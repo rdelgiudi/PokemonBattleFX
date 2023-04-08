@@ -1,10 +1,16 @@
 package com.delgiudice.pokemonbattlefx;
 
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 
 import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Objects;
 
 public class PokemonSpecie {
     private String name;
@@ -62,18 +68,21 @@ public class PokemonSpecie {
         baseStats.put("Special Attack", spAttack);
         baseStats.put("Special Defense", spDefense);
         baseStats.put("Speed", speed);
-        File backSpriteFile = new File(backSprite);
-        File frontSpriteFile = new File(frontSprite);
+        URL frontSpriteUrl = getClass().getResource(frontSprite);
+        URL backSrpiteUrl = getClass().getResource(backSprite);
 
-        if (frontSpriteFile.exists())
+        if (frontSpriteUrl != null)
             this.frontSprite = new Image(frontSprite);
         else
             this.frontSprite = new Image("default.png");
 
-        if (backSpriteFile.exists())
+        if (backSrpiteUrl != null)
             this.backSprite = new Image(backSprite);
         else
             this.backSprite = new Image("default.png");
+
+        this.frontSprite = resample(this.frontSprite, 5);
+        this.backSprite = resample(this.backSprite, 5);
     }
 
     PokemonSpecie(String name, Type type1, int maxHp, int attack, int defense, int spAttack, int spDefense, int speed){
@@ -87,6 +96,9 @@ public class PokemonSpecie {
         baseStats.put("Speed", speed);
         frontSprite = new Image("default.png");
         backSprite = new Image("default.png");
+
+        this.frontSprite = resample(this.frontSprite, 5);
+        this.backSprite = resample(this.backSprite, 5);
     }
 
     PokemonSpecie(String name, Type type1, int maxHp, int attack, int defense, int spAttack, int spDefense, int speed,
@@ -99,18 +111,21 @@ public class PokemonSpecie {
         baseStats.put("Special Attack", spAttack);
         baseStats.put("Special Defense", spDefense);
         baseStats.put("Speed", speed);
-        File backSpriteFile = new File(backSprite);
-        File frontSpriteFile = new File(frontSprite);
+        URL frontSpriteUrl = getClass().getResource(frontSprite);
+        URL backSrpiteUrl = getClass().getResource(backSprite);
 
-        if (frontSpriteFile.exists())
+        if (frontSpriteUrl != null)
             this.frontSprite = new Image(frontSprite);
         else
             this.frontSprite = new Image("default.png");
 
-        if (backSpriteFile.exists())
+        if (backSrpiteUrl != null)
             this.backSprite = new Image(backSprite);
         else
             this.backSprite = new Image("default.png");
+
+        this.frontSprite = resample(this.frontSprite, 5);
+        this.backSprite = resample(this.backSprite, 5);
     }
 
     public PokemonSpecie(PokemonSpecie original) {
@@ -122,17 +137,52 @@ public class PokemonSpecie {
 
     public static void setPokemonList(){        //fills pokemon list, maybe some alternatives on how to execute this?
         Move.setMoveList(); //first we initialize movelist
+
         PokemonSpecie newpkmn = new PokemonSpecie("Bulbasaur", Type.typeList.get(4), Type.typeList.get(7),
-                45, 49, 49, 65, 65, 45, "bulbasaur_front.png",
-                "bulbasaur_back.png");
+                45, 49, 49, 65, 65, 45, "/bulbasaur_front.png",
+                "/bulbasaur_back.png");
         pokemonList.put(newpkmn.getName(), newpkmn);
+
         newpkmn = new PokemonSpecie("Charmander", Type.typeList.get(1),
-                39, 52, 43, 60, 50, 65, "charmander_front.png",
-                "charmander_back.png");
+                39, 52, 43, 60, 50, 65, "/charmander_front.png",
+                "/charmander_back.png");
         pokemonList.put(newpkmn.getName(), newpkmn);
+
         newpkmn = new PokemonSpecie("Rattata", Type.typeList.get(0),
-                30, 56, 35, 25, 35, 72, "rattata_front.png",
-                "rattata_back.png");
+                30, 56, 35, 25, 35, 72, "/rattata_front.png",
+                "/rattata_back.png");
         pokemonList.put(newpkmn.getName(), newpkmn);
+
+        newpkmn = new PokemonSpecie("Squirtle", Type.typeList.get(2), 44, 48, 65, 50,
+                64, 43, "/squirtle_front.png", "/squirtle_back.png");
+        pokemonList.put(newpkmn.getName(), newpkmn);
+    }
+
+    //https://stackoverflow.com/questions/16089304/javafx-imageview-without-any-smoothing
+    private Image resample(Image input, int scaleFactor) {
+        final int W = (int) input.getWidth();
+        final int H = (int) input.getHeight();
+        final int S = scaleFactor;
+
+        WritableImage output = new WritableImage(
+                W * S,
+                H * S
+        );
+
+        PixelReader reader = input.getPixelReader();
+        PixelWriter writer = output.getPixelWriter();
+
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                final int argb = reader.getArgb(x, y);
+                for (int dy = 0; dy < S; dy++) {
+                    for (int dx = 0; dx < S; dx++) {
+                        writer.setArgb(x * S + dx, y * S + dy, argb);
+                    }
+                }
+            }
+        }
+
+        return output;
     }
 }

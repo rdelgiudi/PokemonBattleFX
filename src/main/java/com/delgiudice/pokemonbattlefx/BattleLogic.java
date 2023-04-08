@@ -40,16 +40,16 @@ public class BattleLogic {
                 Move.getMoveList().get("Scratch"), Move.getMoveList().get("Growl"), Move.getMoveList().get("Ember"));
         player = new Player("Red",  allyPokemon);
 
-        player.addPokemon(new Pokemon(PokemonSpecie.getPokemonList().get("Rattata"), 10, Move.getMoveList().get("Tackle"),
-                Move.getMoveList().get("Growl"), Move.getMoveList().get("Quick Attack")));
+        player.addPokemon(new Pokemon(PokemonSpecie.getPokemonList().get("Squirtle"), 10, Move.getMoveList().get("Tackle"),
+                Move.getMoveList().get("Tail Whip"), Move.getMoveList().get("Water Gun")));
 
         Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonList().get("Rattata"), 6, Move.getMoveList().get("Tackle"),
                 Move.getMoveList().get("Growl"));
 
         enemy = new NpcTrainer("Joey", Enums.TrainerTypes.YOUNGSTER ,enemyPokemon);
 
-        enemy.addPokemon(new Pokemon(PokemonSpecie.getPokemonList().get("Rattata"), 8, Move.getMoveList().get("Tackle"),
-                Move.getMoveList().get("Growl"), Move.getMoveList().get("Quick Attack")));
+        enemy.addPokemon(new Pokemon(PokemonSpecie.getPokemonList().get("Charmander"), 8, Move.getMoveList().get("Scratch"),
+                Move.getMoveList().get("Growl"), Move.getMoveList().get("Ember")));
     }
 
     private void initBattleLoop() {
