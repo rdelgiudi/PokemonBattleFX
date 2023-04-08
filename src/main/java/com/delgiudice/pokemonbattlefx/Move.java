@@ -1,187 +1,81 @@
 package com.delgiudice.pokemonbattlefx;
 
-import java.util.HashMap;
-
-///Class which allows to describe a move
 public class Move {
-    String name;
-    private int power, accuracy, pp, statusProb = 0, hits = 1, statUp = 0, maxpp;
-    private boolean priority = false, twoturn = false, lifesteal = false, self = false;
-    private Enums.Subtypes subtype;
-    private Type type;
-    private Enums.StatusType statusType = null;
-    private static HashMap<String ,Move> moveList = new HashMap<>();
+
+    private MoveTemplate template;
+
+    private int pp;
 
     public String getName() {
-        return name;
+        return template.getName();
     }
 
     public int getPower() {
-        return power;
+        return template.getPower();
     }
 
     public int getAccuracy() {
-        return accuracy;
-    }
-
-    public int getPp() {
-        return pp;
+        return template.getAccuracy();
     }
 
     public int getMaxpp() {
-        return maxpp;
+        return template.getMaxpp();
     }
 
-    public int getStatusProb() {
-        return statusProb;
+    public float getStatusProb() {
+        return template.getStatusProb();
     }
 
     public int getHits() {
-        return hits;
+        return template.getHits();
     }
 
     public int getStatUp(){
-        return statUp;}
+        return template.getStatUp();}
 
-    public boolean isPriority() {
-        return priority;
-    }
-
-    public boolean isTwoturn() {
-        return twoturn;
-    }
-
-    public boolean isLifesteal() {
-        return lifesteal;
-    }
-
-    public boolean isSelf() {
-        return self;
+    public int getPp(){
+        return pp;
     }
 
     public Enums.Subtypes getSubtype() {
-        return subtype;
+        return template.getSubtype();
     }
     public Type getType() {
-        return type;
+        return template.getType();
     }
-    public Enums.StatusType getStatusType() {
-        return statusType;}
+    public Enums.StatType getStatType() {
+        return template.getStatType();}
 
-    public static HashMap<String ,Move> getMoveList() {
-        return moveList;
-    }
-
-    public void setPriority(boolean priority) {
-        this.priority = priority;
+    public float getStatUpProb() {
+        return template.getStatUpProb();
     }
 
-    public void setPp(byte pp) {
+    public Enums.Status getStatus() {
+        return template.getStatus();
+    }
+
+    public void setPp(int pp) {
         this.pp = pp;
     }
 
-    public Move(String name, int power, int accuracy, int pp, Enums.Subtypes subtype, Type type,
-                int statusProb, boolean lifesteal, int hits, boolean priority, boolean twoturn) {
-        this.name = name;
-        this.power = power;
-        this.accuracy = accuracy;
-        this.pp = pp;
-        this.maxpp = pp;
-        this.subtype = subtype;
-        this.statusProb = statusProb;
-        this.lifesteal = lifesteal;
-        this.hits = hits;
-        this.priority = priority;
-        this.twoturn = twoturn;
-        this.type = type;
+    public boolean isPriority() {
+        return template.isPriority();
     }
 
-    public Move(String name, int power, int accuracy, int pp, Enums.Subtypes subtype, Type type,
-                Enums.StatusType statusType, int statUp) {
-        this.name = name;
-        this.power = power;
-        this.accuracy = accuracy;
-        this.pp = pp;
-        this.maxpp = pp;
-        this.subtype = subtype;
-        this.type = type;
-        this.statusType = statusType;
-        this.statUp = statUp;
+    public boolean isTwoturn() {
+        return template.isTwoturn();
     }
 
-    public Move(String name, int power, int accuracy, int pp, Enums.Subtypes subtype, Type type,
-                Enums.StatusType statusType, int statUp, boolean self) {
-        this.name = name;
-        this.power = power;
-        this.accuracy = accuracy;
-        this.pp = pp;
-        this.maxpp = pp;
-        this.subtype = subtype;
-        this.type = type;
-        this.statusType = statusType;
-        this.statUp = statUp;
-        this.self = self;
+    public boolean isLifesteal() {
+        return template.isLifesteal();
     }
 
-    public Move(String name, int power, int accuracy, int pp, Enums.Subtypes subtype, Type type) {
-        this.name = name;
-        this.power = power;
-        this.accuracy = accuracy;
-        this.pp = pp;
-        this.maxpp = pp;
-        this.subtype = subtype;
-        this.statusProb = 0;
-        this.lifesteal = false;
-        this.hits = 1;
-        this.priority = false;
-        this.twoturn = false;
-        this.type = type;
+    public boolean isSelf() {
+        return template.isSelf();
     }
 
-    public Move(Move original) {
-        this.name = original.name;
-        this.power = original.power;
-        this.accuracy = original.accuracy;
-        this.maxpp = original.maxpp;
-        this.pp = this.maxpp;
-        this.statusProb = original.statusProb;
-        this.hits = original.hits;
-        this.statUp = original.statUp;
-        this.priority = original.priority;
-        this.twoturn = original.twoturn;
-        this.lifesteal = original.lifesteal;
-        this.subtype = original.subtype;
-        this.type = original.type;
-        this.statusType = original.statusType;
+    public Move(MoveTemplate template) {
+        this.template = template;
+        pp = template.getMaxpp();
     }
-
-    ///initializes list of available moves
-    public static void setMoveList(){
-        Type.setTypeList(); //init types
-        Move newmove = new Move("Tackle", 40, 100, 35, Enums.Subtypes.PHYSICAL,
-                Type.typeList.get(0));
-        moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Growl", 0, 100, 40, Enums.Subtypes.STATUS, Type.typeList.get(0),
-                Enums.StatusType.ATTACK, -1);
-        moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Vine Whip", 45, 100, 25, Enums.Subtypes.PHYSICAL,
-                Type.typeList.get(4));
-        moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Scratch", 40, 100, 35, Enums.Subtypes.PHYSICAL,
-                Type.typeList.get(0));
-        moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Ember", 40, 100, 25, Enums.Subtypes.SPECIAL,
-                Type.typeList.get(1));
-        moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Tail Whip", 0, 100, 30, Enums.Subtypes.STATUS,
-                Type.typeList.get(0), Enums.StatusType.DEFENSE, -1);
-        moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Quick Attack", 40, 100, 30, Enums.Subtypes.PHYSICAL,
-                Type.typeList.get(0));
-        newmove.setPriority(true);
-        moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Water Gun", 40, 100, 25, Enums.Subtypes.SPECIAL, Type.typeList.get(2));
-        moveList.put(newmove.getName(), newmove);
-    }
-
 }

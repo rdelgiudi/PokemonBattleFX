@@ -8,8 +8,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.util.LinkedList;
@@ -17,6 +19,8 @@ import java.util.List;
 
 public class BattleController {
 
+    @FXML
+    private AnchorPane anchorPane;
     @FXML
     private TextArea battleText, battleTextFull;
     @FXML
@@ -29,7 +33,8 @@ public class BattleController {
     @FXML
     private ImageView allyPokemonSprite, enemyPokemonSprite;
     @FXML
-    private Label enemyNameLabel, enemyLvLabel, allyNameLabel, allyHpLabel, allyLvLabel;
+    private Label enemyNameLabel, enemyLvLabel, allyNameLabel, allyHpLabel, allyLvLabel, allyStatusLabel,
+                    enemyStatusLabel;
     @FXML
     private ProgressBar enemyHpBar, allyHpBar;
 
@@ -124,28 +129,38 @@ public class BattleController {
 
         final List<KeyFrame> keyFrameList = new LinkedList<>();
 
+        final double[] outside = new double[1];
+
         final KeyFrame configPokemonSprite = new KeyFrame(Duration.ZERO, e -> {
             setAllyInformation(pokemon, hpStatus);
+
+            outside[0] = anchorPane.getWidth();
 
             allyPokemonSprite.setFitWidth(1);
             allyPokemonSprite.setFitHeight(1);
             allyPokemonSprite.setVisible(true);
 
-            allyPokemonInfo.setLayoutX(1281);
+            AnchorPane.setRightAnchor(allyPokemonInfo, null);
+            allyPokemonInfo.setLayoutX(outside[0]);
             allyPokemonInfo.setVisible(true);
         });
 
         keyFrameList.add(configPokemonSprite);
 
-        for (int i = 1; i <= 333; i++) {
+        for (int i = 1; i <= 338; i++) {
             int finalI = i;
             final KeyFrame kf = new KeyFrame(Duration.millis(i), e -> {
-                allyPokemonInfo.setLayoutX(1281 - finalI);
+                allyPokemonInfo.setLayoutX(outside[0] - finalI);
                 allyPokemonSprite.setFitWidth((width * finalI) / 333);
                 allyPokemonSprite.setFitHeight((height * finalI) / 333);
             });
             keyFrameList.add(kf);
         }
+
+        final KeyFrame resetAnchor = new KeyFrame(Duration.millis(339), e -> {
+            AnchorPane.setRightAnchor(allyPokemonInfo, 15.0);
+        });
+        keyFrameList.add(resetAnchor);
 
         final Timeline timeline = new Timeline();
         timeline.getKeyFrames().addAll(keyFrameList);
@@ -167,13 +182,14 @@ public class BattleController {
             enemyPokemonSprite.setFitHeight(1);
             enemyPokemonSprite.setVisible(true);
 
+            AnchorPane.setLeftAnchor(enemyPokemonInfo, null);
             enemyPokemonInfo.setLayoutX(-312);
             enemyPokemonInfo.setVisible(true);
         });
 
         keyFrameList.add(configPokemonSprite);
 
-        for (int i = 1; i <= 336; i++) {
+        for (int i = 1; i <= 337; i++) {
             int finalI = i;
             final KeyFrame kf = new KeyFrame(Duration.millis(i), e -> {
                 enemyPokemonInfo.setLayoutX(-312 + finalI);
@@ -183,6 +199,11 @@ public class BattleController {
             keyFrameList.add(kf);
         }
 
+        final KeyFrame resetAnchor = new KeyFrame(Duration.millis(338), e -> {
+           AnchorPane.setLeftAnchor(enemyPokemonInfo, 15.0);
+        });
+
+        keyFrameList.add(resetAnchor);
         final Timeline timeline = new Timeline();
         timeline.getKeyFrames().addAll(keyFrameList);
         return timeline;
@@ -240,6 +261,60 @@ public class BattleController {
 
         timeline.getKeyFrames().addAll(keyFrameList);
         return timeline;
+    }
+
+    public Timeline updateStatus(Pokemon pokemon, boolean ally) {
+
+        final Label statusLabel;
+        if (ally)
+            statusLabel = allyStatusLabel;
+        else
+            statusLabel = enemyStatusLabel;
+
+        final String style = "-fx-border-radius: 10; -fx-background-radius: 10";
+        final String[] finalStyle = new String[1];
+
+        final KeyFrame kf = new KeyFrame(Duration.millis(1), e-> {
+
+            statusLabel.setTextFill(Color.WHITE);
+
+            switch (pokemon.getStatus()) {
+                case NONE -> {
+                    statusLabel.setVisible(false);
+                }
+                case PARALYZED -> {
+                    statusLabel.setText("PAR");
+                    finalStyle[0] = style + "; -fx-background-color: #B8B818";
+                }
+                case POISONED -> {
+                    statusLabel.setText("PSN");
+                    finalStyle[0] = style + "; -fx-background-color: purple";
+                }
+                case BADLY_POISONED -> {
+                    statusLabel.setText("PSN");
+                    statusLabel.setTextFill(Color.LIGHTPINK);
+                    finalStyle[0] = style + "; -fx-background-color: purple";
+                }
+                case SLEEPING -> {
+                    statusLabel.setText("SLP");
+                    finalStyle[0] = style + "; -fx-background-color: gray";
+                }
+                case BURNED -> {
+                    statusLabel.setText("BRN");
+                    finalStyle[0] = style + "; -fx-background-color: chocolate";
+                }
+                case FROZEN -> {
+                    statusLabel.setText("FRZ");
+                    finalStyle[0] = style + "; -fx-background-color: dodgerblue";
+                }
+            }
+            if (pokemon.getStatus() != Enums.Status.NONE) {
+                statusLabel.setStyle(finalStyle[0]);
+                statusLabel.setVisible(true);
+            }
+        });
+
+        return new Timeline(kf);
     }
 
     public void setAllyInformation(Pokemon pokemon) {

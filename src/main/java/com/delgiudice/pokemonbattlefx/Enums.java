@@ -53,7 +53,7 @@ public class Enums {
             this.typeString = typeString;
         }
     }
-    enum StatusType {       //statistics to lower or increase
+    enum StatType {       //statistics to lower or increase
         ATTACK("Attack"),
         DEFENSE("Defense"),
         ACCURACY("Accuracy"),
@@ -69,7 +69,7 @@ public class Enums {
             return typeString;
         }
 
-        StatusType(String typeString) {
+        StatType(String typeString) {
             this.typeString = typeString;
         }
     }
@@ -77,6 +77,7 @@ public class Enums {
         NONE("NONE"),
         PARALYZED("PARALYZED"),
         POISONED("POISONED"),
+        BADLY_POISONED("BADLY POISONED"),
         SLEEPING("SLEEPING"),
         BURNED("BURNED"),
         FROZEN("FROZEN");

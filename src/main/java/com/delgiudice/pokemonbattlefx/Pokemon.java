@@ -1,5 +1,6 @@
 package com.delgiudice.pokemonbattlefx;
 
+import java.security.SecureRandom;
 import java.util.*;
 
 public class Pokemon {
@@ -8,7 +9,8 @@ public class Pokemon {
     private byte level;
     private List<Move> moveList = new ArrayList<>();
     private LinkedHashMap<String, Integer> stats = new LinkedHashMap<>();
-    private Enums.Status status;
+    private Enums.Status status = Enums.Status.NONE;
+    private int poisonCounter = 1, sleepCounter = 0;
     private int[] ivs = {0, 0, 0, 0, 0, 0};
     private Enums.Nature nature;
     private HashMap<String, Integer> statModifiers = new HashMap<>();
@@ -18,7 +20,7 @@ public class Pokemon {
         return name;
     }
 
-    public String getOName() {
+    public String getOriginalName() {
         return specie.getName();
     }
 
@@ -55,12 +57,12 @@ public class Pokemon {
         return stats.get(stat);
     }
 
-    public Enums.Status getStatus() {
-        return status;
+    public int getPoisonCounter() {
+        return poisonCounter;
     }
 
-    public void setStatus(Enums.Status status) {
-        this.status = status;
+    public int getSleepCounter() {
+        return sleepCounter;
     }
 
     public int[] getIvs() {
@@ -81,6 +83,22 @@ public class Pokemon {
 
     public int getMaxHP() {
         return stats.get("Max HP");
+    }
+
+    public Enums.Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Enums.Status status) {
+        this.status = status;
+    }
+
+    public void setPoisonCounter(int poisonCounter) {
+        this.poisonCounter = poisonCounter;
+    }
+
+    public void setSleepCounter(int sleepCounter) {
+        this.sleepCounter = sleepCounter;
     }
 
     Pokemon(PokemonSpecie specie, int level, Move move1)
@@ -191,7 +209,7 @@ public class Pokemon {
 
     public void generateIVs()       //generates IV
     {
-        Random g = new Random();
+        SecureRandom g = new SecureRandom();
         for (int i = 0; i < 6; i++)
         {
             ivs[i] = g.nextInt(32);
@@ -200,7 +218,7 @@ public class Pokemon {
 
     public void generateNature()        //generates nature
     {
-        Random g = new Random();
+        SecureRandom g = new SecureRandom();
         int nature_num = g.nextInt(25);
         nature = Enums.Nature.valueOf(nature_num);
     }

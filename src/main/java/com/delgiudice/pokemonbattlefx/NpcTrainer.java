@@ -30,11 +30,13 @@ public class NpcTrainer extends Trainer {
 
     public static void setTrainerList(){
         PokemonSpecie.setPokemonList(); //sets pokemon list to form parties
-        Pokemon tmppokemon = new Pokemon(PokemonSpecie.getPokemonList().get("Rattata"), 5, new Move(Move.getMoveList().get("Scratch")), new Move(Move.getMoveList().get("Tail Whip")),
-                new Move(Move.getMoveList().get("Quick Attack")));
+        Pokemon tmppokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 5,
+                new Move(MoveTemplate.getMoveMap().get("Scratch")), new Move(MoveTemplate.getMoveMap().get("Tail Whip")),
+                new Move(MoveTemplate.getMoveMap().get("Quick Attack")));
         NpcTrainer newtrain = new NpcTrainer("Joey", Enums.TrainerTypes.YOUNGSTER, tmppokemon);
-        tmppokemon = new Pokemon(PokemonSpecie.getPokemonList().get("Bulbasaur"), 5, new Move(Move.getMoveList().get("Tackle")),
-                new Move(Move.getMoveList().get("Growl")), new Move(Move.getMoveList().get("Vine Whip")));
+        tmppokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Bulbasaur"), 5,
+                new Move(MoveTemplate.getMoveMap().get("Tackle")), new Move(MoveTemplate.getMoveMap().get("Growl")),
+                new Move(MoveTemplate.getMoveMap().get("Vine Whip")));
         newtrain.addPokemon(tmppokemon);
         trainerList.put(newtrain.getName(), newtrain);
     }
