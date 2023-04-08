@@ -15,6 +15,10 @@ public class BattleApplication extends Application {
         Scene scene = new Scene(fxmlLoader.load(), 1280, 720);
         stage.setTitle("Battle!");
         stage.setScene(scene);
+        //stage.setMinHeight(scene.getHeight());
+        //stage.setMinWidth(scene.getWidth());
+        //stage.setMaxHeight(scene.getHeight());
+        //stage.setMaxWidth(scene.getWidth());
 
         BattleController controller = fxmlLoader.getController();
         BattleLogic logic = new BattleLogic(controller);

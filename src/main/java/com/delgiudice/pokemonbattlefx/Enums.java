@@ -74,6 +74,7 @@ public class Enums {
         }
     }
     enum Status {       //lista statusów
+        NONE("NONE"),
         PARALYZED("PARALYZED"),
         POISONED("POISONED"),
         SLEEPING("SLEEPING"),

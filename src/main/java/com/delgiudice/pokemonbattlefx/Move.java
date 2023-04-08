@@ -6,7 +6,7 @@ import java.util.HashMap;
 public class Move {
     String name;
     private byte power, accuracy, pp, statusProb = 0, hits = 1, statUp = 0, maxpp;
-    private boolean priority = false, twoturn = false, lifesteal;
+    private boolean priority = false, twoturn = false, lifesteal = false, self = false;
     private Enums.Subtypes subtype;
     private Type type;
     private Enums.StatusType statusType = null;
@@ -55,6 +55,10 @@ public class Move {
         return lifesteal;
     }
 
+    public boolean isSelf() {
+        return self;
+    }
+
     public Enums.Subtypes getSubtype() {
         return subtype;
     }
@@ -92,7 +96,8 @@ public class Move {
         this.type = type;
     }
 
-    public Move(String name, byte power, byte accuracy, byte pp, Enums.Subtypes subtype, Type type, Enums.StatusType statusType, byte statUp) {
+    public Move(String name, byte power, byte accuracy, byte pp, Enums.Subtypes subtype, Type type,
+                Enums.StatusType statusType, byte statUp) {
         this.name = name;
         this.power = power;
         this.accuracy = accuracy;
@@ -104,6 +109,20 @@ public class Move {
         this.statUp = statUp;
     }
 
+    public Move(String name, byte power, byte accuracy, byte pp, Enums.Subtypes subtype, Type type,
+                Enums.StatusType statusType, byte statUp, boolean self) {
+        this.name = name;
+        this.power = power;
+        this.accuracy = accuracy;
+        this.pp = pp;
+        this.maxpp = pp;
+        this.subtype = subtype;
+        this.type = type;
+        this.statusType = statusType;
+        this.statUp = statUp;
+        this.self = self;
+    }
+
     public Move(String name, byte power, byte accuracy, byte pp, Enums.Subtypes subtype, Type type) {
         this.name = name;
         this.power = power;
@@ -113,7 +132,7 @@ public class Move {
         this.subtype = subtype;
         this.statusProb = 0;
         this.lifesteal = false;
-        this.hits = 0;
+        this.hits = 1;
         this.priority = false;
         this.twoturn = false;
         this.type = type;
@@ -139,19 +158,26 @@ public class Move {
     ///initializes list of available moves
     public static void setMoveList(){
         Type.setTypeList(); //init types
-        Move newmove = new Move("Tackle", (byte)40, (byte)100, (byte)35, Enums.Subtypes.PHYSICAL, Type.typeList.get(0));
+        Move newmove = new Move("Tackle", (byte)40, (byte)100, (byte)35, Enums.Subtypes.PHYSICAL,
+                Type.typeList.get(0));
         moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Growl", (byte)0, (byte)100, (byte)40, Enums.Subtypes.STATUS, Type.typeList.get(0), Enums.StatusType.ATTACK, (byte)-1);
+        newmove = new Move("Growl", (byte)0, (byte)100, (byte)40, Enums.Subtypes.STATUS, Type.typeList.get(0),
+                Enums.StatusType.ATTACK, (byte)-1);
         moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Vine Whip", (byte)45, (byte)100, (byte)25, Enums.Subtypes.PHYSICAL, Type.typeList.get(4));
+        newmove = new Move("Vine Whip", (byte)45, (byte)100, (byte)25, Enums.Subtypes.PHYSICAL,
+                Type.typeList.get(4));
         moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Scratch", (byte)40, (byte)100, (byte)35, Enums.Subtypes.PHYSICAL, Type.typeList.get(0));
+        newmove = new Move("Scratch", (byte)40, (byte)100, (byte)35, Enums.Subtypes.PHYSICAL,
+                Type.typeList.get(0));
         moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Ember", (byte)(40), (byte)100, (byte)25, Enums.Subtypes.SPECIAL, Type.typeList.get(1));
+        newmove = new Move("Ember", (byte)(40), (byte)100, (byte)25, Enums.Subtypes.SPECIAL,
+                Type.typeList.get(1));
         moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Tail Whip", (byte)0, (byte)100, (byte)30, Enums.Subtypes.STATUS, Type.typeList.get(0), Enums.StatusType.DEFENSE, (byte)-1);
+        newmove = new Move("Tail Whip", (byte)0, (byte)100, (byte)30, Enums.Subtypes.STATUS,
+                Type.typeList.get(0), Enums.StatusType.DEFENSE, (byte)-1);
         moveList.put(newmove.getName(), newmove);
-        newmove = new Move("Quick Attack", (byte)40, (byte)100, (byte)30, Enums.Subtypes.PHYSICAL, Type.typeList.get(0));
+        newmove = new Move("Quick Attack", (byte)40, (byte)100, (byte)30, Enums.Subtypes.PHYSICAL,
+                Type.typeList.get(0));
         newmove.setPriority(true);
         moveList.put(newmove.getName(), newmove);
     }

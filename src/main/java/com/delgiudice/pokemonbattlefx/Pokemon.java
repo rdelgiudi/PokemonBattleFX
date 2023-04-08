@@ -11,8 +11,77 @@ public class Pokemon {
     private Enums.Status status;
     private int[] ivs = {0, 0, 0, 0, 0, 0};
     private Enums.Nature nature;
-    public HashMap<String, Integer> statModifiers = new HashMap<>();
+    private HashMap<String, Integer> statModifiers = new HashMap<>();
     private PokemonSpecie specie;
+
+    public String getName() {
+        return name;
+    }
+
+    public String getOName() {
+        return specie.getName();
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+
+    public byte getLevel() {
+        return level;
+    }
+
+    public HashMap<String, Integer> getStatModifiers() {
+        return statModifiers;
+    }
+
+    public List<Move> getMoveList() {
+        return moveList;
+    }
+
+    public Move getMoveList(int move) {
+        return moveList.get(move);
+    }
+
+    public LinkedHashMap<String, Integer> getStats() {
+        return stats;
+    }
+
+    public int getStats(String stat)
+    {
+        return stats.get(stat);
+    }
+
+    public Enums.Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Enums.Status status) {
+        this.status = status;
+    }
+
+    public int[] getIvs() {
+        return ivs;
+    }
+
+    public Enums.Nature getNature() {
+        return nature;
+    }
+
+    public PokemonSpecie getSpecie() {
+        return specie;
+    }
+
+    public Type[] getType() {
+        return specie.getType();
+    }
+
+    public int getMaxHP() {
+        return stats.get("Max HP");
+    }
 
     Pokemon(PokemonSpecie specie, int level, Move move1)
     {
@@ -65,67 +134,6 @@ public class Pokemon {
         {
             moveList.add(move);
         }
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getOName() {
-        return specie.getName();
-    }
-
-    public int getHp() {
-        return hp;
-    }
-
-    public void setHp(int hp) {
-        this.hp = hp;
-    }
-
-    public byte getLevel() {
-        return level;
-    }
-
-    public List<Move> getMoveList() {
-        return moveList;
-    }
-
-    public Move getMoveList(int move) {
-        return moveList.get(move);
-    }
-
-    public LinkedHashMap<String, Integer> getStats() {
-        return stats;
-    }
-
-    public int getStats(String stat)
-    {
-        return stats.get(stat);
-    }
-
-    public Enums.Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Enums.Status status) {
-        this.status = status;
-    }
-
-    public int[] getIvs() {
-        return ivs;
-    }
-
-    public Enums.Nature getNature() {
-        return nature;
-    }
-
-    public PokemonSpecie getSpecie() {
-        return specie;
-    }
-
-    public Type[] getType() {
-        return specie.getType();
     }
 
     public void levelUp()       //raises level, updates stats
@@ -211,20 +219,11 @@ public class Pokemon {
             if (!pair.getKey().equals("Max HP"))  {
                 basestat = pair.getValue();
                 float naturemod = 0;
-                switch(nature.getStatTab()[i-1])
-                {
-                    case 0:
-                        naturemod = 1;
-                        break;
-                    case 1:
-                        naturemod = 1.1f;
-                        break;
-                    case -1:
-                        naturemod = 0.9f;
-                        break;
-                    default:
-                        System.out.println("ERROR: Nature out of expected range!");
-                        break;
+                switch (nature.getStatTab()[i - 1]) {
+                    case 0 -> naturemod = 1;
+                    case 1 -> naturemod = 1.1f;
+                    case -1 -> naturemod = 0.9f;
+                    default -> System.out.println("ERROR: Nature out of expected range!");
                 }
                 stat = (int)((((2 * basestat + ivs[0])*level/100) + 5) * naturemod);
                 stats.put(pair.getKey(), stat);
