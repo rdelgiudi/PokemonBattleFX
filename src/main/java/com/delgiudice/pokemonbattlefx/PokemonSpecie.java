@@ -2,6 +2,7 @@ package com.delgiudice.pokemonbattlefx;
 
 import javafx.scene.image.Image;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -61,8 +62,18 @@ public class PokemonSpecie {
         baseStats.put("Special Attack", spAttack);
         baseStats.put("Special Defense", spDefense);
         baseStats.put("Speed", speed);
-        this.frontSprite = new Image(frontSprite);
-        this.backSprite = new Image(backSprite);
+        File backSpriteFile = new File(backSprite);
+        File frontSpriteFile = new File(frontSprite);
+
+        if (frontSpriteFile.exists())
+            this.frontSprite = new Image(frontSprite);
+        else
+            this.frontSprite = new Image("default.png");
+
+        if (backSpriteFile.exists())
+            this.backSprite = new Image(backSprite);
+        else
+            this.backSprite = new Image("default.png");
     }
 
     PokemonSpecie(String name, Type type1, int maxHp, int attack, int defense, int spAttack, int spDefense, int speed){
@@ -88,8 +99,18 @@ public class PokemonSpecie {
         baseStats.put("Special Attack", spAttack);
         baseStats.put("Special Defense", spDefense);
         baseStats.put("Speed", speed);
-        this.frontSprite = new Image(frontSprite);
-        this.backSprite = new Image(backSprite);
+        File backSpriteFile = new File(backSprite);
+        File frontSpriteFile = new File(frontSprite);
+
+        if (frontSpriteFile.exists())
+            this.frontSprite = new Image(frontSprite);
+        else
+            this.frontSprite = new Image("default.png");
+
+        if (backSpriteFile.exists())
+            this.backSprite = new Image(backSprite);
+        else
+            this.backSprite = new Image("default.png");
     }
 
     public PokemonSpecie(PokemonSpecie original) {
