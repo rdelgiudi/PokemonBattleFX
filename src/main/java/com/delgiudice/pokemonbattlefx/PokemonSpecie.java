@@ -11,10 +11,15 @@ import java.util.LinkedHashMap;
 
 public class PokemonSpecie {
     private String name;
+    private int pokedexNumber;
     private Type[] type = {new Type(Enums.Types.NOTYPE), new Type(Enums.Types.NOTYPE)};
     private LinkedHashMap<String, Integer> baseStats = new LinkedHashMap<>();
     private static HashMap<String, PokemonSpecie> pokemonMap = new HashMap<>();
     private Image frontSprite, backSprite;
+
+    public int getPokedexNumber() {
+        return pokedexNumber;
+    }
 
     public static HashMap<String, PokemonSpecie> getPokemonMap() {
         return pokemonMap;
@@ -35,11 +40,15 @@ public class PokemonSpecie {
         return backSprite;
     }
 
+    public void setPokedexNumber(int pokedexNumber) {
+        this.pokedexNumber = pokedexNumber;
+    }
+
     public HashMap<String, Integer> getBaseStats() {
         return baseStats;
     }
 
-    PokemonSpecie(String name, Type type1, Type type2, int maxHp, int attack, int defense, int spAttack, int spDefense,
+    PokemonSpecie(int pokedexNumber ,String name, Type type1, Type type2, int maxHp, int attack, int defense, int spAttack, int spDefense,
                   int speed){
         this.name = name;
         this.type[0] = type1;
@@ -52,9 +61,12 @@ public class PokemonSpecie {
         baseStats.put("Speed", speed);
         frontSprite = new Image("default.png");
         backSprite = new Image("default.png");
+        this.frontSprite = resample(this.frontSprite, 5);
+        this.backSprite = resample(this.backSprite, 5);
+        this.pokedexNumber = pokedexNumber;
     }
 
-    PokemonSpecie(String name, Type type1, Type type2, int maxHp, int attack, int defense, int spAttack, int spDefense,
+    PokemonSpecie(int pokedexNumber ,String name, Type type1, Type type2, int maxHp, int attack, int defense, int spAttack, int spDefense,
                   int speed, String frontSprite, String backSprite){
         this.name = name;
         this.type[0] = type1;
@@ -80,9 +92,11 @@ public class PokemonSpecie {
 
         this.frontSprite = resample(this.frontSprite, 5);
         this.backSprite = resample(this.backSprite, 5);
+
+        this.pokedexNumber = pokedexNumber;
     }
 
-    PokemonSpecie(String name, Type type1, int maxHp, int attack, int defense, int spAttack, int spDefense, int speed){
+    PokemonSpecie(int pokedexNumber ,String name, Type type1, int maxHp, int attack, int defense, int spAttack, int spDefense, int speed){
         this.name = name;
         this.type[0] = type1;
         baseStats.put("Max HP", maxHp);
@@ -96,9 +110,11 @@ public class PokemonSpecie {
 
         this.frontSprite = resample(this.frontSprite, 5);
         this.backSprite = resample(this.backSprite, 5);
+
+        this.pokedexNumber = pokedexNumber;
     }
 
-    PokemonSpecie(String name, Type type1, int maxHp, int attack, int defense, int spAttack, int spDefense, int speed,
+    PokemonSpecie(int pokedexNumber ,String name, Type type1, int maxHp, int attack, int defense, int spAttack, int spDefense, int speed,
                   String frontSprite, String backSprite){
         this.name = name;
         this.type[0] = type1;
@@ -130,32 +146,54 @@ public class PokemonSpecie {
         this.type = original.type;
         this.baseStats = original.baseStats;
         this.frontSprite = original.frontSprite;
+        this.backSprite = original.backSprite;
+        this.pokedexNumber = original.pokedexNumber;
     }
 
-    public static void setPokemonList(){        //fills pokemon list, maybe some alternatives on how to execute this?
-        MoveTemplate.setMoveList(); //first we initialize movelist
+    public static void setPokemonMap(){        //fills pokemon list, maybe some alternatives on how to execute this?
+        MoveTemplate.setMoveMap(); //first we initialize movelist
 
-        PokemonSpecie newpkmn = new PokemonSpecie("Bulbasaur", Type.typeMap.get(Enums.Types.GRASS),
+        PokemonSpecie newpkmn = new PokemonSpecie(1,"Bulbasaur", Type.typeMap.get(Enums.Types.GRASS),
                 Type.typeMap.get(Enums.Types.POISON), 45, 49, 49, 65, 65, 45,
                 "/bulbasaur_front.png", "/bulbasaur_back.png");
         pokemonMap.put(newpkmn.getName(), newpkmn);
 
-        newpkmn = new PokemonSpecie("Charmander", Type.typeMap.get(Enums.Types.FIRE),
+        newpkmn = new PokemonSpecie(2, "Ivysaur", Type.typeMap.get(Enums.Types.GRASS),
+                Type.typeMap.get(Enums.Types.POISON), 60, 62, 63, 80, 80, 60,
+                "/ivysaur_front.png", "/ivysaur_back.png");
+        pokemonMap.put(newpkmn.getName(), newpkmn);
+
+        newpkmn = new PokemonSpecie(3, "Venosaur", Type.typeMap.get(Enums.Types.GRASS),
+                Type.typeMap.get(Enums.Types.POISON), 80, 82, 83, 100, 100, 80,
+                "/venosaur_front.png", "/venosaur_back.png");
+        pokemonMap.put(newpkmn.getName(), newpkmn);
+
+        newpkmn = new PokemonSpecie(4,"Charmander", Type.typeMap.get(Enums.Types.FIRE),
                 39, 52, 43, 60, 50, 65, "/charmander_front.png",
                 "/charmander_back.png");
         pokemonMap.put(newpkmn.getName(), newpkmn);
 
-        newpkmn = new PokemonSpecie("Rattata", Type.typeMap.get(Enums.Types.NORMAL),
+        newpkmn = new PokemonSpecie(5, "Charmeleon", Type.typeMap.get(Enums.Types.FIRE),
+                58, 64, 58, 80, 65, 80, "charmeleon_front.png",
+                "/charmeleon_back.png");
+        pokemonMap.put(newpkmn.getName(), newpkmn);
+
+        newpkmn = new PokemonSpecie(6, "Charizard", Type.typeMap.get(Enums.Types.FIRE),
+                Type.typeMap.get(Enums.Types.FLYING), 78, 84, 78, 109, 85, 100,
+                "/charizard_front.png", "/charizard_back.png");
+        pokemonMap.put(newpkmn.getName(), newpkmn);
+
+        newpkmn = new PokemonSpecie(19,"Rattata", Type.typeMap.get(Enums.Types.NORMAL),
                 30, 56, 35, 25, 35, 72, "/rattata_front.png",
                 "/rattata_back.png");
         pokemonMap.put(newpkmn.getName(), newpkmn);
 
-        newpkmn = new PokemonSpecie("Squirtle", Type.typeMap.get(Enums.Types.WATER), 44, 48,
+        newpkmn = new PokemonSpecie(7,"Squirtle", Type.typeMap.get(Enums.Types.WATER), 44, 48,
                 65, 50, 64, 43, "/squirtle_front.png",
                 "/squirtle_back.png");
         pokemonMap.put(newpkmn.getName(), newpkmn);
 
-        newpkmn = new PokemonSpecie("Machop", Type.typeMap.get(Enums.Types.FIGHTING), 70, 80,
+        newpkmn = new PokemonSpecie(66,"Machop", Type.typeMap.get(Enums.Types.FIGHTING), 70, 80,
                 50, 35, 35, 35, "/machop_front.png", "/machop_back.png");
         pokemonMap.put(newpkmn.getName(), newpkmn);
     }

@@ -47,14 +47,17 @@
             <Button fx:id="runButton" mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Run" GridPane.columnIndex="1" GridPane.rowIndex="1" />
          </children>
       </GridPane>
-      <VBox fx:id="allyPokemonInfo" alignment="TOP_RIGHT" layoutX="958.0" layoutY="382.0" prefHeight="118.0" prefWidth="312.0" style="-fx-border-color: black;" visible="false" AnchorPane.bottomAnchor="220.0" AnchorPane.rightAnchor="15.0">
+      <VBox fx:id="allyPokemonInfo" alignment="TOP_RIGHT" layoutY="382.0" prefHeight="118.0" prefWidth="410.0" style="-fx-border-color: black;" visible="false" AnchorPane.bottomAnchor="220.0" AnchorPane.rightAnchor="15.0">
          <children>
             <HBox prefHeight="43.0" prefWidth="312.0">
                <children>
-                  <Label fx:id="allyNameLabel" alignment="CENTER" prefHeight="25.0" prefWidth="255.0" text="Ally Pokemon Name">
+                  <Label fx:id="allyNameLabel" prefHeight="25.0" prefWidth="330.0" text="Ally Pokemon Name">
                      <font>
                         <Font name="Monospaced Regular" size="18.0" />
                      </font>
+                     <padding>
+                        <Insets left="15.0" />
+                     </padding>
                   </Label>
                   <Label fx:id="allyLvLabel" alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="152.0" text="Lv. ???">
                      <font>
@@ -74,19 +77,22 @@
                      <font>
                         <Font name="Monospaced Regular" size="14.0" />
                      </font></Label>
-                  <ProgressBar fx:id="allyHpBar" prefHeight="20.0" prefWidth="208.0" progress="1.0" style="-fx-accent: green;" />
+                  <ProgressBar fx:id="allyHpBar" prefHeight="20.0" prefWidth="300.0" progress="1.0" style="-fx-accent: green;" />
                </children>
                <VBox.margin>
                   <Insets right="10.0" />
                </VBox.margin>
             </HBox>
-            <Label fx:id="allyHpLabel" prefHeight="25.0" prefWidth="216.0" text="??/??">
+            <Label fx:id="allyHpLabel" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="310.0" text="??/??">
                <font>
                   <Font name="Monospaced Regular" size="18.0" />
                </font>
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
+               <VBox.margin>
+                  <Insets right="10.0" />
+               </VBox.margin>
             </Label>
          </children>
          <opaqueInsets>
@@ -96,14 +102,23 @@
             <Insets right="10.0" />
          </padding>
       </VBox>
-      <VBox fx:id="enemyPokemonInfo" alignment="TOP_RIGHT" layoutX="14.0" layoutY="79.0" prefHeight="118.0" prefWidth="312.0" style="-fx-border-color: black;" visible="false" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="79.0">
+      <VBox fx:id="enemyPokemonInfo" alignment="TOP_RIGHT" layoutX="15.0" layoutY="79.0" prefHeight="118.0" prefWidth="410.0" style="-fx-border-color: black;" visible="false" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="79.0">
          <children>
             <HBox prefHeight="43.0" prefWidth="312.0">
                <children>
-                  <Label fx:id="enemyNameLabel" alignment="CENTER" prefHeight="25.0" prefWidth="255.0" text="Enemy Pokemon Name">
+                  <Label fx:id="enemyNameLabel" prefHeight="25.0" prefWidth="330.0" text="Enemy Pokemon Name">
                      <font>
                         <Font name="Monospaced Regular" size="18.0" />
                      </font>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                     <padding>
+                        <Insets left="15.0" />
+                     </padding>
                   </Label>
                   <Label fx:id="enemyLvLabel" alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="152.0" text="Lv. ???">
                      <font>
@@ -126,7 +141,7 @@
                      <font>
                         <Font name="Monospaced Regular" size="14.0" />
                      </font></Label>
-                  <ProgressBar fx:id="enemyHpBar" prefHeight="20.0" prefWidth="208.0" progress="1.0" style="-fx-accent: green;" />
+                  <ProgressBar fx:id="enemyHpBar" prefHeight="20.0" prefWidth="300.0" progress="1.0" style="-fx-accent: green;" />
                </children>
                <VBox.margin>
                   <Insets right="10.0" />
@@ -167,13 +182,13 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
          </rowConstraints>
          <children>
-            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 1" />
-            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 2" GridPane.columnIndex="1" />
-            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 4" GridPane.rowIndex="1" />
+            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 1" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 2" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 3" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 4" GridPane.columnIndex="0" GridPane.rowIndex="1" />
             <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Button fx:id="pokemonBackButton" mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Back" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 3" GridPane.columnIndex="2" />
             <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 6" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Button fx:id="pokemonBackButton" mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Back" GridPane.columnIndex="3" GridPane.rowIndex="1" />
          </children>
       </GridPane>
    </children>

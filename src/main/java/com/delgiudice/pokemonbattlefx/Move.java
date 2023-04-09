@@ -4,7 +4,7 @@ public class Move {
 
     private MoveTemplate template;
 
-    private int pp;
+    private int pp, twoturnCounter = 0;
 
     public String getName() {
         return template.getName();
@@ -54,6 +54,10 @@ public class Move {
         return template.getStatus();
     }
 
+    public MoveTemplate getTemplate() {
+        return template;
+    }
+
     public void setPp(int pp) {
         this.pp = pp;
     }
@@ -66,8 +70,8 @@ public class Move {
         return template.isTwoturn();
     }
 
-    public boolean isLifesteal() {
-        return template.isLifesteal();
+    public float getLifesteal() {
+        return template.getLifesteal();
     }
 
     public boolean isSelf() {

@@ -17,8 +17,10 @@ public class BattleLogic {
     private Player player;
     private NpcTrainer enemy;
 
-    private int currentAllyPokemon;
-    private int currentEnemyPokemon;
+    private int currentAllyPokemon = 0;
+    private int currentEnemyPokemon = 0;
+
+    private boolean enemySentOut, allySentOut;
 
     boolean inBattle;
 
@@ -30,36 +32,32 @@ public class BattleLogic {
     }
 
     private void setup() {
-        PokemonSpecie.setPokemonList();
-        MoveTemplate.setMoveList();
+        Pokemon.generatePokemonExamples();
 
         // For testing purposes only, delete later
-        Pokemon allyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Charmander"), 8,
-                new Move(MoveTemplate.getMoveMap().get("Scratch")), new Move(MoveTemplate.getMoveMap().get("Growl")),
-                new Move(MoveTemplate.getMoveMap().get("Ember")));
+        Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get("Charmander"));
         player = new Player("Red",  allyPokemon);
 
-        player.addPokemon(new Pokemon(PokemonSpecie.getPokemonMap().get("Machop"), 8,
+        player.addPokemon(new Pokemon(PokemonSpecie.getPokemonMap().get("Machop"), 8, Ability.GUTS,
                 new Move(MoveTemplate.getMoveMap().get("Tackle")), new Move(MoveTemplate.getMoveMap().get("Growl")),
                 new Move(MoveTemplate.getMoveMap().get("Double Kick"))));
 
-        player.addPokemon(new Pokemon(PokemonSpecie.getPokemonMap().get("Squirtle"), 8,
+        player.addPokemon(new Pokemon(PokemonSpecie.getPokemonMap().get("Squirtle"), 8, Ability.TORRENT,
                 new Move(MoveTemplate.getMoveMap().get("Tackle")), new Move(MoveTemplate.getMoveMap().get("Tail Whip")),
                         new Move(MoveTemplate.getMoveMap().get("Water Gun"))));
 
-        Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 8,
+        Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 8, Ability.GUTS,
                 new Move(MoveTemplate.getMoveMap().get("Scratch")) , new Move(MoveTemplate.getMoveMap().get("Growl")));
 
         enemy = new NpcTrainer("Joey", Enums.TrainerTypes.YOUNGSTER ,enemyPokemon);
 
-        enemy.addPokemon(new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 10,
+        enemy.addPokemon(new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 10, Ability.GUTS,
                 new Move(MoveTemplate.getMoveMap().get("Scratch")), new Move(MoveTemplate.getMoveMap().get("Growl")),
                 new Move(MoveTemplate.getMoveMap().get("Quick Attack"))));
 
-        player.getParty().get(0).setStatus(Enums.Status.FROZEN);
-        controller.updateStatus(player.getParty().get(0), true).play();
     }
 
+    // function that initiates a battle, adding looping checks here should be avoided
     private void initBattleLoop() {
         boolean allyPokemonSelected = checkIfAllyAbleToBattle(true);
         boolean enemyPokemonSelected = checkIfEnemyAbleToBattle();
@@ -71,6 +69,9 @@ public class BattleLogic {
         if (!enemyPokemonSelected) {
             battleWon();
         }
+
+        enemySentOut = true;
+        allySentOut = true;
 
         controller.updateStatus(player.getParty(currentAllyPokemon), true).play();
         controller.updateStatus(enemy.getParty(currentEnemyPokemon), false).play();
@@ -128,8 +129,7 @@ public class BattleLogic {
 
         for (Pokemon pokemon : enemy.getParty()) {
             if (pokemon.getHp() > 0) {
-                currentEnemyPokemon = index;
-                resetStats(pokemon);
+                switchPokemon(false, index);
                 return true;
             }
             index++;
@@ -146,12 +146,14 @@ public class BattleLogic {
                 true);
         Timeline battleLostMsg3 = controller.getBattleTextAnimation("Quitting...",
                 true);
+        Timeline paused = controller.generatePause(1000);
 
-        battleLostMsg2.setDelay(Duration.seconds(3));
-        battleLostMsg3.setDelay(Duration.seconds(3));
+        battleLostMsg2.setDelay(Duration.seconds(2));
+        battleLostMsg3.setDelay(Duration.seconds(2));
         battleLostMsg1.setOnFinished(e -> battleLostMsg2.play());
         battleLostMsg2.setOnFinished(e -> battleLostMsg3.play());
-        battleLostMsg3.setOnFinished(e -> exit());
+        battleLostMsg3.setOnFinished(e -> paused.play());
+        paused.setOnFinished(e -> exit());
         battleLostMsg1.play();
     }
 
@@ -161,17 +163,18 @@ public class BattleLogic {
         Timeline battleWonMsg1 = controller.getBattleTextAnimation(String.format("%s defeated%n%s %s!", player.getName(),
                 enemy.getTrainerType().toString(), enemy.getName()), true);
         Timeline battleWonMsg2 = controller.getBattleTextAnimation("Quitting...", true);
+        Timeline paused = controller.generatePause(1000);
 
         battleWonMsg1.setDelay(Duration.seconds(2));
-        battleWonMsg2.setDelay(Duration.seconds(3));
+        battleWonMsg2.setDelay(Duration.seconds(2));
         battleWonMsg1.setOnFinished(e -> battleWonMsg2.play());
-        battleWonMsg2.setOnFinished(e -> exit());
+        battleWonMsg2.setOnFinished(e -> paused.play());
+        paused.setOnFinished(e -> exit());
 
         battleWonMsg1.play();
     }
 
     private void battleLoop() {
-
         Timeline playerChoiceDialog = controller.getBattleTextAnimation(String.format("What will%n%s do?",
                 player.getParty(currentAllyPokemon).getName()), false);
         //playerChoiceDialog.setDelay(Duration.seconds(2));
@@ -195,8 +198,17 @@ public class BattleLogic {
                 });
             else
                 moveButton.setOnAction(e -> {
+                    controller.getMoveGrid().setDisable(true);
                     Timeline outOfPPInfo = controller.getBattleTextAnimation("This move is out of PP!", false);
-                    outOfPPInfo.setOnFinished(event -> playerChoiceDialog.play());
+                    Timeline playerChoiceDialog2 = controller.getBattleTextAnimation(String.format("What will%n%s do?",
+                            player.getParty(currentAllyPokemon).getName()), false);
+                    playerChoiceDialog2.setDelay(Duration.seconds(1));
+                    outOfPPInfo.setOnFinished(event -> playerChoiceDialog2.play());
+                    playerChoiceDialog2.setOnFinished(event -> {
+                        controller.getMoveGrid().setDisable(false);
+                        controller.getMoveGrid().setVisible(false);
+                        controller.switchToPlayerChoice(true);
+                    });
                     outOfPPInfo.play();
                 });
         }
@@ -218,73 +230,81 @@ public class BattleLogic {
 
     private void setPokemonSwapListeners() {
 
-        int index = 0;
+        int iLimit = Math.min(player.getParty().size(), 2);
+        int jLimit = player.getParty().size() > 3 ? 1: 0;
+;
+        controller.updateSelectPokemonButtons(player.getParty());
 
-        for (Pokemon pokemon : player.getParty()) {
-            Button button = (Button) controller.getPokemonGrid().getChildren().get(index);
-            button.setText(String.format("%s%nHP:%d/%d", pokemon.getName(), pokemon.getHp(), pokemon.getMaxHP()));
-            button.setDisable(pokemon.getHp() == 0);
+        for (int j=0; j <= jLimit; j++) {
+            for (int i = 0; i <= iLimit; i++) {
+                int partyIndex = i + (3 * j);
 
-            int finalIndex = index;
-            index++;
+                Button button = (Button) controller.getNodeFromGridPane(controller.getPokemonGrid(), i, j);
+                Pokemon pokemon = player.getParty(partyIndex);
 
-            if (finalIndex == currentAllyPokemon) {
-                button.setDisable(true);
-                continue;
-            }
+                if (partyIndex == currentAllyPokemon) {
+                    button.setOnAction(e -> {
+                        controller.getPokemonGrid().setDisable(true);
+                        Timeline alreadyInBattleInfo = controller.getBattleTextAnimation(String.format(
+                                "%s is already%nin battle!", pokemon.getName()), false);
+                        Timeline resetText = controller.getBattleTextAnimation(String.format("What will%n%s do?",
+                                pokemon.getName()), false);
+                        resetText.setDelay(Duration.seconds(1));
+                        alreadyInBattleInfo.setOnFinished(event -> resetText.play());
+                        resetText.setOnFinished(event -> {
+                            controller.getPokemonGrid().setDisable(false);
+                            controller.getPokemonGrid().setVisible(false);
+                            controller.switchToPlayerChoice(true);
+                        });
+                        alreadyInBattleInfo.play();
+                    });
+                    continue;
+                }
 
-            button.setOnAction(e -> {
-                String currentAllyName = player.getParty(currentAllyPokemon).getName();
+                button.setOnAction(e -> {
+                    String currentAllyName = player.getParty(currentAllyPokemon).getName();
 
-                controller.getPokemonGrid().setVisible(false);
-                controller.switchToPlayerChoice(false);
+                    controller.getPokemonGrid().setVisible(false);
+                    controller.switchToPlayerChoice(false);
 
-                List<Timeline> battleTimeLine = new LinkedList<>();
+                    List<Timeline> battleTimeLine = new LinkedList<>();
 
-                Timeline allyPokemonReturnText = controller.getBattleTextAnimation(String.format(
-                        "That's enough %s,%ncome back!", currentAllyName), true);
-                allyPokemonReturnText.setDelay(Duration.seconds(0.1));
-                battleTimeLine.add(allyPokemonReturnText);
+                    Timeline allyPokemonReturnText = controller.getBattleTextAnimation(String.format(
+                            "That's enough %s,%ncome back!", currentAllyName), true);
+                    allyPokemonReturnText.setDelay(Duration.seconds(0.1));
+                    battleTimeLine.add(allyPokemonReturnText);
 
-                Timeline allyPokemonReturn = controller.getPokemonFaintedAnimation(true);
-                allyPokemonReturn.setDelay(Duration.seconds(1));
-                battleTimeLine.add(allyPokemonReturn);
+                    Timeline allyPokemonReturn = controller.getPokemonFaintedAnimation(true);
+                    allyPokemonReturn.setDelay(Duration.seconds(1));
+                    battleTimeLine.add(allyPokemonReturn);
 
-                currentAllyPokemon = finalIndex;
-                resetStats(player.getParty(currentAllyPokemon));
+                    switchPokemon(true, partyIndex);
 
-                //controller.setAllyInformation(player.getParty(currentAllyPokemon));
-                Timeline allyPokemonIntro = controller.getBattleTextAnimation(String.format("Go! %s!",
-                        player.getParty(currentAllyPokemon).getName()), true);
-                allyPokemonIntro.setDelay(Duration.seconds(1));
-                battleTimeLine.add(allyPokemonIntro);
+                    //controller.setAllyInformation(player.getParty(currentAllyPokemon));
+                    Timeline allyPokemonIntro = controller.getBattleTextAnimation(String.format("Go! %s!",
+                            player.getParty(currentAllyPokemon).getName()), true);
+                    allyPokemonIntro.setDelay(Duration.seconds(1));
+                    battleTimeLine.add(allyPokemonIntro);
 
-                Timeline updateStatus = controller.updateStatus(player.getParty(currentAllyPokemon), true);
-                battleTimeLine.add(updateStatus);
+                    Timeline updateStatus = controller.updateStatus(player.getParty(currentAllyPokemon), true);
+                    battleTimeLine.add(updateStatus);
 
-                Timeline allyInfoAnimation = controller.getAllyInfoAnimation(player.getParty(currentAllyPokemon),
-                        player.getParty(currentAllyPokemon).getHp());
-                battleTimeLine.add(allyInfoAnimation);
+                    Timeline allyInfoAnimation = controller.getAllyInfoAnimation(player.getParty(currentAllyPokemon),
+                            player.getParty(currentAllyPokemon).getHp());
+                    battleTimeLine.add(allyInfoAnimation);
 
-                SecureRandom generator = new SecureRandom();
-                int enemyMoveIndex = generator.nextInt(enemy.getParty(currentEnemyPokemon).getMoveList().size());
-                Move enemyMove = enemy.getParty(currentEnemyPokemon).getMoveList(enemyMoveIndex);
+                    SecureRandom generator = new SecureRandom();
+                    int enemyMoveIndex = generator.nextInt(enemy.getParty(currentEnemyPokemon).getMoveList().size());
+                    Move enemyMove = enemy.getParty(currentEnemyPokemon).getMoveList(enemyMoveIndex);
 
-                List<Timeline> enemyMoveList = useMove(enemyMove, enemy.getParty(currentEnemyPokemon),
-                        player.getParty(currentAllyPokemon), true);
+                    List<Timeline> enemyMoveList = useMove(enemyMove, enemy.getParty(currentEnemyPokemon),
+                            player.getParty(currentAllyPokemon), true);
 
-                battleTimeLine.addAll(enemyMoveList);
+                    battleTimeLine.addAll(enemyMoveList);
 
-                checkFainted(battleTimeLine);
+                    checkFainted(battleTimeLine);
 
-            });
-        }
-
-        if (index < 5) {
-            for (int i=index; i <= 6; i++) {
-                Button button = (Button)controller.getPokemonGrid().getChildren().get(i);
-                button.setText("");
-                button.setDisable(true);
+                });
             }
         }
 
@@ -304,14 +324,24 @@ public class BattleLogic {
         controller.getMoveGrid().setVisible(false);
         controller.switchToPlayerChoice(false);
 
-        boolean faster = player.getParty(currentAllyPokemon).getStats().get("Speed") >
-                enemy.getParty(currentEnemyPokemon).getStats().get("Speed");
-        boolean tied = player.getParty(currentAllyPokemon).getStats().get("Speed").equals(
-                enemy.getParty(currentEnemyPokemon).getStats().get("Speed"));
+        Pokemon allyPokemon = player.getParty(currentAllyPokemon);
+        Pokemon enemyPokemon = enemy.getParty(currentEnemyPokemon);
+
+        double playerSpeed = allyPokemon.getStats().get("Speed");
+        double enemySpeed = enemyPokemon.getStats().get("Speed");
+
+        playerSpeed = allyPokemon.getStatus() == Enums.Status.PARALYZED ? playerSpeed / 2: playerSpeed;
+        enemySpeed = enemyPokemon.getStatus() == Enums.Status.PARALYZED ? enemySpeed / 2: enemySpeed;
+
+        playerSpeed = Math.round(playerSpeed);
+        enemySpeed = Math.round(enemySpeed);
+
+        boolean faster = playerSpeed > enemySpeed;
+        boolean tied = playerSpeed == enemySpeed;
 
         List<Timeline> battleTimeLine;
-        int enemyMoveIndex = generator.nextInt(enemy.getParty(currentEnemyPokemon).getMoveList().size());
-        Move enemyMove = enemy.getParty(currentEnemyPokemon).getMoveList(enemyMoveIndex);
+        int enemyMoveIndex = generator.nextInt(enemyPokemon.getMoveList().size());
+        Move enemyMove = enemyPokemon.getMoveList(enemyMoveIndex);
 
         if (allyMove.isPriority() && !enemyMove.isPriority()) {
             battleTimeLine = processTurnAllyFaster(allyMove, enemyMove);
@@ -467,7 +497,7 @@ public class BattleLogic {
         battleTimeLine.get(0).play();
     }
 
-
+    //Processes damaging status effects
     private List<Timeline> processDamageStatusEffects(Pokemon pokemon, boolean ally) {
 
         double damageDouble = 0;
@@ -475,21 +505,21 @@ public class BattleLogic {
 
         switch (pokemon.getStatus()) {
             case BURNED-> {
-                damageDouble = Math.floor(pokemon.getMaxHP() / 16.0);
+                damageDouble = Math.round(pokemon.getMaxHP() / 16.0);
                 damageInfoTimeline = controller.getBattleTextAnimation(String.format("%s was hurt by%nburn!",
                         pokemon.getName()), true);
                 if (damageDouble == 0)
                     damageDouble = 1;
             }
             case POISONED -> {
-                damageDouble = Math.floor(pokemon.getMaxHP() / 8.0);
+                damageDouble = Math.round(pokemon.getMaxHP() / 8.0);
                 damageInfoTimeline = controller.getBattleTextAnimation(String.format("%s was hurt by%npoison!",
                         pokemon.getName()), true);
                 if (damageDouble == 0)
                     damageDouble = 1;
             }
             case BADLY_POISONED -> {
-                damageDouble = Math.floor(pokemon.getMaxHP() * pokemon.getPoisonCounter() / 16.0);
+                damageDouble = Math.round(pokemon.getMaxHP() * pokemon.getPoisonCounter() / 16.0);
                 damageInfoTimeline = controller.getBattleTextAnimation(String.format("%s was hurt by%npoison!",
                         pokemon.getName()), true);
                 pokemon.setPoisonCounter(pokemon.getPoisonCounter() + 1);
@@ -533,6 +563,7 @@ public class BattleLogic {
         return null;
     }
 
+    // Processes fainting enemy
     private void processEnemyFainted(List<Timeline> battleTimeLine) {
         Timeline enemyPokemonFainted = controller.getPokemonFaintedAnimation(false);
         enemyPokemonFainted.setDelay(Duration.seconds(2));
@@ -548,6 +579,7 @@ public class BattleLogic {
         //finalChecks(battleTimeLine, enemyFainted);
     }
 
+    // Processes fainting ally
     private void processAllyFainted(List<Timeline> battleTimeLine) {
         Timeline allyPokemonFainted = controller.getPokemonFaintedAnimation(true);
         allyPokemonFainted.setDelay(Duration.seconds(2));
@@ -566,50 +598,48 @@ public class BattleLogic {
 
     }
 
+    // Configures Pokemon select menu
     private void selectNewPokemonMenu() {
-        int index = 0;
         controller.getPokemonGrid().setVisible(true);
-        for (Pokemon pokemon : player.getParty()) {
-            Button button = (Button)controller.getPokemonGrid().getChildren().get(index);
-            button.setText(String.format("%s%nHP:%d/%d", pokemon.getName(), pokemon.getHp(), pokemon.getMaxHP()));
-            button.setDisable(pokemon.getHp() == 0);
 
-            int finalIndex = index;
-            button.setOnAction(e -> {
-                currentAllyPokemon = finalIndex;
-                resetStats(player.getParty(currentAllyPokemon));
+        int iLimit = Math.min(player.getParty().size(), 2);
+        int jLimit = player.getParty().size() > 3 ? 1: 0;
 
-                controller.getPokemonGrid().setVisible(false);
+        controller.updateSelectPokemonButtons(player.getParty());
 
-                List<Timeline> battleTimeLine = new LinkedList<>();
+        for (int j=0; j <= jLimit; j++) {
+            for (int i = 0; i <= iLimit; i++) {
+                int partyIndex = i + (3 * j);
 
-                Timeline allyPokemonIntro = controller.getBattleTextAnimation(String.format("Go! %s!",
-                        player.getParty(currentAllyPokemon).getName()), true);
-                allyPokemonIntro.setDelay(Duration.seconds(1));
+                Button button = (Button) controller.getNodeFromGridPane(controller.getPokemonGrid(), i, j);
 
-                battleTimeLine.add(allyPokemonIntro);
+                button.setOnAction(e -> {
+                    switchPokemon(true, partyIndex);
 
-                Timeline updateStatus = controller.updateStatus(player.getParty(currentAllyPokemon), true);
-                battleTimeLine.add(updateStatus);
+                    controller.getPokemonGrid().setVisible(false);
 
-                //controller.setAllyInformation(player.getParty(currentAllyPokemon));
-                Timeline allyInfoAnimation = controller.getAllyInfoAnimation(player.getParty(currentAllyPokemon),
-                        player.getParty(currentAllyPokemon).getHp());
+                    List<Timeline> battleTimeLine = new LinkedList<>();
 
-                battleTimeLine.add(allyInfoAnimation);
+                    Timeline allyPokemonIntro = controller.getBattleTextAnimation(String.format("Go! %s!",
+                            player.getParty(currentAllyPokemon).getName()), true);
+                    allyPokemonIntro.setDelay(Duration.seconds(1));
 
-                finalChecks(battleTimeLine);
+                    battleTimeLine.add(allyPokemonIntro);
 
-            });
+                    Timeline updateStatus = controller.updateStatus(player.getParty(currentAllyPokemon), true);
+                    battleTimeLine.add(updateStatus);
 
-            index++;
-        }
+                    //controller.setAllyInformation(player.getParty(currentAllyPokemon));
+                    Timeline allyInfoAnimation = controller.getAllyInfoAnimation(player.getParty(currentAllyPokemon),
+                            player.getParty(currentAllyPokemon).getHp());
 
-        if (index < 5) {
-            for (int i=index; i <= 6; i++) {
-                Button button = (Button)controller.getPokemonGrid().getChildren().get(i);
-                button.setText("");
-                button.setDisable(true);
+                    battleTimeLine.add(allyInfoAnimation);
+
+                    finalChecks(battleTimeLine);
+
+                });
+
+
             }
         }
 
@@ -618,6 +648,7 @@ public class BattleLogic {
         button.setDisable(true);
     }
 
+    // Events when ally Pokemon is faster
     private List<Timeline> processTurnAllyFaster(Move allyMove, Move enemyMove) {
         //Random generator = new Random();
 
@@ -635,6 +666,7 @@ public class BattleLogic {
         return allyMoveTimeLine;
     }
 
+    // Events when ally Pokemon is slower
     private List<Timeline> processTurnAllySlower(Move allyMove, Move enemyMove) {
         //Random generator = new Random();
 
@@ -660,56 +692,97 @@ public class BattleLogic {
 
     }
 
+    private List<Timeline> processUserParalyzed(Pokemon user, List<Timeline> moveTimeLine) {
+        Timeline paralysisInfo = controller.getBattleTextAnimation(String.format("%s is%nfully paralyzed!",
+                user.getName()), true);
+        moveTimeLine.add(paralysisInfo);
+        moveTimeLine.add(controller.generatePause(2000));
+        System.out.println(user.getName() + "is fully paralyzed!");
+        return moveTimeLine;
+    }
+
+    private List<Timeline> processUserAsleep(Pokemon user, List<Timeline> moveTimeLine) {
+        Timeline sleepInfo = controller.getBattleTextAnimation(String.format("%s is%nfast asleep!", user.getName()),
+                true);
+        user.setSleepCounter(user.getSleepCounter() - 1);
+        moveTimeLine.add(sleepInfo);
+        moveTimeLine.add(controller.generatePause(2000));
+        System.out.printf("%s is asleep!%n", user.getName());
+        return moveTimeLine;
+    }
+
+    private void processUserWakeUp(Pokemon user, List<Timeline> moveTimeLine, boolean allyTarget) {
+        Timeline sleepInfo = controller.getBattleTextAnimation(String.format("%s woke up!", user.getName()),
+                true);
+        user.setStatus(Enums.Status.NONE);
+        Timeline statusChange = controller.updateStatus(user, !allyTarget);
+        statusChange.setDelay(Duration.seconds(1));
+
+        moveTimeLine.add(sleepInfo);
+        moveTimeLine.add(statusChange);
+        moveTimeLine.add(controller.generatePause(1000));
+        System.out.printf("%s woke up!%n", user.getName());
+    }
+
+    private List<Timeline> processUserFrozen(Pokemon user, List<Timeline> moveTimeLine) {
+        Timeline frozenInfo = controller.getBattleTextAnimation(String.format("%s is frozen solid!",
+                user.getName()), true);
+        moveTimeLine.add(frozenInfo);
+        moveTimeLine.add(controller.generatePause(2000));
+        return moveTimeLine;
+    }
+
+    private void processUserThawOut(Pokemon user, List<Timeline> moveTimeLine, boolean allyTarget) {
+        Timeline frozenInfo = controller.getBattleTextAnimation(String.format("%s thawed out!", user.getName()),
+                true);
+        moveTimeLine.add(frozenInfo);
+
+        user.setStatus(Enums.Status.NONE);
+        Timeline updateStatus = controller.updateStatus(user, !allyTarget);
+        //updateStatus.setDelay(Duration.seconds(1));
+        moveTimeLine.add(updateStatus);
+        moveTimeLine.add(controller.generatePause(2000));
+    }
+
+    private List<Timeline> processMoveMissed(List<Timeline> moveTimeLine) {
+        System.out.println("Move missed!");
+        Timeline moveMissedDialogue = controller.getBattleTextAnimation("Move Missed!", true);
+        moveMissedDialogue.setDelay(Duration.seconds(2));
+
+        moveTimeLine.add(moveMissedDialogue);
+        moveTimeLine.add(controller.generatePause(2000));
+
+        return moveTimeLine;
+    }
+
+    // Processes using a move, as well as status effects that might prevent from using it
     private List<Timeline> useMove(Move move, Pokemon user, Pokemon target, boolean allyTarget) {
 
         List<Timeline> moveTimeLine = new LinkedList<>();
         SecureRandom generator = new SecureRandom();
 
+        if (user.getStatus() == Enums.Status.PARALYZED) {
+            int rand = generator.nextInt(4);
+            if (rand == 0) {
+                return processUserParalyzed(user, moveTimeLine);
+            }
+        }
         if (user.getStatus() == Enums.Status.SLEEPING && user.getSleepCounter() > 0) {
-            Timeline sleepInfo = controller.getBattleTextAnimation(String.format("%s is%nfast asleep!", user.getName()),
-                    true);
-            //sleepInfo.setDelay(Duration.seconds(2));
-            user.setSleepCounter(user.getSleepCounter() - 1);
-            moveTimeLine.add(controller.generatePause(2000));
-            moveTimeLine.add(sleepInfo);
-            System.out.printf("%s is asleep!%n", user.getName());
-            return moveTimeLine;
+            return processUserAsleep(user, moveTimeLine);
         }
         else if(user.getStatus() == Enums.Status.SLEEPING && user.getSleepCounter() == 0) {
-            Timeline sleepInfo = controller.getBattleTextAnimation(String.format("%s woke up!", user.getName()),
-                    true);
-            //sleepInfo.setDelay(Duration.seconds(2));
-            user.setStatus(Enums.Status.NONE);
-            Timeline statusChange = controller.updateStatus(user, !allyTarget);
-            statusChange.setDelay(Duration.seconds(1));
-
-            moveTimeLine.add(sleepInfo);
-            moveTimeLine.add(statusChange);
-            System.out.printf("%s woke up!%n", user.getName());
+            processUserWakeUp(user, moveTimeLine, allyTarget);
         }
+
         if (user.getStatus() == Enums.Status.FROZEN) {
             int rand = generator.nextInt(5);
             boolean damagingFireMove = move.getType().getTypeEnum() == Enums.Types.FIRE &&
                     move.getSubtype() != Enums.Subtypes.STATUS;
             if (rand == 0 || damagingFireMove) {
-                Timeline frozenInfo = controller.getBattleTextAnimation(String.format("%s thawed out!", user.getName()),
-                        true);
-                //frozenInfo.setDelay(Duration.seconds(2));
-                moveTimeLine.add(frozenInfo);
-
-                user.setStatus(Enums.Status.NONE);
-                Timeline updateStatus = controller.updateStatus(user, !allyTarget);
-                updateStatus.setDelay(Duration.seconds(1));
-                moveTimeLine.add(updateStatus);
-                moveTimeLine.add(controller.generatePause(2000));
+                processUserThawOut(user, moveTimeLine, allyTarget);
             }
             else {
-                Timeline frozenInfo = controller.getBattleTextAnimation(String.format("%s is frozen solid!",
-                        user.getName()), true);
-                //frozenInfo.setDelay(Duration.seconds(2));
-                moveTimeLine.add(frozenInfo);
-                moveTimeLine.add(controller.generatePause(2000));
-                return moveTimeLine;
+                return processUserFrozen(user, moveTimeLine);
             }
         }
 
@@ -732,22 +805,14 @@ public class BattleLogic {
             int hit = moveAccuracy * statAccuracy;
             int r = generator.nextInt(100) + 1;
             if (r > hit) {
-                System.out.println("Move missed!");
-                Timeline moveMissedDialogue = controller.getBattleTextAnimation("Move Missed!", true);
-                moveMissedDialogue.setDelay(Duration.seconds(2));
-
-                moveTimeLine.add(moveMissedDialogue);
-                moveTimeLine.add(controller.generatePause(2000));
-
-                return moveTimeLine;
+                return processMoveMissed(moveTimeLine);
             }
         }
 
         Enums.Subtypes moveType = move.getSubtype();
-
         MoveDamageInfo damageInfo = new MoveDamageInfo(0, false, -999);
-
         int i;
+        int damage = 0;
 
         for (i=0; i<move.getHits(); i++) {
             if (target.getHp() == 0)
@@ -777,7 +842,7 @@ public class BattleLogic {
 
             else if (damageInfo.damage() > 0) {
 
-                int damage = damageInfo.damage();
+                damage = damageInfo.damage();
 
                 //List<Timeline> hitTimeline = new LinkedList<>();
 
@@ -832,24 +897,53 @@ public class BattleLogic {
             moveTimeLine.add(hitsInformation);
         }
 
+        float recoil = move.getTemplate().getRecoil();
+
+        if (recoil > 0 && damage != 0 && move.getHits() == 1) {
+            Timeline recoilText = controller.getBattleTextAnimation(String.format(
+                    "%s took damage%nfrom recoil!",user.getName()),true);
+
+            recoilText.setDelay(Duration.seconds(1));
+            moveTimeLine.add(recoilText);
+
+            double recoilDamage = damage * recoil;
+            int recoilDamageInt = (int) Math.round(recoilDamage);
+            if (recoilDamageInt > user.getHp())
+                recoilDamageInt = user.getHp();
+
+            int oldHp = user.getHp();
+            user.setHp(user.getHp() - recoilDamageInt);
+
+            Timeline recoilDealtAnimation;
+            if(!allyTarget)
+                recoilDealtAnimation = controller.getAllyHpAnimation(oldHp, user.getHp(), user.getMaxHP());
+            else
+                recoilDealtAnimation = controller.getEnemyHpAnimation(oldHp, user.getHp(), user.getMaxHP());
+
+            moveTimeLine.add(recoilDealtAnimation);
+        }
+
         boolean targetFainted = target.getHp() == 0;
+        boolean userFainted = user.getHp() == 0;
+        boolean targetProtected = move.getSubtype() != Enums.Subtypes.STATUS &&
+                target.getAbility() == Ability.SHIELD_DUST;
         final Timeline statChangeInfo;
 
         float prob = move.getStatUpProb() * 100;
         int rand = generator.nextInt(100) + 1;
 
-        if (move.getStatType() != null && move.isSelf() && prob >= rand) {
+        if (move.getStatType() != null && move.isSelf() && prob >= rand && !userFainted) {
             statChangeInfo = processStatChange(move, user);
             moveTimeLine.add(statChangeInfo);
         }
-        else if (move.getStatType() != null && prob >= rand && !targetFainted) {
+        else if (move.getStatType() != null && prob >= rand && !targetFainted && !targetProtected) {
             statChangeInfo = processStatChange(move, target);
             moveTimeLine.add(statChangeInfo);
         }
 
         prob = move.getStatusProb() * 100;
         rand = generator.nextInt(100) + 1;
-        if (move.getStatus() != Enums.Status.NONE && prob >= rand && !targetFainted) {
+        if (move.getStatus() != Enums.Status.NONE && prob >= rand && !targetFainted && !targetProtected) {
             Timeline statusChangeInfo = processStatusChange(move, target);
             statusChangeInfo.setDelay(Duration.seconds(1));
             moveTimeLine.add(statusChangeInfo);
@@ -977,12 +1071,12 @@ public class BattleLogic {
             isCrit = true;
         if (isCrit) {
             if(attackMod >= 0)
-                attack = (int)Math.floor((double) attackTemp * (2 + attackMod)/2);
+                attack = (int)Math.round((double) attackTemp * (2 + attackMod)/2);
             else
                 attack = attackTemp;
             if(defenseMod <= 0) {
                 double defense_multiplier = 2.0 / (2 - defenseMod);
-                defense = (int) Math.floor(defenseTemp * defense_multiplier);
+                defense = (int) Math.round(defenseTemp * defense_multiplier);
             }
             else
                 defense = defenseTemp;
@@ -990,22 +1084,24 @@ public class BattleLogic {
         }
         else  {
             if(attackMod >= 0) {
-                attack = (int) Math.floor((double) attackTemp * (2 + attackMod) / 2);
+                attack = (int) Math.round((double) attackTemp * (2 + attackMod) / 2);
             }
             else {
                 double attack_multiplier = 2.0 / (2 - attackMod);
-                attack = (int) Math.floor(attackTemp * attack_multiplier);
+                attack = (int) Math.round(attackTemp * attack_multiplier);
             }
 
             if(defenseMod >= 0) {
-                defense = (int) Math.floor((double) defenseTemp * (2 + defenseMod) / 2);
+                defense = (int) Math.round((double) defenseTemp * (2 + defenseMod) / 2);
             }
             else {
                 double defense_multiplier = 2.0 / (2 - defenseMod);
-                defense = (int) Math.floor(defenseTemp * defense_multiplier);
+                defense = (int) Math.round(defenseTemp * defense_multiplier);
             }
             critMod = 1;
         }
+        double abilityMultiplier = processAbilityMultiplier(move, user);
+        attack = attack * abilityMultiplier;
         //Miscellaneous stats calculation (stab, random factor, burn debuff)
         double part1 = ((2.0 * user.getLevel())/5.0) + 2;
         float rand = (generator.nextInt(15) + 85)/100.0f;
@@ -1036,7 +1132,7 @@ public class BattleLogic {
         }
         //Final damage calculations
         double modifier = critMod * rand * stab * typeEffect * burn;
-        double damageDouble = Math.floor(((((part1 * move.getPower() * ((attack/defense)/50.0)) + 2) * modifier)));
+        double damageDouble = Math.round(((((part1 * move.getPower() * ((attack/defense)/50.0)) + 2) * modifier)));
         int damage = (int) damageDouble;
 
         System.out.println(user.getName() + " used a " + move.getType().toString() + " type move!");
@@ -1057,6 +1153,40 @@ public class BattleLogic {
         return new MoveDamageInfo(damage, isCrit, typeEffect);
     }
 
+    private double processAbilityMultiplier(Move move, Pokemon user) {
+        Enums.Types boostedType;
+        switch (user.getAbility()) {
+            case OVERGROW -> boostedType = Enums.Types.GRASS;
+            case BLAZE -> boostedType = Enums.Types.FIRE;
+            case TORRENT -> boostedType = Enums.Types.WATER;
+            default -> {
+                return 1.0;
+            }
+        }
+
+        double hpThreshold = (double) user.getMaxHP() / 3;
+        if (user.getHp() > hpThreshold)
+            return 1.0;
+
+        if (move.getType().getTypeEnum() != boostedType)
+            return 1.0;
+
+        return 1.5;
+    }
+
+    private void switchPokemon(boolean ally, int slot) {
+        if (ally) {
+            currentAllyPokemon = slot;
+            allySentOut = true;
+            resetStats(player.getParty(currentAllyPokemon));
+        }
+        else {
+            currentEnemyPokemon = slot;
+            enemySentOut = true;
+            resetStats(enemy.getParty(currentEnemyPokemon));
+        }
+    }
+
     private void resetStats(Pokemon pokemon)
     {
         pokemon.getStatModifiers().clear();
@@ -1065,5 +1195,6 @@ public class BattleLogic {
         }
 
         pokemon.setPoisonCounter(1);
+        pokemon.getSubStatuses().clear();
     }
 }

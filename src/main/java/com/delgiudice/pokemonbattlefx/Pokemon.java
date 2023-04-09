@@ -4,9 +4,10 @@ import java.security.SecureRandom;
 import java.util.*;
 
 public class Pokemon {
+
+    private static final HashMap<String, Pokemon> pokemonExamples = new HashMap<>();
     private String name;
-    private int hp;
-    private byte level;
+    private int hp, level;
     private List<Move> moveList = new ArrayList<>();
     private LinkedHashMap<String, Integer> stats = new LinkedHashMap<>();
     private Enums.Status status = Enums.Status.NONE;
@@ -15,6 +16,9 @@ public class Pokemon {
     private Enums.Nature nature;
     private HashMap<String, Integer> statModifiers = new HashMap<>();
     private PokemonSpecie specie;
+    private List<Enums.SubStatus> subStatuses = new LinkedList<>();
+    private Ability ability = Ability.NONE;
+    private boolean trapped;
 
     public String getName() {
         return name;
@@ -32,8 +36,16 @@ public class Pokemon {
         this.hp = hp;
     }
 
-    public byte getLevel() {
+    public int getLevel() {
         return level;
+    }
+
+    public Ability getAbility() {
+        return ability;
+    }
+
+    public static HashMap<String, Pokemon> getPokemonExamples() {
+        return pokemonExamples;
     }
 
     public HashMap<String, Integer> getStatModifiers() {
@@ -63,6 +75,14 @@ public class Pokemon {
 
     public int getSleepCounter() {
         return sleepCounter;
+    }
+
+    public List<Enums.SubStatus> getSubStatuses() {
+        return subStatuses;
+    }
+
+    public boolean isTrapped() {
+        return trapped;
     }
 
     public int[] getIvs() {
@@ -101,41 +121,53 @@ public class Pokemon {
         this.sleepCounter = sleepCounter;
     }
 
-    Pokemon(PokemonSpecie specie, int level, Move move1)
+    public void setTrapped(boolean trapped) {
+        this.trapped = trapped;
+    }
+
+    public void setAbility(Ability ability) {
+        this.ability = ability;
+    }
+
+    Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1)
     {
         this.name = specie.getName();
         this.specie = specie;
-        this.level = (byte)level;
+        this.level = level;
+        this.ability = ability;
         moveList.add(move1);
         generateVariables();
         this.hp = stats.get("Max HP");
     }
-    Pokemon(PokemonSpecie specie, int level, Move move1, Move move2)
+    Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1, Move move2)
     {
         this.name = specie.getName();
         this.specie = specie;
-        this.level = (byte)level;
+        this.level = level;
+        this.ability = ability;
         moveList.add(move1);
         moveList.add(move2);
         generateVariables();
         this.hp = stats.get("Max HP");
     }
-    Pokemon(PokemonSpecie specie, int level, Move move1, Move move2, Move move3)
+    Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1, Move move2, Move move3)
     {
         this.name = specie.getName();
         this.specie = specie;
-        this.level = (byte)level;
+        this.level = level;
+        this.ability = ability;
         moveList.add(move1);
         moveList.add(move2);
         moveList.add(move3);
         generateVariables();
         this.hp = stats.get("Max HP");
     }
-    Pokemon(PokemonSpecie specie, int level, Move move1, Move move2, Move move3, Move move4)
+    Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1, Move move2, Move move3, Move move4)
     {
         this.name = specie.getName();
         this.specie = specie;
-        this.level = (byte)level;
+        this.level = level;
+        this.ability = ability;
         moveList.add(move1);
         moveList.add(move2);
         moveList.add(move3);
@@ -147,11 +179,14 @@ public class Pokemon {
     {
         this.name = original.name;
         this.specie = original.specie;
-        this.hp = stats.get("Max HP");
+        this.level = original.level;
+        this.ability = original.ability;
+        this.ivs = original.ivs;
+        this.nature = original.nature;
+        calculateStats();
         for (Move move : original.getMoveList())
-        {
-            moveList.add(move);
-        }
+            moveList.add(new Move(move.getTemplate()));
+        this.hp = stats.get("Max HP");
     }
 
     public void levelUp()       //raises level, updates stats
@@ -255,5 +290,13 @@ public class Pokemon {
         generateNature();
         generateIVs();
         calculateStats();
+    }
+
+    public static void generatePokemonExamples() {
+        PokemonSpecie.setPokemonMap();
+        Pokemon example = new Pokemon(PokemonSpecie.getPokemonMap().get("Charmander"), 50, Ability.BLAZE,
+                new Move(MoveTemplate.getMoveMap().get("Slash")), new Move(MoveTemplate.getMoveMap().get("Dragon Breath")),
+                new Move(MoveTemplate.getMoveMap().get("Flare Blitz")), new Move(MoveTemplate.getMoveMap().get("Fire Spin")));
+        pokemonExamples.put(example.getName(), example);
     }
 }

@@ -3,6 +3,7 @@ package com.delgiudice.pokemonbattlefx;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -134,11 +135,11 @@ public class BattleController {
         final KeyFrame configPokemonSprite = new KeyFrame(Duration.ZERO, e -> {
             setAllyInformation(pokemon, hpStatus);
 
-            outside[0] = anchorPane.getWidth();
-
             allyPokemonSprite.setFitWidth(1);
             allyPokemonSprite.setFitHeight(1);
             allyPokemonSprite.setVisible(true);
+
+            outside[0] = anchorPane.getWidth();
 
             AnchorPane.setRightAnchor(allyPokemonInfo, null);
             allyPokemonInfo.setLayoutX(outside[0]);
@@ -147,17 +148,19 @@ public class BattleController {
 
         keyFrameList.add(configPokemonSprite);
 
-        for (int i = 1; i <= 338; i++) {
+        double maxI = allyPokemonInfo.getPrefWidth() + 15;
+
+        for (int i = 1; i <= maxI; i++) {
             int finalI = i;
             final KeyFrame kf = new KeyFrame(Duration.millis(i), e -> {
                 allyPokemonInfo.setLayoutX(outside[0] - finalI);
-                allyPokemonSprite.setFitWidth((width * finalI) / 333);
-                allyPokemonSprite.setFitHeight((height * finalI) / 333);
+                allyPokemonSprite.setFitWidth((width * finalI) / maxI);
+                allyPokemonSprite.setFitHeight((height * finalI) / maxI);
             });
             keyFrameList.add(kf);
         }
 
-        final KeyFrame resetAnchor = new KeyFrame(Duration.millis(339), e -> {
+        final KeyFrame resetAnchor = new KeyFrame(Duration.millis(maxI + 1), e -> {
             AnchorPane.setRightAnchor(allyPokemonInfo, 15.0);
         });
         keyFrameList.add(resetAnchor);
@@ -183,23 +186,25 @@ public class BattleController {
             enemyPokemonSprite.setVisible(true);
 
             AnchorPane.setLeftAnchor(enemyPokemonInfo, null);
-            enemyPokemonInfo.setLayoutX(-312);
+            enemyPokemonInfo.setLayoutX(-enemyPokemonInfo.getPrefWidth());
             enemyPokemonInfo.setVisible(true);
         });
 
         keyFrameList.add(configPokemonSprite);
 
-        for (int i = 1; i <= 337; i++) {
+        double maxI = enemyPokemonInfo.getPrefWidth() + 15;
+
+        for (int i = 1; i <= maxI; i++) {
             int finalI = i;
             final KeyFrame kf = new KeyFrame(Duration.millis(i), e -> {
-                enemyPokemonInfo.setLayoutX(-312 + finalI);
-                enemyPokemonSprite.setFitWidth((width * finalI) / 336);
-                enemyPokemonSprite.setFitHeight((height * finalI) / 336);
+                enemyPokemonInfo.setLayoutX(-enemyPokemonInfo.getPrefWidth() + finalI);
+                enemyPokemonSprite.setFitWidth((width * finalI) / maxI);
+                enemyPokemonSprite.setFitHeight((height * finalI) / maxI);
             });
             keyFrameList.add(kf);
         }
 
-        final KeyFrame resetAnchor = new KeyFrame(Duration.millis(338), e -> {
+        final KeyFrame resetAnchor = new KeyFrame(Duration.millis(maxI + 1), e -> {
            AnchorPane.setLeftAnchor(enemyPokemonInfo, 15.0);
         });
 
@@ -229,6 +234,9 @@ public class BattleController {
 
     public void setEnemyHpBar(int hp, int maxhp) {
         double currentHpPercentage = (double) hp / maxhp;
+        if (currentHpPercentage < 0.03 && hp != 0)
+            currentHpPercentage = 0.03;
+
         enemyHpBar.setProgress(currentHpPercentage);
 
         if (currentHpPercentage > 0.56)
@@ -337,6 +345,8 @@ public class BattleController {
 
     public void setAllyHpBar(int hp, int maxhp) {
         double currentHpPercentage = (double) hp / maxhp;
+        if (currentHpPercentage < 0.03 && hp != 0)
+            currentHpPercentage = 0.03;
 
         allyHpBar.setProgress(currentHpPercentage);
         allyHpLabel.setText(String.format("%d\t / \t%d", hp, maxhp));
@@ -423,38 +433,83 @@ public class BattleController {
 
     }
 
-    public void updateAvailableMoves(Pokemon pokemon) {
-        List<Move> moveList = pokemon.getMoveList();
+    private void setMoveInformation(Button button, Move move) {
 
         String ppInfo = "%s%nPP: %-2d\t/\t%2d";
 
-        firstMoveButton.setText(String.format(ppInfo, moveList.get(0).getName(), moveList.get(0).getPp(),
-                moveList.get(0).getMaxpp()));
-        if (moveList.size() > 1)
-            secondMoveButton.setText(String.format(ppInfo, moveList.get(1).getName(), moveList.get(1).getPp(),
-                    moveList.get(1).getMaxpp()));
+        button.setText(String.format(ppInfo, move.getName(), move.getPp(),
+                move.getMaxpp()));
+
+        float percentage = (float)move.getPp() / move.getMaxpp();
+
+        if (percentage > 0.25)
+            button.setTextFill(Color.BLACK);
+        else if (percentage > 0)
+            button.setTextFill(Color.ORANGE);
+        else
+            button.setTextFill(Color.DARKRED);
+    }
+
+    public void updateAvailableMoves(Pokemon pokemon) {
+        List<Move> moveList = pokemon.getMoveList();
+
+        setMoveInformation(firstMoveButton, moveList.get(0));
+
+        if (moveList.size() > 1) {
+            setMoveInformation(secondMoveButton, moveList.get(1));
+        }
         else {
+            secondMoveButton.setTextFill(Color.BLACK);
             secondMoveButton.setText("");
             secondMoveButton.setDisable(true);
         }
         if (moveList.size() > 2)
-            thirdMoveButton.setText(String.format(ppInfo, moveList.get(2).getName(), moveList.get(2).getPp(),
-                    moveList.get(2).getMaxpp()));
+            setMoveInformation(thirdMoveButton, moveList.get(2));
         else {
+            thirdMoveButton.setTextFill(Color.BLACK);
             thirdMoveButton.setText("");
             thirdMoveButton.setDisable(true);
         }
+
         if (moveList.size() > 3)
-            fourthMoveButton.setText(String.format(ppInfo, moveList.get(2).getName(), moveList.get(2).getPp(),
-                    moveList.get(2).getMaxpp()));
+            setMoveInformation(fourthMoveButton, moveList.get(3));
         else {
+            fourthMoveButton.setTextFill(Color.BLACK);
             fourthMoveButton.setText("");
             fourthMoveButton.setDisable(true);
         }
+
     }
 
-    public void updateAvailablePokemon(List<Pokemon> pokemon) {
+    public void updateSelectPokemonButtons(List<Pokemon> party) {
 
+        int partySize = party.size();
+
+        for (int j=0; j <= 1; j++) {
+            for (int i = 0; i <= 2; i++) {
+
+                int partyIndex = i + (3 * j);
+
+                Button button = (Button) getNodeFromGridPane(getPokemonGrid(), i, j);
+                button.setStyle("-fx-background-color: green");
+                button.setDisable(false);
+
+                if (partyIndex > partySize - 1) {
+                    button.setText("");
+                    button.setDisable(true);
+                    button.setStyle("-fx-background-color: transparent");
+                    continue;
+                }
+
+                Pokemon pokemon = party.get(partyIndex);
+                button.setText(String.format("%s%nHP:%d/%d", pokemon.getName(), pokemon.getHp(), pokemon.getMaxHP()));
+
+                if (pokemon.getHp() == 0) {
+                    button.setStyle("-fx-background-color: red");
+                    button.setDisable(true);
+                }
+            }
+        }
     }
 
     public Timeline generatePause(double millis) {
@@ -478,6 +533,17 @@ public class BattleController {
         optionGrid.setVisible(false);
         pokemonGrid.setVisible(true);
 
+        updateSelectPokemonButtons(party);
+
         //updateAvailablePokemon(party);
+    }
+
+    public Node getNodeFromGridPane(GridPane gridPane, int col, int row) {
+        for (Node node : gridPane.getChildren()) {
+            if (GridPane.getColumnIndex(node) == col && GridPane.getRowIndex(node) == row) {
+                return node;
+            }
+        }
+        return null;
     }
 }

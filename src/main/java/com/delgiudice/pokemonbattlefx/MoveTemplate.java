@@ -5,13 +5,15 @@ import java.util.HashMap;
 ///Class which allows to describe a move
 public class MoveTemplate {
     String name;
-    private int power, accuracy, hits = 1, statUp = 0, maxpp;
-    private float statusProb, statUpProb, recoil;
-    private boolean priority = false, twoturn = false, lifesteal = false, self = false;
+    private int power, accuracy, hits = 1, statUp = 0, maxpp, critIncrease = 0, critTemporaryIncrease = 0;
+    private float statusProb, statUpProb, recoil = 0, lifesteal = 0;
+    private boolean priority = false, twoturn = false, self = false, trap = false;
     private Enums.Subtypes subtype;
     private Type type;
     private Enums.StatType statType = null;
     private Enums.Status status = Enums.Status.NONE;
+
+    private Enums.SubStatus subStatus = Enums.SubStatus.NONE;
     private static HashMap<String , MoveTemplate> moveMap = new HashMap<>();
 
     public String getName() {
@@ -49,6 +51,10 @@ public class MoveTemplate {
         return status;
     }
 
+    public Enums.SubStatus getSubStatus() {
+        return subStatus;
+    }
+
     public boolean isPriority() {
         return priority;
     }
@@ -57,8 +63,20 @@ public class MoveTemplate {
         return twoturn;
     }
 
-    public boolean isLifesteal() {
+    public float getLifesteal() {
         return lifesteal;
+    }
+
+    public boolean isTrap() {
+        return trap;
+    }
+
+    public int getCritIncrease() {
+        return critIncrease;
+    }
+
+    public int getCritTemporaryIncrease() {
+        return critTemporaryIncrease;
     }
 
     public boolean isSelf() {
@@ -94,7 +112,7 @@ public class MoveTemplate {
         this.twoturn = twoturn;
     }
 
-    public void setLifesteal(boolean lifesteal) {
+    public void setLifesteal(float lifesteal) {
         this.lifesteal = lifesteal;
     }
 
@@ -112,6 +130,18 @@ public class MoveTemplate {
 
     public void setStatusProb(float prob) {
         this.statusProb = prob;
+    }
+
+    public void setTrap(boolean trap) {
+        this.trap = trap;
+    }
+
+    public void setCritIncrease(int critIncrease) {
+        this.critIncrease = critIncrease;
+    }
+
+    public void setCritTemporaryIncrease(int critTemporaryIncrease) {
+        this.critTemporaryIncrease = critTemporaryIncrease;
     }
 
     public MoveTemplate(String name, int power, int accuracy, int pp, Enums.Subtypes subtype, Type type,
@@ -135,7 +165,7 @@ public class MoveTemplate {
         this.maxpp = pp;
         this.subtype = subtype;
         this.statusProb = 0;
-        this.lifesteal = false;
+        this.lifesteal = 0;
         this.hits = 1;
         this.priority = false;
         this.twoturn = false;
@@ -160,7 +190,7 @@ public class MoveTemplate {
     }
 
     ///initializes list of available moves
-    public static void setMoveList(){
+    public static void setMoveMap(){
         Type.setTypeList(); //init types
         MoveTemplate newmove = new MoveTemplate("Tackle", 40, 100, 35, Enums.Subtypes.PHYSICAL,
                 Type.typeMap.get(Enums.Types.NORMAL));
@@ -201,6 +231,30 @@ public class MoveTemplate {
                 Type.typeMap.get(Enums.Types.FIGHTING));
         newmove.setHits(2);
         moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Slash", 70, 100, 20, Enums.Subtypes.PHYSICAL,
+                Type.typeMap.get(Enums.Types.NORMAL));
+        newmove.setCritTemporaryIncrease(1);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Dragon Breath", 60, 100, 20, Enums.Subtypes.SPECIAL,
+                Type.typeMap.get(Enums.Types.DRAGON));
+        newmove.setStatus(Enums.Status.PARALYZED);
+        newmove.setStatUpProb(0.3f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Flare Blitz", 120, 100, 15, Enums.Subtypes.PHYSICAL,
+                Type.typeMap.get(Enums.Types.FIRE));
+        newmove.setRecoil(1.0f/3.0f);
+        newmove.setStatus(Enums.Status.BURNED);
+        newmove.setStatUpProb(0.1f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Fire Spin", 35, 85, 15, Enums.Subtypes.SPECIAL,
+                Type.typeMap.get(Enums.Types.FIRE));
+        newmove.setTrap(true);
+        moveMap.put(newmove.getName(), newmove);
+
     }
 
 }

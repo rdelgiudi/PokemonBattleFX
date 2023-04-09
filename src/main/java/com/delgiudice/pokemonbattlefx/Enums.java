@@ -1,11 +1,10 @@
 package com.delgiudice.pokemonbattlefx;
 
 import java.util.HashMap;
-import java.util.Map;
 
 public class Enums {
     //All types
-    enum Types {        //lista typów
+    public enum Types {        //lista typów
         NORMAL("NORMAL"),       //0
         FIRE("FIRE"),           //1
         WATER("WATER"),         //2
@@ -37,7 +36,7 @@ public class Enums {
             this.typeString = typeString;
         }
     }
-    enum Subtypes {     //move subtype list
+    public enum Subtypes {     //move subtype list
         PHYSICAL("PHYSICAL"),
         SPECIAL("SPECIAL"),
         STATUS("STATUS");
@@ -53,7 +52,7 @@ public class Enums {
             this.typeString = typeString;
         }
     }
-    enum StatType {       //statistics to lower or increase
+    public enum StatType {       //statistics to lower or increase
         ATTACK("Attack"),
         DEFENSE("Defense"),
         ACCURACY("Accuracy"),
@@ -73,7 +72,7 @@ public class Enums {
             this.typeString = typeString;
         }
     }
-    enum Status {       //lista statusów
+    public enum Status {       //lista statusów
         NONE("NONE"),
         PARALYZED("paralyzed"),
         POISONED("poisoned"),
@@ -92,7 +91,22 @@ public class Enums {
             this.statusString = statusString;
         }
     }
-    enum Nature {       //lista natur
+    public enum SubStatus {
+        NONE("no abnormal status"),
+        CONFUSED("confused"),
+        ATTRACTED("immobilized by love");
+
+        final private String statusString;
+
+        public String toString() {
+            return statusString;
+        }
+
+        SubStatus(String statusString) {
+            this.statusString = statusString;
+        }
+    }
+    public enum Nature {       //lista natur
         HARDY(0, "Hardy", 0, 0, 0, 0, 0),
         LONELY(1,"Lonely", 1, -1, 0, 0, 0),
         BRAVE(2,"Brave", 1, 0, 0, 0, -1),
@@ -122,7 +136,7 @@ public class Enums {
         final private int value;
         final private String nature;
         final private int[] statTab = {0, 0, 0, 0, 0};
-        private static Map map = new HashMap<>();
+        private static HashMap<Object, Nature> map = new HashMap<>();
 
         static {
             for (Nature nature : Nature.values()) {
@@ -156,7 +170,7 @@ public class Enums {
             this.value = value;
         }
     }
-    enum TrainerTypes{
+    public enum TrainerTypes{
         ACETRAINER("Ace Trainer"),
         YOUNGSTER("Youngster");
 
@@ -170,7 +184,7 @@ public class Enums {
             this.typeString = typeString;
         }
     }
-    enum ItemType{
+    public enum ItemType{
         HEALING,
         PPRESTORE;
     }
