@@ -315,5 +315,10 @@ public class Pokemon {
                 new Move(MoveTemplate.getMoveMap().get("Slash")), new Move(MoveTemplate.getMoveMap().get("Dragon Breath")),
                 new Move(MoveTemplate.getMoveMap().get("Flare Blitz")), new Move(MoveTemplate.getMoveMap().get("Fire Spin")));
         pokemonExamples.put(example.getName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get("Bulbasaur"), 50, Ability.OVERGROW,
+                new Move(MoveTemplate.getMoveMap().get("Razor Leaf")), new Move(MoveTemplate.getMoveMap().get("Double-Edge")),
+                new Move(MoveTemplate.getMoveMap().get("Solar Beam")), new Move(MoveTemplate.getMoveMap().get("Sleep Powder")));
+        pokemonExamples.put(example.getName(), example);
     }
 }

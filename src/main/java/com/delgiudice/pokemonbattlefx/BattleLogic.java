@@ -1,5 +1,6 @@
 package com.delgiudice.pokemonbattlefx;
 
+import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.control.Button;
 import javafx.util.Duration;
@@ -7,6 +8,7 @@ import javafx.util.Duration;
 import java.security.SecureRandom;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import static javafx.application.Platform.exit;
 
@@ -19,6 +21,8 @@ public class BattleLogic {
 
     private int currentAllyPokemon = 0;
     private int currentEnemyPokemon = 0;
+
+    private Move allyTwoTurnMove = null, enemyTwoTurnMove = null;
 
     private boolean enemySentOut, allySentOut;
 
@@ -35,7 +39,7 @@ public class BattleLogic {
         Pokemon.generatePokemonExamples();
 
         // For testing purposes only, delete later
-        Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get("Charmander"));
+        Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get("Bulbasaur"));
         player = new Player("Red",  allyPokemon);
 
         player.addPokemon(new Pokemon(PokemonSpecie.getPokemonMap().get("Machop"), 8, Ability.GUTS,
@@ -46,7 +50,7 @@ public class BattleLogic {
                 new Move(MoveTemplate.getMoveMap().get("Tackle")), new Move(MoveTemplate.getMoveMap().get("Tail Whip")),
                         new Move(MoveTemplate.getMoveMap().get("Water Gun"))));
 
-        Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 8, Ability.GUTS,
+        Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 50, Ability.GUTS,
                 new Move(MoveTemplate.getMoveMap().get("Scratch")) , new Move(MoveTemplate.getMoveMap().get("Growl")));
 
         enemy = new NpcTrainer("Joey", Enums.TrainerTypes.YOUNGSTER ,enemyPokemon);
@@ -175,6 +179,21 @@ public class BattleLogic {
     }
 
     private void battleLoop() {
+
+        if (enemySentOut) {
+            enemySentOut = false;
+            //TODO: Processing events at the start of the turn
+        }
+        if (allySentOut) {
+            allySentOut = false;
+            //TODO: Processing events at the start of the turn
+        }
+
+        if (allyTwoTurnMove != null) {
+            battleTurn(allyTwoTurnMove);
+            return;
+        }
+
         Timeline playerChoiceDialog = controller.getBattleTextAnimation(String.format("What will%n%s do?",
                 player.getParty(currentAllyPokemon).getName()), false);
         //playerChoiceDialog.setDelay(Duration.seconds(2));
@@ -341,7 +360,11 @@ public class BattleLogic {
 
         List<Timeline> battleTimeLine;
         int enemyMoveIndex = generator.nextInt(enemyPokemon.getMoveList().size());
-        Move enemyMove = enemyPokemon.getMoveList(enemyMoveIndex);
+        Move enemyMove;
+        if (enemyTwoTurnMove == null)
+            enemyMove = enemyPokemon.getMoveList(enemyMoveIndex);
+        else
+            enemyMove = enemyTwoTurnMove;
 
         // Priority move always faster, unless both parties are using them
         if (allyMove.isPriority() && !enemyMove.isPriority()) {
@@ -746,16 +769,59 @@ public class BattleLogic {
         moveTimeLine.add(controller.generatePause(2000));
     }
 
-    private List<Timeline> processMoveMissed(Pokemon user, List<Timeline> moveTimeLine) {
+    private List<Timeline> processMoveMissed(Pokemon user, List<Timeline> moveTimeLine, boolean allyTarget) {
         System.out.println("Move missed!");
         Timeline moveMissedDialogue = controller.getBattleTextAnimation(String.format("%s's%nattack missed!",
                 user.getName()), true);
         moveMissedDialogue.setDelay(Duration.seconds(2));
 
         moveTimeLine.add(moveMissedDialogue);
+        processTwoTurnMoveComplete(moveTimeLine, allyTarget);
         moveTimeLine.add(controller.generatePause(2000));
 
         return moveTimeLine;
+    }
+
+    private void processTwoTurnMoveComplete(List<Timeline> moveTimeLine, boolean allyTarget) {
+        if (allyTarget) {
+            enemyTwoTurnMove = null;
+            Timeline revealEnemy = new Timeline(new KeyFrame(Duration.millis(1),
+                    e -> controller.getEnemyPokemonSprite().setVisible(true)));
+            moveTimeLine.add(revealEnemy);
+        }
+        else {
+            allyTwoTurnMove = null;
+            Timeline revealAlly = new Timeline(new KeyFrame(Duration.millis(1),
+                    e -> controller.getAllyPokemonSprite().setVisible(true)));
+            moveTimeLine.add(revealAlly);
+        }
+
+    }
+
+    private Timeline getTwoTurnMoveInfo(Move move, Pokemon user) {
+        Timeline timeline = null;
+        switch(move.getName()) {
+            case "Dig" -> timeline = controller.getBattleTextAnimation(String.format(
+                    "%s dug underground!", user.getName()), true);
+            case "Solar Beam" -> timeline = controller.getBattleTextAnimation(String.format(
+                    "%s is taking in sunlight!", user.getName()), true);
+            default -> throw new IllegalStateException("Unidentified twoturn move: "
+            + move.getName());
+        }
+        return timeline;
+    }
+
+    private boolean checkTwoTurnMiss(Move move, boolean allyTarget) {
+        Move twoturnmove = allyTarget ? allyTwoTurnMove : enemyTwoTurnMove;
+        if (twoturnmove == null || twoturnmove.isCharging())
+            return false;
+
+        if (Objects.equals(twoturnmove.getName(), "Dig") &&
+                Objects.equals(move.getName(), "Earthquake")) {
+            return false;
+        }
+
+        return true;
     }
 
     // Processes using a move, as well as status effects that might prevent from using it
@@ -789,6 +855,31 @@ public class BattleLogic {
             }
         }
 
+        if (move.isTwoturn() && allyTarget && enemyTwoTurnMove == null) {
+            Timeline enemyTwoTurnInfo = getTwoTurnMoveInfo(move, user);
+            moveTimeLine.add(enemyTwoTurnInfo);
+            enemyTwoTurnMove = move;
+            if (!move.isCharging()) {
+                Timeline enemyTwoTurnStart = new Timeline(new KeyFrame(Duration.millis(1),
+                        e -> controller.getEnemyPokemonSprite().setVisible(false)));
+                moveTimeLine.add(enemyTwoTurnStart);
+            }
+            moveTimeLine.add(controller.generatePause(1000));
+            return moveTimeLine;
+        }
+        if (move.isTwoturn() && !allyTarget && allyTwoTurnMove == null) {
+            Timeline allyTwoTurnInfo = getTwoTurnMoveInfo(move, user);
+            moveTimeLine.add(allyTwoTurnInfo);
+            allyTwoTurnMove = move;
+            if (!move.isCharging()) {
+                Timeline allyTwoTurnStart = new Timeline(new KeyFrame(Duration.millis(1),
+                        e -> controller.getAllyPokemonSprite().setVisible(false)));
+                moveTimeLine.add(allyTwoTurnStart);
+            }
+            moveTimeLine.add(controller.generatePause(1000));
+            return moveTimeLine;
+        }
+
         System.out.println(user.getName() + " used " + move.getName());
         Timeline moveUsedDialog = controller.getBattleTextAnimation(user.getName() + " used " + move.getName() + "!",
                 true);
@@ -815,8 +906,8 @@ public class BattleLogic {
 
             float hit = moveAccuracy * accuracyModifier;
             int r = generator.nextInt(100) + 1;
-            if (r > hit) {
-                return processMoveMissed(user, moveTimeLine);
+            if (r > hit || checkTwoTurnMiss(move, allyTarget)) {
+                return processMoveMissed(user, moveTimeLine, allyTarget);
             }
         }
 
@@ -885,6 +976,10 @@ public class BattleLogic {
 
             }
 
+        }
+
+        if (move.isTwoturn()) {
+            processTwoTurnMoveComplete(moveTimeLine, allyTarget);
         }
 
         if (damageInfo.typeEffect() >= 2 && moveType != Enums.Subtypes.STATUS) {
@@ -974,6 +1069,8 @@ public class BattleLogic {
             moveTimeLine.add(statusChangeInfo);
 
             Timeline updateStatus = controller.updateStatus(target, allyTarget);
+            if (move.getStatus() == Enums.Status.SLEEPING || move.getStatus() == Enums.Status.FROZEN)
+                processTwoTurnMoveComplete(moveTimeLine, allyTarget);
             statusChangeInfo.setDelay(Duration.seconds(1));
             moveTimeLine.add(updateStatus);
         }
@@ -993,9 +1090,9 @@ public class BattleLogic {
         }
         else {
             target.setStatus(move.getStatus());
-            statusChangeInfo = controller.getBattleTextAnimation(String.format("%s has been%n%s!",
+            statusChangeInfo = controller.getBattleTextAnimation(String.format("%s is%n%s!",
                     target.getName(), move.getStatus().toString()), true);
-            System.out.printf("%s has been %s!%n", target.getName(), move.getStatus().toString());
+            System.out.printf("%s is %s!%n", target.getName(), move.getStatus().toString());
             if (move.getStatus() == Enums.Status.SLEEPING) {
                 int sleepTurns = generator.nextInt(3) + 1;
                 target.setSleepCounter(sleepTurns);
@@ -1053,7 +1150,7 @@ public class BattleLogic {
             }
         }
 
-        System.out.println(target.getName() + " status change to " + move.getStatType().toString() + ": " + change);
+        System.out.println(target.getName() + " stat change to " + move.getStatType().toString() + ": " + change);
 
         statChangeInfo.setDelay(Duration.seconds(2));
 
@@ -1216,11 +1313,13 @@ public class BattleLogic {
             currentAllyPokemon = slot;
             allySentOut = true;
             resetStats(player.getParty(currentAllyPokemon));
+            allyTwoTurnMove = null;
         }
         else {
             currentEnemyPokemon = slot;
             enemySentOut = true;
             resetStats(enemy.getParty(currentEnemyPokemon));
+            enemyTwoTurnMove = null;
         }
     }
 

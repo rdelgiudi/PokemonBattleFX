@@ -39,6 +39,14 @@ public class BattleController {
     @FXML
     private ProgressBar enemyHpBar, allyHpBar;
 
+    public ImageView getAllyPokemonSprite() {
+        return allyPokemonSprite;
+    }
+
+    public ImageView getEnemyPokemonSprite() {
+        return enemyPokemonSprite;
+    }
+
     public Button getFightButton() {
         return fightButton;
     }

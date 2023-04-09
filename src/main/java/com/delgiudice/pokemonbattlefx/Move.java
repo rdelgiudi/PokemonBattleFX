@@ -4,7 +4,7 @@ public class Move {
 
     private MoveTemplate template;
 
-    private int pp, twoturnCounter = 0;
+    private int pp;
 
     public String getName() {
         return template.getName();
@@ -60,6 +60,10 @@ public class Move {
 
     public int getCritIncrease() {
         return template.getCritIncrease();
+    }
+
+    public boolean isCharging() {
+        return template.isCharging();
     }
 
     public void setPp(int pp) {

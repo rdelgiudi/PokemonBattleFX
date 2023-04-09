@@ -7,7 +7,7 @@ public class MoveTemplate {
     String name;
     private int power, accuracy, hits = 1, statUp = 0, maxpp, critIncrease = 0, critTemporaryIncrease = 0;
     private float statusProb, statUpProb, recoil = 0, lifesteal = 0;
-    private boolean priority = false, twoturn = false, self = false, trap = false;
+    private boolean priority = false, twoturn = false, self = false, trap = false, charging = false;
     private Enums.Subtypes subtype;
     private Type type;
     private Enums.StatType statType = null;
@@ -53,6 +53,10 @@ public class MoveTemplate {
 
     public Enums.SubStatus getSubStatus() {
         return subStatus;
+    }
+
+    public boolean isCharging() {
+        return charging;
     }
 
     public boolean isPriority() {
@@ -134,6 +138,10 @@ public class MoveTemplate {
 
     public void setTrap(boolean trap) {
         this.trap = trap;
+    }
+
+    public void setCharging(boolean charging) {
+        this.charging = charging;
     }
 
     public void setCritIncrease(int critIncrease) {
@@ -253,6 +261,33 @@ public class MoveTemplate {
         newmove = new MoveTemplate("Fire Spin", 35, 85, 15, Enums.Subtypes.SPECIAL,
                 Type.typeMap.get(Enums.Types.FIRE));
         newmove.setTrap(true);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Dig", 80, 100, 10, Enums.Subtypes.PHYSICAL,
+                Type.typeMap.get(Enums.Types.GROUND));
+        newmove.setTwoturn(true);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Razor Leaf", 55, 95, 25, Enums.Subtypes.PHYSICAL,
+                Type.typeMap.get(Enums.Types.GRASS));
+        newmove.setCritTemporaryIncrease(1);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Solar Beam", 120, 100, 10, Enums.Subtypes.SPECIAL,
+                Type.typeMap.get(Enums.Types.GRASS));
+        newmove.setTwoturn(true);
+        newmove.setCharging(true);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Double-Edge", 120, 100, 15, Enums.Subtypes.PHYSICAL,
+                Type.typeMap.get(Enums.Types.NORMAL));
+        newmove.setRecoil(1.0f/3.0f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Sleep Powder", 0, 75, 15, Enums.Subtypes.STATUS,
+                Type.typeMap.get(Enums.Types.GRASS));
+        newmove.setStatus(Enums.Status.SLEEPING);
+        newmove.setStatusProb(1.0f);
         moveMap.put(newmove.getName(), newmove);
 
     }
