@@ -457,6 +457,10 @@ public class BattleController {
 
     }
 
+    public Timeline generatePause(double millis) {
+        return new Timeline(new KeyFrame(Duration.millis(millis)));
+    }
+
     public void fightButtonPressed(Pokemon pokemon) {
 
         updateAvailableMoves(pokemon);

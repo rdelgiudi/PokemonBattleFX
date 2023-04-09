@@ -75,12 +75,12 @@ public class Enums {
     }
     enum Status {       //lista statusów
         NONE("NONE"),
-        PARALYZED("PARALYZED"),
-        POISONED("POISONED"),
-        BADLY_POISONED("BADLY POISONED"),
-        SLEEPING("SLEEPING"),
-        BURNED("BURNED"),
-        FROZEN("FROZEN");
+        PARALYZED("paralyzed"),
+        POISONED("poisoned"),
+        BADLY_POISONED("badly poisoned"),
+        SLEEPING("asleep"),
+        BURNED("burned"),
+        FROZEN("frozen");
 
         final private String statusString;
 

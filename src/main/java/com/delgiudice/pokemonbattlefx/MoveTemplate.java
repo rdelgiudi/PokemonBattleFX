@@ -110,6 +110,10 @@ public class MoveTemplate {
         this.status = status;
     }
 
+    public void setStatusProb(float prob) {
+        this.statusProb = prob;
+    }
+
     public MoveTemplate(String name, int power, int accuracy, int pp, Enums.Subtypes subtype, Type type,
                         Enums.StatType statType, int statUp, boolean self, float statUpProb) {
         this.name = name;
@@ -176,6 +180,8 @@ public class MoveTemplate {
 
         newmove = new MoveTemplate("Ember", 40, 100, 25, Enums.Subtypes.SPECIAL,
                 Type.typeMap.get(Enums.Types.FIRE));
+        newmove.setStatus(Enums.Status.BURNED);
+        newmove.setStatusProb(0.1f);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate("Tail Whip", 0, 100, 30, Enums.Subtypes.STATUS,
