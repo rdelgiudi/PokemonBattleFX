@@ -58,6 +58,10 @@ public class Move {
         return template;
     }
 
+    public int getCritIncrease() {
+        return template.getCritIncrease();
+    }
+
     public void setPp(int pp) {
         this.pp = pp;
     }

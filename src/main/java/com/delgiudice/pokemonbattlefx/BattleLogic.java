@@ -343,12 +343,14 @@ public class BattleLogic {
         int enemyMoveIndex = generator.nextInt(enemyPokemon.getMoveList().size());
         Move enemyMove = enemyPokemon.getMoveList(enemyMoveIndex);
 
+        // Priority move always faster, unless both parties are using them
         if (allyMove.isPriority() && !enemyMove.isPriority()) {
             battleTimeLine = processTurnAllyFaster(allyMove, enemyMove);
         }
         else if (enemyMove.isPriority() && !allyMove.isPriority()) {
             battleTimeLine = processTurnAllySlower(allyMove, enemyMove);
         }
+        // If both or neither parties are using priority moves, being faster depends on speed
         else if (faster) {
             battleTimeLine = processTurnAllyFaster(allyMove, enemyMove);
         }
@@ -744,9 +746,10 @@ public class BattleLogic {
         moveTimeLine.add(controller.generatePause(2000));
     }
 
-    private List<Timeline> processMoveMissed(List<Timeline> moveTimeLine) {
+    private List<Timeline> processMoveMissed(Pokemon user, List<Timeline> moveTimeLine) {
         System.out.println("Move missed!");
-        Timeline moveMissedDialogue = controller.getBattleTextAnimation("Move Missed!", true);
+        Timeline moveMissedDialogue = controller.getBattleTextAnimation(String.format("%s's%nattack missed!",
+                user.getName()), true);
         moveMissedDialogue.setDelay(Duration.seconds(2));
 
         moveTimeLine.add(moveMissedDialogue);
@@ -797,15 +800,23 @@ public class BattleLogic {
         int moveAccuracy = move.getAccuracy();
 
         if (moveAccuracy != 0) {
-            int statAccuracy = ((user.getStatModifiers().get("Accuracy") - target.getStatModifiers().get("Evasiveness")) + 3)/3;
+            int statAccuracy = user.getStatModifiers().get("Accuracy") - target.getStatModifiers().get("Evasiveness");
             if (statAccuracy > 6)
                 statAccuracy = 6;
             else if (statAccuracy < -6)
                 statAccuracy = -6;
-            int hit = moveAccuracy * statAccuracy;
+
+            float accuracyModifier;
+            if (statAccuracy < 0) {
+                accuracyModifier = 3.0f / (3-statAccuracy);
+            }
+            else
+                accuracyModifier = (float)(3+statAccuracy) / 3.0f;
+
+            float hit = moveAccuracy * accuracyModifier;
             int r = generator.nextInt(100) + 1;
             if (r > hit) {
-                return processMoveMissed(moveTimeLine);
+                return processMoveMissed(user, moveTimeLine);
             }
         }
 
@@ -941,6 +952,20 @@ public class BattleLogic {
             moveTimeLine.add(statChangeInfo);
         }
 
+        if (move.getCritIncrease() > 0) {
+            Timeline critChangeInfo;
+            if(!user.isUnderFocusEnergy()) {
+                critChangeInfo = controller.getBattleTextAnimation(String.format("%s is getting pumped!", user.getName()),
+                        true);
+                user.setCritIncrease(user.getCritIncrease() + 2);
+                user.setUnderFocusEnergy(true);
+            }
+            else
+                critChangeInfo = controller.getBattleTextAnimation("But it failed!", true);
+
+            moveTimeLine.add(critChangeInfo);
+        }
+
         prob = move.getStatusProb() * 100;
         rand = generator.nextInt(100) + 1;
         if (move.getStatus() != Enums.Status.NONE && prob >= rand && !targetFainted && !targetProtected) {
@@ -1038,7 +1063,19 @@ public class BattleLogic {
     MoveDamageInfo calculateMoveDamage(int movetype, Move move, Pokemon user, Pokemon target)
     {
         SecureRandom generator = new SecureRandom();
-        int critNum = generator.nextInt(16);
+        int bound;
+        int critChanceTempIncrease = move.getTemplate().getCritTemporaryIncrease();
+        int critChanceIncrease = user.getCritIncrease();
+        int totalCritChanceIncrease = critChanceIncrease + critChanceTempIncrease;
+
+        switch (totalCritChanceIncrease) {
+            case 0 -> bound = 16;
+            case 1 -> bound = 8;
+            case 2 -> bound = 2;
+            default -> bound = 1;
+        }
+
+        int critNum = generator.nextInt(bound);
         boolean isCrit = false;
         float critMod;
 
@@ -1196,5 +1233,7 @@ public class BattleLogic {
 
         pokemon.setPoisonCounter(1);
         pokemon.getSubStatuses().clear();
+        pokemon.setUnderFocusEnergy(false);
+        pokemon.setCritIncrease(0);
     }
 }

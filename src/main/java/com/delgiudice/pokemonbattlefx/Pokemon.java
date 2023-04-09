@@ -11,14 +11,14 @@ public class Pokemon {
     private List<Move> moveList = new ArrayList<>();
     private LinkedHashMap<String, Integer> stats = new LinkedHashMap<>();
     private Enums.Status status = Enums.Status.NONE;
-    private int poisonCounter = 1, sleepCounter = 0;
+    private int poisonCounter = 1, sleepCounter = 0, critIncrease = 0;
     private int[] ivs = {0, 0, 0, 0, 0, 0};
     private Enums.Nature nature;
     private HashMap<String, Integer> statModifiers = new HashMap<>();
     private PokemonSpecie specie;
     private List<Enums.SubStatus> subStatuses = new LinkedList<>();
     private Ability ability = Ability.NONE;
-    private boolean trapped;
+    private boolean trapped, underFocusEnergy = false;
 
     public String getName() {
         return name;
@@ -109,6 +109,11 @@ public class Pokemon {
         return status;
     }
 
+
+    public boolean isUnderFocusEnergy() {
+        return underFocusEnergy;
+    }
+
     public void setStatus(Enums.Status status) {
         this.status = status;
     }
@@ -121,12 +126,24 @@ public class Pokemon {
         this.sleepCounter = sleepCounter;
     }
 
+    public int getCritIncrease() {
+        return critIncrease;
+    }
+
     public void setTrapped(boolean trapped) {
         this.trapped = trapped;
     }
 
     public void setAbility(Ability ability) {
         this.ability = ability;
+    }
+
+    public void setCritIncrease(int critIncrease) {
+        this.critIncrease = critIncrease;
+    }
+
+    public void setUnderFocusEnergy(boolean underFocusEnergy) {
+        this.underFocusEnergy = underFocusEnergy;
     }
 
     Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1)
