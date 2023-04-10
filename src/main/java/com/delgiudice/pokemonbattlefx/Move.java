@@ -62,6 +62,10 @@ public class Move {
         return template.getCritIncrease();
     }
 
+    public float getHpRestore() {
+        return template.getHpRestore();
+    }
+
     public boolean isCharging() {
         return template.isCharging();
     }

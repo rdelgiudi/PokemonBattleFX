@@ -320,5 +320,10 @@ public class Pokemon {
                 new Move(MoveTemplate.getMoveMap().get("Razor Leaf")), new Move(MoveTemplate.getMoveMap().get("Double-Edge")),
                 new Move(MoveTemplate.getMoveMap().get("Solar Beam")), new Move(MoveTemplate.getMoveMap().get("Sleep Powder")));
         pokemonExamples.put(example.getName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get("Ivysaur"), 50, Ability.OVERGROW,
+                new Move(MoveTemplate.getMoveMap().get("Seed Bomb")), new Move(MoveTemplate.getMoveMap().get("Synthesis")),
+                new Move(MoveTemplate.getMoveMap().get("Solar Beam")), new Move(MoveTemplate.getMoveMap().get("Sweet Scent")));
+        pokemonExamples.put(example.getName(), example);
     }
 }

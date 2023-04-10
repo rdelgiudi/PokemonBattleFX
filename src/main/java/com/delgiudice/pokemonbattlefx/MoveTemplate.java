@@ -6,7 +6,7 @@ import java.util.HashMap;
 public class MoveTemplate {
     String name;
     private int power, accuracy, hits = 1, statUp = 0, maxpp, critIncrease = 0, critTemporaryIncrease = 0;
-    private float statusProb, statUpProb, recoil = 0, lifesteal = 0;
+    private float statusProb, statUpProb, recoil = 0, lifesteal = 0, hpRestore = 0;
     private boolean priority = false, twoturn = false, self = false, trap = false, charging = false;
     private Enums.Subtypes subtype;
     private Type type;
@@ -53,6 +53,10 @@ public class MoveTemplate {
 
     public Enums.SubStatus getSubStatus() {
         return subStatus;
+    }
+
+    public float getHpRestore() {
+        return hpRestore;
     }
 
     public boolean isCharging() {
@@ -142,6 +146,10 @@ public class MoveTemplate {
 
     public void setCharging(boolean charging) {
         this.charging = charging;
+    }
+
+    public void setHpRestore(float hpRestore) {
+        this.hpRestore = hpRestore;
     }
 
     public void setCritIncrease(int critIncrease) {
@@ -288,6 +296,19 @@ public class MoveTemplate {
                 Type.typeMap.get(Enums.Types.GRASS));
         newmove.setStatus(Enums.Status.SLEEPING);
         newmove.setStatusProb(1.0f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Seed Bomb", 80, 100, 15, Enums.Subtypes.PHYSICAL,
+                Type.typeMap.get(Enums.Types.GRASS));
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Synthesis", 0, 0, 5, Enums.Subtypes.STATUS,
+                Type.typeMap.get(Enums.Types.GRASS));
+        newmove.setHpRestore(0.5f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Sweet Scent", 0, 100, 20, Enums.Subtypes.STATUS,
+                Type.typeMap.get(Enums.Types.NORMAL), Enums.StatType.EVASIVENESS, -1, false, 1);
         moveMap.put(newmove.getName(), newmove);
 
     }

@@ -39,7 +39,7 @@ public class BattleLogic {
         Pokemon.generatePokemonExamples();
 
         // For testing purposes only, delete later
-        Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get("Bulbasaur"));
+        Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get("Ivysaur"));
         player = new Player("Red",  allyPokemon);
 
         player.addPokemon(new Pokemon(PokemonSpecie.getPokemonMap().get("Machop"), 8, Ability.GUTS,
@@ -51,7 +51,8 @@ public class BattleLogic {
                         new Move(MoveTemplate.getMoveMap().get("Water Gun"))));
 
         Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 50, Ability.GUTS,
-                new Move(MoveTemplate.getMoveMap().get("Scratch")) , new Move(MoveTemplate.getMoveMap().get("Growl")));
+                new Move(MoveTemplate.getMoveMap().get("Scratch")) , new Move(MoveTemplate.getMoveMap().get("Growl")),
+                new Move(MoveTemplate.getMoveMap().get("Quick Attack")));
 
         enemy = new NpcTrainer("Joey", Enums.TrainerTypes.YOUNGSTER ,enemyPokemon);
 
@@ -920,17 +921,45 @@ public class BattleLogic {
             if (target.getHp() == 0)
                 break;
 
-            switch (moveType){
-                case PHYSICAL:
-                    damageInfo = calculateMoveDamage(0, move, user, target);
-                    break;
-                case SPECIAL:
-                    damageInfo = calculateMoveDamage(1, move, user, target);
-                    break;
-                case STATUS:
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + moveType);
+            switch (moveType) {
+                case PHYSICAL -> damageInfo = calculateMoveDamage(0, move, user, target);
+                case SPECIAL -> damageInfo = calculateMoveDamage(1, move, user, target);
+                case STATUS -> {
+                    if (move.getHpRestore() > 0 && user.getHp() != user.getMaxHP()) {
+                        double restoredHealth = user.getMaxHP() * move.getHpRestore();
+                        double healthChange = restoredHealth + user.getHp();
+                        if (healthChange > user.getMaxHP())
+                            healthChange = user.getMaxHP();
+                        int oldHp = user.getHp();
+                        int healthChangeInt = (int) Math.round(healthChange);
+                        user.setHp(healthChangeInt);
+                        Timeline userHealthChange;
+                        if (allyTarget)
+                            userHealthChange = controller.getEnemyHpAnimation(oldHp, user.getHp(), user.getMaxHP());
+
+                        else
+                            userHealthChange = controller.getAllyHpAnimation(oldHp, user.getHp(), user.getMaxHP());
+
+                        userHealthChange.setDelay(Duration.seconds(1));
+                        moveTimeLine.add(userHealthChange);
+
+                        Timeline userHealthInfo = controller.getBattleTextAnimation(String.format(
+                                "%s restored health!", user.getName()), true);
+                        moveTimeLine.add(userHealthInfo);
+
+                        moveTimeLine.add(controller.generatePause(2000));
+                        return moveTimeLine;
+
+                    } else if (move.getHpRestore() > 0 && user.getHp() == user.getMaxHP()) {
+                        Timeline userHealthInfo = controller.getBattleTextAnimation(String.format(
+                                "%s's health%nis already full!", user.getName()), true);
+                        moveTimeLine.add(userHealthInfo);
+
+                        moveTimeLine.add(controller.generatePause(2000));
+                        return moveTimeLine;
+                    }
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + moveType);
             }
 
             if (damageInfo.typeEffect() == 0) {
