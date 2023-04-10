@@ -9,9 +9,8 @@ public class NpcTrainer extends Trainer {
 
     NpcTrainer(String name, Enums.TrainerTypes type, Pokemon pokemon)
     {
-        setName(name);
+        super(name, pokemon);
         trainerType = type;
-        getParty().add(pokemon);
     }
 
     /*NpcTrainer(NpcTrainer original)           //Does not work yet, do not use!

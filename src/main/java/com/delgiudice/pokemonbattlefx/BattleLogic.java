@@ -784,10 +784,8 @@ public class BattleLogic {
         processTwoTurnMoveComplete(moveTimeLine, user, allyTarget);
         moveTimeLine.add(controller.generatePause(2000));
 
-        if (allyTarget && user.getMultiTurnMove() != null)
-            checkMultiturnMoveInterruptEffect(moveTimeLine, user, true);
-        else if (!allyTarget && user.getMultiTurnMove() != null)
-            checkMultiturnMoveInterruptEffect(moveTimeLine, user, false);
+        if (user.getMultiTurnMove() != null)
+            checkMultiturnMoveInterruptEffect(moveTimeLine, user);
     }
 
     private void processTwoTurnMoveComplete(List<Timeline> moveTimeLine, Pokemon user, boolean allyTarget) {
@@ -869,21 +867,15 @@ public class BattleLogic {
         return moveTimeLine;
     }
 
-    private void processMultiturnMoveCompleted(List<Timeline> moveTimeLine, Pokemon user, boolean allyTarget) {
+    private void processMultiturnMoveCompleted(List<Timeline> moveTimeLine, Pokemon user) {
         if (!user.getSubStatuses().contains(Enums.SubStatus.CONFUSED)) {
             Timeline userConfusedMsg = controller.getBattleTextAnimation(String.format("%s has become confused%ndue to fatigue!",
                     user.getName()), true);
             userConfusedMsg.setDelay(Duration.seconds(2));
 
-            if (allyTarget) {
-                moveTimeLine.add(userConfusedMsg);
-                user.setMultiTurnMove(null);
-                applyConfusion(user, false);
-            } else {
-                moveTimeLine.add(userConfusedMsg);
-                user.setMultiTurnMove(null);
-                applyConfusion(user, true);
-            }
+            moveTimeLine.add(userConfusedMsg);
+            user.setMultiTurnMove(null);
+            applyConfusion(user);
         }
     }
 
@@ -892,38 +884,27 @@ public class BattleLogic {
         user.setMultiTurnCounter(0);
     }
 
-    private void checkMultiturnMoveInterruptEffect(List<Timeline> moveTimeLine, Pokemon user, boolean allyTarget) {
+    private void checkMultiturnMoveInterruptEffect(List<Timeline> moveTimeLine, Pokemon user) {
         if (user.getMultiTurnCounter() == 0) {
-            processMultiturnMoveCompleted(moveTimeLine, user, allyTarget);
+            processMultiturnMoveCompleted(moveTimeLine, user);
         }
         else if (user.getMultiTurnCounter() > 0) {
             processMultiturnMoveInterrupted(user);
         }
     }
 
-    private void updateConfusionStatus(List<Timeline> moveTimeLine, Pokemon user, boolean allyTarget) {
+    private void updateConfusionStatus(List<Timeline> moveTimeLine, Pokemon user) {
 
         Timeline snappedOutMessage = controller.getBattleTextAnimation(String.format(
                 "%s snapped out of confusion!", user.getName()), true);
 
-        if (allyTarget) {
-            if (user.getConfusionTimer() == 0) {
-                user.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
-                moveTimeLine.add(snappedOutMessage);
-                moveTimeLine.add(controller.generatePause(2000));
-            }
-            else
-                user.setConfusionTimer(user.getConfusionTimer() - 1);
+        if (user.getConfusionTimer() == 0) {
+            user.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
+            moveTimeLine.add(snappedOutMessage);
+            moveTimeLine.add(controller.generatePause(2000));
         }
-        else {
-            if (user.getConfusionTimer() == 0) {
-                user.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
-                moveTimeLine.add(snappedOutMessage);
-                moveTimeLine.add(controller.generatePause(2000));
-            }
-            else
-                user.setConfusionTimer(user.getConfusionTimer() - 1);
-        }
+        else
+            user.setConfusionTimer(user.getConfusionTimer() - 1);
     }
 
     private void processConfusionHit(List<Timeline> moveTimeLine ,Pokemon user, boolean allyTarget) {
@@ -966,13 +947,13 @@ public class BattleLogic {
         if (user.getStatus() == Enums.Status.PARALYZED) {
             int rand = generator.nextInt(4);
             if (rand == 0) {
-                checkMultiturnMoveInterruptEffect(moveTimeLine, user, allyTarget);
+                checkMultiturnMoveInterruptEffect(moveTimeLine, user);
                 processUserParalyzed(user, moveTimeLine);
                 return moveTimeLine;
             }
         }
         if (user.getStatus() == Enums.Status.SLEEPING && user.getSleepCounter() > 0) {
-            checkMultiturnMoveInterruptEffect(moveTimeLine, user, allyTarget);
+            checkMultiturnMoveInterruptEffect(moveTimeLine, user);
             processUserAsleep(user, moveTimeLine);
             return moveTimeLine;
         }
@@ -988,14 +969,14 @@ public class BattleLogic {
                 processUserThawOut(user, moveTimeLine, allyTarget);
             }
             else {
-                checkMultiturnMoveInterruptEffect(moveTimeLine, user, allyTarget);
+                checkMultiturnMoveInterruptEffect(moveTimeLine, user);
                 processUserFrozen(user, moveTimeLine);
                 return moveTimeLine;
             }
         }
         //***************************************
         if(user.getSubStatuses().contains(Enums.SubStatus.CONFUSED))
-            updateConfusionStatus(moveTimeLine ,user, allyTarget);
+            updateConfusionStatus(moveTimeLine ,user);
 
         if (user.getSubStatuses().contains(Enums.SubStatus.CONFUSED)) {
             Timeline confuseMessage = controller.getBattleTextAnimation(String.format("%s is%nconfused!", user.getName()),
@@ -1036,11 +1017,8 @@ public class BattleLogic {
 
         moveTimeLine.add(moveUsedDialog);
 
-        boolean enemyDuringMultiturn = allyTarget && user.getMultiTurnMove() != null;
-        boolean allyDuringMultiturn = !allyTarget && user.getMultiTurnMove() != null;
-
         // If Pokemon in progress of multiturn move, pp is not deducted
-        if(!(enemyDuringMultiturn || allyDuringMultiturn))
+        if(user.getMultiTurnMove() == null)
             move.setPp(move.getPp() - 1);
 
         int moveAccuracy = move.getAccuracy();
@@ -1144,15 +1122,7 @@ public class BattleLogic {
         // Check if Pokemon in first turn of a multiturn move
         // generates the number of moves that it can use before being confused and
         // assigns appropriate variables
-        boolean allyMultiturn = move.isMultiturn() && !allyTarget;
-        boolean enemyMultiturn = move.isMultiturn() && allyTarget;
-
-        if (enemyMultiturn && user.getMultiTurnMove() == null) {
-            int turns = generator.nextInt(2) + 1;
-            user.setMultiTurnMove(move);
-            user.setMultiTurnCounter(turns);
-        }
-        else if(allyMultiturn && user.getMultiTurnMove() == null) {
+        if (move.isMultiturn() && user.getMultiTurnMove() == null) {
             int turns = generator.nextInt(2) + 1;
             user.setMultiTurnMove(move);
             user.setMultiTurnCounter(turns);
@@ -1269,10 +1239,8 @@ public class BattleLogic {
 
         // If multiturn counter has reached 0, then a multiturn move is disabled
         // and the target becomes confused
-        if (allyMultiturn && user.getMultiTurnCounter() == 0 && user.getMultiTurnMove() != null)
-            processMultiturnMoveCompleted(moveTimeLine, user, false);
-        else if (enemyMultiturn && user.getMultiTurnCounter() == 0 && user.getMultiTurnMove() != null)
-            processMultiturnMoveCompleted(moveTimeLine, user, true);
+        if (move.isMultiturn() && user.getMultiTurnCounter() == 0 && user.getMultiTurnMove() != null)
+            processMultiturnMoveCompleted(moveTimeLine, user);
         //*********************************************************************
 
         // Added small delay at the end to let the player read the last generated dialog
@@ -1280,7 +1248,7 @@ public class BattleLogic {
         return moveTimeLine;
     }
 
-    private Timeline applyConfusion(Pokemon target, boolean allyTarget) {
+    private Timeline applyConfusion(Pokemon target) {
         Timeline confusionMessage = controller.getBattleTextAnimation(String.format("%s is now%nconfused!",
                 target.getName()), true);
 

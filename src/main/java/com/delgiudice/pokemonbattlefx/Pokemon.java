@@ -6,6 +6,7 @@ import java.util.*;
 public class Pokemon {
     private static final HashMap<String, Pokemon> pokemonExamples = new HashMap<>();
     private String name;
+    private Trainer owner;
     private int hp, level;
     private List<Move> moveList = new ArrayList<>();
     private LinkedHashMap<String, Integer> stats = new LinkedHashMap<>();
@@ -82,6 +83,10 @@ public class Pokemon {
         return subStatuses;
     }
 
+    public Trainer getOwner() {
+        return owner;
+    }
+
     public boolean isTrapped() {
         return trapped;
     }
@@ -136,6 +141,10 @@ public class Pokemon {
 
     public boolean isUnderFocusEnergy() {
         return underFocusEnergy;
+    }
+
+    public void setOwner(Trainer owner) {
+        this.owner = owner;
     }
 
     public void setStatus(Enums.Status status) {
