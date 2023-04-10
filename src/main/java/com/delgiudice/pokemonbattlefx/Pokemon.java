@@ -359,7 +359,7 @@ public class Pokemon {
         pokemonExamples.put(example.getName(), example);
 
         example = new Pokemon(PokemonSpecie.getPokemonMap().get("Charmander"), 50, Ability.BLAZE,
-                new Move(MoveTemplate.getMoveMap().get("Slash")), new Move(MoveTemplate.getMoveMap().get("Dragon Breath")),
+                new Move(MoveTemplate.getMoveMap().get("Slash")), new Move(MoveTemplate.getMoveMap().get("Outrage")),
                 new Move(MoveTemplate.getMoveMap().get("Flare Blitz")), new Move(MoveTemplate.getMoveMap().get("Dig")));
         pokemonExamples.put(example.getName(), example);
     }

@@ -21,8 +21,6 @@ public class BattleLogic {
 
     private int currentAllyPokemon = 0, currentEnemyPokemon = 0;
 
-    private Move allyMultiTurnMove = null, enemyMultiTurnMove = null;
-    private int allyMultiTurnCounter = 0, enemyMultiTurnCounter = 0;
     private int allyConfusionCounter = 0, enemyConfusionCounter = 0;
 
     private boolean enemySentOut, allySentOut;
@@ -43,24 +41,18 @@ public class BattleLogic {
         Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get("Charmander"));
         player = new Player("Red",  allyPokemon);
 
-        player.addPokemon(new Pokemon(PokemonSpecie.getPokemonMap().get("Machop"), 8, Ability.GUTS,
-                new Move(MoveTemplate.getMoveMap().get("Tackle")), new Move(MoveTemplate.getMoveMap().get("Growl")),
-                new Move(MoveTemplate.getMoveMap().get("Double Kick"))));
+        player.addPokemon(new Pokemon(Pokemon.getPokemonExamples().get("Venosaur")));
 
-        player.addPokemon(new Pokemon(PokemonSpecie.getPokemonMap().get("Squirtle"), 8, Ability.TORRENT,
-                new Move(MoveTemplate.getMoveMap().get("Tackle")), new Move(MoveTemplate.getMoveMap().get("Tail Whip")),
-                        new Move(MoveTemplate.getMoveMap().get("Water Gun"))));
+        player.addPokemon(new Pokemon(Pokemon.getPokemonExamples().get("Charmander")));
 
-        Pokemon enemyPokemon = new Pokemon(Pokemon.getPokemonExamples().get("Ivysaur"));
+        Pokemon enemyPokemon = new Pokemon(Pokemon.getPokemonExamples().get("Charmander"));
         /*Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 50, Ability.GUTS,
                 new Move(MoveTemplate.getMoveMap().get("Scratch")) , new Move(MoveTemplate.getMoveMap().get("Growl")),
                 new Move(MoveTemplate.getMoveMap().get("Quick Attack")));*/
 
         enemy = new NpcTrainer("Joey", Enums.TrainerTypes.YOUNGSTER ,enemyPokemon);
 
-        enemy.addPokemon(new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 10, Ability.GUTS,
-                new Move(MoveTemplate.getMoveMap().get("Scratch")), new Move(MoveTemplate.getMoveMap().get("Growl")),
-                new Move(MoveTemplate.getMoveMap().get("Quick Attack"))));
+        enemy.addPokemon(new Pokemon(Pokemon.getPokemonExamples().get("Charmander")));
 
     }
 
@@ -183,6 +175,8 @@ public class BattleLogic {
 
     private void battleLoop() {
 
+        Pokemon allyPokemon = player.getParty(currentAllyPokemon);
+
         if (enemySentOut) {
             enemySentOut = false;
             //TODO: Processing events at the start of the turn
@@ -192,13 +186,13 @@ public class BattleLogic {
             //TODO: Processing events at the start of the turn
         }
 
-        if (player.getParty(currentAllyPokemon).getTwoTurnMove() != null) {
-            battleTurn(player.getParty(currentAllyPokemon).getTwoTurnMove());
+        if (allyPokemon.getTwoTurnMove() != null) {
+            battleTurn(allyPokemon.getTwoTurnMove());
             return;
         }
-        if (allyMultiTurnMove != null && allyMultiTurnCounter > 0) {
-            allyMultiTurnCounter--;
-            battleTurn(allyMultiTurnMove);
+        if (allyPokemon.getMultiTurnMove() != null && allyPokemon.getMultiTurnCounter() > 0) {
+            allyPokemon.setMultiTurnCounter(allyPokemon.getMultiTurnCounter() - 1);
+            battleTurn(allyPokemon.getMultiTurnMove());
             return;
         }
 
@@ -369,11 +363,11 @@ public class BattleLogic {
         List<Timeline> battleTimeLine;
         int enemyMoveIndex = generator.nextInt(enemyPokemon.getMoveList().size());
         Move enemyMove;
-        if (enemyMultiTurnMove != null & enemyPokemon.getTwoTurnMove() != null)
+        if (enemyPokemon.getMultiTurnMove() != null & enemyPokemon.getTwoTurnMove() != null)
             throw new IllegalStateException("Both multiturn and two turn active at the same time");
-        else if (enemyMultiTurnMove != null && enemyMultiTurnCounter > 0) {
-            enemyMultiTurnCounter--;
-            enemyMove = enemyMultiTurnMove;
+        else if (enemyPokemon.getMultiTurnMove() != null && enemyPokemon.getMultiTurnCounter() > 0) {
+            enemyPokemon.setMultiTurnCounter(enemyPokemon.getMultiTurnCounter() - 1);
+            enemyMove = enemyPokemon.getMultiTurnMove();
         }
         else if (enemyPokemon.getTwoTurnMove() != null)
             enemyMove = enemyPokemon.getTwoTurnMove();
@@ -792,9 +786,9 @@ public class BattleLogic {
         processTwoTurnMoveComplete(moveTimeLine, user, allyTarget);
         moveTimeLine.add(controller.generatePause(2000));
 
-        if (allyTarget && enemyMultiTurnMove != null)
+        if (allyTarget && user.getMultiTurnMove() != null)
             checkMultiturnMoveInterruptEffect(moveTimeLine, user, true);
-        else if (!allyTarget && allyMultiTurnMove != null)
+        else if (!allyTarget && user.getMultiTurnMove() != null)
             checkMultiturnMoveInterruptEffect(moveTimeLine, user, false);
     }
 
@@ -885,47 +879,34 @@ public class BattleLogic {
 
             if (allyTarget) {
                 moveTimeLine.add(userConfusedMsg);
-                enemyMultiTurnMove = null;
+                user.setMultiTurnMove(null);
                 applyConfusion(user, false);
             } else {
                 moveTimeLine.add(userConfusedMsg);
-                allyMultiTurnMove = null;
+                user.setMultiTurnMove(null);
                 applyConfusion(user, true);
             }
         }
-
     }
 
-    private void processMultiturnMoveInterrupted(boolean allyTarget) {
-        if (allyTarget) {
-            enemyMultiTurnMove = null;
-            enemyMultiTurnCounter = 0;
-        }
-        else {
-            allyMultiTurnMove = null;
-            allyMultiTurnCounter = 0;
-        }
+    private void processMultiturnMoveInterrupted(Pokemon user) {
+        user.setMultiTurnMove(null);
+        user.setMultiTurnCounter(0);
     }
 
     private void checkMultiturnMoveInterruptEffect(List<Timeline> moveTimeLine, Pokemon user, boolean allyTarget) {
-        if (allyTarget && enemyMultiTurnCounter == 0) {
-            processMultiturnMoveCompleted(moveTimeLine, user, true);
+        if (user.getMultiTurnCounter() == 0) {
+            processMultiturnMoveCompleted(moveTimeLine, user, allyTarget);
         }
-        else if (!allyTarget && allyMultiTurnCounter == 0) {
-            processMultiturnMoveCompleted(moveTimeLine, user, false);
-        }
-        else if (allyTarget && enemyMultiTurnCounter > 0) {
-            processMultiturnMoveInterrupted(true);
-        }
-        else if (!allyTarget && allyMultiTurnCounter > 0) {
-            processMultiturnMoveInterrupted(false);
+        else if (user.getMultiTurnCounter() > 0) {
+            processMultiturnMoveInterrupted(user);
         }
     }
 
     private void updateConfusionStatus(List<Timeline> moveTimeLine, Pokemon user, boolean allyTarget) {
 
         Timeline snappedOutMessage = controller.getBattleTextAnimation(String.format(
-                "%s snapped out of confusion", user.getName()), true);
+                "%s snapped out of confusion!", user.getName()), true);
 
         if (allyTarget) {
             if (enemyConfusionCounter == 0) {
@@ -1057,8 +1038,8 @@ public class BattleLogic {
 
         moveTimeLine.add(moveUsedDialog);
 
-        boolean enemyDuringMultiturn = allyTarget && enemyMultiTurnMove != null;
-        boolean allyDuringMultiturn = !allyTarget && allyMultiTurnMove != null;
+        boolean enemyDuringMultiturn = allyTarget && user.getMultiTurnMove() != null;
+        boolean allyDuringMultiturn = !allyTarget && user.getMultiTurnMove() != null;
 
         // If Pokemon in progress of multiturn move, pp is not deducted
         if(!(enemyDuringMultiturn || allyDuringMultiturn))
@@ -1168,15 +1149,15 @@ public class BattleLogic {
         boolean allyMultiturn = move.isMultiturn() && !allyTarget;
         boolean enemyMultiturn = move.isMultiturn() && allyTarget;
 
-        if (enemyMultiturn && enemyMultiTurnMove == null) {
+        if (enemyMultiturn && user.getMultiTurnMove() == null) {
             int turns = generator.nextInt(2) + 1;
-            enemyMultiTurnMove = move;
-            enemyMultiTurnCounter = turns;
+            user.setMultiTurnMove(move);
+            user.setMultiTurnCounter(turns);
         }
-        else if(allyMultiturn && allyMultiTurnMove == null) {
+        else if(allyMultiturn && user.getMultiTurnMove() == null) {
             int turns = generator.nextInt(2) + 1;
-            allyMultiTurnMove = move;
-            allyMultiTurnCounter = turns;
+            user.setMultiTurnMove(move);
+            user.setMultiTurnCounter(turns);
         }
         //**********************************************************
 
@@ -1290,9 +1271,9 @@ public class BattleLogic {
 
         // If multiturn counter has reached 0, then a multiturn move is disabled
         // and the target becomes confused
-        if (allyMultiturn && allyMultiTurnCounter == 0 && allyMultiTurnMove != null)
+        if (allyMultiturn && user.getMultiTurnCounter() == 0 && user.getMultiTurnMove() != null)
             processMultiturnMoveCompleted(moveTimeLine, user, false);
-        else if (enemyMultiturn && enemyMultiTurnCounter == 0 && enemyMultiTurnMove != null)
+        else if (enemyMultiturn && user.getMultiTurnCounter() == 0 && user.getMultiTurnMove() != null)
             processMultiturnMoveCompleted(moveTimeLine, user, true);
         //*********************************************************************
 
@@ -1561,8 +1542,8 @@ public class BattleLogic {
             allySentOut = true;
             resetStats(player.getParty(currentAllyPokemon));
             pokemon.setTwoTurnMove(null);
-            allyMultiTurnMove = null;
-            allyMultiTurnCounter = 0;
+            pokemon.setMultiTurnMove(null);
+            pokemon.setMultiTurnCounter(0);
             allyConfusionCounter = 0;
         }
         else {
@@ -1571,8 +1552,8 @@ public class BattleLogic {
             enemySentOut = true;
             resetStats(enemy.getParty(currentEnemyPokemon));
             pokemon.setTwoTurnMove(null);
-            enemyMultiTurnMove = null;
-            enemyMultiTurnCounter = 0;
+            pokemon.setMultiTurnMove(null);
+            pokemon.setMultiTurnCounter(0);
             enemyConfusionCounter = 0;
         }
     }
