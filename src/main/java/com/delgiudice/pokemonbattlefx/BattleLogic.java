@@ -19,10 +19,12 @@ public class BattleLogic {
     private Player player;
     private NpcTrainer enemy;
 
-    private int currentAllyPokemon = 0;
-    private int currentEnemyPokemon = 0;
+    private int currentAllyPokemon = 0, currentEnemyPokemon = 0;
 
     private Move allyTwoTurnMove = null, enemyTwoTurnMove = null;
+    private Move allyMultiTurnMove = null, enemyMultiTurnMove = null;
+    private int allyMultiTurnCounter = 0, enemyMultiTurnCounter = 0;
+    private int allyConfusionCounter = 0, enemyConfusionCounter = 0;
 
     private boolean enemySentOut, allySentOut;
 
@@ -39,7 +41,7 @@ public class BattleLogic {
         Pokemon.generatePokemonExamples();
 
         // For testing purposes only, delete later
-        Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get("Ivysaur"));
+        Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get("Charmander"));
         player = new Player("Red",  allyPokemon);
 
         player.addPokemon(new Pokemon(PokemonSpecie.getPokemonMap().get("Machop"), 8, Ability.GUTS,
@@ -50,9 +52,10 @@ public class BattleLogic {
                 new Move(MoveTemplate.getMoveMap().get("Tackle")), new Move(MoveTemplate.getMoveMap().get("Tail Whip")),
                         new Move(MoveTemplate.getMoveMap().get("Water Gun"))));
 
-        Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 50, Ability.GUTS,
+        Pokemon enemyPokemon = new Pokemon(Pokemon.getPokemonExamples().get("Ivysaur"));
+        /*Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 50, Ability.GUTS,
                 new Move(MoveTemplate.getMoveMap().get("Scratch")) , new Move(MoveTemplate.getMoveMap().get("Growl")),
-                new Move(MoveTemplate.getMoveMap().get("Quick Attack")));
+                new Move(MoveTemplate.getMoveMap().get("Quick Attack")));*/
 
         enemy = new NpcTrainer("Joey", Enums.TrainerTypes.YOUNGSTER ,enemyPokemon);
 
@@ -192,6 +195,11 @@ public class BattleLogic {
 
         if (allyTwoTurnMove != null) {
             battleTurn(allyTwoTurnMove);
+            return;
+        }
+        if (allyMultiTurnMove != null && allyMultiTurnCounter > 0) {
+            allyMultiTurnCounter--;
+            battleTurn(allyMultiTurnMove);
             return;
         }
 
@@ -362,10 +370,16 @@ public class BattleLogic {
         List<Timeline> battleTimeLine;
         int enemyMoveIndex = generator.nextInt(enemyPokemon.getMoveList().size());
         Move enemyMove;
-        if (enemyTwoTurnMove == null)
-            enemyMove = enemyPokemon.getMoveList(enemyMoveIndex);
-        else
+        if (enemyMultiTurnMove != null & enemyTwoTurnMove != null)
+            throw new IllegalStateException("Both multiturn and two turn active at the same time");
+        else if (enemyMultiTurnMove != null && enemyMultiTurnCounter > 0) {
+            enemyMultiTurnCounter--;
+            enemyMove = enemyMultiTurnMove;
+        }
+        else if (enemyTwoTurnMove != null)
             enemyMove = enemyTwoTurnMove;
+        else
+            enemyMove = enemyPokemon.getMoveList(enemyMoveIndex);
 
         // Priority move always faster, unless both parties are using them
         if (allyMove.isPriority() && !enemyMove.isPriority()) {
@@ -718,23 +732,21 @@ public class BattleLogic {
 
     }
 
-    private List<Timeline> processUserParalyzed(Pokemon user, List<Timeline> moveTimeLine) {
+    private void processUserParalyzed(Pokemon user, List<Timeline> moveTimeLine) {
         Timeline paralysisInfo = controller.getBattleTextAnimation(String.format("%s is%nfully paralyzed!",
                 user.getName()), true);
         moveTimeLine.add(paralysisInfo);
         moveTimeLine.add(controller.generatePause(2000));
         System.out.println(user.getName() + "is fully paralyzed!");
-        return moveTimeLine;
     }
 
-    private List<Timeline> processUserAsleep(Pokemon user, List<Timeline> moveTimeLine) {
+    private void processUserAsleep(Pokemon user, List<Timeline> moveTimeLine) {
         Timeline sleepInfo = controller.getBattleTextAnimation(String.format("%s is%nfast asleep!", user.getName()),
                 true);
         user.setSleepCounter(user.getSleepCounter() - 1);
         moveTimeLine.add(sleepInfo);
         moveTimeLine.add(controller.generatePause(2000));
         System.out.printf("%s is asleep!%n", user.getName());
-        return moveTimeLine;
     }
 
     private void processUserWakeUp(Pokemon user, List<Timeline> moveTimeLine, boolean allyTarget) {
@@ -748,14 +760,15 @@ public class BattleLogic {
         moveTimeLine.add(statusChange);
         moveTimeLine.add(controller.generatePause(1000));
         System.out.printf("%s woke up!%n", user.getName());
+
+        user.setSleepCounter(0);
     }
 
-    private List<Timeline> processUserFrozen(Pokemon user, List<Timeline> moveTimeLine) {
+    private void processUserFrozen(Pokemon user, List<Timeline> moveTimeLine) {
         Timeline frozenInfo = controller.getBattleTextAnimation(String.format("%s is frozen solid!",
                 user.getName()), true);
         moveTimeLine.add(frozenInfo);
         moveTimeLine.add(controller.generatePause(2000));
-        return moveTimeLine;
     }
 
     private void processUserThawOut(Pokemon user, List<Timeline> moveTimeLine, boolean allyTarget) {
@@ -770,7 +783,7 @@ public class BattleLogic {
         moveTimeLine.add(controller.generatePause(2000));
     }
 
-    private List<Timeline> processMoveMissed(Pokemon user, List<Timeline> moveTimeLine, boolean allyTarget) {
+    private void processMoveMissed(Pokemon user, List<Timeline> moveTimeLine, boolean allyTarget) {
         System.out.println("Move missed!");
         Timeline moveMissedDialogue = controller.getBattleTextAnimation(String.format("%s's%nattack missed!",
                 user.getName()), true);
@@ -780,7 +793,10 @@ public class BattleLogic {
         processTwoTurnMoveComplete(moveTimeLine, allyTarget);
         moveTimeLine.add(controller.generatePause(2000));
 
-        return moveTimeLine;
+        if (allyTarget && enemyMultiTurnMove != null)
+            checkMultiturnMoveInterruptEffect(moveTimeLine, user, true);
+        else if (!allyTarget && allyMultiTurnMove != null)
+            checkMultiturnMoveInterruptEffect(moveTimeLine, user, false);
     }
 
     private void processTwoTurnMoveComplete(List<Timeline> moveTimeLine, boolean allyTarget) {
@@ -796,7 +812,6 @@ public class BattleLogic {
                     e -> controller.getAllyPokemonSprite().setVisible(true)));
             moveTimeLine.add(revealAlly);
         }
-
     }
 
     private Timeline getTwoTurnMoveInfo(Move move, Pokemon user) {
@@ -812,17 +827,152 @@ public class BattleLogic {
         return timeline;
     }
 
-    private boolean checkTwoTurnMiss(Move move, boolean allyTarget) {
+    private int checkTwoTurnMiss(Move move, boolean allyTarget) {
         Move twoturnmove = allyTarget ? allyTwoTurnMove : enemyTwoTurnMove;
         if (twoturnmove == null || twoturnmove.isCharging())
-            return false;
+            return 1;
 
-        if (Objects.equals(twoturnmove.getName(), "Dig") &&
-                Objects.equals(move.getName(), "Earthquake")) {
-            return false;
+        boolean digEarthquake = Objects.equals(twoturnmove.getName(), "Dig") && Objects.equals(move.getName(),
+                "Earthquake");
+
+        if (digEarthquake) {
+            return 2;
         }
 
-        return true;
+        return 0;
+    }
+
+    private List<Timeline> processHealthRestore(List<Timeline> moveTimeLine, Move move, Pokemon user, boolean allyTarget) {
+        if (user.getHp() != user.getMaxHP()) {
+            double restoredHealth = user.getMaxHP() * move.getHpRestore();
+            double healthChange = restoredHealth + user.getHp();
+            if (healthChange > user.getMaxHP())
+                healthChange = user.getMaxHP();
+            int oldHp = user.getHp();
+            int healthChangeInt = (int) Math.round(healthChange);
+            user.setHp(healthChangeInt);
+            Timeline userHealthChange;
+            if (allyTarget)
+                userHealthChange = controller.getEnemyHpAnimation(oldHp, user.getHp(), user.getMaxHP());
+
+            else
+                userHealthChange = controller.getAllyHpAnimation(oldHp, user.getHp(), user.getMaxHP());
+
+            userHealthChange.setDelay(Duration.seconds(1));
+            moveTimeLine.add(userHealthChange);
+
+            Timeline userHealthInfo = controller.getBattleTextAnimation(String.format(
+                    "%s restored health!", user.getName()), true);
+            moveTimeLine.add(userHealthInfo);
+
+        }
+        else {
+            Timeline userHealthInfo = controller.getBattleTextAnimation(String.format(
+                    "%s's health%nis already full!", user.getName()), true);
+            moveTimeLine.add(userHealthInfo);
+            userHealthInfo.setDelay(Duration.seconds(1));
+        }
+
+        moveTimeLine.add(controller.generatePause(2000));
+        return moveTimeLine;
+    }
+
+    private void processMultiturnMoveCompleted(List<Timeline> moveTimeLine, Pokemon user, boolean allyTarget) {
+        if (!user.getSubStatuses().contains(Enums.SubStatus.CONFUSED)) {
+            Timeline userConfusedMsg = controller.getBattleTextAnimation(String.format("%s has become confused%ndue to fatigue!",
+                    user.getName()), true);
+            userConfusedMsg.setDelay(Duration.seconds(2));
+
+            if (allyTarget) {
+                moveTimeLine.add(userConfusedMsg);
+                enemyMultiTurnMove = null;
+                applyConfusion(user, false);
+            } else {
+                moveTimeLine.add(userConfusedMsg);
+                allyMultiTurnMove = null;
+                applyConfusion(user, true);
+            }
+        }
+
+    }
+
+    private void processMultiturnMoveInterrupted(boolean allyTarget) {
+        if (allyTarget) {
+            enemyMultiTurnMove = null;
+            enemyMultiTurnCounter = 0;
+        }
+        else {
+            allyMultiTurnMove = null;
+            allyMultiTurnCounter = 0;
+        }
+    }
+
+    private void checkMultiturnMoveInterruptEffect(List<Timeline> moveTimeLine, Pokemon user, boolean allyTarget) {
+        if (allyTarget && enemyMultiTurnCounter == 0) {
+            processMultiturnMoveCompleted(moveTimeLine, user, true);
+        }
+        else if (!allyTarget && allyMultiTurnCounter == 0) {
+            processMultiturnMoveCompleted(moveTimeLine, user, false);
+        }
+        else if (allyTarget && enemyMultiTurnCounter > 0) {
+            processMultiturnMoveInterrupted(true);
+        }
+        else if (!allyTarget && allyMultiTurnCounter > 0) {
+            processMultiturnMoveInterrupted(false);
+        }
+    }
+
+    private void updateConfusionStatus(List<Timeline> moveTimeLine, Pokemon user, boolean allyTarget) {
+
+        Timeline snappedOutMessage = controller.getBattleTextAnimation(String.format(
+                "%s snapped out of confusion", user.getName()), true);
+
+        if (allyTarget) {
+            if (enemyConfusionCounter == 0) {
+                user.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
+                moveTimeLine.add(snappedOutMessage);
+                moveTimeLine.add(controller.generatePause(2000));
+            }
+            else
+                enemyConfusionCounter--;
+        }
+        else {
+            if (allyConfusionCounter == 0) {
+                user.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
+                moveTimeLine.add(snappedOutMessage);
+                moveTimeLine.add(controller.generatePause(2000));
+            }
+            else
+                allyConfusionCounter--;
+        }
+    }
+
+    private void processConfusionHit(List<Timeline> moveTimeLine ,Pokemon user, boolean allyTarget) {
+        Timeline messageConfusion = controller.getBattleTextAnimation("It hurt itself in its\nconfusion!", true);
+        moveTimeLine.add(messageConfusion);
+        moveTimeLine.add(controller.generatePause(500));
+
+        MoveDamageInfo confusionDamageInfo = calculateMoveDamage(0,
+                new Move(MoveTemplate.getMoveMap().get("Confusion Damage")), user, user, 1, false);
+
+        int confusionDamage = confusionDamageInfo.damage();
+        if (confusionDamage > user.getHp())
+            confusionDamage = user.getHp();
+
+        int oldHp = user.getHp();
+        user.setHp(user.getHp() - confusionDamage);
+
+        Timeline generateHit;
+
+        if(allyTarget) {
+            generateHit = controller.getEnemyHpAnimation(oldHp, user.getHp(), user.getMaxHP());
+        }
+        else {
+            generateHit = controller.getAllyHpAnimation(oldHp, user.getHp(), user.getMaxHP());
+        }
+
+        moveTimeLine.add(generateHit);
+        moveTimeLine.add(controller.generatePause(2000));
     }
 
     // Processes using a move, as well as status effects that might prevent from using it
@@ -831,14 +981,21 @@ public class BattleLogic {
         List<Timeline> moveTimeLine = new LinkedList<>();
         SecureRandom generator = new SecureRandom();
 
+        // Status processing, if user Pokemon is stopped by status effects, the function returns
+        // Also when interrupted during multiturn moves, the algorithm checks if it would be the last turn
+        // if yes then the target is also confused on top of other status ailments
         if (user.getStatus() == Enums.Status.PARALYZED) {
             int rand = generator.nextInt(4);
             if (rand == 0) {
-                return processUserParalyzed(user, moveTimeLine);
+                checkMultiturnMoveInterruptEffect(moveTimeLine, user, allyTarget);
+                processUserParalyzed(user, moveTimeLine);
+                return moveTimeLine;
             }
         }
         if (user.getStatus() == Enums.Status.SLEEPING && user.getSleepCounter() > 0) {
-            return processUserAsleep(user, moveTimeLine);
+            checkMultiturnMoveInterruptEffect(moveTimeLine, user, allyTarget);
+            processUserAsleep(user, moveTimeLine);
+            return moveTimeLine;
         }
         else if(user.getStatus() == Enums.Status.SLEEPING && user.getSleepCounter() == 0) {
             processUserWakeUp(user, moveTimeLine, allyTarget);
@@ -852,7 +1009,25 @@ public class BattleLogic {
                 processUserThawOut(user, moveTimeLine, allyTarget);
             }
             else {
-                return processUserFrozen(user, moveTimeLine);
+                checkMultiturnMoveInterruptEffect(moveTimeLine, user, allyTarget);
+                processUserFrozen(user, moveTimeLine);
+                return moveTimeLine;
+            }
+        }
+        //***************************************
+        if(user.getSubStatuses().contains(Enums.SubStatus.CONFUSED))
+            updateConfusionStatus(moveTimeLine ,user, allyTarget);
+
+        if (user.getSubStatuses().contains(Enums.SubStatus.CONFUSED)) {
+            Timeline confuseMessage = controller.getBattleTextAnimation(String.format("%s is%nconfused!", user.getName()),
+                    true);
+            moveTimeLine.add(confuseMessage);
+            moveTimeLine.add(controller.generatePause(2000));
+
+            int confuseInt = generator.nextInt(3);
+            if (confuseInt == 0) {
+                processConfusionHit(moveTimeLine, user, allyTarget);
+                return moveTimeLine;
             }
         }
 
@@ -887,10 +1062,17 @@ public class BattleLogic {
 
         moveTimeLine.add(moveUsedDialog);
 
-        move.setPp(move.getPp() - 1);
+        boolean enemyDuringMultiturn = allyTarget && enemyMultiTurnMove != null;
+        boolean allyDuringMultiturn = !allyTarget && allyMultiTurnMove != null;
+
+        // If Pokemon in progress of multiturn move, pp is not deducted
+        if(!(enemyDuringMultiturn || allyDuringMultiturn))
+            move.setPp(move.getPp() - 1);
 
         int moveAccuracy = move.getAccuracy();
+        int twoTurnModifier = checkTwoTurnMiss(move, allyTarget);
 
+        // Move hit calculations, if move misses the function ends
         if (moveAccuracy != 0) {
             int statAccuracy = user.getStatModifiers().get("Accuracy") - target.getStatModifiers().get("Evasiveness");
             if (statAccuracy > 6)
@@ -907,10 +1089,12 @@ public class BattleLogic {
 
             float hit = moveAccuracy * accuracyModifier;
             int r = generator.nextInt(100) + 1;
-            if (r > hit || checkTwoTurnMiss(move, allyTarget)) {
-                return processMoveMissed(user, moveTimeLine, allyTarget);
+            if (r > hit || twoTurnModifier == 0) {
+                processMoveMissed(user, moveTimeLine, allyTarget);
+                return moveTimeLine;
             }
         }
+        //**********************************************
 
         Enums.Subtypes moveType = move.getSubtype();
         MoveDamageInfo damageInfo = new MoveDamageInfo(0, false, -999);
@@ -921,47 +1105,19 @@ public class BattleLogic {
             if (target.getHp() == 0)
                 break;
 
+            // Check move type and calculate damage
             switch (moveType) {
-                case PHYSICAL -> damageInfo = calculateMoveDamage(0, move, user, target);
-                case SPECIAL -> damageInfo = calculateMoveDamage(1, move, user, target);
+                case PHYSICAL -> damageInfo = calculateMoveDamage(0, move, user, target, twoTurnModifier, true);
+                case SPECIAL -> damageInfo = calculateMoveDamage(1, move, user, target, twoTurnModifier, true);
                 case STATUS -> {
-                    if (move.getHpRestore() > 0 && user.getHp() != user.getMaxHP()) {
-                        double restoredHealth = user.getMaxHP() * move.getHpRestore();
-                        double healthChange = restoredHealth + user.getHp();
-                        if (healthChange > user.getMaxHP())
-                            healthChange = user.getMaxHP();
-                        int oldHp = user.getHp();
-                        int healthChangeInt = (int) Math.round(healthChange);
-                        user.setHp(healthChangeInt);
-                        Timeline userHealthChange;
-                        if (allyTarget)
-                            userHealthChange = controller.getEnemyHpAnimation(oldHp, user.getHp(), user.getMaxHP());
-
-                        else
-                            userHealthChange = controller.getAllyHpAnimation(oldHp, user.getHp(), user.getMaxHP());
-
-                        userHealthChange.setDelay(Duration.seconds(1));
-                        moveTimeLine.add(userHealthChange);
-
-                        Timeline userHealthInfo = controller.getBattleTextAnimation(String.format(
-                                "%s restored health!", user.getName()), true);
-                        moveTimeLine.add(userHealthInfo);
-
-                        moveTimeLine.add(controller.generatePause(2000));
-                        return moveTimeLine;
-
-                    } else if (move.getHpRestore() > 0 && user.getHp() == user.getMaxHP()) {
-                        Timeline userHealthInfo = controller.getBattleTextAnimation(String.format(
-                                "%s's health%nis already full!", user.getName()), true);
-                        moveTimeLine.add(userHealthInfo);
-
-                        moveTimeLine.add(controller.generatePause(2000));
-                        return moveTimeLine;
-                    }
+                    if (move.getHpRestore() > 0)
+                        return processHealthRestore(moveTimeLine, move, user, allyTarget);
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + moveType);
             }
+            //****************************************
 
+            // Type effect calculation, if the move can't hit a Pokemon the function returns
             if (damageInfo.typeEffect() == 0) {
                 final Timeline effectInfo = controller.getBattleTextAnimation(String.format("It doesn't affect %s...",
                                 target.getName()), true);
@@ -970,7 +1126,9 @@ public class BattleLogic {
                 moveTimeLine.add(effectInfo);
                 return moveTimeLine;
             }
+            //****************************************************
 
+            // Applying damage as well as the UI animations connected to it
             else if (damageInfo.damage() > 0) {
 
                 damage = damageInfo.damage();
@@ -994,7 +1152,8 @@ public class BattleLogic {
 
                 moveTimeLine.add(damageDealtAnimation);
 
-                System.out.println(move.getName() + " dealt " + damage + " damage to " + target.getName() + "!");
+                System.out.println("Hit " + i+1 + ": " + move.getName() + " dealt " + damage + " damage to " +
+                        target.getName() + "!");
 
                 if (damageInfo.critical()) {
                     final Timeline criticalInfo = controller.getBattleTextAnimation("A critical hit!", true);
@@ -1004,34 +1163,57 @@ public class BattleLogic {
                 }
 
             }
+            //***************************************************************
 
         }
 
+        // Check if Pokemon in first turn of a multiturn move
+        // generates the number of moves that it can use before being confused and
+        // assigns appropriate variables
+        boolean allyMultiturn = move.isMultiturn() && !allyTarget;
+        boolean enemyMultiturn = move.isMultiturn() && allyTarget;
+
+        if (enemyMultiturn && enemyMultiTurnMove == null) {
+            int turns = generator.nextInt(2) + 1;
+            enemyMultiTurnMove = move;
+            enemyMultiTurnCounter = turns;
+        }
+        else if(allyMultiturn && allyMultiTurnMove == null) {
+            int turns = generator.nextInt(2) + 1;
+            allyMultiTurnMove = move;
+            allyMultiTurnCounter = turns;
+        }
+        //**********************************************************
+
+        // Checks if this is the second part of a two turn move
+        // if yes, then it resets the state of twoturn moves
         if (move.isTwoturn()) {
             processTwoTurnMoveComplete(moveTimeLine, allyTarget);
         }
 
+        //  Other checks related to move effectiveness
         if (damageInfo.typeEffect() >= 2 && moveType != Enums.Subtypes.STATUS) {
             final Timeline effectInfo = controller.getBattleTextAnimation("It's super effective!", true);
             effectInfo.setDelay(Duration.seconds(2));
-
             moveTimeLine.add(effectInfo);
         }
         else if (damageInfo.typeEffect() < 1 && damageInfo.typeEffect() > 0 && moveType != Enums.Subtypes.STATUS) {
             final Timeline effectInfo = controller.getBattleTextAnimation("It's not very effective...", true);
             effectInfo.setDelay(Duration.seconds(2));
-
             moveTimeLine.add(effectInfo);
         }
+        //***************************************
 
+        // Check related to number of hits for moves that hit multiple times
         if (move.getHits() > 1 && damageInfo.typeEffect() != 0) {
             Timeline hitsInformation = controller.getBattleTextAnimation(String.format("It hit %d time(s)!",
                     i), true);
             hitsInformation.setDelay(Duration.seconds(2));
-
             moveTimeLine.add(hitsInformation);
         }
+        //********************************************************
 
+        // Recoil handling
         float recoil = move.getTemplate().getRecoil();
 
         if (recoil > 0 && damage != 0 && move.getHits() == 1) {
@@ -1057,10 +1239,12 @@ public class BattleLogic {
 
             moveTimeLine.add(recoilDealtAnimation);
         }
+        //********************************************************
 
+        // Checks related to moves that increase or decrease stats
         boolean targetFainted = target.getHp() == 0;
         boolean userFainted = user.getHp() == 0;
-        boolean targetProtected = move.getSubtype() != Enums.Subtypes.STATUS &&
+        boolean targetProtectedAbility = move.getSubtype() != Enums.Subtypes.STATUS &&
                 target.getAbility() == Ability.SHIELD_DUST;
         final Timeline statChangeInfo;
 
@@ -1071,11 +1255,13 @@ public class BattleLogic {
             statChangeInfo = processStatChange(move, user);
             moveTimeLine.add(statChangeInfo);
         }
-        else if (move.getStatType() != null && prob >= rand && !targetFainted && !targetProtected) {
+        else if (move.getStatType() != null && prob >= rand && !targetFainted && !targetProtectedAbility) {
             statChangeInfo = processStatChange(move, target);
             moveTimeLine.add(statChangeInfo);
         }
+        //*******************************************************
 
+        // Check related to moves that increase critcal hit chance
         if (move.getCritIncrease() > 0) {
             Timeline critChangeInfo;
             if(!user.isUnderFocusEnergy()) {
@@ -1089,10 +1275,12 @@ public class BattleLogic {
 
             moveTimeLine.add(critChangeInfo);
         }
+        //*******************************************************
 
+        // Checks related to moves that inflict status effects
         prob = move.getStatusProb() * 100;
         rand = generator.nextInt(100) + 1;
-        if (move.getStatus() != Enums.Status.NONE && prob >= rand && !targetFainted && !targetProtected) {
+        if (move.getStatus() != Enums.Status.NONE && prob >= rand && !targetFainted && !targetProtectedAbility) {
             Timeline statusChangeInfo = processStatusChange(move, target);
             statusChangeInfo.setDelay(Duration.seconds(1));
             moveTimeLine.add(statusChangeInfo);
@@ -1103,12 +1291,40 @@ public class BattleLogic {
             statusChangeInfo.setDelay(Duration.seconds(1));
             moveTimeLine.add(updateStatus);
         }
+        //*********************************************************
 
+        // If multiturn counter has reached 0, then a multiturn move is disabled
+        // and the target becomes confused
+        if (allyMultiturn && allyMultiTurnCounter == 0 && allyMultiTurnMove != null)
+            processMultiturnMoveCompleted(moveTimeLine, user, false);
+        else if (enemyMultiturn && enemyMultiTurnCounter == 0 && enemyMultiTurnMove != null)
+            processMultiturnMoveCompleted(moveTimeLine, user, true);
+        //*********************************************************************
+
+        // Added small delay at the end to let the player read the last generated dialog
         moveTimeLine.add(controller.generatePause(2000));
         return moveTimeLine;
     }
 
-    Timeline processStatusChange(Move move, Pokemon target) {
+    private Timeline applyConfusion(Pokemon target, boolean allyTarget) {
+        Timeline confusionMessage = controller.getBattleTextAnimation(String.format("%s is now%nconfused!",
+                target.getName()), true);
+
+        SecureRandom generator = new SecureRandom();
+
+        int turns = generator.nextInt(4) + 1;
+
+        target.getSubStatuses().add(Enums.SubStatus.CONFUSED);
+
+        if (allyTarget)
+            allyConfusionCounter = turns;
+        else
+            enemyConfusionCounter = turns;
+
+        return confusionMessage;
+    }
+
+    private Timeline processStatusChange(Move move, Pokemon target) {
         final Timeline statusChangeInfo;
         SecureRandom generator = new SecureRandom();
 
@@ -1131,7 +1347,7 @@ public class BattleLogic {
         return statusChangeInfo;
     }
 
-    Timeline processStatChange(Move move, Pokemon target) {
+    private Timeline processStatChange(Move move, Pokemon target) {
         final Timeline statChangeInfo;
 
         int change = move.getStatUp();
@@ -1186,7 +1402,8 @@ public class BattleLogic {
         return statChangeInfo;
     }
 
-    MoveDamageInfo calculateMoveDamage(int movetype, Move move, Pokemon user, Pokemon target)
+    private MoveDamageInfo calculateMoveDamage(int movetype, Move move, Pokemon user, Pokemon target, int twoTurnModifier,
+                                       boolean canCrit)
     {
         SecureRandom generator = new SecureRandom();
         int bound;
@@ -1229,25 +1446,30 @@ public class BattleLogic {
         //Final effective attack and defense stat
         double attack;
         double defense;
-        //We check if the hit is going to be critical (critical hits ignore negative stat changes and only leave positive ones)
-        if (critNum == 0)
+        // Check if the hit is going to be critical, critical hits ignore negative (user-wise) stat changes and only
+        // leave positive ones
+
+        if (critNum == 0 && canCrit)
             isCrit = true;
+
         if (isCrit) {
-            if(attackMod >= 0)
+            if(attackMod > 0)
                 attack = (int)Math.round((double) attackTemp * (2 + attackMod)/2);
             else
                 attack = attackTemp;
-            if(defenseMod <= 0) {
+
+            if(defenseMod < 0) {
                 double defense_multiplier = 2.0 / (2 - defenseMod);
                 defense = (int) Math.round(defenseTemp * defense_multiplier);
             }
             else
                 defense = defenseTemp;
+
             critMod = 1.5f;
         }
         else  {
             if(attackMod >= 0) {
-                attack = (int) Math.round((double) attackTemp * (2 + attackMod) / 2);
+                attack = (int) Math.round((double) attackTemp * (2 + attackMod) / 2.0);
             }
             else {
                 double attack_multiplier = 2.0 / (2 - attackMod);
@@ -1255,7 +1477,7 @@ public class BattleLogic {
             }
 
             if(defenseMod >= 0) {
-                defense = (int) Math.round((double) defenseTemp * (2 + defenseMod) / 2);
+                defense = (int) Math.round((double) defenseTemp * (2 + defenseMod) / 2.0);
             }
             else {
                 double defense_multiplier = 2.0 / (2 - defenseMod);
@@ -1294,7 +1516,7 @@ public class BattleLogic {
             }
         }
         //Final damage calculations
-        double modifier = critMod * rand * stab * typeEffect * burn;
+        double modifier = critMod * rand * stab * typeEffect * burn * twoTurnModifier;
         double damageDouble = Math.round(((((part1 * move.getPower() * ((attack/defense)/50.0)) + 2) * modifier)));
         int damage = (int) damageDouble;
 
@@ -1343,12 +1565,18 @@ public class BattleLogic {
             allySentOut = true;
             resetStats(player.getParty(currentAllyPokemon));
             allyTwoTurnMove = null;
+            allyMultiTurnMove = null;
+            allyMultiTurnCounter = 0;
+            allyConfusionCounter = 0;
         }
         else {
             currentEnemyPokemon = slot;
             enemySentOut = true;
             resetStats(enemy.getParty(currentEnemyPokemon));
             enemyTwoTurnMove = null;
+            enemyMultiTurnMove = null;
+            enemyMultiTurnCounter = 0;
+            enemyConfusionCounter = 0;
         }
     }
 

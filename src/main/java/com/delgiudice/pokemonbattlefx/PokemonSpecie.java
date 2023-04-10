@@ -5,9 +5,12 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 
+import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+
 
 public class PokemonSpecie {
     private String name;
@@ -15,7 +18,7 @@ public class PokemonSpecie {
     private Type[] type = {new Type(Enums.Types.NOTYPE), new Type(Enums.Types.NOTYPE)};
     private LinkedHashMap<String, Integer> baseStats = new LinkedHashMap<>();
     private static HashMap<String, PokemonSpecie> pokemonMap = new HashMap<>();
-    private Image frontSprite, backSprite;
+    private Image frontSprite, backSprite, frontSpriteAnim, backSpriteAnim;
 
     public int getPokedexNumber() {
         return pokedexNumber;
@@ -35,6 +38,12 @@ public class PokemonSpecie {
 
     public Image getFrontSprite() {
         return frontSprite;}
+
+    //public Image getFrontSpriteAnim() {
+    //    return frontSpriteAnim;}
+
+    //public Image getBackSpriteAnim() {
+    //    return backSpriteAnim;}
 
     public Image getBackSprite() {
         return backSprite;
@@ -61,8 +70,10 @@ public class PokemonSpecie {
         baseStats.put("Speed", speed);
         frontSprite = new Image("default.png");
         backSprite = new Image("default.png");
-        this.frontSprite = resample(this.frontSprite, 5);
-        this.backSprite = resample(this.backSprite, 5);
+        this.frontSprite = resample(this.frontSprite, 10);
+        this.backSprite = resample(this.backSprite, 10);
+        this.frontSpriteAnim = null;
+        this.backSpriteAnim = null;
         this.pokedexNumber = pokedexNumber;
     }
 
@@ -79,6 +90,10 @@ public class PokemonSpecie {
         baseStats.put("Speed", speed);
         URL frontSpriteUrl = getClass().getResource(frontSprite);
         URL backSrpiteUrl = getClass().getResource(backSprite);
+        //String frontSpriteAnim = frontSprite.split("\\.")[0];
+
+        //frontSpriteAnim = frontSpriteAnim + "_anim.png";
+        //URL frontSpriteAnimUrl = getClass().getResource(frontSpriteAnim);
 
         if (frontSpriteUrl != null)
             this.frontSprite = new Image(frontSprite);
@@ -89,9 +104,16 @@ public class PokemonSpecie {
             this.backSprite = new Image(backSprite);
         else
             this.backSprite = new Image("default.png");
+        //if (frontSpriteAnimUrl != null)
+        //    this.frontSpriteAnim = new Image(frontSpriteAnim);
+        //else
+        //    this.frontSpriteAnim = null;
 
-        this.frontSprite = resample(this.frontSprite, 5);
-        this.backSprite = resample(this.backSprite, 5);
+
+        this.frontSprite = resample(this.frontSprite, 10);
+        this.backSprite = resample(this.backSprite, 10);
+        //if (this.frontSpriteAnim != null)
+        //    this.frontSpriteAnim = resample(this.frontSpriteAnim, 10);
 
         this.pokedexNumber = pokedexNumber;
     }
@@ -108,8 +130,8 @@ public class PokemonSpecie {
         frontSprite = new Image("default.png");
         backSprite = new Image("default.png");
 
-        this.frontSprite = resample(this.frontSprite, 5);
-        this.backSprite = resample(this.backSprite, 5);
+        this.frontSprite = resample(this.frontSprite, 10);
+        this.backSprite = resample(this.backSprite, 10);
 
         this.pokedexNumber = pokedexNumber;
     }
@@ -137,8 +159,10 @@ public class PokemonSpecie {
         else
             this.backSprite = new Image("default.png");
 
-        this.frontSprite = resample(this.frontSprite, 5);
-        this.backSprite = resample(this.backSprite, 5);
+        this.frontSprite = resample(this.frontSprite, 10);
+        this.backSprite = resample(this.backSprite, 10);
+
+        this.pokedexNumber = pokedexNumber;
     }
 
     public PokemonSpecie(PokemonSpecie original) {
@@ -200,6 +224,7 @@ public class PokemonSpecie {
 
     //https://stackoverflow.com/questions/16089304/javafx-imageview-without-any-smoothing
     private Image resample(Image input, int scaleFactor) {
+
         final int W = (int) input.getWidth();
         final int H = (int) input.getHeight();
         final int S = scaleFactor;
@@ -208,7 +233,6 @@ public class PokemonSpecie {
                 W * S,
                 H * S
         );
-
         PixelReader reader = input.getPixelReader();
         PixelWriter writer = output.getPixelWriter();
 
@@ -226,3 +250,5 @@ public class PokemonSpecie {
         return output;
     }
 }
+
+

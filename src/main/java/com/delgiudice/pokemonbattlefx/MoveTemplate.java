@@ -7,7 +7,7 @@ public class MoveTemplate {
     String name;
     private int power, accuracy, hits = 1, statUp = 0, maxpp, critIncrease = 0, critTemporaryIncrease = 0;
     private float statusProb, statUpProb, recoil = 0, lifesteal = 0, hpRestore = 0;
-    private boolean priority = false, twoturn = false, self = false, trap = false, charging = false;
+    private boolean priority = false, twoturn = false, self = false, trap = false, charging = false, multiturn = false;
     private Enums.Subtypes subtype;
     private Type type;
     private Enums.StatType statType = null;
@@ -53,6 +53,10 @@ public class MoveTemplate {
 
     public Enums.SubStatus getSubStatus() {
         return subStatus;
+    }
+
+    public boolean isMultiturn() {
+        return multiturn;
     }
 
     public float getHpRestore() {
@@ -160,6 +164,10 @@ public class MoveTemplate {
         this.critTemporaryIncrease = critTemporaryIncrease;
     }
 
+    public void setMultiturn(boolean multiturn) {
+        this.multiturn = multiturn;
+    }
+
     public MoveTemplate(String name, int power, int accuracy, int pp, Enums.Subtypes subtype, Type type,
                         Enums.StatType statType, int statUp, boolean self, float statUpProb) {
         this.name = name;
@@ -208,7 +216,12 @@ public class MoveTemplate {
     ///initializes list of available moves
     public static void setMoveMap(){
         Type.setTypeList(); //init types
-        MoveTemplate newmove = new MoveTemplate("Tackle", 40, 100, 35, Enums.Subtypes.PHYSICAL,
+
+        MoveTemplate newmove = new MoveTemplate("Confusion Damage", 40, 0, 0, Enums.Subtypes.PHYSICAL,
+                Type.typeMap.get(Enums.Types.NOTYPE));
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Tackle", 40, 100, 35, Enums.Subtypes.PHYSICAL,
                 Type.typeMap.get(Enums.Types.NORMAL));
         moveMap.put(newmove.getName(), newmove);
 
@@ -309,6 +322,20 @@ public class MoveTemplate {
 
         newmove = new MoveTemplate("Sweet Scent", 0, 100, 20, Enums.Subtypes.STATUS,
                 Type.typeMap.get(Enums.Types.NORMAL), Enums.StatType.EVASIVENESS, -1, false, 1);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Outrage", 120, 100, 10, Enums.Subtypes.PHYSICAL,
+                Type.typeMap.get(Enums.Types.DRAGON));
+        newmove.setMultiturn(true);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Petal Dance", 120, 100, 10, Enums.Subtypes.SPECIAL,
+                Type.typeMap.get(Enums.Types.GRASS));
+        newmove.setMultiturn(true);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Petal Blizzard", 90, 100, 15, Enums.Subtypes.PHYSICAL,
+                Type.typeMap.get(Enums.Types.GRASS));
         moveMap.put(newmove.getName(), newmove);
 
     }

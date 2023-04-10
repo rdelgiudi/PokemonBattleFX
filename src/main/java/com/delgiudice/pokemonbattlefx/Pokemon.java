@@ -4,7 +4,6 @@ import java.security.SecureRandom;
 import java.util.*;
 
 public class Pokemon {
-
     private static final HashMap<String, Pokemon> pokemonExamples = new HashMap<>();
     private String name;
     private int hp, level;
@@ -12,6 +11,8 @@ public class Pokemon {
     private LinkedHashMap<String, Integer> stats = new LinkedHashMap<>();
     private Enums.Status status = Enums.Status.NONE;
     private int poisonCounter = 1, sleepCounter = 0, critIncrease = 0;
+    private Move twoTurnMove = null, multiTurnMove = null;
+    private int twoTurnCounter = 0, multiTurnCounter = 0;
     private int[] ivs = {0, 0, 0, 0, 0, 0};
     private Enums.Nature nature;
     private HashMap<String, Integer> statModifiers = new HashMap<>();
@@ -109,6 +110,25 @@ public class Pokemon {
         return status;
     }
 
+    public int getCritIncrease() {
+        return critIncrease;
+    }
+
+    public Move getTwoTurnMove() {
+        return twoTurnMove;
+    }
+
+    public Move getMultiTurnMove() {
+        return multiTurnMove;
+    }
+
+    public int getTwoTurnCounter() {
+        return twoTurnCounter;
+    }
+
+    public int getMultiTurnCounter() {
+        return multiTurnCounter;
+    }
 
     public boolean isUnderFocusEnergy() {
         return underFocusEnergy;
@@ -126,10 +146,6 @@ public class Pokemon {
         this.sleepCounter = sleepCounter;
     }
 
-    public int getCritIncrease() {
-        return critIncrease;
-    }
-
     public void setTrapped(boolean trapped) {
         this.trapped = trapped;
     }
@@ -144,6 +160,22 @@ public class Pokemon {
 
     public void setUnderFocusEnergy(boolean underFocusEnergy) {
         this.underFocusEnergy = underFocusEnergy;
+    }
+
+    public void setTwoTurnMove(Move twoTurnMove) {
+        this.twoTurnMove = twoTurnMove;
+    }
+
+    public void setMultiTurnMove(Move multiTurnMove) {
+        this.multiTurnMove = multiTurnMove;
+    }
+
+    public void setTwoTurnCounter(int twoTurnCounter) {
+        this.twoTurnCounter = twoTurnCounter;
+    }
+
+    public void setMultiTurnCounter(int multiTurnCounter) {
+        this.multiTurnCounter = multiTurnCounter;
     }
 
     Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1)
@@ -311,12 +343,7 @@ public class Pokemon {
 
     public static void generatePokemonExamples() {
         PokemonSpecie.setPokemonMap();
-        Pokemon example = new Pokemon(PokemonSpecie.getPokemonMap().get("Charmander"), 50, Ability.BLAZE,
-                new Move(MoveTemplate.getMoveMap().get("Slash")), new Move(MoveTemplate.getMoveMap().get("Dragon Breath")),
-                new Move(MoveTemplate.getMoveMap().get("Flare Blitz")), new Move(MoveTemplate.getMoveMap().get("Fire Spin")));
-        pokemonExamples.put(example.getName(), example);
-
-        example = new Pokemon(PokemonSpecie.getPokemonMap().get("Bulbasaur"), 50, Ability.OVERGROW,
+        Pokemon example = new Pokemon(PokemonSpecie.getPokemonMap().get("Bulbasaur"), 50, Ability.OVERGROW,
                 new Move(MoveTemplate.getMoveMap().get("Razor Leaf")), new Move(MoveTemplate.getMoveMap().get("Double-Edge")),
                 new Move(MoveTemplate.getMoveMap().get("Solar Beam")), new Move(MoveTemplate.getMoveMap().get("Sleep Powder")));
         pokemonExamples.put(example.getName(), example);
@@ -324,6 +351,16 @@ public class Pokemon {
         example = new Pokemon(PokemonSpecie.getPokemonMap().get("Ivysaur"), 50, Ability.OVERGROW,
                 new Move(MoveTemplate.getMoveMap().get("Seed Bomb")), new Move(MoveTemplate.getMoveMap().get("Synthesis")),
                 new Move(MoveTemplate.getMoveMap().get("Solar Beam")), new Move(MoveTemplate.getMoveMap().get("Sweet Scent")));
+        pokemonExamples.put(example.getName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get("Venosaur"), 50, Ability.OVERGROW,
+                new Move(MoveTemplate.getMoveMap().get("Petal Blizzard")), new Move(MoveTemplate.getMoveMap().get("Petal Dance")),
+                new Move(MoveTemplate.getMoveMap().get("Solar Beam")), new Move(MoveTemplate.getMoveMap().get("Double-Edge")));
+        pokemonExamples.put(example.getName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get("Charmander"), 50, Ability.BLAZE,
+                new Move(MoveTemplate.getMoveMap().get("Slash")), new Move(MoveTemplate.getMoveMap().get("Dragon Breath")),
+                new Move(MoveTemplate.getMoveMap().get("Flare Blitz")), new Move(MoveTemplate.getMoveMap().get("Dig")));
         pokemonExamples.put(example.getName(), example);
     }
 }

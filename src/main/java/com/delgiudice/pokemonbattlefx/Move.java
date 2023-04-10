@@ -82,6 +82,10 @@ public class Move {
         return template.isTwoturn();
     }
 
+    public boolean isMultiturn() {
+        return template.isMultiturn();
+    }
+
     public float getLifesteal() {
         return template.getLifesteal();
     }
