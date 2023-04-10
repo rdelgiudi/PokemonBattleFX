@@ -21,8 +21,6 @@ public class BattleLogic {
 
     private int currentAllyPokemon = 0, currentEnemyPokemon = 0;
 
-    private int allyConfusionCounter = 0, enemyConfusionCounter = 0;
-
     private boolean enemySentOut, allySentOut;
 
     boolean inBattle;
@@ -687,7 +685,7 @@ public class BattleLogic {
 
         List<Timeline> allyMoveTimeLine = useMove(allyMove, player.getParty(currentAllyPokemon),
                 enemy.getParty(currentEnemyPokemon), false);
-        if (enemy.getParty(currentEnemyPokemon).getHp() == 0) {
+        if (enemy.getParty(currentEnemyPokemon).getHp() == 0 || player.getParty(currentAllyPokemon).getHp() == 0) {
             return allyMoveTimeLine;
         }
         //int enemyMove = generator.nextInt(enemy.getParty(currentEnemyPokemon).getMoveList().size());
@@ -707,7 +705,7 @@ public class BattleLogic {
         List<Timeline> enemyMoveTimeLine = useMove(enemyMove, enemy.getParty(currentEnemyPokemon),
                 player.getParty(currentAllyPokemon), true);
 
-        if (player.getParty(currentAllyPokemon).getHp() == 0) {
+        if (enemy.getParty(currentEnemyPokemon).getHp() == 0 || player.getParty(currentAllyPokemon).getHp() == 0)  {
             return enemyMoveTimeLine;
         }
         List<Timeline> allyMoveTimeLine = useMove(allyMove, player.getParty(currentAllyPokemon),
@@ -909,22 +907,22 @@ public class BattleLogic {
                 "%s snapped out of confusion!", user.getName()), true);
 
         if (allyTarget) {
-            if (enemyConfusionCounter == 0) {
+            if (user.getConfusionTimer() == 0) {
                 user.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
                 moveTimeLine.add(snappedOutMessage);
                 moveTimeLine.add(controller.generatePause(2000));
             }
             else
-                enemyConfusionCounter--;
+                user.setConfusionTimer(user.getConfusionTimer() - 1);
         }
         else {
-            if (allyConfusionCounter == 0) {
+            if (user.getConfusionTimer() == 0) {
                 user.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
                 moveTimeLine.add(snappedOutMessage);
                 moveTimeLine.add(controller.generatePause(2000));
             }
             else
-                allyConfusionCounter--;
+                user.setConfusionTimer(user.getConfusionTimer() - 1);
         }
     }
 
@@ -1291,11 +1289,7 @@ public class BattleLogic {
         int turns = generator.nextInt(4) + 1;
 
         target.getSubStatuses().add(Enums.SubStatus.CONFUSED);
-
-        if (allyTarget)
-            allyConfusionCounter = turns;
-        else
-            enemyConfusionCounter = turns;
+        target.setConfusionTimer(turns);
 
         return confusionMessage;
     }
@@ -1536,26 +1530,21 @@ public class BattleLogic {
     }
 
     private void switchPokemon(boolean ally, int slot) {
+
+        Pokemon pokemon;
+
         if (ally) {
-            Pokemon pokemon = player.getParty(currentAllyPokemon);
             currentAllyPokemon = slot;
+            pokemon = player.getParty(currentAllyPokemon);
             allySentOut = true;
-            resetStats(player.getParty(currentAllyPokemon));
-            pokemon.setTwoTurnMove(null);
-            pokemon.setMultiTurnMove(null);
-            pokemon.setMultiTurnCounter(0);
-            allyConfusionCounter = 0;
         }
         else {
-            Pokemon pokemon = enemy.getParty(currentEnemyPokemon);
             currentEnemyPokemon = slot;
+            pokemon = enemy.getParty(currentEnemyPokemon);
             enemySentOut = true;
-            resetStats(enemy.getParty(currentEnemyPokemon));
-            pokemon.setTwoTurnMove(null);
-            pokemon.setMultiTurnMove(null);
-            pokemon.setMultiTurnCounter(0);
-            enemyConfusionCounter = 0;
         }
+
+        resetStats(pokemon);
     }
 
     private void resetStats(Pokemon pokemon)
@@ -1569,5 +1558,9 @@ public class BattleLogic {
         pokemon.getSubStatuses().clear();
         pokemon.setUnderFocusEnergy(false);
         pokemon.setCritIncrease(0);
+        pokemon.setTwoTurnMove(null);
+        pokemon.setMultiTurnMove(null);
+        pokemon.setMultiTurnCounter(0);
+        pokemon.setConfusionTimer(0);
     }
 }

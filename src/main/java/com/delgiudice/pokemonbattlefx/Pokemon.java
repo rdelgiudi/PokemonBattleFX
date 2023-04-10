@@ -12,7 +12,7 @@ public class Pokemon {
     private Enums.Status status = Enums.Status.NONE;
     private int poisonCounter = 1, sleepCounter = 0, critIncrease = 0;
     private Move twoTurnMove = null, multiTurnMove = null;
-    private int twoTurnCounter = 0, multiTurnCounter = 0;
+    private int twoTurnCounter = 0, multiTurnCounter = 0, confusionTimer = 0;
     private int[] ivs = {0, 0, 0, 0, 0, 0};
     private Enums.Nature nature;
     private HashMap<String, Integer> statModifiers = new HashMap<>();
@@ -130,6 +130,10 @@ public class Pokemon {
         return multiTurnCounter;
     }
 
+    public int getConfusionTimer() {
+        return confusionTimer;
+    }
+
     public boolean isUnderFocusEnergy() {
         return underFocusEnergy;
     }
@@ -176,6 +180,10 @@ public class Pokemon {
 
     public void setMultiTurnCounter(int multiTurnCounter) {
         this.multiTurnCounter = multiTurnCounter;
+    }
+
+    public void setConfusionTimer(int confusionTimer) {
+        this.confusionTimer = confusionTimer;
     }
 
     Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1)
