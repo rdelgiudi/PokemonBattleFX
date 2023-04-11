@@ -5,16 +5,17 @@ import java.util.HashMap;
 ///Class which allows to describe a move
 public class MoveTemplate {
     String name;
-    private int power, accuracy, hits = 1, statUp = 0, maxpp, critIncrease = 0, critTemporaryIncrease = 0;
-    private float statusProb, statUpProb, recoil = 0, lifesteal = 0, hpRestore = 0;
+    private final int power, accuracy;
+    private int maxpp, hits = 1, statUp = 0, critIncrease = 0, critTemporaryIncrease = 0;
+    private float statusProb = 0, statUpProb = 0, recoil = 0, lifesteal = 0, hpRestore = 0;
     private boolean priority = false, twoturn = false, self = false, trap = false, charging = false, multiturn = false;
-    private Enums.Subtypes subtype;
-    private Type type;
+    private final Enums.Subtypes subtype;
+    private final Type type;
     private Enums.StatType statType = null;
     private Enums.Status status = Enums.Status.NONE;
 
     private Enums.SubStatus subStatus = Enums.SubStatus.NONE;
-    private static HashMap<String , MoveTemplate> moveMap = new HashMap<>();
+    private static final HashMap<String , MoveTemplate> moveMap = new HashMap<>();
 
     public String getName() {
         return name;
@@ -269,7 +270,7 @@ public class MoveTemplate {
         newmove = new MoveTemplate("Dragon Breath", 60, 100, 20, Enums.Subtypes.SPECIAL,
                 Type.typeMap.get(Enums.Types.DRAGON));
         newmove.setStatus(Enums.Status.PARALYZED);
-        newmove.setStatUpProb(0.3f);
+        newmove.setStatusProb(0.3f);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate("Flare Blitz", 120, 100, 15, Enums.Subtypes.PHYSICAL,

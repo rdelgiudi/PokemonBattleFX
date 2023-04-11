@@ -12,8 +12,8 @@ public class Pokemon {
     private LinkedHashMap<String, Integer> stats = new LinkedHashMap<>();
     private Enums.Status status = Enums.Status.NONE;
     private int poisonCounter = 1, sleepCounter = 0, critIncrease = 0;
-    private Move twoTurnMove = null, multiTurnMove = null;
-    private int twoTurnCounter = 0, multiTurnCounter = 0, confusionTimer = 0;
+    private Move twoTurnMove = null, multiTurnMove = null, trapMove = null;
+    private int twoTurnCounter = 0, multiTurnCounter = 0, confusionTimer = 0, trappedTimer = 0;
     private int[] ivs = {0, 0, 0, 0, 0, 0};
     private Enums.Nature nature;
     private HashMap<String, Integer> statModifiers = new HashMap<>();
@@ -21,6 +21,13 @@ public class Pokemon {
     private List<Enums.SubStatus> subStatuses = new LinkedList<>();
     private Ability ability = Ability.NONE;
     private boolean trapped, underFocusEnergy = false;
+
+    public String getBattleName() {
+        if (owner.isPlayer())
+            return name;
+        else
+            return "Foe " + name;
+    }
 
     public String getName() {
         return name;
@@ -139,12 +146,24 @@ public class Pokemon {
         return confusionTimer;
     }
 
+    public int getTrappedTimer() {
+        return trappedTimer;
+    }
+
+    public Move getTrapMove() {
+        return trapMove;
+    }
+
     public boolean isUnderFocusEnergy() {
         return underFocusEnergy;
     }
 
     public void setOwner(Trainer owner) {
         this.owner = owner;
+    }
+
+    public void setTrappedTimer(int trappedTimer) {
+        this.trappedTimer = trappedTimer;
     }
 
     public void setStatus(Enums.Status status) {
@@ -189,6 +208,10 @@ public class Pokemon {
 
     public void setMultiTurnCounter(int multiTurnCounter) {
         this.multiTurnCounter = multiTurnCounter;
+    }
+
+    public void setTrapMove(Move trapMove) {
+        this.trapMove = trapMove;
     }
 
     public void setConfusionTimer(int confusionTimer) {
@@ -376,8 +399,8 @@ public class Pokemon {
         pokemonExamples.put(example.getName(), example);
 
         example = new Pokemon(PokemonSpecie.getPokemonMap().get("Charmander"), 50, Ability.BLAZE,
-                new Move(MoveTemplate.getMoveMap().get("Slash")), new Move(MoveTemplate.getMoveMap().get("Outrage")),
-                new Move(MoveTemplate.getMoveMap().get("Flare Blitz")), new Move(MoveTemplate.getMoveMap().get("Dig")));
+                new Move(MoveTemplate.getMoveMap().get("Slash")), new Move(MoveTemplate.getMoveMap().get("Dragon Breath")),
+                new Move(MoveTemplate.getMoveMap().get("Flare Blitz")), new Move(MoveTemplate.getMoveMap().get("Fire Spin")));
         pokemonExamples.put(example.getName(), example);
     }
 }

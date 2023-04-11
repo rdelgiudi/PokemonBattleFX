@@ -82,6 +82,10 @@ public class Move {
         return template.isTwoturn();
     }
 
+    public boolean isTrap() {
+        return template.isTrap();
+    }
+
     public boolean isMultiturn() {
         return template.isMultiturn();
     }
