@@ -5,8 +5,6 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 
-import java.io.File;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -15,7 +13,7 @@ import java.util.LinkedHashMap;
 public class PokemonSpecie {
     private String name;
     private int pokedexNumber;
-    private Type[] type = {new Type(Enums.Types.NOTYPE), new Type(Enums.Types.NOTYPE)};
+    private Type[] type = {new Type(Enums.Types.NO_TYPE), new Type(Enums.Types.NO_TYPE)};
     private LinkedHashMap<String, Integer> baseStats = new LinkedHashMap<>();
     private static HashMap<String, PokemonSpecie> pokemonMap = new HashMap<>();
     private Image frontSprite, backSprite, frontSpriteAnim, backSpriteAnim;

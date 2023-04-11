@@ -262,14 +262,15 @@ public class BattleController {
             return null;
 
         boolean descending = from > to;
+        int frameTime = 1000 / max;
 
         for (int i = 1; i <= Math.abs(from - to); i++) {
             final KeyFrame kf;
             final int finalI = i;
             if (descending)
-                kf = new KeyFrame(Duration.millis(50 * i), e -> setEnemyHpBar(from - finalI, max));
+                kf = new KeyFrame(Duration.millis(frameTime * i), e -> setEnemyHpBar(from - finalI, max));
             else
-                kf = new KeyFrame(Duration.millis(50 * i), e -> setEnemyHpBar(from + finalI, max));
+                kf = new KeyFrame(Duration.millis(frameTime * i), e -> setEnemyHpBar(from + finalI, max));
             keyFrameList.add(kf);
         }
 
@@ -375,18 +376,17 @@ public class BattleController {
 
         boolean descending = from > to;
 
+        double frameTime = 1000.0 / max;
         int frameCount = Math.abs(from - to);
 
         for (int i = 1; i <= frameCount; i++) {
             final KeyFrame kf;
             final int finalI = i;
 
-            double duration = (double) (500 * i) / frameCount;
-
             if (descending)
-                kf = new KeyFrame(Duration.millis(duration), e -> setAllyHpBar(from - finalI, max));
+                kf = new KeyFrame(Duration.millis(frameTime * i), e -> setAllyHpBar(from - finalI, max));
             else
-                kf = new KeyFrame(Duration.millis(duration), e -> setAllyHpBar(from + finalI, max));
+                kf = new KeyFrame(Duration.millis(frameTime * i), e -> setAllyHpBar(from + finalI, max));
             keyFrameList.add(kf);
         }
 

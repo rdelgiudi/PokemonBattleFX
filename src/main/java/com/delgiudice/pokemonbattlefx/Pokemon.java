@@ -26,7 +26,14 @@ public class Pokemon {
         if (owner.isPlayer())
             return name;
         else
-            return "Foe " + name;
+            return "The foe's " + name;
+    }
+
+    public String getBattleNameMiddle() {
+        if (owner.isPlayer())
+            return name;
+        else
+            return "the foe's " + name;
     }
 
     public String getName() {
@@ -401,6 +408,16 @@ public class Pokemon {
         example = new Pokemon(PokemonSpecie.getPokemonMap().get("Charmander"), 50, Ability.BLAZE,
                 new Move(MoveTemplate.getMoveMap().get("Slash")), new Move(MoveTemplate.getMoveMap().get("Dragon Breath")),
                 new Move(MoveTemplate.getMoveMap().get("Flare Blitz")), new Move(MoveTemplate.getMoveMap().get("Fire Spin")));
+        pokemonExamples.put(example.getName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get("Charmeleon"), 50, Ability.BLAZE,
+                new Move(MoveTemplate.getMoveMap().get("Inferno")), new Move(MoveTemplate.getMoveMap().get("Fire Fang")),
+                        new Move(MoveTemplate.getMoveMap().get("Scary Face")), new Move(MoveTemplate.getMoveMap().get("Dragon Claw")));
+        pokemonExamples.put(example.getName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get("Charizard"), 50, Ability.BLAZE,
+                new Move(MoveTemplate.getMoveMap().get("Air Slash")), new Move(MoveTemplate.getMoveMap().get("Heat Wave")),
+                new Move(MoveTemplate.getMoveMap().get("Flare Blitz")), new Move(MoveTemplate.getMoveMap().get("Dragon Dance")));
         pokemonExamples.put(example.getName(), example);
     }
 }

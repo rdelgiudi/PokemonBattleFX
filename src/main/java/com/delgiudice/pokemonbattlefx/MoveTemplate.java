@@ -1,6 +1,10 @@
 package com.delgiudice.pokemonbattlefx;
 
+import javafx.beans.property.StringProperty;
+
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 ///Class which allows to describe a move
 public class MoveTemplate {
@@ -11,7 +15,7 @@ public class MoveTemplate {
     private boolean priority = false, twoturn = false, self = false, trap = false, charging = false, multiturn = false;
     private final Enums.Subtypes subtype;
     private final Type type;
-    private Enums.StatType statType = null;
+    private List<Enums.StatType> statTypes = new LinkedList<>();
     private Enums.Status status = Enums.Status.NONE;
 
     private Enums.SubStatus subStatus = Enums.SubStatus.NONE;
@@ -102,8 +106,8 @@ public class MoveTemplate {
     public Type getType() {
         return type;
     }
-    public Enums.StatType getStatType() {
-        return statType;}
+    public List<Enums.StatType> getStatTypes() {
+        return statTypes;}
 
     public static HashMap<String , MoveTemplate> getMoveMap() {
         return moveMap;
@@ -165,19 +169,23 @@ public class MoveTemplate {
         this.critTemporaryIncrease = critTemporaryIncrease;
     }
 
+    public void setSubStatus(Enums.SubStatus subStatus) {
+        this.subStatus = subStatus;
+    }
+
     public void setMultiturn(boolean multiturn) {
         this.multiturn = multiturn;
     }
 
     public MoveTemplate(String name, int power, int accuracy, int pp, Enums.Subtypes subtype, Type type,
-                        Enums.StatType statType, int statUp, boolean self, float statUpProb) {
+                        Enums.StatType statTypes, int statUp, boolean self, float statUpProb) {
         this.name = name;
         this.power = power;
         this.accuracy = accuracy;
         this.maxpp = pp;
         this.subtype = subtype;
         this.type = type;
-        this.statType = statType;
+        this.statTypes.add(statTypes);
         this.statUp = statUp;
         this.self = self;
         this.statUpProb = statUpProb;
@@ -210,7 +218,7 @@ public class MoveTemplate {
         this.lifesteal = original.lifesteal;
         this.subtype = original.subtype;
         this.type = original.type;
-        this.statType = original.statType;
+        this.statTypes = original.statTypes;
         this.self = original.self;
     }
 
@@ -219,7 +227,7 @@ public class MoveTemplate {
         Type.setTypeList(); //init types
 
         MoveTemplate newmove = new MoveTemplate("Confusion Damage", 40, 0, 0, Enums.Subtypes.PHYSICAL,
-                Type.typeMap.get(Enums.Types.NOTYPE));
+                Type.typeMap.get(Enums.Types.NO_TYPE));
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate("Tackle", 40, 100, 35, Enums.Subtypes.PHYSICAL,
@@ -339,6 +347,54 @@ public class MoveTemplate {
                 Type.typeMap.get(Enums.Types.GRASS));
         moveMap.put(newmove.getName(), newmove);
 
+        newmove = new MoveTemplate("Confuse Ray", 0, 100, 10, Enums.Subtypes.STATUS,
+                Type.typeMap.get(Enums.Types.GHOST));
+        newmove.setSubStatus(Enums.SubStatus.CONFUSED);
+        newmove.setStatusProb(1.0f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Will-O-Wisp", 0, 85, 15, Enums.Subtypes.STATUS,
+                Type.typeMap.get(Enums.Types.FIRE));
+        newmove.setStatus(Enums.Status.BURNED);
+        newmove.setStatusProb(1.0f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Inferno", 100, 50, 5, Enums.Subtypes.SPECIAL,
+                Type.typeMap.get(Enums.Types.FIRE));
+        newmove.setStatus(Enums.Status.BURNED);
+        newmove.setStatUpProb(1.0f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Scary Face", 0, 100, 10, Enums.Subtypes.STATUS,
+                Type.typeMap.get(Enums.Types.NORMAL), Enums.StatType.SPEED, -2, false, 1.0f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Fire Fang", 65, 95, 15, Enums.Subtypes.PHYSICAL,
+                Type.typeMap.get(Enums.Types.FIRE));
+        newmove.setStatus(Enums.Status.BURNED);
+        newmove.setStatUpProb(0.1f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Dragon Claw", 80, 100, 15, Enums.Subtypes.PHYSICAL,
+                Type.typeMap.get(Enums.Types.DRAGON));
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Air Slash", 75, 95, 15, Enums.Subtypes.SPECIAL,
+                Type.typeMap.get(Enums.Types.FLYING));
+        newmove.setSubStatus(Enums.SubStatus.FLINCHED);
+        newmove.setStatusProb(0.3f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Heat Wave", 95, 90, 10, Enums.Subtypes.SPECIAL,
+                Type.typeMap.get(Enums.Types.FIRE));
+        newmove.setStatus(Enums.Status.BURNED);
+        newmove.setStatUpProb(0.1f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate("Dragon Dance", 0, 0, 20, Enums.Subtypes.STATUS,
+                Type.typeMap.get(Enums.Types.DRAGON), Enums.StatType.ATTACK, 1, true, 1.0f);
+        newmove.getStatTypes().add(Enums.StatType.SPEED);
+        moveMap.put(newmove.getName(), newmove);
     }
 
 }

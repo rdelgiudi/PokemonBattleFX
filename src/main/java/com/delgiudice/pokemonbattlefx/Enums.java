@@ -24,7 +24,7 @@ public class Enums {
         STEEL("STEEL"),         //16
         FAIRY("FAIRY"),         //17
         MISSING("NONE"),        //18
-        NOTYPE("NO TYPE");      //19
+        NO_TYPE("TYPELESS");      //19
 
         final private String typeString;
 
@@ -72,7 +72,7 @@ public class Enums {
             this.typeString = typeString;
         }
     }
-    public enum Status {       //lista statusów
+    public enum Status {       //status list
         NONE("NONE"),
         PARALYZED("paralyzed"),
         POISONED("poisoned"),
@@ -93,8 +93,9 @@ public class Enums {
     }
     public enum SubStatus {
         NONE("no abnormal status"),
-        CONFUSED("confused"),
-        ATTRACTED("immobilized by love");
+        CONFUSED("became confused"),
+        FLINCHED("flinched"),
+        ATTRACTED("fell in love"); //TODO: implementation of Pokemon genders
 
         final private String statusString;
 
@@ -171,7 +172,7 @@ public class Enums {
         }
     }
     public enum TrainerTypes{
-        ACETRAINER("Ace Trainer"),
+        ACE_TRAINER("Ace Trainer"),
         YOUNGSTER("Youngster");
 
         final private String typeString;
@@ -186,6 +187,6 @@ public class Enums {
     }
     public enum ItemType{
         HEALING,
-        PPRESTORE;
+        PP_RESTORE;
     }
 }

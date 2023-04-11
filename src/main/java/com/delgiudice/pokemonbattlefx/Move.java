@@ -1,5 +1,7 @@
 package com.delgiudice.pokemonbattlefx;
 
+import java.util.List;
+
 public class Move {
 
     private MoveTemplate template;
@@ -43,8 +45,8 @@ public class Move {
     public Type getType() {
         return template.getType();
     }
-    public Enums.StatType getStatType() {
-        return template.getStatType();}
+    public List<Enums.StatType> getStatTypes() {
+        return template.getStatTypes();}
 
     public float getStatUpProb() {
         return template.getStatUpProb();
@@ -52,6 +54,10 @@ public class Move {
 
     public Enums.Status getStatus() {
         return template.getStatus();
+    }
+
+    public Enums.SubStatus getSubStatus() {
+        return template.getSubStatus();
     }
 
     public MoveTemplate getTemplate() {
