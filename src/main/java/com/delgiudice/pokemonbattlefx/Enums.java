@@ -1,39 +1,47 @@
 package com.delgiudice.pokemonbattlefx;
 
+import javafx.scene.paint.Color;
+
 import java.util.HashMap;
 
 public class Enums {
     //All types
     public enum Types {        //lista typów
-        NORMAL("NORMAL"),       //0
-        FIRE("FIRE"),           //1
-        WATER("WATER"),         //2
-        ELECTRIC("ELECTRIC"),   //3
-        GRASS("GRASS"),         //4
-        ICE("ICE"),             //5
-        FIGHTING("FIGHTING"),   //6
-        POISON("POISON"),       //7
-        GROUND("GROUND"),       //8
-        FLYING("FLYING"),       //9
-        PSYCHIC("PSYCHIC"),     //10
-        BUG("BUG"),             //11
-        ROCK("ROCK"),           //12
-        GHOST("GHOST"),         //13
-        DRAGON("DRAGON"),       //14
-        DARK("DARK"),           //15
-        STEEL("STEEL"),         //16
-        FAIRY("FAIRY"),         //17
-        MISSING("NONE"),        //18
-        NO_TYPE("TYPELESS");      //19
+        NORMAL("NORMAL", Color.valueOf("#A8A878")),       //0
+        FIRE("FIRE", Color.valueOf("#F08030")),           //1
+        WATER("WATER", Color.valueOf("#6890F0")),         //2
+        ELECTRIC("ELECTRIC", Color.valueOf("#F8D030")),   //3
+        GRASS("GRASS", Color.valueOf("#78C850")),         //4
+        ICE("ICE", Color.valueOf("#98D8D8")),             //5
+        FIGHTING("FIGHTING", Color.valueOf("#C03028")),   //6
+        POISON("POISON", Color.valueOf("#A040A0")),       //7
+        GROUND("GROUND", Color.valueOf("#E0C068")),       //8
+        FLYING("FLYING", Color.valueOf("#A890F0")),       //9
+        PSYCHIC("PSYCHIC", Color.valueOf("#F85888")),     //10
+        BUG("BUG", Color.valueOf("#6D7815")),             //11
+        ROCK("ROCK", Color.valueOf("#786824")),           //12
+        GHOST("GHOST", Color.valueOf("#493963")),         //13
+        DRAGON("DRAGON", Color.valueOf("#7038F8")),       //14
+        DARK("DARK", Color.valueOf("#49392F")),           //15
+        STEEL("STEEL", Color.valueOf("#787887")),         //16
+        FAIRY("FAIRY", Color.valueOf("#B8B8D0")),         //17
+        MISSING("NONE", Color.WHITE),        //18
+        NO_TYPE("TYPELESS", Color.valueOf("#44685E"));      //19
 
         final private String typeString;
+        final private Color typeColor;
 
         public String toString() {
             return typeString;
         }
 
-        Types(String typeString) {
+        public Color getTypeColor() {
+            return typeColor;
+        }
+
+        Types(String typeString, Color typeColor) {
             this.typeString = typeString;
+            this.typeColor = typeColor;
         }
     }
     public enum Subtypes {     //move subtype list

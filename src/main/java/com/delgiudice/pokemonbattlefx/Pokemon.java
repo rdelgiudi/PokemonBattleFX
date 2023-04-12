@@ -369,7 +369,7 @@ public class Pokemon {
     {
         int stat, basestat;
         basestat = specie.getBaseStats().get(Enums.StatType.MAX_HP);     //uses different formula, that's why it's separate
-        stat = (int)(((2 * basestat + ivs[0])*level/100) + level + 10);
+        stat = (int)(Math.floor((2 * basestat + ivs[0])*level/100.0) + level + 10);
         stats.put(Enums.StatType.MAX_HP, stat);
         hp = stat;
         Iterator<Map.Entry<Enums.StatType, Integer>> it = specie.getBaseStats().entrySet().iterator();
@@ -385,7 +385,7 @@ public class Pokemon {
                     case -1 -> naturemod = 0.9f;
                     default -> System.out.println("ERROR: Nature out of expected range!");
                 }
-                stat = (int)((((2 * basestat + ivs[0])*level/100) + 5) * naturemod);
+                stat = (int)Math.floor((Math.floor((2 * basestat + ivs[i])*level/100.0) + 5) * naturemod);
                 stats.put(pair.getKey(), stat);
                 i++;
             }

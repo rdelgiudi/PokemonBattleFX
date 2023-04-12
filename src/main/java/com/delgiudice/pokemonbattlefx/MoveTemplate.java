@@ -410,6 +410,14 @@ public class MoveTemplate {
         newmove = new MoveTemplate(MoveEnum.EARTHQUAKE, 100, 100, 10, Enums.Subtypes.PHYSICAL,
                 Type.getTypeMap().get(Enums.Types.GROUND));
         moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.HYDRO_PUMP, 110, 80, 5, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap().get(Enums.Types.WATER));
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.AQUA_TAIL, 90, 90, 10, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap().get(Enums.Types.WATER));
+        moveMap.put(newmove.getName(), newmove);
     }
 
 }

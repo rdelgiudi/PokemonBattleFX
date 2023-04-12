@@ -20,6 +20,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 import java.util.LinkedList;
@@ -500,19 +501,34 @@ public class BattleController {
 
     }
 
+    private String format(double val) {
+        String in = Integer.toHexString((int) Math.round(val * 255));
+        return in.length() == 1 ? "0" + in : in;
+    }
+
+    public String toHexString(Color value) {
+        return "#" + (format(value.getRed()) + format(value.getGreen()) + format(value.getBlue()) + format(value.getOpacity()))
+                .toUpperCase();
+    }
+
     private void setMoveInformation(Button button, Move move) {
 
-        String ppInfo = "%s%nPP: %-2d\t/\t%2d";
+        String ppInfo = "%s%nPP: %-2d/%2d%nType: %s";
+
+        String type;
+        type = move.getType().getTypeEnum().toString();
 
         button.setText(String.format(ppInfo, move.getName(), move.getPp(),
-                move.getMaxpp()));
+                move.getMaxpp(), type));
 
         float percentage = (float)move.getPp() / move.getMaxpp();
+
+        button.setFont(Font.font("Monospaced"));
 
         if (percentage > 0.25)
             button.setTextFill(Color.BLACK);
         else if (percentage > 0)
-            button.setTextFill(Color.ORANGE);
+            button.setTextFill(Color.DARKORANGE);
         else
             button.setTextFill(Color.DARKRED);
     }
@@ -558,13 +574,14 @@ public class BattleController {
                 int partyIndex = i + (3 * j);
 
                 Button button = (Button) getNodeFromGridPane(getPokemonGrid(), i, j);
-                button.setStyle("-fx-background-color: green");
+                //button.setStyle("-fx-background-color: green");
+                button.setTextFill(Color.DARKGREEN);
                 button.setDisable(false);
 
                 if (partyIndex > partySize - 1) {
                     button.setText("");
                     button.setDisable(true);
-                    button.setStyle("-fx-background-color: transparent");
+                    //button.setStyle("-fx-background-color: transparent");
                     continue;
                 }
 
@@ -572,7 +589,8 @@ public class BattleController {
                 button.setText(String.format("%s%nHP:%d/%d", pokemon.getName(), pokemon.getHp(), pokemon.getMaxHP()));
 
                 if (pokemon.getHp() == 0) {
-                    button.setStyle("-fx-background-color: red");
+                    //button.setStyle("-fx-background-color: red");
+                    button.setTextFill(Color.DARKRED);
                     button.setDisable(true);
                 }
             }

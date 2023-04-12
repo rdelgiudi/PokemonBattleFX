@@ -3,6 +3,7 @@ package com.delgiudice.pokemonbattlefx;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.control.Button;
+import javafx.scene.text.Font;
 import javafx.util.Duration;
 
 import java.security.SecureRandom;
@@ -20,6 +21,7 @@ public class BattleLogic {
     private static final String POKEMON_FAINTED_STRING = "%s fainted!";
     private static final String POKEMON_SENT_OUT_STRING = "Go! %s!";
     private static final String MOVE_NO_EFFECT_STRING = "It doesn't affect%n%s...";
+    private static final Font MAIN_FONT = Font.font("Monospaced");
 
     private Player player;
     private NpcTrainer enemy;
@@ -369,6 +371,7 @@ public class BattleLogic {
 
         Button button = controller.getPokemonBackButton();
         button.setText("Back");
+        button.setFont(MAIN_FONT);
         button.setDisable(false);
 
         button.setOnAction(e -> {
@@ -842,6 +845,7 @@ public class BattleLogic {
 
         Button button = controller.getPokemonBackButton();
         button.setText("Back");
+        button.setFont(MAIN_FONT);
         button.setDisable(true);
     }
 

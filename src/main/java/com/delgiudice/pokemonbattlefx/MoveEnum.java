@@ -36,7 +36,9 @@ public enum MoveEnum {
     AIR_SLASH("Air Slash"),
     HEAT_WAVE("Heat Wave"),
     DRAGON_DANCE("Dragon Dance"),
-    EARTHQUAKE("Earthquake");
+    EARTHQUAKE("Earthquake"),
+    HYDRO_PUMP("Hydro Pump"),
+    AQUA_TAIL("Aqua Tail");
 
 
     private final String name;
