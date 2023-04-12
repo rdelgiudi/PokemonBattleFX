@@ -1,14 +1,21 @@
 package com.delgiudice.pokemonbattlefx;
 
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -17,6 +24,7 @@ import javafx.util.Duration;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class BattleController {
 
@@ -32,12 +40,14 @@ public class BattleController {
     @FXML
     private VBox allyPokemonInfo, enemyPokemonInfo;
     @FXML
-    private ImageView allyPokemonSprite, enemyPokemonSprite;
+    private ImageView allyPokemonSprite, enemyPokemonSprite, textArrowView;
     @FXML
     private Label enemyNameLabel, enemyLvLabel, allyNameLabel, allyHpLabel, allyLvLabel, allyStatusLabel,
                     enemyStatusLabel;
     @FXML
     private ProgressBar enemyHpBar, allyHpBar;
+
+    private Scene scene;
 
     public ImageView getAllyPokemonSprite() {
         return allyPokemonSprite;
@@ -96,7 +106,6 @@ public class BattleController {
     }
 
     public void initialize() {
-
     }
 
     public void switchToPlayerChoice(boolean choice) {
@@ -127,6 +136,56 @@ public class BattleController {
             kf = new KeyFrame(Duration.millis(25 * text.length() + 25), e -> battleText.setText(text));
 
         timeline.getKeyFrames().add(kf);
+
+        return timeline;
+    }
+
+    public void battleTextAdvanceByUserInput(Timeline text, Timeline nextText) {
+
+        Scene scene = battleTextFull.getScene();
+
+        text.setOnFinished(e -> {
+
+            final Timeline timeline = getTextArrowAnimation();
+
+            scene.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.PRIMARY) {
+                    textArrowView.setVisible(false);
+                    nextText.play();
+                    scene.setOnMouseClicked(null);
+                    scene.setOnKeyPressed(null);
+                    timeline.stop();
+                }
+            });
+            scene.setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.ENTER) {
+                    textArrowView.setVisible(false);
+                    nextText.play();
+                    scene.setOnMouseClicked(null);
+                    scene.setOnKeyPressed(null);
+                    timeline.stop();
+                }
+            });
+
+            textArrowView.setVisible(true);
+            timeline.play();
+            });
+    }
+
+    private Timeline getTextArrowAnimation() {
+
+        List<KeyFrame> keyFrameList = new LinkedList<>();
+
+        for (int i=10; i < 20; i++) {
+            double finalI = i;
+            KeyFrame kf = new KeyFrame(Duration.millis((i-10) * 25), e -> AnchorPane.setBottomAnchor(textArrowView, finalI));
+            keyFrameList.add(kf);
+        }
+
+        final Timeline timeline = new Timeline();
+        timeline.getKeyFrames().addAll(keyFrameList);
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.setAutoReverse(true);
 
         return timeline;
     }

@@ -8,7 +8,7 @@ public class Move {
 
     private int pp;
 
-    public String getName() {
+    public MoveEnum getName() {
         return template.getName();
     }
 
@@ -32,8 +32,8 @@ public class Move {
         return template.getHits();
     }
 
-    public int getStatUp(){
-        return template.getStatUp();}
+    public int getStatChange(){
+        return template.getStatChange();}
 
     public int getPp(){
         return pp;
@@ -48,8 +48,8 @@ public class Move {
     public List<Enums.StatType> getStatTypes() {
         return template.getStatTypes();}
 
-    public float getStatUpProb() {
-        return template.getStatUpProb();
+    public float getStatChangeProb() {
+        return template.getStatChangeProb();
     }
 
     public Enums.Status getStatus() {
@@ -102,6 +102,14 @@ public class Move {
 
     public boolean isSelf() {
         return template.isSelf();
+    }
+
+    public float getRecoil() {
+        return template.getRecoil();
+    }
+
+    public boolean isRecoilHpDamage() {
+        return template.isRecoilUserHp();
     }
 
     public Move(MoveTemplate template) {

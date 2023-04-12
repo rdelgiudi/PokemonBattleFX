@@ -4,19 +4,19 @@ import java.security.SecureRandom;
 import java.util.*;
 
 public class Pokemon {
-    private static final HashMap<String, Pokemon> pokemonExamples = new HashMap<>();
+    private static final HashMap<PokemonEnum, Pokemon> pokemonExamples = new HashMap<>();
     private String name;
     private Trainer owner;
     private int hp, level;
     private List<Move> moveList = new ArrayList<>();
-    private LinkedHashMap<String, Integer> stats = new LinkedHashMap<>();
+    private LinkedHashMap<Enums.StatType, Integer> stats = new LinkedHashMap<>();
     private Enums.Status status = Enums.Status.NONE;
     private int poisonCounter = 1, sleepCounter = 0, critIncrease = 0;
     private Move twoTurnMove = null, multiTurnMove = null, trapMove = null;
     private int twoTurnCounter = 0, multiTurnCounter = 0, confusionTimer = 0, trappedTimer = 0;
     private int[] ivs = {0, 0, 0, 0, 0, 0};
     private Enums.Nature nature;
-    private HashMap<String, Integer> statModifiers = new HashMap<>();
+    private HashMap<Enums.StatType, Integer> statModifiers = new HashMap<>();
     private PokemonSpecie specie;
     private List<Enums.SubStatus> subStatuses = new LinkedList<>();
     private Ability ability = Ability.NONE;
@@ -40,7 +40,7 @@ public class Pokemon {
         return name;
     }
 
-    public String getOriginalName() {
+    public PokemonEnum getOriginalName() {
         return specie.getName();
     }
 
@@ -60,11 +60,11 @@ public class Pokemon {
         return ability;
     }
 
-    public static HashMap<String, Pokemon> getPokemonExamples() {
+    public static HashMap<PokemonEnum, Pokemon> getPokemonExamples() {
         return pokemonExamples;
     }
 
-    public HashMap<String, Integer> getStatModifiers() {
+    public HashMap<Enums.StatType, Integer> getStatModifiers() {
         return statModifiers;
     }
 
@@ -76,11 +76,11 @@ public class Pokemon {
         return moveList.get(move);
     }
 
-    public LinkedHashMap<String, Integer> getStats() {
+    public LinkedHashMap<Enums.StatType, Integer> getStats() {
         return stats;
     }
 
-    public int getStats(String stat)
+    public int getStats(Enums.StatType stat)
     {
         return stats.get(stat);
     }
@@ -122,7 +122,7 @@ public class Pokemon {
     }
 
     public int getMaxHP() {
-        return stats.get("Max HP");
+        return stats.get(Enums.StatType.MAX_HP);
     }
 
     public Enums.Status getStatus() {
@@ -227,28 +227,28 @@ public class Pokemon {
 
     Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1)
     {
-        this.name = specie.getName();
+        this.name = specie.getName().toString();
         this.specie = specie;
         this.level = level;
         this.ability = ability;
         moveList.add(move1);
         generateVariables();
-        this.hp = stats.get("Max HP");
+        this.hp = stats.get(Enums.StatType.MAX_HP);
     }
     Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1, Move move2)
     {
-        this.name = specie.getName();
+        this.name = specie.getName().toString();
         this.specie = specie;
         this.level = level;
         this.ability = ability;
         moveList.add(move1);
         moveList.add(move2);
         generateVariables();
-        this.hp = stats.get("Max HP");
+        this.hp = stats.get(Enums.StatType.MAX_HP);
     }
     Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1, Move move2, Move move3)
     {
-        this.name = specie.getName();
+        this.name = specie.getName().toString();
         this.specie = specie;
         this.level = level;
         this.ability = ability;
@@ -256,11 +256,11 @@ public class Pokemon {
         moveList.add(move2);
         moveList.add(move3);
         generateVariables();
-        this.hp = stats.get("Max HP");
+        this.hp = stats.get(Enums.StatType.MAX_HP);
     }
     Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1, Move move2, Move move3, Move move4)
     {
-        this.name = specie.getName();
+        this.name = specie.getName().toString();
         this.specie = specie;
         this.level = level;
         this.ability = ability;
@@ -269,7 +269,7 @@ public class Pokemon {
         moveList.add(move3);
         moveList.add(move4);
         generateVariables();
-        this.hp = stats.get("Max HP");
+        this.hp = stats.get(Enums.StatType.MAX_HP);
     }
     Pokemon(Pokemon original)
     {
@@ -282,15 +282,26 @@ public class Pokemon {
         calculateStats();
         for (Move move : original.getMoveList())
             moveList.add(new Move(move.getTemplate()));
-        this.hp = stats.get("Max HP");
+        this.hp = stats.get(Enums.StatType.MAX_HP);
+    }
+
+    public boolean[] checkAvailableMoves() {
+        boolean[] availableMoves = new boolean[4];
+
+        for (int i=0; i < moveList.size(); i++) {
+            if (moveList.get(i).getPp() > 0)
+                availableMoves[i] = true;
+        }
+
+        return availableMoves;
     }
 
     public void levelUp()       //raises level, updates stats
     {
         int[] oldStats = new int[6];
         int i = 0;
-        for(Map.Entry<String, Integer> stat : stats.entrySet()) {
-            String statname = stat.getKey();
+        for(Map.Entry<Enums.StatType, Integer> stat : stats.entrySet()) {
+            Enums.StatType statname = stat.getKey();
             int statval = stat.getValue();
             oldStats[i] = statval;
             i++;
@@ -300,16 +311,16 @@ public class Pokemon {
         System.out.println("\n" + name + " leveled up to level " + level + "!\n");
         System.out.println("Stats increase:");
         i = 0;
-        for (Map.Entry<String, Integer> stat : stats.entrySet()){
-            String statname = stat.getKey();
+        for (Map.Entry<Enums.StatType, Integer> stat : stats.entrySet()){
+            Enums.StatType statname = stat.getKey();
             int statval = stat.getValue();
             int statDiff = statval - oldStats[i];
             i++;
             System.out.println(statname + ": +" + statDiff);
         }
         System.out.println("\nCurrent stats:");
-        for (Map.Entry<String, Integer> stat : stats.entrySet()){
-            String statname = stat.getKey();
+        for (Map.Entry<Enums.StatType, Integer> stat : stats.entrySet()){
+            Enums.StatType statname = stat.getKey();
             int statval = stat.getValue();
             System.out.println(statname + ": " + statval);
         }
@@ -357,15 +368,15 @@ public class Pokemon {
     public void calculateStats()        //calculates pokemon statistics based on ivs and nature and level
     {
         int stat, basestat;
-        basestat = specie.getBaseStats().get("Max HP");     //uses different formula, that's why it's separate
+        basestat = specie.getBaseStats().get(Enums.StatType.MAX_HP);     //uses different formula, that's why it's separate
         stat = (int)(((2 * basestat + ivs[0])*level/100) + level + 10);
-        stats.put("Max HP", stat);
+        stats.put(Enums.StatType.MAX_HP, stat);
         hp = stat;
-        Iterator<Map.Entry<String, Integer>> it = specie.getBaseStats().entrySet().iterator();
+        Iterator<Map.Entry<Enums.StatType, Integer>> it = specie.getBaseStats().entrySet().iterator();
         int i = 1;
         while(it.hasNext()) {       //iterates statistics, checks nature buffs/debuffs and calculates
-            Map.Entry<String, Integer> pair = it.next();
-            if (!pair.getKey().equals("Max HP"))  {
+            Map.Entry<Enums.StatType, Integer> pair = it.next();
+            if (!pair.getKey().equals(Enums.StatType.MAX_HP))  {
                 basestat = pair.getValue();
                 float naturemod = 0;
                 switch (nature.getStatTab()[i - 1]) {
@@ -390,34 +401,34 @@ public class Pokemon {
 
     public static void generatePokemonExamples() {
         PokemonSpecie.setPokemonMap();
-        Pokemon example = new Pokemon(PokemonSpecie.getPokemonMap().get("Bulbasaur"), 50, Ability.OVERGROW,
-                new Move(MoveTemplate.getMoveMap().get("Razor Leaf")), new Move(MoveTemplate.getMoveMap().get("Double-Edge")),
-                new Move(MoveTemplate.getMoveMap().get("Solar Beam")), new Move(MoveTemplate.getMoveMap().get("Sleep Powder")));
-        pokemonExamples.put(example.getName(), example);
+        Pokemon example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.BULBASAUR), 50, Ability.OVERGROW,
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.RAZOR_LEAF)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.DOUBLE_EDGE)),
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.SOLAR_BEAM)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.SLEEP_POWDER)));
+        pokemonExamples.put(example.getOriginalName(), example);
 
-        example = new Pokemon(PokemonSpecie.getPokemonMap().get("Ivysaur"), 50, Ability.OVERGROW,
-                new Move(MoveTemplate.getMoveMap().get("Seed Bomb")), new Move(MoveTemplate.getMoveMap().get("Synthesis")),
-                new Move(MoveTemplate.getMoveMap().get("Solar Beam")), new Move(MoveTemplate.getMoveMap().get("Sweet Scent")));
-        pokemonExamples.put(example.getName(), example);
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.IVYSAUR), 50, Ability.OVERGROW,
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.SEED_BOMB)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.SYNTHESIS)),
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.SOLAR_BEAM)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.SWEET_SCENT)));
+        pokemonExamples.put(example.getOriginalName(), example);
 
-        example = new Pokemon(PokemonSpecie.getPokemonMap().get("Venosaur"), 50, Ability.OVERGROW,
-                new Move(MoveTemplate.getMoveMap().get("Petal Blizzard")), new Move(MoveTemplate.getMoveMap().get("Petal Dance")),
-                new Move(MoveTemplate.getMoveMap().get("Solar Beam")), new Move(MoveTemplate.getMoveMap().get("Double-Edge")));
-        pokemonExamples.put(example.getName(), example);
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.VENOSAUR), 50, Ability.OVERGROW,
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.PETAL_BLIZZARD)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.PETAL_DANCE)),
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.SOLAR_BEAM)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.DOUBLE_EDGE)));
+        pokemonExamples.put(example.getOriginalName(), example);
 
-        example = new Pokemon(PokemonSpecie.getPokemonMap().get("Charmander"), 50, Ability.BLAZE,
-                new Move(MoveTemplate.getMoveMap().get("Slash")), new Move(MoveTemplate.getMoveMap().get("Dragon Breath")),
-                new Move(MoveTemplate.getMoveMap().get("Flare Blitz")), new Move(MoveTemplate.getMoveMap().get("Fire Spin")));
-        pokemonExamples.put(example.getName(), example);
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.CHARMANDER), 50, Ability.BLAZE,
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.SLASH)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.DRAGON_BREATH)),
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.FLARE_BLITZ)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.FIRE_SPIN)));
+        pokemonExamples.put(example.getOriginalName(), example);
 
-        example = new Pokemon(PokemonSpecie.getPokemonMap().get("Charmeleon"), 50, Ability.BLAZE,
-                new Move(MoveTemplate.getMoveMap().get("Inferno")), new Move(MoveTemplate.getMoveMap().get("Fire Fang")),
-                        new Move(MoveTemplate.getMoveMap().get("Scary Face")), new Move(MoveTemplate.getMoveMap().get("Dragon Claw")));
-        pokemonExamples.put(example.getName(), example);
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.CHARMELEON), 50, Ability.BLAZE,
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.INFERNO)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.FIRE_FANG)),
+                        new Move(MoveTemplate.getMoveMap().get(MoveEnum.SCARY_FACE)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.DRAGON_CLAW)));
+        pokemonExamples.put(example.getOriginalName(), example);
 
-        example = new Pokemon(PokemonSpecie.getPokemonMap().get("Charizard"), 50, Ability.BLAZE,
-                new Move(MoveTemplate.getMoveMap().get("Air Slash")), new Move(MoveTemplate.getMoveMap().get("Heat Wave")),
-                new Move(MoveTemplate.getMoveMap().get("Flare Blitz")), new Move(MoveTemplate.getMoveMap().get("Dragon Dance")));
-        pokemonExamples.put(example.getName(), example);
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.CHARIZARD), 50, Ability.BLAZE,
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.AIR_SLASH)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.HEAT_WAVE)),
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.FLARE_BLITZ)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.DRAGON_DANCE)));
+        pokemonExamples.put(example.getOriginalName(), example);
     }
 }

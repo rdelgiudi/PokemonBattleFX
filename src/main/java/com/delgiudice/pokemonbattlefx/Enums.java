@@ -52,14 +52,15 @@ public class Enums {
             this.typeString = typeString;
         }
     }
-    public enum StatType {       //statistics to lower or increase
+    public enum StatType {       //pokemon statistics (both regular and stat changes)
+        MAX_HP("Max HP"),
         ATTACK("Attack"),
         DEFENSE("Defense"),
-        ACCURACY("Accuracy"),
+        ACCURACY("Accuracy"), // in battle only
         SPECIAL_ATTACK("Special Attack"),
         SPECIAL_DEFENSE("Special Defense"),
         SPEED("Speed"),
-        EVASIVENESS("Evasiveness");
+        EVASIVENESS("Evasiveness"); //in battle only
 
         final private String typeString;
 

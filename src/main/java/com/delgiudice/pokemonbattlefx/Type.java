@@ -7,6 +7,13 @@ import java.util.List;
 
 ///This class indicates the typing of move/Pokemon as well as contains type strengths and weaknesses
 public class Type {
+
+    private static final HashMap<Enums.Types,Type> typeMap = new HashMap<>();
+
+    public static HashMap<Enums.Types,Type> getTypeMap() {
+        return typeMap;
+    }
+
     private final Enums.Types type;
     private final List<Enums.Types> weakAgainst = new LinkedList<>();
     private final List<Enums.Types> strongAgainst = new LinkedList<>();
@@ -36,8 +43,6 @@ public class Type {
     public String toString() {
         return type.toString();
     }
-
-    public static HashMap<Enums.Types,Type> typeMap = new HashMap<>();
 
     //initializes list of available types
     public static void setTypeList()
