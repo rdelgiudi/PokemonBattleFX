@@ -6,7 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="added new moves and pokemon examples">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleLogic.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Move.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Move.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveEnum.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveEnum.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveTemplate.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveTemplate.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Type.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Type.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,6 +95,29 @@
     </task>
     <option name="localTasksCounter" value="3" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/java1.8" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fixed pom.xml" />

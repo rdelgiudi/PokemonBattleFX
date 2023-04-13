@@ -10,6 +10,10 @@ public class Type {
 
     private static final HashMap<Enums.Types,Type> typeMap = new HashMap<>();
 
+    public static Type getTypeMap(Enums.Types type) {
+        return typeMap.get(type);
+    }
+
     public static HashMap<Enums.Types,Type> getTypeMap() {
         return typeMap;
     }

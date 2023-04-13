@@ -124,6 +124,14 @@ public class Move {
         return template.isRecoilUserHp();
     }
 
+    public boolean isContactMove() {
+        return template.isContactMove();
+    }
+
+    public boolean isMultiturnConfusion() {
+        return template.isMultiturnConfusion();
+    }
+
     public Move(MoveTemplate template) {
         this.template = template;
         pp = template.getMaxpp();
