@@ -19,7 +19,7 @@ public class Type {
     private final List<Enums.Types> strongAgainst = new LinkedList<>();
     private Enums.Types noEffectAgainst = Enums.Types.MISSING;
 
-    Type(Enums.Types type) {
+    public Type(Enums.Types type) {
         this.type = type;
         setEffectiveness();       //fills effectiveness
     }

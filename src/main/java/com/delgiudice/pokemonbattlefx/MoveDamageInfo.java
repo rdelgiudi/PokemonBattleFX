@@ -6,7 +6,7 @@ public class MoveDamageInfo {
     public boolean critical;
     public float typeEffect;
 
-    MoveDamageInfo(int damage, boolean critical, float typeEffect) {
+    public MoveDamageInfo(int damage, boolean critical, float typeEffect) {
         this.damage = damage;
         this.critical = critical;
         this.typeEffect = typeEffect;

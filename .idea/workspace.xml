@@ -6,19 +6,59 @@
   <component name="ChangeListManager">
     <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="fixed pom.xml">
       <change afterPath="$PROJECT_DIR$/.idea/artifacts/PokemonBattleFX_jar.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleLogic.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Move.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Move.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveDamageInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveDamageInfo.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveEnum.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveEnum.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveTemplate.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveTemplate.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/NpcTrainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/NpcTrainer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Player.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Pokemon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Pokemon.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/PokemonSpecie.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/PokemonSpecie.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Trainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Trainer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Type.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Type.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Merge.Settings">
+    <option name="BRANCH" value="java1.8" />
+  </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="java1.8" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2OMzgERbUBr4T4HgSSf7JXkoCSx" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
-  <component name="RunManager">
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager" selected="Application.run">
     <configuration name="run" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="com.delgiudice.pokemonbattlefx.Main" />
       <module name="PokemonBattleFX" />
@@ -26,7 +66,19 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="testrun" type="Application" factoryName="Application">
+      <option name="MAIN_CLASS_NAME" value="TestMain" />
+      <module name="PokemonBattleFX" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Application.run" />
+      <item itemvalue="Application.testrun" />
+    </list>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task id="LOCAL-00001" summary="fixed pom.xml">
       <created>1681380906219</created>
@@ -34,6 +86,13 @@
       <option name="presentableId" value="LOCAL-00001" />
       <option name="project" value="LOCAL" />
       <updated>1681380906219</updated>
+    </task>
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="fixed pom.xml" />
+      <created>1681385350045</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1681385350045</updated>
     </task>
     <option name="localTasksCounter" value="2" />
     <servers />

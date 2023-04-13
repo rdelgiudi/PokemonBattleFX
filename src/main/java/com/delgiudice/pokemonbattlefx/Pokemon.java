@@ -4,22 +4,48 @@ import java.security.SecureRandom;
 import java.util.*;
 
 public class Pokemon {
+    // pokemonExamples - a map of Pokemon with example moves, level and ability, for quickly assembling a team without
+    // the need to input it all manually
     private static final HashMap<PokemonEnum, Pokemon> pokemonExamples = new HashMap<>();
+    // name - name of the Pokemon, identical to the name of the specie unless nicknamed
     private String name;
+    // owner - owner of the Pokemon
     private Trainer owner;
+    // hp - current HP
+    // level - current level
     private int hp, level;
+    // moveList - a list of moves that can be performed by the Pokemon
     private List<Move> moveList = new ArrayList<>();
+    // stats - statistics calculated for the Pokemon, the calculations involve: base stats, level, nature, ivs
     private LinkedHashMap<Enums.StatType, Integer> stats = new LinkedHashMap<>();
+    // status - current status effect inflicted on the Pokemon
     private Enums.Status status = Enums.Status.NONE;
+    // poisonCounter - a counter used when a Pokemon is badly poisoned, increases with each turn
+    // sleepCounter - a counter used when a Pokemon sleeps, the counter decreases with each turn
+    // critIncrease - critical hit chance increases applied to the Pokemon (Focus Energy, items)
     private int poisonCounter = 1, sleepCounter = 0, critIncrease = 0;
+    // twoTurnMove - twoturn move that is currently in use
+    // multiTurnMove - a multiturn move that is currently in use
+    // trapMove - a trap move that is currently affecting the Pokemon
     private Move twoTurnMove = null, multiTurnMove = null, trapMove = null;
+    // twoTurnCounter - counter that was planned to be used when processing twoturn moves, currently unused
+    // multiTurnCounter - counter that tracks how many multiturn moves are to be executed
+    // trappedTimer - counter that tracks how many more turns the Pokemon should be affected by trapping moves
     private int twoTurnCounter = 0, multiTurnCounter = 0, confusionTimer = 0, trappedTimer = 0;
+    // ivs - Individual Values - random values between 0-31 that increase stats
     private int[] ivs = {0, 0, 0, 0, 0, 0};
+    // nature - the nature of the Pokemon, that sometimes impact some of its stats
     private Enums.Nature nature;
+    // statModifiers - modifiers applied on the Pokemon during battle
     private HashMap<Enums.StatType, Integer> statModifiers = new HashMap<>();
+    // specie - specie of the Pokemon
     private PokemonSpecie specie;
+    // subStatuses - currently applied subStatuses
     private List<Enums.SubStatus> subStatuses = new LinkedList<>();
+    // ability - ability of the Pokemon
     private Ability ability = Ability.NONE;
+    // trapped - determines whether the Pokemon is currently under effects of a trapping move
+    // underFocusEnergy - determines whether the Pokemon is under the effects of the move Focus Energy
     private boolean trapped, underFocusEnergy = false;
 
     public String getBattleName() {
@@ -225,7 +251,7 @@ public class Pokemon {
         this.confusionTimer = confusionTimer;
     }
 
-    Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1)
+    public Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1)
     {
         this.name = specie.getName().toString();
         this.specie = specie;
@@ -235,7 +261,7 @@ public class Pokemon {
         generateVariables();
         this.hp = stats.get(Enums.StatType.MAX_HP);
     }
-    Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1, Move move2)
+    public Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1, Move move2)
     {
         this.name = specie.getName().toString();
         this.specie = specie;
@@ -246,7 +272,7 @@ public class Pokemon {
         generateVariables();
         this.hp = stats.get(Enums.StatType.MAX_HP);
     }
-    Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1, Move move2, Move move3)
+    public Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1, Move move2, Move move3)
     {
         this.name = specie.getName().toString();
         this.specie = specie;
@@ -258,7 +284,7 @@ public class Pokemon {
         generateVariables();
         this.hp = stats.get(Enums.StatType.MAX_HP);
     }
-    Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1, Move move2, Move move3, Move move4)
+    public Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1, Move move2, Move move3, Move move4)
     {
         this.name = specie.getName().toString();
         this.specie = specie;
@@ -271,7 +297,7 @@ public class Pokemon {
         generateVariables();
         this.hp = stats.get(Enums.StatType.MAX_HP);
     }
-    Pokemon(Pokemon original)
+    public Pokemon(Pokemon original)
     {
         this.name = original.name;
         this.specie = original.specie;
@@ -437,6 +463,11 @@ public class Pokemon {
         example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.CHARIZARD), 50, Ability.BLAZE,
                 new Move(MoveTemplate.getMoveMap().get(MoveEnum.AIR_SLASH)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.HEAT_WAVE)),
                 new Move(MoveTemplate.getMoveMap().get(MoveEnum.FLARE_BLITZ)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.DRAGON_DANCE)));
+        pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.SQUIRTLE), 50, Ability.TORRENT,
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.AQUA_TAIL)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.HYDRO_PUMP)),
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.SKULL_BASH)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.SHELL_SMASH)));
         pokemonExamples.put(example.getOriginalName(), example);
     }
 }

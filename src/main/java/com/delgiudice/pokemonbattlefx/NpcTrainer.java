@@ -7,7 +7,7 @@ public class NpcTrainer extends Trainer {
     public static HashMap<String, NpcTrainer> trainerList = new LinkedHashMap<>();
     private Enums.TrainerTypes trainerType;
 
-    NpcTrainer(String name, Enums.TrainerTypes type, Pokemon pokemon)
+    public NpcTrainer(String name, Enums.TrainerTypes type, Pokemon pokemon)
     {
         super(name, pokemon);
         trainerType = type;

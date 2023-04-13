@@ -39,7 +39,8 @@ public enum MoveEnum {
     EARTHQUAKE("Earthquake"),
     HYDRO_PUMP("Hydro Pump"),
     AQUA_TAIL("Aqua Tail"),
-    SKULL_BASH("Skull Bash");
+    SKULL_BASH("Skull Bash"),
+    SHELL_SMASH("Shell Smash");
 
 
     private final String name;

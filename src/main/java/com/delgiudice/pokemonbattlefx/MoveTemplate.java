@@ -7,18 +7,56 @@ import java.util.List;
 ///Class which allows to describe a move
 public class MoveTemplate {
 
+    // moveMap - a map of all moves available
     private static final HashMap<MoveEnum, MoveTemplate> moveMap = new HashMap<>();
 
+    //name - name of the move in enum form, can also return a string if needed
     MoveEnum name;
+    // power - move power, used for damage calculations
+    // accuracy - move accuracy, used for hit calculations
     private final int power, accuracy;
-    private int maxpp, hits = 1, statChange = 0, critIncrease = 0, critTemporaryIncrease = 0;
+    // maxpp - maximum amount of PP (Power Points) that a move has
+    // hits - the amount of hits that a move inflicts (each move's critical hit and damage is calculated separately)
+    // statChange - the amount of stages of a stat that a move changes (typically from -3 to 3)
+    // secondaryStatChange - holds the same information as statChange, in case a move changes a set of stats in different
+    // ways than the primary change
+    // critIncrease - the amount of stages of critical hit chance that a move changes (typically 1 or 2)
+    // critTemporaryIncrease - the amount of stages of critical hit chance that the move changes for the time of its
+    // execution
+    // priority - priority of a given move, between -7 and 5
+    private int maxpp, hits = 1, statChange = 0, secondaryStatChange = 0, critIncrease = 0, critTemporaryIncrease = 0,
+            priority = 0;
+    // statusProb - probability of inflicting status effects after move execution, typically 1 for status moves, <1 otherwise
+    // statChangeProb - probability of changing a stat, typically 1 for status moves, <1 otherwise
+    // recoil - the percentage of damage dealt that should be converted to recoil except the move Struggle, that deals a
+    // percentage of max HP instead
+    // lifesteal - the percentage of damage dealt that should be converted to health restoration for the user
+    // hprestore - the percentage of user's max HP to be restored by this move (only for status moves)
     private float statusProb = 0, statChangeProb = 0, recoil = 0, lifesteal = 0, hpRestore = 0;
-    private boolean priority = false, twoturn = false, self = false, trap = false, charging = false, multiturn = false,
-                    recoilUserHp = false;
+
+    // twoturn - determines if a move has a charging phase before executing
+    // self - determines whether a move's secondary effect affects its user
+    // trap - determines whether a move is a trap move, trap moves hurt the target for 2 to 5 turns and prevent them
+    // from switching
+    // charging - determines whether a twoturn move is purely a charging move, i.e. doesn't involve a semi invulnerable
+    // state when charging the move
+    // multiturn - determines whether a move is a charging move
+    // recoilUserHp - determines if a move calculates recoil based on user max HP instead of damage dealt
+    private boolean twoturn = false, self = false, trap = false, charging = false, multiturn = false,
+                    recoilUserHp = false, statUpDuringCharging = false;
+
+    // subtype - subtype of move, Physical, Special or Status
     private final Enums.Subtypes subtype;
+    // type - type of move, for example: Fire, Grass, Water, Normal
     private final Type type;
-    private List<Enums.StatType> statTypes = new LinkedList<>();
+    // statTypes - a list of stat changes that the move inflicts
+    // secondaryStatTypes - another list of stat changes that the move inflicts, used in case they increase or decrease
+    // by a different value than the primary stat change
+    private List<Enums.StatType> statTypes = new LinkedList<>(), secondaryStatTypes = new LinkedList<>();
+    // status - status effect that the move inflicts
     private Enums.Status status = Enums.Status.NONE;
+    // subStatus - secondary status effect that the move inflicts, secondary effects usually don't last very long or can
+    // be cured by switching out a Pokemon
     private Enums.SubStatus subStatus = Enums.SubStatus.NONE;
 
     public MoveEnum getName() {
@@ -72,7 +110,7 @@ public class MoveTemplate {
         return charging;
     }
 
-    public boolean isPriority() {
+    public int getPriority() {
         return priority;
     }
 
@@ -96,6 +134,14 @@ public class MoveTemplate {
         return critTemporaryIncrease;
     }
 
+    public int getSecondaryStatChange() {
+        return secondaryStatChange;
+    }
+
+    public List<Enums.StatType> getSecondaryStatTypes() {
+        return secondaryStatTypes;
+    }
+
     public boolean isSelf() {
         return self;
     }
@@ -117,11 +163,15 @@ public class MoveTemplate {
         return recoil;
     }
 
+    public boolean isStatUpDuringCharging() {
+        return statUpDuringCharging;
+    }
+
     public boolean isRecoilUserHp() {
         return recoilUserHp;
     }
 
-    public void setPriority(boolean priority) {
+    public void setPriority(int priority) {
         this.priority = priority;
     }
 
@@ -143,6 +193,10 @@ public class MoveTemplate {
 
     public void setRecoilUserHp(boolean recoilUserHp) {
         this.recoilUserHp = recoilUserHp;
+    }
+
+    public void setStatChange(int statChange) {
+        this.statChange = statChange;
     }
 
     public void setStatChangeProb(float statChangeProb) {
@@ -183,6 +237,14 @@ public class MoveTemplate {
 
     public void setMultiturn(boolean multiturn) {
         this.multiturn = multiturn;
+    }
+
+    public void setStatUpDuringCharging(boolean statUpDuringCharging) {
+        this.statUpDuringCharging = statUpDuringCharging;
+    }
+
+    public void setSecondaryStatChange(int secondaryStatChange) {
+        this.secondaryStatChange = secondaryStatChange;
     }
 
     public MoveTemplate(MoveEnum name, int power, int accuracy, int pp, Enums.Subtypes subtype, Type type,
@@ -269,7 +331,7 @@ public class MoveTemplate {
 
         newmove = new MoveTemplate(MoveEnum.QUICK_ATTACK, 40, 100, 30, Enums.Subtypes.PHYSICAL,
                 Type.getTypeMap().get(Enums.Types.NORMAL));
-        newmove.setPriority(true);
+        newmove.setPriority(1);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.WATER_GUN, 40, 100, 25, Enums.Subtypes.SPECIAL,
@@ -418,6 +480,26 @@ public class MoveTemplate {
         newmove = new MoveTemplate(MoveEnum.AQUA_TAIL, 90, 90, 10, Enums.Subtypes.PHYSICAL,
                 Type.getTypeMap().get(Enums.Types.WATER));
         moveMap.put(newmove.getName(), newmove);
+
+
+        newmove = new MoveTemplate(MoveEnum.SKULL_BASH, 130, 100, 10, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap().get(Enums.Types.NORMAL));
+        newmove.getStatTypes().add(Enums.StatType.DEFENSE);
+        newmove.setStatChange(1);
+        newmove.setStatUpDuringCharging(true);
+        newmove.setTwoturn(true);
+        newmove.setCharging(true);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.SHELL_SMASH, 0, 0, 15, Enums.Subtypes.STATUS,
+                Type.getTypeMap().get(Enums.Types.NORMAL), Enums.StatType.DEFENSE, -1, true, 1.0f);
+        newmove.getStatTypes().add(Enums.StatType.SPECIAL_DEFENSE);
+        newmove.setSecondaryStatChange(2);
+        newmove.getSecondaryStatTypes().add(Enums.StatType.ATTACK);
+        newmove.getSecondaryStatTypes().add(Enums.StatType.SPECIAL_ATTACK);
+        newmove.getSecondaryStatTypes().add(Enums.StatType.SPEED);
+        moveMap.put(newmove.getName(), newmove);
+
     }
 
 }

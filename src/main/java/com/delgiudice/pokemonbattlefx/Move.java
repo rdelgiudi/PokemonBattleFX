@@ -80,8 +80,16 @@ public class Move {
         this.pp = pp;
     }
 
-    public boolean isPriority() {
-        return template.isPriority();
+    public int getPriority() {
+        return template.getPriority();
+    }
+
+    public int getSecondaryStatChange() {
+        return template.getSecondaryStatChange();
+    }
+
+    public List<Enums.StatType> getSecondaryStatTypes() {
+        return template.getSecondaryStatTypes();
     }
 
     public boolean isTwoturn() {
@@ -106,6 +114,10 @@ public class Move {
 
     public float getRecoil() {
         return template.getRecoil();
+    }
+
+    public boolean isStatUpDuringCharging() {
+        return template.isStatUpDuringCharging();
     }
 
     public boolean isRecoilHpDamage() {

@@ -33,12 +33,12 @@ public class Trainer {
         this.name = name;
     }
 
-    Trainer(String name, Pokemon pokemon) {
+    public Trainer(String name, Pokemon pokemon) {
         this.name = name;
         addPokemon(pokemon);
     }
 
-    Trainer(String name) {
+    public Trainer(String name) {
         this.name = name;
     }
 

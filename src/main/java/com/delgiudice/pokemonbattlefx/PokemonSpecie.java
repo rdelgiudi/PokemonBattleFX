@@ -12,13 +12,19 @@ import java.util.LinkedHashMap;
 
 public class PokemonSpecie {
 
+    // pokemonMap - a map of all available Pokemon species
     private static final HashMap<PokemonEnum, PokemonSpecie> pokemonMap = new HashMap<>();
+    // name - name of the Pokemon in form of an enum, can also return string if needed
     private PokemonEnum name;
+    // pokedexNumber - the number in the PokeDex occupied by this specie
     private int pokedexNumber;
+    // type - type of the Pokemon
     private Type[] type = {new Type(Enums.Types.NO_TYPE), new Type(Enums.Types.NO_TYPE)};
+    // baseStats - base statistics of a specie, from which their actual stats are calculated
     private LinkedHashMap<Enums.StatType, Integer> baseStats = new LinkedHashMap<>();
+    // frontSprite - image of the Pokemon front sprite (enemy)
+    // backSprite - image of the Pokemon back sprite (ally)
     private Image frontSprite, backSprite, frontSpriteAnim, backSpriteAnim;
-
     public int getPokedexNumber() {
         return pokedexNumber;
     }
@@ -56,7 +62,7 @@ public class PokemonSpecie {
         return baseStats;
     }
 
-    PokemonSpecie(int pokedexNumber, PokemonEnum name, Type type1, Type type2, int maxHp, int attack, int defense, int spAttack, int spDefense,
+    public PokemonSpecie(int pokedexNumber, PokemonEnum name, Type type1, Type type2, int maxHp, int attack, int defense, int spAttack, int spDefense,
                   int speed){
         this.name = name;
         this.type[0] = type1;
@@ -76,7 +82,7 @@ public class PokemonSpecie {
         this.pokedexNumber = pokedexNumber;
     }
 
-    PokemonSpecie(int pokedexNumber, PokemonEnum name, Type type1, Type type2, int maxHp, int attack, int defense, int spAttack, int spDefense,
+    public PokemonSpecie(int pokedexNumber, PokemonEnum name, Type type1, Type type2, int maxHp, int attack, int defense, int spAttack, int spDefense,
                   int speed, String frontSprite, String backSprite){
         this.name = name;
         this.type[0] = type1;
@@ -117,7 +123,7 @@ public class PokemonSpecie {
         this.pokedexNumber = pokedexNumber;
     }
 
-    PokemonSpecie(int pokedexNumber, PokemonEnum name, Type type1, int maxHp, int attack, int defense, int spAttack, int spDefense, int speed){
+    public PokemonSpecie(int pokedexNumber, PokemonEnum name, Type type1, int maxHp, int attack, int defense, int spAttack, int spDefense, int speed){
         this.name = name;
         this.type[0] = type1;
         baseStats.put(Enums.StatType.MAX_HP, maxHp);
@@ -135,7 +141,7 @@ public class PokemonSpecie {
         this.pokedexNumber = pokedexNumber;
     }
 
-    PokemonSpecie(int pokedexNumber, PokemonEnum name, Type type1, int maxHp, int attack, int defense, int spAttack, int spDefense, int speed,
+    public PokemonSpecie(int pokedexNumber, PokemonEnum name, Type type1, int maxHp, int attack, int defense, int spAttack, int spDefense, int speed,
                   String frontSprite, String backSprite){
         this.name = name;
         this.type[0] = type1;

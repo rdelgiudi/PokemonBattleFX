@@ -43,7 +43,7 @@ public class BattleLogic {
         Pokemon.generatePokemonExamples();
 
         // For testing purposes only, delete later
-        Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get(PokemonEnum.CHARIZARD));
+        Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get(PokemonEnum.SQUIRTLE));
         player = new Player("Red",  allyPokemon);
 
         player.addPokemon(new Pokemon(Pokemon.getPokemonExamples().get(PokemonEnum.VENOSAUR)));
@@ -259,7 +259,7 @@ public class BattleLogic {
                 Timeline noMovesLeftMessage = controller.getBattleTextAnimation(String.format("%s has no%nmoves left!",
                         player.getParty(currentAllyPokemon).getBattleName()), true);
                 Timeline shortPause = controller.generatePause(1);
-                shortPause.setOnFinished(event -> battleTurn(new Move(MoveTemplate.getMoveMap().get("Struggle"))));
+                shortPause.setOnFinished(event -> battleTurn(new Move(MoveTemplate.getMoveMap().get(MoveEnum.STRUGGLE))));
                 controller.battleTextAdvanceByUserInput(noMovesLeftMessage, shortPause);
                 noMovesLeftMessage.play();
             }
@@ -415,11 +415,11 @@ public class BattleLogic {
         List<Timeline> battleTimeLine;
         Move enemyMove = generateEnemyMove(enemyPokemon);
 
-        // Priority move always faster, unless both parties are using them
-        if (allyMove.isPriority() && !enemyMove.isPriority()) {
+        // Move of higher priority is always faster
+        if (allyMove.getPriority() > enemyMove.getPriority()) {
             battleTimeLine = processTurnAllyFaster(allyMove, enemyMove);
         }
-        else if (enemyMove.isPriority() && !allyMove.isPriority()) {
+        else if (enemyMove.getPriority() < allyMove.getPriority()) {
             battleTimeLine = processTurnAllySlower(allyMove, enemyMove);
         }
         // If both or neither parties are using priority moves, being faster depends on speed
@@ -986,6 +986,10 @@ public class BattleLogic {
                 timeline = controller.getBattleTextAnimation(String.format(
                     "%s is taking in sunlight!", user.getBattleName()), true);
                 break;
+            case SKULL_BASH:
+                timeline = controller.getBattleTextAnimation(String.format(
+                        "%s tucked in its head!", user.getBattleName()), true);
+                break;
             default:
                 throw new IllegalStateException("Unidentified twoturn move: "
             + move.getName());
@@ -1094,7 +1098,7 @@ public class BattleLogic {
         moveTimeLine.add(controller.generatePause(500));
 
         MoveDamageInfo confusionDamageInfo = calculateMoveDamage(0,
-                new Move(MoveTemplate.getMoveMap().get("Confusion Damage")), user, user, 1, false);
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.CONFUSION_DAMAGE)), user, user, 1, false);
 
         int confusionDamage = confusionDamageInfo.damage;
         if (confusionDamage > user.getHp())
@@ -1210,6 +1214,8 @@ public class BattleLogic {
             }
         }
 
+        // Checks related to twoturn moves, non charging moves set Pokemon to a semi-invulnerable state,
+        // otherwise just lock the Pokemon out of a choice next turn during charging
         if (move.isTwoturn() && user.getTwoTurnMove() == null) {
             Timeline allyTwoTurnInfo = getTwoTurnMoveInfo(move, user);
             moveTimeLine.add(allyTwoTurnInfo);
@@ -1228,6 +1234,12 @@ public class BattleLogic {
                 }
             }
             moveTimeLine.add(controller.generatePause(1000));
+
+            if (move.isStatUpDuringCharging()) {
+                processStatChange(moveTimeLine, move, user, true);
+                moveTimeLine.add(controller.generatePause(1000));
+            }
+
             return moveTimeLine;
         }
 
@@ -1406,18 +1418,22 @@ public class BattleLogic {
                 target.getAbility() == Ability.SHIELD_DUST;
         boolean secondaryEffectsImmune = userFainted || targetProtectedAbility;
 
-        final List<Timeline> statChangeInfo;
+        //final List<Timeline> statChangeInfo;
 
         float prob = move.getStatChangeProb() * 100.0f;
         int rand = generator.nextInt(100) + 1;
 
         if (!move.getStatTypes().isEmpty() && move.isSelf() && prob >= rand && !userFainted) {
-            statChangeInfo = processStatChange(move, user);
-            moveTimeLine.addAll(statChangeInfo);
+            processStatChange(moveTimeLine, move, user, true);
+            if(move.getSecondaryStatTypes().size() > 0)
+                processStatChange(moveTimeLine, move, user, false);
+            //moveTimeLine.addAll(statChangeInfo);
         }
         else if (!move.getStatTypes().isEmpty() && prob >= rand && !secondaryEffectsImmune) {
-            statChangeInfo = processStatChange(move, target);
-            moveTimeLine.addAll(statChangeInfo);
+            processStatChange(moveTimeLine, move, target, true);
+            if(move.getSecondaryStatTypes().size() > 0)
+                processStatChange(moveTimeLine, move, target, false);
+            //moveTimeLine.addAll(statChangeInfo);
         }
         //*******************************************************
 
@@ -1598,21 +1614,31 @@ public class BattleLogic {
         return statusChangeInfo;
     }
 
-    private List<Timeline> processStatChange(Move move, Pokemon target) {
-        final List<Timeline> statChangeInfo = new LinkedList<>();
+    private void processStatChange(List<Timeline> moveTimeLine ,Move move, Pokemon target, boolean primary) {
 
-        for (Enums.StatType statType : move.getStatTypes()) {
-            statChangeInfo.add(controller.generatePause(2000));
-            int change = move.getStatChange();
+        List<Enums.StatType> statTypes;
+        if (primary)
+            statTypes = move.getStatTypes();
+        else
+            statTypes = move.getSecondaryStatTypes();
+
+        for (Enums.StatType statType : statTypes) {
+            moveTimeLine.add(controller.generatePause(2000));
+            int change;
+            if (primary)
+                change = move.getStatChange();
+            else
+                change = move.getSecondaryStatChange();
+
             int currentStatModifier = target.getStatModifiers().get(statType);
             int statup = currentStatModifier + change;
 
             if (currentStatModifier == 6 && change > 0) {
-                statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s can't go any higher!",
+                moveTimeLine.add(controller.getBattleTextAnimation(String.format("%s's%n%s can't go any higher!",
                         target.getBattleName(), statType), true));
                 change = 0;
             } else if (currentStatModifier == -6 && change < 0) {
-                statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s can't go any lower!",
+                moveTimeLine.add(controller.getBattleTextAnimation(String.format("%s's%n%s can't go any lower!",
                         target.getBattleName(), statType), true));
                 change = 0;
             } else {
@@ -1629,27 +1655,27 @@ public class BattleLogic {
                 }
                 switch (change) {
                     case 1:
-                        statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s rose!",
+                        moveTimeLine.add(controller.getBattleTextAnimation(String.format("%s's%n%s rose!",
                             target.getBattleName(), statType), true));
                         break;
                     case 2:
-                        statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s rose sharply!",
+                        moveTimeLine.add(controller.getBattleTextAnimation(String.format("%s's%n%s rose sharply!",
                             target.getBattleName(), statType), true));
                         break;
                     case 3:
-                        statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s rose drastically!",
+                        moveTimeLine.add(controller.getBattleTextAnimation(String.format("%s's%n%s rose drastically!",
                             target.getBattleName(), statType), true));
                         break;
                     case -1:
-                        statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s fell!",
+                        moveTimeLine.add(controller.getBattleTextAnimation(String.format("%s's%n%s fell!",
                             target.getBattleName(), statType), true));
                         break;
                     case -2:
-                        statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s harshly fell!",
+                        moveTimeLine.add(controller.getBattleTextAnimation(String.format("%s's%n%s harshly fell!",
                             target.getBattleName(), statType), true));
                         break;
                     case -3:
-                        statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s severely fell!",
+                        moveTimeLine.add(controller.getBattleTextAnimation(String.format("%s's%n%s severely fell!",
                             target.getBattleName(), statType), true));
                         break;
                     default:
@@ -1660,8 +1686,6 @@ public class BattleLogic {
 
             System.out.println(target.getBattleName() + " stat change to " + statType + ": " + change);
         }
-
-        return statChangeInfo;
     }
 
     private MoveDamageInfo calculateMoveDamage(int movetype, Move move, Pokemon user, Pokemon target, int twoTurnModifier,
