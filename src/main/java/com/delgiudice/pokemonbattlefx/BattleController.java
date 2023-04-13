@@ -356,34 +356,34 @@ public class BattleController {
             statusLabel.setTextFill(Color.WHITE);
 
             switch (pokemon.getStatus()) {
-                case NONE -> {
+                case NONE:
                     statusLabel.setVisible(false);
-                }
-                case PARALYZED -> {
+                    break;
+                case PARALYZED:
                     statusLabel.setText("PAR");
                     finalStyle[0] = style + "; -fx-background-color: #B8B818";
-                }
-                case POISONED -> {
+                    break;
+                case POISONED:
                     statusLabel.setText("PSN");
                     finalStyle[0] = style + "; -fx-background-color: purple";
-                }
-                case BADLY_POISONED -> {
+                    break;
+                case BADLY_POISONED:
                     statusLabel.setText("PSN");
                     statusLabel.setTextFill(Color.LIGHTPINK);
                     finalStyle[0] = style + "; -fx-background-color: purple";
-                }
-                case SLEEPING -> {
+                    break;
+                case SLEEPING:
                     statusLabel.setText("SLP");
                     finalStyle[0] = style + "; -fx-background-color: gray";
-                }
-                case BURNED -> {
+                    break;
+                case BURNED:
                     statusLabel.setText("BRN");
                     finalStyle[0] = style + "; -fx-background-color: chocolate";
-                }
-                case FROZEN -> {
+                    break;
+                case FROZEN:
                     statusLabel.setText("FRZ");
                     finalStyle[0] = style + "; -fx-background-color: dodgerblue";
-                }
+                    break;
             }
             if (pokemon.getStatus() != Enums.Status.NONE) {
                 statusLabel.setStyle(finalStyle[0]);

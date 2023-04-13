@@ -55,12 +55,13 @@ public class Type {
     public void setEffectiveness()
     {
         switch (type) {
-            case NORMAL -> {
+            case NORMAL:
                 weakAgainst.add(Enums.Types.ROCK);
                 weakAgainst.add(Enums.Types.STEEL);
                 noEffectAgainst = Enums.Types.GHOST;
-            }
-            case FIRE -> {
+                break;
+
+            case FIRE:
                 weakAgainst.add(Enums.Types.FIRE);
                 weakAgainst.add(Enums.Types.WATER);
                 weakAgainst.add(Enums.Types.ROCK);
@@ -69,24 +70,27 @@ public class Type {
                 strongAgainst.add(Enums.Types.ICE);
                 strongAgainst.add(Enums.Types.BUG);
                 strongAgainst.add(Enums.Types.STEEL);
-            }
-            case WATER -> {
+                break;
+
+            case WATER:
                 weakAgainst.add(Enums.Types.WATER);
                 weakAgainst.add(Enums.Types.GRASS);
                 weakAgainst.add(Enums.Types.DRAGON);
                 strongAgainst.add(Enums.Types.FIRE);
                 strongAgainst.add(Enums.Types.GROUND);
                 strongAgainst.add(Enums.Types.ROCK);
-            }
-            case ELECTRIC -> {
+                break;
+
+            case ELECTRIC:
                 weakAgainst.add(Enums.Types.ELECTRIC);
                 weakAgainst.add(Enums.Types.GRASS);
                 weakAgainst.add(Enums.Types.DRAGON);
                 strongAgainst.add(Enums.Types.WATER);
                 strongAgainst.add(Enums.Types.FLYING);
                 noEffectAgainst = Enums.Types.GROUND;
-            }
-            case GRASS -> {
+                break;
+
+            case GRASS:
                 weakAgainst.add(Enums.Types.FIRE);
                 weakAgainst.add(Enums.Types.GRASS);
                 weakAgainst.add(Enums.Types.POISON);
@@ -97,8 +101,9 @@ public class Type {
                 strongAgainst.add(Enums.Types.WATER);
                 strongAgainst.add(Enums.Types.GROUND);
                 strongAgainst.add(Enums.Types.ROCK);
-            }
-            case ICE -> {
+                break;
+
+            case ICE:
                 weakAgainst.add(Enums.Types.FIRE);
                 weakAgainst.add(Enums.Types.WATER);
                 weakAgainst.add(Enums.Types.ICE);
@@ -107,8 +112,8 @@ public class Type {
                 strongAgainst.add(Enums.Types.GROUND);
                 strongAgainst.add(Enums.Types.FLYING);
                 strongAgainst.add(Enums.Types.DRAGON);
-            }
-            case FIGHTING -> {
+                break;
+            case FIGHTING:
                 weakAgainst.add(Enums.Types.POISON);
                 weakAgainst.add(Enums.Types.FLYING);
                 weakAgainst.add(Enums.Types.PSYCHIC);
@@ -120,8 +125,9 @@ public class Type {
                 strongAgainst.add(Enums.Types.DARK);
                 strongAgainst.add(Enums.Types.STEEL);
                 noEffectAgainst = Enums.Types.GHOST;
-            }
-            case POISON -> {
+                break;
+
+            case POISON:
                 weakAgainst.add(Enums.Types.POISON);
                 weakAgainst.add(Enums.Types.GROUND);
                 weakAgainst.add(Enums.Types.ROCK);
@@ -129,8 +135,9 @@ public class Type {
                 strongAgainst.add(Enums.Types.GRASS);
                 strongAgainst.add(Enums.Types.FAIRY);
                 noEffectAgainst = Enums.Types.STEEL;
-            }
-            case GROUND -> {
+                break;
+
+            case GROUND:
                 weakAgainst.add(Enums.Types.GRASS);
                 weakAgainst.add(Enums.Types.BUG);
                 strongAgainst.add(Enums.Types.FIRE);
@@ -139,23 +146,26 @@ public class Type {
                 strongAgainst.add(Enums.Types.ROCK);
                 strongAgainst.add(Enums.Types.STEEL);
                 noEffectAgainst = Enums.Types.FLYING;
-            }
-            case FLYING -> {
+                break;
+
+            case FLYING:
                 weakAgainst.add(Enums.Types.ELECTRIC);
                 weakAgainst.add(Enums.Types.ROCK);
                 weakAgainst.add(Enums.Types.STEEL);
                 strongAgainst.add(Enums.Types.GRASS);
                 strongAgainst.add(Enums.Types.FIGHTING);
                 strongAgainst.add(Enums.Types.BUG);
-            }
-            case PSYCHIC -> {
+                break;
+
+            case PSYCHIC:
                 weakAgainst.add(Enums.Types.PSYCHIC);
                 weakAgainst.add(Enums.Types.STEEL);
                 strongAgainst.add(Enums.Types.FIGHTING);
                 strongAgainst.add(Enums.Types.POISON);
                 noEffectAgainst = Enums.Types.DARK;
-            }
-            case BUG -> {
+                break;
+
+            case BUG:
                 weakAgainst.add(Enums.Types.FIRE);
                 weakAgainst.add(Enums.Types.FIGHTING);
                 weakAgainst.add(Enums.Types.POISON);
@@ -166,8 +176,9 @@ public class Type {
                 strongAgainst.add(Enums.Types.GRASS);
                 strongAgainst.add(Enums.Types.PSYCHIC);
                 strongAgainst.add(Enums.Types.DARK);
-            }
-            case ROCK -> {
+                break;
+
+            case ROCK:
                 weakAgainst.add(Enums.Types.FIGHTING);
                 weakAgainst.add(Enums.Types.GROUND);
                 weakAgainst.add(Enums.Types.STEEL);
@@ -175,26 +186,30 @@ public class Type {
                 strongAgainst.add(Enums.Types.ICE);
                 strongAgainst.add(Enums.Types.FLYING);
                 strongAgainst.add(Enums.Types.BUG);
-            }
-            case GHOST -> {
+                break;
+
+            case GHOST:
                 weakAgainst.add(Enums.Types.DARK);
                 strongAgainst.add(Enums.Types.PSYCHIC);
                 strongAgainst.add(Enums.Types.GHOST);
                 noEffectAgainst = Enums.Types.NORMAL;
-            }
-            case DRAGON -> {
+                break;
+
+            case DRAGON:
                 weakAgainst.add(Enums.Types.STEEL);
                 strongAgainst.add(Enums.Types.DRAGON);
                 noEffectAgainst = Enums.Types.FAIRY;
-            }
-            case DARK -> {
+                break;
+
+            case DARK:
                 weakAgainst.add(Enums.Types.FIGHTING);
                 weakAgainst.add(Enums.Types.DRAGON);
                 weakAgainst.add(Enums.Types.FAIRY);
                 strongAgainst.add(Enums.Types.PSYCHIC);
                 strongAgainst.add(Enums.Types.GHOST);
-            }
-            case STEEL -> {
+                break;
+
+            case STEEL:
                 weakAgainst.add(Enums.Types.FIRE);
                 weakAgainst.add(Enums.Types.WATER);
                 weakAgainst.add(Enums.Types.ELECTRIC);
@@ -202,15 +217,17 @@ public class Type {
                 strongAgainst.add(Enums.Types.ICE);
                 strongAgainst.add(Enums.Types.ROCK);
                 strongAgainst.add(Enums.Types.FAIRY);
-            }
-            case FAIRY -> {
+                break;
+
+            case FAIRY:
                 weakAgainst.add(Enums.Types.FIRE);
                 weakAgainst.add(Enums.Types.POISON);
                 weakAgainst.add(Enums.Types.STEEL);
                 strongAgainst.add(Enums.Types.FIGHTING);
                 strongAgainst.add(Enums.Types.DRAGON);
                 strongAgainst.add(Enums.Types.DARK);
-            }
+                break;
+
         }
     }
 }

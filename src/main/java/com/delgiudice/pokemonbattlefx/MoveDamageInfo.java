@@ -1,5 +1,14 @@
 package com.delgiudice.pokemonbattlefx;
 
-public record MoveDamageInfo(int damage, boolean critical, float typeEffect) {
+public class MoveDamageInfo {
     public static final int NOT_APPLICABLE = -1;
+    public int damage;
+    public boolean critical;
+    public float typeEffect;
+
+    MoveDamageInfo(int damage, boolean critical, float typeEffect) {
+        this.damage = damage;
+        this.critical = critical;
+        this.typeEffect = typeEffect;
+    }
 }

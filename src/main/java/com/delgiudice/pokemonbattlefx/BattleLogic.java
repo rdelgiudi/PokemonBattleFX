@@ -698,28 +698,29 @@ public class BattleLogic {
         String poisonDamageMessage = "%s was hurt by%npoison!";
 
         switch (pokemon.getStatus()) {
-            case BURNED-> {
+            case BURNED:
                 damageDouble = Math.round(pokemon.getMaxHP() / 16.0);
                 damageInfoTimeline = controller.getBattleTextAnimation(String.format("%s was hurt by%nburn!",
                         pokemon.getBattleName()), true);
                 if (damageDouble == 0)
                     damageDouble = 1;
-            }
-            case POISONED -> {
+                break;
+            case POISONED:
                 damageDouble = Math.round(pokemon.getMaxHP() / 8.0);
                 damageInfoTimeline = controller.getBattleTextAnimation(String.format(poisonDamageMessage,
                         pokemon.getBattleName()), true);
                 if (damageDouble == 0)
                     damageDouble = 1;
-            }
-            case BADLY_POISONED -> {
+                break;
+
+            case BADLY_POISONED:
                 damageDouble = Math.round(pokemon.getMaxHP() * pokemon.getPoisonCounter() / 16.0);
                 damageInfoTimeline = controller.getBattleTextAnimation(String.format(poisonDamageMessage,
                         pokemon.getBattleName()), true);
                 pokemon.setPoisonCounter(pokemon.getPoisonCounter() + 1);
                 if (damageDouble == 0)
                     damageDouble = 1;
-            }
+                break;
         }
 
         if (damageDouble > 0) {
@@ -977,11 +978,16 @@ public class BattleLogic {
     private Timeline getTwoTurnMoveInfo(Move move, Pokemon user) {
         Timeline timeline = null;
         switch(move.getName()) {
-            case DIG -> timeline = controller.getBattleTextAnimation(String.format(
+            case DIG:
+                timeline = controller.getBattleTextAnimation(String.format(
                     "%s dug underground!", user.getBattleName()), true);
-            case SOLAR_BEAM -> timeline = controller.getBattleTextAnimation(String.format(
+                break;
+            case SOLAR_BEAM:
+                timeline = controller.getBattleTextAnimation(String.format(
                     "%s is taking in sunlight!", user.getBattleName()), true);
-            default -> throw new IllegalStateException("Unidentified twoturn move: "
+                break;
+            default:
+                throw new IllegalStateException("Unidentified twoturn move: "
             + move.getName());
         }
         return timeline;
@@ -1090,7 +1096,7 @@ public class BattleLogic {
         MoveDamageInfo confusionDamageInfo = calculateMoveDamage(0,
                 new Move(MoveTemplate.getMoveMap().get("Confusion Damage")), user, user, 1, false);
 
-        int confusionDamage = confusionDamageInfo.damage();
+        int confusionDamage = confusionDamageInfo.damage;
         if (confusionDamage > user.getHp())
             confusionDamage = user.getHp();
 
@@ -1273,13 +1279,19 @@ public class BattleLogic {
 
             // Check move type and calculate damage
             switch (moveType) {
-                case PHYSICAL -> damageInfo = calculateMoveDamage(0, move, user, target, twoTurnModifier, true);
-                case SPECIAL -> damageInfo = calculateMoveDamage(1, move, user, target, twoTurnModifier, true);
-                case STATUS -> {
+                case PHYSICAL:
+                    damageInfo = calculateMoveDamage(0, move, user, target, twoTurnModifier, true);
+                    break;
+                case SPECIAL:
+                    damageInfo = calculateMoveDamage(1, move, user, target, twoTurnModifier, true);
+                    break;
+                case STATUS:
                     if (move.getHpRestore() > 0)
                         return processHealthRestore(moveTimeLine, move, user);
-                }
-                default -> throw new IllegalStateException("Unexpected value: " + moveType);
+                    break;
+
+                default:
+                    throw new IllegalStateException("Unexpected value: " + moveType);
             }
             //****************************************
 
@@ -1290,7 +1302,7 @@ public class BattleLogic {
                     (target.getType()[0].getTypeEnum() == Enums.Types.ELECTRIC ||
                             target.getType()[0].getTypeEnum() == Enums.Types.ELECTRIC);
 
-            if (damageInfo.typeEffect() == 0 && (move.getSubtype() != Enums.Subtypes.STATUS || statusMovesExceptionGround)) {
+            if (damageInfo.typeEffect == 0 && (move.getSubtype() != Enums.Subtypes.STATUS || statusMovesExceptionGround)) {
                 final Timeline effectInfo = controller.getBattleTextAnimation(String.format(MOVE_NO_EFFECT_STRING,
                                 target.getBattleNameMiddle()), true);
                 effectInfo.setDelay(Duration.seconds(2));
@@ -1304,9 +1316,9 @@ public class BattleLogic {
             //****************************************************
 
             // Applying damage as well as the UI animations connected to it
-            else if (damageInfo.damage() > 0) {
+            else if (damageInfo.damage > 0) {
 
-                damage = damageInfo.damage();
+                damage = damageInfo.damage;
 
                 //List<Timeline> hitTimeline = new LinkedList<>();
 
@@ -1330,7 +1342,7 @@ public class BattleLogic {
                 System.out.println("Hit " + i+1 + ": " + move.getName() + " dealt " + damage + " damage to " +
                         target.getBattleName() + "!");
 
-                if (damageInfo.critical()) {
+                if (damageInfo.critical) {
                     final Timeline criticalInfo = controller.getBattleTextAnimation("A critical hit!", true);
                     criticalInfo.setDelay(Duration.seconds(2));
 
@@ -1359,12 +1371,12 @@ public class BattleLogic {
         }
 
         //  Other checks related to move effectiveness
-        if (damageInfo.typeEffect() >= 2 && moveType != Enums.Subtypes.STATUS) {
+        if (damageInfo.typeEffect >= 2 && moveType != Enums.Subtypes.STATUS) {
             final Timeline effectInfo = controller.getBattleTextAnimation("It's super effective!", true);
             effectInfo.setDelay(Duration.seconds(2));
             moveTimeLine.add(effectInfo);
         }
-        else if (damageInfo.typeEffect() < 1 && damageInfo.typeEffect() > 0 && moveType != Enums.Subtypes.STATUS) {
+        else if (damageInfo.typeEffect < 1 && damageInfo.typeEffect > 0 && moveType != Enums.Subtypes.STATUS) {
             final Timeline effectInfo = controller.getBattleTextAnimation("It's not very effective...", true);
             effectInfo.setDelay(Duration.seconds(2));
             moveTimeLine.add(effectInfo);
@@ -1372,7 +1384,7 @@ public class BattleLogic {
         //***************************************
 
         // Check related to number of hits for moves that hit multiple times
-        if (move.getHits() > 1 && damageInfo.typeEffect() != 0) {
+        if (move.getHits() > 1 && damageInfo.typeEffect != 0) {
             Timeline hitsInformation = controller.getBattleTextAnimation(String.format("It hit %d time(s)!",
                     i), true);
             hitsInformation.setDelay(Duration.seconds(2));
@@ -1616,19 +1628,32 @@ public class BattleLogic {
                     target.getStatModifiers().put(statType, statup);
                 }
                 switch (change) {
-                    case 1 -> statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s rose!",
+                    case 1:
+                        statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s rose!",
                             target.getBattleName(), statType), true));
-                    case 2 -> statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s rose sharply!",
+                        break;
+                    case 2:
+                        statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s rose sharply!",
                             target.getBattleName(), statType), true));
-                    case 3 -> statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s rose drastically!",
+                        break;
+                    case 3:
+                        statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s rose drastically!",
                             target.getBattleName(), statType), true));
-                    case -1 -> statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s fell!",
+                        break;
+                    case -1:
+                        statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s fell!",
                             target.getBattleName(), statType), true));
-                    case -2 -> statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s harshly fell!",
+                        break;
+                    case -2:
+                        statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s harshly fell!",
                             target.getBattleName(), statType), true));
-                    case -3 -> statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s severely fell!",
+                        break;
+                    case -3:
+                        statChangeInfo.add(controller.getBattleTextAnimation(String.format("%s's%n%s severely fell!",
                             target.getBattleName(), statType), true));
-                    default -> throw new IllegalStateException(
+                        break;
+                    default:
+                        throw new IllegalStateException(
                             "Wrong change value, should be between -3 and 3 (excluding 0), is: " + change);
                 }
             }
@@ -1649,10 +1674,18 @@ public class BattleLogic {
         int totalCritChanceIncrease = critChanceIncrease + critChanceTempIncrease;
 
         switch (totalCritChanceIncrease) {
-            case 0 -> bound = 16;
-            case 1 -> bound = 8;
-            case 2 -> bound = 2;
-            default -> bound = 1;
+            case 0:
+                bound = 16;
+                break;
+            case 1:
+                bound = 8;
+                break;
+            case 2:
+                bound = 2;
+                break;
+            default:
+                bound = 1;
+                break;
         }
 
         int critNum = generator.nextInt(bound);
@@ -1667,18 +1700,19 @@ public class BattleLogic {
         //First we check if the executed move is a special or physical move, then we grab the corresponding stats
         //Attack for user and defense for target
         switch (movetype) {
-            case 0 -> {
+            case 0:
                 attackTemp = user.getStats(Enums.StatType.ATTACK);
                 attackMod = user.getStatModifiers().get(Enums.StatType.ATTACK);
                 defenseTemp = target.getStats(Enums.StatType.DEFENSE);
                 defenseMod = target.getStatModifiers().get(Enums.StatType.DEFENSE);
-            }
-            case 1 -> {
+                break;
+            case 1:
                 attackTemp = user.getStats(Enums.StatType.SPECIAL_ATTACK);
                 attackMod = user.getStatModifiers().get(Enums.StatType.SPECIAL_ATTACK);
                 defenseTemp = target.getStats(Enums.StatType.SPECIAL_DEFENSE);
                 defenseMod = target.getStatModifiers().get(Enums.StatType.SPECIAL_DEFENSE);
-            }
+                break;
+
         }
         //Final effective attack and defense stat
         double attack;
@@ -1779,12 +1813,17 @@ public class BattleLogic {
     private double processAbilityMultiplier(Move move, Pokemon user) {
         Enums.Types boostedType;
         switch (user.getAbility()) {
-            case OVERGROW -> boostedType = Enums.Types.GRASS;
-            case BLAZE -> boostedType = Enums.Types.FIRE;
-            case TORRENT -> boostedType = Enums.Types.WATER;
-            default -> {
+            case OVERGROW:
+                boostedType = Enums.Types.GRASS;
+                break;
+            case BLAZE:
+                boostedType = Enums.Types.FIRE;
+                break;
+            case TORRENT:
+                boostedType = Enums.Types.WATER;
+                break;
+            default:
                 return 1.0;
-            }
         }
 
         double hpThreshold = (double) user.getMaxHP() / 3;

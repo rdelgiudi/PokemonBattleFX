@@ -380,10 +380,18 @@ public class Pokemon {
                 basestat = pair.getValue();
                 float naturemod = 0;
                 switch (nature.getStatTab()[i - 1]) {
-                    case 0 -> naturemod = 1;
-                    case 1 -> naturemod = 1.1f;
-                    case -1 -> naturemod = 0.9f;
-                    default -> System.out.println("ERROR: Nature out of expected range!");
+                    case 0:
+                        naturemod = 1;
+                        break;
+                    case 1:
+                        naturemod = 1.1f;
+                        break;
+                    case -1:
+                        naturemod = 0.9f;
+                        break;
+                    default:
+                        System.out.println("ERROR: Nature out of expected range!");
+                        break;
                 }
                 stat = (int)Math.floor((Math.floor((2 * basestat + ivs[i])*level/100.0) + 5) * naturemod);
                 stats.put(pair.getKey(), stat);
