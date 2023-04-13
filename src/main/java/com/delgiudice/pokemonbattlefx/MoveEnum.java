@@ -38,7 +38,8 @@ public enum MoveEnum {
     DRAGON_DANCE("Dragon Dance"),
     EARTHQUAKE("Earthquake"),
     HYDRO_PUMP("Hydro Pump"),
-    AQUA_TAIL("Aqua Tail");
+    AQUA_TAIL("Aqua Tail"),
+    SKULL_BASH("Skull Bash");
 
 
     private final String name;
