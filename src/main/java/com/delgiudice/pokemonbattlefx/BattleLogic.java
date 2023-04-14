@@ -50,8 +50,8 @@ public class BattleLogic {
 
         player.addPokemon(new Pokemon(Pokemon.getPokemonExamples().get(PokemonEnum.CHARMANDER)));
 
-        Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.RATTATA), 60, Ability.BLAZE,
-               new Move(MoveTemplate.getMoveMap().get(MoveEnum.AIR_SLASH)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.GROWL)));
+        Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.CHARIZARD), 100, Ability.NONE,
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.TAIL_WHIP)));
         //Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 50, Ability.GUTS,
         //        new Move(MoveTemplate.getMoveMap().get("Scratch")) , new Move(MoveTemplate.getMoveMap().get("Growl")),
         //        new Move(MoveTemplate.getMoveMap().get("Quick Attack")));
@@ -1060,9 +1060,9 @@ public class BattleLogic {
             System.out.println(user.getBattleName() + " multiturn has ended, became confused");
 
             moveTimeLine.add(userConfusedMsg);
-            user.setMultiTurnMove(null);
             applyConfusion(user);
         }
+        processMultiturnMoveInterrupted(user);
     }
 
     private void processMultiturnMoveInterrupted(Pokemon user) {
@@ -1071,11 +1071,11 @@ public class BattleLogic {
     }
 
     private void checkMultiturnMoveInterruptEffect(List<Timeline> moveTimeLine, Pokemon user) {
-        if (user.getMultiTurnCounter() == 0) {
-            processMultiturnMoveCompleted(moveTimeLine, user);
-        }
-        else if (user.getMultiTurnCounter() > 0) {
+        if (user.getMultiTurnCounter() > 0 || !user.getMultiTurnMove().isMultiturnConfusion()) {
             processMultiturnMoveInterrupted(user);
+        }
+        else if (user.getMultiTurnCounter() == 0) {
+            processMultiturnMoveCompleted(moveTimeLine, user);
         }
     }
 
@@ -1084,9 +1084,9 @@ public class BattleLogic {
         Timeline snappedOutMessage = controller.getBattleTextAnimation(String.format(
                 "%s snapped out of confusion!", user.getBattleName()), true);
 
-        System.out.println(user.getBattleName() + " snapped out of confusion");
 
         if (user.getConfusionTimer() == 0) {
+            System.out.println(user.getBattleName() + " snapped out of confusion");
             user.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
             moveTimeLine.add(snappedOutMessage);
             moveTimeLine.add(controller.generatePause(2000));
@@ -1122,6 +1122,8 @@ public class BattleLogic {
 
         moveTimeLine.add(generateHit);
         moveTimeLine.add(controller.generatePause(2000));
+
+        processMultiturnMoveInterrupted(user);
     }
 
     private void processUserFlinched(List<Timeline> moveTimeLine, Pokemon user) {
@@ -1200,13 +1202,14 @@ public class BattleLogic {
         //***************************************
 
         // Checks related to confused Pokemon
-        // Decreases confusion timeer, checks if Pokemon will hit itself in confusion and deletes status if timer is 0
+        // Decreases confusion timer, checks if Pokemon will hit itself in confusion and deletes status if timer is 0
         if(user.getSubStatuses().contains(Enums.SubStatus.CONFUSED))
             updateConfusionStatus(moveTimeLine ,user);
 
         if (user.getSubStatuses().contains(Enums.SubStatus.CONFUSED)) {
             Timeline confuseMessage = controller.getBattleTextAnimation(String.format("%s is%nconfused!", user.getBattleName()),
                     true);
+            System.out.println(user.getBattleName() + " is confused");
             moveTimeLine.add(confuseMessage);
             moveTimeLine.add(controller.generatePause(2000));
 
@@ -1287,8 +1290,10 @@ public class BattleLogic {
         MoveDamageInfo damageInfo = new MoveDamageInfo(0, false, MoveDamageInfo.NOT_APPLICABLE);
         int i;
         int damage = 0;
+        int hits = move.isMultiturn() ? 1 : move.getHits();
 
-        for (i=0; i<move.getHits(); i++) {
+
+        for (i=0; i<hits; i++) {
             if (target.getHp() == 0)
                 break;
 
@@ -1372,10 +1377,16 @@ public class BattleLogic {
         // Check if Pokemon in first turn of a multiturn move
         // generates the number of moves that it can use before being confused and
         // assigns appropriate variables
-        if (move.isMultiturn() && user.getMultiTurnMove() == null) {
+        if (move.isMultiturn() && user.getMultiTurnMove() == null && move.isMultiturnConfusion()) {
             int turns = generator.nextInt(2) + 1;
             user.setMultiTurnMove(move);
             user.setMultiTurnCounter(turns);
+        }
+        else if (move.isMultiturn() && user.getMultiTurnMove() == null) {
+            if (move.getHits() == 1) {
+                user.setMultiTurnMove(move);
+                user.setMultiTurnCounter(4);
+            }
         }
         //**********************************************************
 
@@ -1516,9 +1527,10 @@ public class BattleLogic {
         }
         //*****************************************************
 
-        // If multiturn counter has reached 0, then a multiturn move is disabled
+        // If multiturn counter has reached 0 and causes confusion, then a multiturn move is disabled
         // and the target becomes confused
-        if (move.isMultiturn() && user.getMultiTurnCounter() == 0 && user.getMultiTurnMove() != null)
+        if (move.isMultiturn() && user.getMultiTurnCounter() == 0 && user.getMultiTurnMove() != null &&
+        move.isMultiturnConfusion())
             processMultiturnMoveCompleted(moveTimeLine, user);
         //*********************************************************************
 
@@ -1586,8 +1598,21 @@ public class BattleLogic {
         SecureRandom generator = new SecureRandom();
 
         System.out.println(target.getBattleName() + " was trapped in vortex");
+        int turns = 0;
+        if (move.getName() == MoveEnum.FIRE_SPIN) {
+            int rand = generator.nextInt(256);
+            if (rand < 96)
+                turns = 2;
+            else if (rand < 192)
+                turns = 3;
+            else if (rand < 224)
+                turns = 4;
+            else
+                turns = 5;
+        }
 
-        int turns = generator.nextInt(4) + 2;
+        if (turns == 0)
+            throw new IllegalStateException("An unexpected move arrived at this function: " + move.getName());
         target.setTrappedTimer(turns);
         target.setTrapMove(move);
 
@@ -1700,6 +1725,7 @@ public class BattleLogic {
         int critChanceIncrease = user.getCritIncrease();
         int totalCritChanceIncrease = critChanceIncrease + critChanceTempIncrease;
 
+        // Takes into consideration crit chance boosts, for 3 and over critical hit is guaranteed
         switch (totalCritChanceIncrease) {
             case 0:
                 bound = 16;
@@ -1724,8 +1750,8 @@ public class BattleLogic {
         int defenseTemp = 0;
         int defenseMod = 0;
 
-        //First we check if the executed move is a special or physical move, then we grab the corresponding stats
-        //Attack for user and defense for target
+        // Check if the executed move is a special or physical move, then grab the corresponding stats
+        // Attack for user and defense for target (or Special Attack and Special Defense)
         switch (movetype) {
             case 0:
                 attackTemp = user.getStats(Enums.StatType.ATTACK);
@@ -1744,6 +1770,7 @@ public class BattleLogic {
         //Final effective attack and defense stat
         double attack;
         double defense;
+
         // Check if the hit is going to be critical, critical hits ignore negative (user-wise) stat changes and only
         // leave positive ones
 
@@ -1783,6 +1810,8 @@ public class BattleLogic {
             }
             critMod = 1;
         }
+
+        // Check if an ability boosts the output of an attack
         double abilityMultiplier = processAbilityMultiplier(move, user);
         attack = attack * abilityMultiplier;
 
@@ -1816,7 +1845,15 @@ public class BattleLogic {
         }
         //Final damage calculations
         double modifier = critMod * rand * stab * typeEffect * burn * twoTurnModifier;
-        double damageDouble = Math.round(((((part1 * move.getPower() * ((attack/defense)/50.0)) + 2) * modifier)));
+        int power = move.getPower();
+        // if under the effect of a multiturn stacking move (multiturn + doesn't cause confusion + hits set to 1)
+        // increase power twofold every turn it is used
+        boolean nonConfusionMultiturn = move.isMultiturn() && !move.isMultiturnConfusion();
+        if (nonConfusionMultiturn && move.getHits() == 1 && user.getMultiTurnMove() == move) {
+            int powerMultiplier =  5 - user.getMultiTurnCounter();
+            power *= powerMultiplier;
+        }
+        double damageDouble = Math.round(((((part1 * power * ((attack/defense)/50.0)) + 2) * modifier)));
         int damage = (int) damageDouble;
 
         System.out.println(user.getBattleName() + " used a " + move.getType().toString() + " type move!");

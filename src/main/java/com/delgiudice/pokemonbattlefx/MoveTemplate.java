@@ -44,8 +44,9 @@ public class MoveTemplate {
     // recoilUserHp - determines if a move calculates recoil based on user max HP instead of damage dealt
     // contactMove - check if the move makes contact for calculations related to some Pokemon abilities,
     // such as static
+    // multiturnConfusion - checks if the move causes confusion at the end of its execution (such as Outrage)
     private boolean twoturn = false, self = false, trap = false, charging = false, multiturn = false,
-                    recoilUserHp = false, statUpDuringCharging = false, contactMove = false;
+                    recoilUserHp = false, statUpDuringCharging = false, contactMove = false, multiturnConfusion = false;
 
     // subtype - subtype of move, Physical, Special or Status
     private final Enums.Subtypes subtype;
@@ -102,6 +103,10 @@ public class MoveTemplate {
 
     public boolean isMultiturn() {
         return multiturn;
+    }
+
+    public boolean isContactMove() {
+        return contactMove;
     }
 
     public float getHpRestore() {
@@ -173,6 +178,10 @@ public class MoveTemplate {
         return recoilUserHp;
     }
 
+    public boolean isMultiturnConfusion() {
+        return multiturnConfusion;
+    }
+
     public void setPriority(int priority) {
         this.priority = priority;
     }
@@ -233,6 +242,10 @@ public class MoveTemplate {
         this.critTemporaryIncrease = critTemporaryIncrease;
     }
 
+    public void setMultiturnConfusion(boolean multiturnConfusion) {
+        this.multiturnConfusion = multiturnConfusion;
+    }
+
     public void setSubStatus(Enums.SubStatus subStatus) {
         this.subStatus = subStatus;
     }
@@ -274,6 +287,10 @@ public class MoveTemplate {
         this.subtype = subtype;
         this.type = type;
         this.contactMove = contactMove;
+    }
+
+    public static MoveTemplate getMove(MoveEnum moveEnum) {
+        return moveMap.get(moveEnum);
     }
 
     ///initializes list of available moves
@@ -400,11 +417,13 @@ public class MoveTemplate {
         newmove = new MoveTemplate(MoveEnum.OUTRAGE, 120, 100, 10, Enums.Subtypes.PHYSICAL,
                 Type.getTypeMap().get(Enums.Types.DRAGON), true);
         newmove.setMultiturn(true);
+        newmove.setMultiturnConfusion(true);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.PETAL_DANCE, 120, 100, 10, Enums.Subtypes.SPECIAL,
                 Type.getTypeMap().get(Enums.Types.GRASS), true);
         newmove.setMultiturn(true);
+        newmove.setMultiturnConfusion(true);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.PETAL_BLIZZARD, 90, 100, 15, Enums.Subtypes.PHYSICAL,
@@ -492,6 +511,12 @@ public class MoveTemplate {
         newmove.getSecondaryStatTypes().add(Enums.StatType.SPEED);
         moveMap.put(newmove.getName(), newmove);
 
+        newmove = new MoveTemplate(MoveEnum.ROLLOUT, 30, 90, 20, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.ROCK), true);
+        newmove.setMultiturn(true);
+        newmove.setMultiturnConfusion(false);
+        newmove.setHits(1);
+        moveMap.put(newmove.getName(), newmove);
     }
 
 }
