@@ -1595,8 +1595,21 @@ public class BattleLogic {
         SecureRandom generator = new SecureRandom();
 
         System.out.println(target.getBattleName() + " was trapped in vortex");
+        int turns = 0;
+        if (move.getName() == MoveEnum.FIRE_SPIN) {
+            int rand = generator.nextInt(256);
+            if (rand < 96)
+                turns = 2;
+            else if (rand < 192)
+                turns = 3;
+            else if (rand < 224)
+                turns = 4;
+            else
+                turns = 5;
+        }
 
-        int turns = generator.nextInt(4) + 2;
+        if (turns == 0)
+            throw new IllegalStateException("An unexpected move arrived at this function: " + move.getName());
         target.setTrappedTimer(turns);
         target.setTrapMove(move);
 
