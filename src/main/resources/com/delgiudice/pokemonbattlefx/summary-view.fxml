@@ -108,7 +108,7 @@
                   <Font name="Monospaced Bold" size="20.0" />
                </font>
             </Label>
-            <HBox fx:id="typeBox" alignment="CENTER" prefHeight="36.0" prefWidth="778.0" spacing="15.0">
+            <HBox fx:id="typeBox" alignment="CENTER" prefHeight="40.0" prefWidth="778.0" spacing="15.0">
                <children>
                   <Label fx:id="firstTypeLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="30.0" prefWidth="110.0" style="-fx-background-color: #44685E; -fx-border-radius: 10; -fx-background-radius: 10;" text="???" textFill="WHITE">
                      <font>
@@ -390,6 +390,9 @@
                            </font>
                         </Label>
                      </children>
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding>
                   </HBox>
                   <HBox fx:id="secondMoveBox" alignment="CENTER_LEFT" prefHeight="36.0" prefWidth="778.0" style="-fx-border-color: black;">
                      <children>
@@ -423,6 +426,9 @@
                            </font>
                         </Label>
                      </children>
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding>
                   </HBox>
                   <HBox fx:id="thirdMoveBox" alignment="CENTER_LEFT" prefHeight="36.0" prefWidth="778.0" style="-fx-border-color: black;">
                      <children>
@@ -456,6 +462,9 @@
                            </font>
                         </Label>
                      </children>
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding>
                   </HBox>
                   <HBox fx:id="fourthMoveBox" alignment="CENTER_LEFT" prefHeight="36.0" prefWidth="778.0" style="-fx-border-color: black;">
                      <children>
@@ -489,6 +498,9 @@
                            </font>
                         </Label>
                      </children>
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding>
                   </HBox>
                </children>
             </VBox>
