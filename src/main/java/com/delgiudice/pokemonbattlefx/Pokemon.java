@@ -469,5 +469,10 @@ public class Pokemon {
                 new Move(MoveTemplate.getMoveMap().get(MoveEnum.AQUA_TAIL)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.HYDRO_PUMP)),
                 new Move(MoveTemplate.getMoveMap().get(MoveEnum.SKULL_BASH)), new Move(MoveTemplate.getMoveMap().get(MoveEnum.SHELL_SMASH)));
         pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.WARTORTLE), 50, Ability.TORRENT,
+                new Move(MoveTemplate.getMove(MoveEnum.HYDRO_PUMP)), new Move(MoveTemplate.getMove(MoveEnum.ICE_PUNCH)),
+                new Move(MoveTemplate.getMove(MoveEnum.WHIRLPOOL)), new Move(MoveTemplate.getMove(MoveEnum.SHELL_SMASH)));
+        pokemonExamples.put(example.getOriginalName(), example);
     }
 }

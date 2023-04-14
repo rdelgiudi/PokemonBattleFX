@@ -222,6 +222,11 @@ public class PokemonSpecie {
                 "/squirtle_back.png");
         pokemonMap.put(newpkmn.getName(), newpkmn);
 
+        newpkmn = new PokemonSpecie(8, PokemonEnum.WARTORTLE, Type.getTypeMap(Enums.Types.WATER), 59, 63,
+                80, 65, 80, 58, "/wartortle_front.png",
+                "/wartortle_back.png");
+        pokemonMap.put(newpkmn.getName(), newpkmn);
+
         newpkmn = new PokemonSpecie(66,PokemonEnum.MACHOP, Type.getTypeMap().get(Enums.Types.FIGHTING), 70, 80,
                 50, 35, 35, 35, "/machop_front.png", "/machop_back.png");
         pokemonMap.put(newpkmn.getName(), newpkmn);

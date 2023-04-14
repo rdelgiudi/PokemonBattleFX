@@ -40,7 +40,7 @@ public class BattleController {
     private Button fightButton, bagButton, pokemonButton, runButton, firstMoveButton, secondMoveButton, thirdMoveButton,
             fourthMoveButton, backMoveButton, pokemonBackButton;
     @FXML
-    private VBox allyPokemonInfo, enemyPokemonInfo;
+    private VBox allyPokemonInfo, enemyPokemonInfo, pokemonSubmenu;
     @FXML
     private ImageView allyPokemonSprite, enemyPokemonSprite, textArrowView;
     @FXML
@@ -48,6 +48,14 @@ public class BattleController {
                     enemyStatusLabel;
     @FXML
     private ProgressBar enemyHpBar, allyHpBar;
+
+    private final static String FIGHT_BUTTON_PRESSED = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: darkred;";
+    private final static String FIGHT_BUTTON_RELEASE = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: firebrick;";
+    private final static String FIGHT_BUTTON_HOVER = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: crimson;";
+
+    private final static String POKEMON_BUTTON_PRESSED = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: darkgreen;";
+    private final static String POKEMON_BUTTON_RELEASE = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: forestgreen;";
+    private final static String POKEMON_BUTTON_HOVER = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: limegreen;";
 
     private Scene scene;
 
@@ -107,7 +115,62 @@ public class BattleController {
         return pokemonBackButton;
     }
 
+    public VBox getPokemonSubmenu() {
+        return pokemonSubmenu;
+    }
+
     public void initialize() {
+        battleText.setMouseTransparent(true);
+        battleText.setFocusTraversable(false);
+        battleTextFull.setMouseTransparent(true);
+        battleTextFull.setFocusTraversable(false);
+
+        setupButtons();
+    }
+
+    private void setupButtons() {
+        setFightButton();
+        setPokemonButton();
+    }
+
+    private void setFightButton() {
+        fightButton.setOnMousePressed(e -> {
+            fightButton.setStyle(FIGHT_BUTTON_PRESSED);
+        });
+
+        fightButton.setOnMouseReleased(e -> {
+            fightButton.setStyle(FIGHT_BUTTON_RELEASE);
+        });
+
+        fightButton.setOnMouseEntered(e -> {
+            fightButton.setText(">" + fightButton.getText().substring(1));
+            fightButton.setStyle(FIGHT_BUTTON_HOVER);
+        });
+
+        fightButton.setOnMouseExited(e -> {
+            fightButton.setText(" " + fightButton.getText().substring(1));
+            fightButton.setStyle(FIGHT_BUTTON_RELEASE);
+        });
+    }
+
+    private void setPokemonButton() {
+        pokemonButton.setOnMousePressed(e -> {
+            pokemonButton.setStyle(POKEMON_BUTTON_PRESSED);
+        });
+
+        pokemonButton.setOnMouseReleased(e -> {
+            pokemonButton.setStyle(POKEMON_BUTTON_RELEASE);
+        });
+
+        pokemonButton.setOnMouseEntered(e -> {
+            pokemonButton.setText(">" + pokemonButton.getText().substring(1));
+            pokemonButton.setStyle(POKEMON_BUTTON_HOVER);
+        });
+
+        pokemonButton.setOnMouseExited(e -> {
+            pokemonButton.setText(" " + pokemonButton.getText().substring(1));
+            pokemonButton.setStyle(POKEMON_BUTTON_RELEASE);
+        });
     }
 
     public void switchToPlayerChoice(boolean choice) {
@@ -523,15 +586,34 @@ public class BattleController {
         button.setTextAlignment(TextAlignment.CENTER);
 
         button.setFont(Font.font("Monospaced"));
-        Color buttonColor = move.getType().getTypeEnum().getTypeColor();
-        String colorHex = toHexString(buttonColor);
-        button.setStyle("-fx-background-color: " + colorHex);
+        Color buttonBorderColor = move.getType().getTypeEnum().getTypeColor();
+        Color buttonColor = Color.LIGHTGRAY;
+        String colorHex = toHexString(buttonBorderColor);
+        String colorHexEnd = toHexString(buttonColor);
+        String setColorIntro = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 7; " +
+                "-fx-border-color: ";
+        String setColorEnd = "; -fx-background-color: ";
+        button.setStyle(setColorIntro + colorHex);
+        button.setOnMouseExited(e -> button.setStyle(setColorIntro + colorHex + setColorEnd + colorHexEnd));
+        button.setOnMouseReleased(e -> button.setStyle(setColorIntro + colorHex + setColorEnd + colorHexEnd));
 
-        double brightness = buttonColor.getBrightness();
-        Color textColorRegular = (brightness > 0.5) ? Color.BLACK: Color.WHITE;
-        Color textColorWarning = (brightness > 0.5) ? Color.rgb(255, 255, 0): Color.rgb(255, 255, 102);
-        Color textColorLow = (brightness > 0.5) ? Color.rgb(255, 69, 0): Color.rgb(255, 165, 0);
-        Color textColorNoPP = (brightness > 0.5) ? Color.DARKRED: Color.RED;
+        Color buttonBorderColorPressed = buttonBorderColor.darker();
+        Color buttonColorPressed = buttonColor.darker();
+        String colorHexPressed = toHexString(buttonBorderColorPressed);
+        String colorHexPressedEnd = toHexString(buttonColorPressed);
+        button.setOnMousePressed(e -> button.setStyle(setColorIntro + colorHexPressed + setColorEnd + colorHexPressedEnd));
+
+        Color buttonBorderColorHover = buttonBorderColor.brighter();
+        Color buttonColorHover = buttonColor.brighter();
+        String colorHexHover = toHexString(buttonBorderColorHover);
+        String colorHexHoverEnd = toHexString(buttonColorHover);
+        button.setOnMouseEntered(e -> button.setStyle(setColorIntro + colorHexHover + setColorEnd + colorHexHoverEnd));
+
+        // looks good like this so far, needs more testing
+        Color textColorRegular = Color.BLACK;
+        Color textColorWarning = Color.GOLDENROD;
+        Color textColorLow = Color.DARKORANGE;
+        Color textColorNoPP = Color.FIREBRICK;
 
         float percentage = (float)move.getPp() / move.getMaxpp();
         if (percentage > 0.5)
@@ -579,6 +661,18 @@ public class BattleController {
 
         int partySize = party.size();
 
+        String setColorIntro = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 7; " +
+                "-fx-border-color: ";
+        String setColorEnd = "; -fx-background-color: ";
+
+        Color buttonColor = Color.LIGHTGRAY;
+        String colorHexEnd = toHexString(buttonColor);
+        Color buttonColorPressed = buttonColor.darker();
+        String colorHexPressedEnd = toHexString(buttonColorPressed);
+        Color buttonColorHover = buttonColor.brighter();
+        String colorHexHoverEnd = toHexString(buttonColorHover);
+        String halfAndHalf = "linear-gradient(from 0%% 50%% to 100%% 50%%, %s, %s)";
+
         for (int j=0; j <= 1; j++) {
             for (int i = 0; i <= 2; i++) {
 
@@ -589,15 +683,54 @@ public class BattleController {
                 button.setTextFill(Color.DARKGREEN);
                 button.setDisable(false);
 
+                button.setTextAlignment(TextAlignment.CENTER);
+
+                button.setFont(Font.font("Monospaced"));
+                Color[] buttonBorderColor = new Color[2];
+                Color[] buttonBorderColorPressed = new Color[2];
+
+
                 if (partyIndex > partySize - 1) {
                     button.setText("");
                     button.setDisable(true);
-                    //button.setStyle("-fx-background-color: transparent");
+                    button.setStyle(setColorIntro + "black" + setColorEnd + colorHexEnd);
                     continue;
                 }
-
                 Pokemon pokemon = party.get(partyIndex);
                 button.setText(String.format("%s%nHP:%d/%d", pokemon.getName(), pokemon.getHp(), pokemon.getMaxHP()));
+
+                buttonBorderColor[0] = pokemon.getType()[0].getTypeEnum().getTypeColor();
+
+                if (pokemon.getType()[1].getTypeEnum() == Enums.Types.NO_TYPE) {
+                    buttonBorderColor[1] = buttonBorderColor[0];
+                }
+                else {
+                    buttonBorderColor[1] = pokemon.getType()[1].getTypeEnum().getTypeColor();
+                }
+                String[] colorHex = new String[2];
+                colorHex[0] = toHexString(buttonBorderColor[0]);
+                colorHex[1] = toHexString(buttonBorderColor[1]);
+                String colorHexComplete = String.format(halfAndHalf, colorHex[0], colorHex[1]);
+                button.setStyle(setColorIntro + colorHexComplete + setColorEnd + colorHexEnd);
+                button.setOnMouseExited(e -> button.setStyle(setColorIntro + colorHexComplete + setColorEnd + colorHexEnd));
+                button.setOnMouseReleased(e -> button.setStyle(setColorIntro + colorHexComplete + setColorEnd + colorHexEnd));
+
+                buttonBorderColorPressed[0] = buttonBorderColor[0].darker();
+                buttonBorderColorPressed[1] = buttonBorderColor[1].darker();
+                String[] colorHexPressed = new String[2];
+                colorHexPressed[0] = toHexString(buttonBorderColorPressed[0]);
+                colorHexPressed[1] = toHexString(buttonBorderColorPressed[1]);
+                String colorHexPressedComplete = String.format(halfAndHalf, colorHexPressed[0], colorHexPressed[1]);
+                button.setOnMousePressed(e -> button.setStyle(setColorIntro + colorHexPressedComplete + setColorEnd + colorHexPressedEnd));
+
+                Color[] buttonBorderColorHover = new Color[2];
+                buttonBorderColorHover[0] = buttonBorderColor[0].brighter();
+                buttonBorderColorHover[1] = buttonBorderColor[1].brighter();
+                String[] colorHexHover = new String[2];
+                colorHexHover[0] = toHexString(buttonBorderColorHover[0]);
+                colorHexHover[1] = toHexString(buttonBorderColorHover[1]);
+                String colorHexHoverComplete = String.format(halfAndHalf, colorHexHover[0], colorHexHover[1]);
+                button.setOnMouseEntered(e -> button.setStyle(setColorIntro + colorHexHoverComplete + setColorEnd + colorHexHoverEnd));
 
                 if (pokemon.getHp() == 0) {
                     //button.setStyle("-fx-background-color: red");

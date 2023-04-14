@@ -9,7 +9,8 @@ public enum PokemonEnum {
     CHARIZARD("Charizard"),
     RATTATA("Rattata"),
     SQUIRTLE("Squirtle"),
-    MACHOP("Machop");
+    MACHOP("Machop"),
+    WARTORTLE("Wartortle");
 
     private final String name;
 

@@ -4,10 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="contact move flag added">
+    <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="move colors added in move select menu">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/SummaryController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/summary-view.fxml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleLogic.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Enums.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Enums.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveEnum.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveEnum.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveTemplate.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveTemplate.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Pokemon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Pokemon.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/PokemonEnum.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/PokemonEnum.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/PokemonSpecie.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/PokemonSpecie.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/battle-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/battle-view.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,6 +27,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Class" />
+        <option value="FxmlFile" />
       </list>
     </option>
   </component>
@@ -47,6 +57,11 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\krp8_\IdeaProjects\PokemonBattleFX\src\main\resources" />
+    </key>
+  </component>
   <component name="RunManager" selected="Application.run">
     <configuration name="run" type="Application" factoryName="Application">
       <option name="MAIN_CLASS_NAME" value="com.delgiudice.pokemonbattlefx.Main" />
@@ -97,14 +112,33 @@
       <option name="project" value="LOCAL" />
       <updated>1681422150817</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="move colors added in move select menu">
+      <created>1681475709863</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1681475709863</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="fixed pom.xml" />
     <MESSAGE value="added new moves and pokemon examples" />
     <MESSAGE value="contact move flag added" />
-    <option name="LAST_COMMIT_MESSAGE" value="contact move flag added" />
+    <MESSAGE value="move colors added in move select menu" />
+    <option name="LAST_COMMIT_MESSAGE" value="move colors added in move select menu" />
   </component>
   <component name="XDebuggerManager">
     <pin-to-top-manager>

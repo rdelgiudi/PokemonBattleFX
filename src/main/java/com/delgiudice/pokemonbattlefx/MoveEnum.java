@@ -41,7 +41,9 @@ public enum MoveEnum {
     AQUA_TAIL("Aqua Tail"),
     SKULL_BASH("Skull Bash"),
     SHELL_SMASH("Shell Smash"),
-    ROLLOUT("Rollout");
+    ROLLOUT("Rollout"),
+    WHIRLPOOL("Whirlpool"),
+    ICE_PUNCH("Ice Punch");
 
 
     private final String name;

@@ -61,23 +61,37 @@ public class Enums {
         }
     }
     public enum StatType {       //pokemon statistics (both regular and stat changes)
-        MAX_HP("Max HP"),
-        ATTACK("Attack"),
-        DEFENSE("Defense"),
-        ACCURACY("Accuracy"), // in battle only
-        SPECIAL_ATTACK("Special Attack"),
-        SPECIAL_DEFENSE("Special Defense"),
-        SPEED("Speed"),
-        EVASIVENESS("Evasiveness"); //in battle only
+        MAX_HP(0,"Max HP"),
+        ATTACK(1,"Attack"),
+        DEFENSE(2,"Defense"),
+        ACCURACY(-1,"Accuracy"), // in battle only
+        SPECIAL_ATTACK(3,"Special Attack"),
+        SPECIAL_DEFENSE(4,"Special Defense"),
+        SPEED(5,"Speed"),
+        EVASIVENESS(-2,"Evasiveness"); //in battle only
 
         final private String typeString;
+        final int baseStatId;
 
         public String toString()
         {
             return typeString;
         }
 
-        StatType(String typeString) {
+        public int getBaseStatId() {
+            return baseStatId;
+        }
+
+        public static StatType fromBaseStatId(int val) {
+            for (StatType statType : StatType.values())
+                if (statType.baseStatId == val)
+                    return statType;
+
+             throw new IllegalArgumentException("Argument out of range for StatType");
+        }
+
+        StatType(int id ,String typeString) {
+            this.baseStatId = id;
             this.typeString = typeString;
         }
     }

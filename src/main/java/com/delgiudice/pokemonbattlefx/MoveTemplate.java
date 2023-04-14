@@ -517,6 +517,17 @@ public class MoveTemplate {
         newmove.setMultiturnConfusion(false);
         newmove.setHits(1);
         moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.WHIRLPOOL, 35, 85, 15, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.WATER), false);
+        newmove.setTrap(true);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.ICE_PUNCH, 75, 100, 15, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.ICE), true);
+        newmove.setStatus(Enums.Status.FROZEN);
+        newmove.setStatusProb(0.1f);
+        moveMap.put(newmove.getName(), newmove);
     }
 
 }
