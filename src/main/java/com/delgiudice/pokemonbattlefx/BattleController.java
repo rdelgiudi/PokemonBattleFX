@@ -21,6 +21,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
 import java.util.LinkedList;
@@ -514,23 +515,33 @@ public class BattleController {
     private void setMoveInformation(Button button, Move move) {
 
         String ppInfo = "%s%nPP: %-2d/%2d%nType: %s";
-
         String type;
         type = move.getType().getTypeEnum().toString();
 
         button.setText(String.format(ppInfo, move.getName(), move.getPp(),
                 move.getMaxpp(), type));
-
-        float percentage = (float)move.getPp() / move.getMaxpp();
+        button.setTextAlignment(TextAlignment.CENTER);
 
         button.setFont(Font.font("Monospaced"));
+        Color buttonColor = move.getType().getTypeEnum().getTypeColor();
+        String colorHex = toHexString(buttonColor);
+        button.setStyle("-fx-background-color: " + colorHex);
 
-        if (percentage > 0.25)
-            button.setTextFill(Color.BLACK);
+        double brightness = buttonColor.getBrightness();
+        Color textColorRegular = (brightness > 0.5) ? Color.BLACK: Color.WHITE;
+        Color textColorWarning = (brightness > 0.5) ? Color.rgb(255, 255, 0): Color.rgb(255, 255, 102);
+        Color textColorLow = (brightness > 0.5) ? Color.rgb(255, 69, 0): Color.rgb(255, 165, 0);
+        Color textColorNoPP = (brightness > 0.5) ? Color.DARKRED: Color.RED;
+
+        float percentage = (float)move.getPp() / move.getMaxpp();
+        if (percentage > 0.5)
+            button.setTextFill(textColorRegular);
+        else if (percentage > 0.25)
+            button.setTextFill(textColorWarning);
         else if (percentage > 0)
-            button.setTextFill(Color.DARKORANGE);
+            button.setTextFill(textColorLow);
         else
-            button.setTextFill(Color.DARKRED);
+            button.setTextFill(textColorNoPP);
     }
 
     public void updateAvailableMoves(Pokemon pokemon) {

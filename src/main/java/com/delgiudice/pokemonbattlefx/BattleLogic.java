@@ -445,7 +445,18 @@ public class BattleLogic {
     }
 
     private Move generateEnemyMove(Pokemon enemyPokemon) {
-        SecureRandom generator = new SecureRandom();
+        Move enemyMove;
+
+        if (enemyPokemon.getMultiTurnMove() != null & enemyPokemon.getTwoTurnMove() != null)
+            throw new IllegalStateException("Both multiturn and two turn active at the same time");
+        else if (enemyPokemon.getMultiTurnMove() != null && enemyPokemon.getMultiTurnCounter() > 0) {
+            enemyMove = enemyPokemon.getMultiTurnMove();
+            return enemyMove;
+        }
+        else if (enemyPokemon.getTwoTurnMove() != null) {
+            enemyMove = enemyPokemon.getTwoTurnMove();
+            return enemyMove;
+        }
 
         boolean[] moveAvailable = enemyPokemon.checkAvailableMoves();
         List<Integer> availableIndices = new ArrayList<>();
@@ -454,23 +465,15 @@ public class BattleLogic {
             if (moveAvailable[i])
                 availableIndices.add(i);
         }
-        Move enemyMove;
         if (availableIndices.size() == 0) {
             enemyMove = new Move(MoveTemplate.getMoveMap().get(MoveEnum.STRUGGLE));
             return enemyMove;
         }
 
+        SecureRandom generator = new SecureRandom();
         int enemyMoveIndex = generator.nextInt(availableIndices.size());
-        if (enemyPokemon.getMultiTurnMove() != null & enemyPokemon.getTwoTurnMove() != null)
-            throw new IllegalStateException("Both multiturn and two turn active at the same time");
-        else if (enemyPokemon.getMultiTurnMove() != null && enemyPokemon.getMultiTurnCounter() > 0) {
-            //enemyPokemon.setMultiTurnCounter(enemyPokemon.getMultiTurnCounter() - 1);
-            enemyMove = enemyPokemon.getMultiTurnMove();
-        }
-        else if (enemyPokemon.getTwoTurnMove() != null)
-            enemyMove = enemyPokemon.getTwoTurnMove();
-        else
-            enemyMove = enemyPokemon.getMoveList(availableIndices.get(enemyMoveIndex));
+
+        enemyMove = enemyPokemon.getMoveList(availableIndices.get(enemyMoveIndex));
 
         return enemyMove;
     }
