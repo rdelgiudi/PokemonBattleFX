@@ -10,7 +10,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
 <AnchorPane prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: linear-gradient(to top left, lightblue, darkblue);" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.delgiudice.pokemonbattlefx.SummaryController">
    <children>
       <VBox prefHeight="390.0" prefWidth="252.0" style="-fx-border-color: black; -fx-background-color: white;" AnchorPane.leftAnchor="120.0" AnchorPane.topAnchor="40.0">
@@ -373,7 +372,7 @@
                               <Font name="Monospaced Regular" size="20.0" />
                            </font>
                         </Label>
-                        <Label alignment="CENTER" prefHeight="36.0" prefWidth="230.0" text="PP:">
+                        <Label alignment="CENTER_RIGHT" prefHeight="36.0" prefWidth="230.0" text="PP:">
                            <opaqueInsets>
                               <Insets />
                            </opaqueInsets>
@@ -409,7 +408,7 @@
                               <Font name="Monospaced Regular" size="20.0" />
                            </font>
                         </Label>
-                        <Label alignment="CENTER" prefHeight="36.0" prefWidth="230.0" text="PP:">
+                        <Label alignment="CENTER_RIGHT" prefHeight="36.0" prefWidth="230.0" text="PP:">
                            <opaqueInsets>
                               <Insets />
                            </opaqueInsets>
@@ -445,7 +444,7 @@
                               <Font name="Monospaced Regular" size="20.0" />
                            </font>
                         </Label>
-                        <Label alignment="CENTER" prefHeight="36.0" prefWidth="230.0" text="PP:">
+                        <Label alignment="CENTER_RIGHT" prefHeight="36.0" prefWidth="230.0" text="PP:">
                            <opaqueInsets>
                               <Insets />
                            </opaqueInsets>
@@ -481,7 +480,7 @@
                               <Font name="Monospaced Regular" size="20.0" />
                            </font>
                         </Label>
-                        <Label alignment="CENTER" prefHeight="36.0" prefWidth="230.0" text="PP:">
+                        <Label alignment="CENTER_RIGHT" prefHeight="36.0" prefWidth="230.0" text="PP:">
                            <opaqueInsets>
                               <Insets />
                            </opaqueInsets>
@@ -512,6 +511,103 @@
          </font>
       </Button>
       <Button fx:id="nextButton" layoutX="1170.0" layoutY="40.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="90.0" text="Next" AnchorPane.bottomAnchor="655.0" AnchorPane.rightAnchor="20.0">
+         <font>
+            <Font name="Monospaced Regular" size="12.0" />
+         </font>
+      </Button>
+      <VBox fx:id="moveInfoBox" layoutX="481.0" layoutY="552.0" prefHeight="146.0" prefWidth="778.0" style="-fx-background-color: white;" visible="false" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="21.0">
+         <children>
+            <HBox fx:id="focusMoveBox" alignment="CENTER_LEFT" prefHeight="36.0" prefWidth="778.0" style="-fx-border-color: black; -fx-background-color: linear-gradient(to left, darkmagenta, indigo);">
+               <children>
+                  <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="30.0" prefWidth="110.0" style="-fx-background-color: #44685E; -fx-border-radius: 10; -fx-background-radius: 10;" text="???" textFill="WHITE">
+                     <font>
+                        <Font name="Monospaced Regular" size="15.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER" prefHeight="34.0" prefWidth="260.0" text="Move" textFill="WHITE">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <font>
+                        <Font name="Monospaced Regular" size="20.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER_RIGHT" prefHeight="36.0" prefWidth="230.0" text="PP:" textFill="WHITE">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <font>
+                        <Font name="Monospaced Regular" size="20.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER" prefHeight="34.0" prefWidth="175.0" style="-fx-background-color: white;" text="?? / ??">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <font>
+                        <Font name="Monospaced Regular" size="20.0" />
+                     </font>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets left="10.0" />
+               </padding>
+            </HBox>
+            <HBox prefHeight="34.0" prefWidth="778.0">
+               <children>
+                  <Label alignment="CENTER" prefHeight="34.0" prefWidth="434.0" style="-fx-background-color: linear-gradient(to left, darkmagenta, indigo);" text="Description:" textFill="WHITE">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <font>
+                        <Font name="Monospaced Regular" size="20.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER_RIGHT" prefHeight="34.0" prefWidth="78.0" style="-fx-background-color: linear-gradient(to left, darkmagenta, indigo);" text="Power:" textFill="WHITE">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <font>
+                        <Font name="Monospaced Regular" size="20.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER" prefHeight="34.0" prefWidth="71.0" style="-fx-border-color: black;" text="???">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <font>
+                        <Font name="Monospaced Regular" size="20.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER_RIGHT" prefHeight="34.0" prefWidth="116.0" style="-fx-background-color: linear-gradient(to left, darkmagenta, indigo);" text="Accuracy:" textFill="WHITE">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <font>
+                        <Font name="Monospaced Regular" size="20.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER" prefHeight="31.0" prefWidth="80.0" style="-fx-border-color: black;" text="???">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <font>
+                        <Font name="Monospaced Regular" size="20.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
+            <Label alignment="TOP_LEFT" prefHeight="75.0" prefWidth="789.0" text="Label description">
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </VBox.margin>
+               <font>
+                  <Font name="Monospaced Regular" size="16.0" />
+               </font>
+            </Label>
+         </children>
+      </VBox>
+      <Button fx:id="closeMoveInfoButton" layoutX="390.0" layoutY="673.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="90.0" text="Close" visible="false" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="800.0">
          <font>
             <Font name="Monospaced Regular" size="12.0" />
          </font>

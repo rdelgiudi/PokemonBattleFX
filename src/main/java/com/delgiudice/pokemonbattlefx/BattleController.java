@@ -631,6 +631,9 @@ public class BattleController {
 
         setMoveInformation(firstMoveButton, moveList.get(0));
 
+        String setColorNoMove = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 7; " +
+                "-fx-border-color: black; -fx-background-color: lightgray";
+
         if (moveList.size() > 1) {
             setMoveInformation(secondMoveButton, moveList.get(1));
         }
@@ -638,6 +641,7 @@ public class BattleController {
             secondMoveButton.setTextFill(Color.BLACK);
             secondMoveButton.setText("");
             secondMoveButton.setDisable(true);
+            secondMoveButton.setStyle(setColorNoMove);
         }
         if (moveList.size() > 2)
             setMoveInformation(thirdMoveButton, moveList.get(2));
@@ -645,6 +649,7 @@ public class BattleController {
             thirdMoveButton.setTextFill(Color.BLACK);
             thirdMoveButton.setText("");
             thirdMoveButton.setDisable(true);
+            thirdMoveButton.setStyle(setColorNoMove);
         }
 
         if (moveList.size() > 3)
@@ -653,6 +658,7 @@ public class BattleController {
             fourthMoveButton.setTextFill(Color.BLACK);
             fourthMoveButton.setText("");
             fourthMoveButton.setDisable(true);
+            fourthMoveButton.setStyle(setColorNoMove);
         }
 
     }

@@ -4,7 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="ui improvements and Pokemon Summary screen" />
+    <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="summary-view.fxml adjustments">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Move.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Move.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveTemplate.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveTemplate.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/SummaryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/SummaryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/summary-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/summary-view.fxml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -113,7 +119,14 @@
       <option name="project" value="LOCAL" />
       <updated>1681514850435</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="summary-view.fxml adjustments">
+      <created>1681514912734</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1681514912734</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -133,7 +146,8 @@
     <MESSAGE value="contact move flag added" />
     <MESSAGE value="move colors added in move select menu" />
     <MESSAGE value="ui improvements and Pokemon Summary screen" />
-    <option name="LAST_COMMIT_MESSAGE" value="ui improvements and Pokemon Summary screen" />
+    <MESSAGE value="summary-view.fxml adjustments" />
+    <option name="LAST_COMMIT_MESSAGE" value="summary-view.fxml adjustments" />
   </component>
   <component name="XDebuggerManager">
     <pin-to-top-manager>

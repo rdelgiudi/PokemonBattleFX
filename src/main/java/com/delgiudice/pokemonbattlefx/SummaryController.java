@@ -18,13 +18,13 @@ public class SummaryController {
     @FXML
     private Label pokemonNameLabel, levelLabel, itemLabel, abilityLabel, abilityDescriptionLabel, natureLabel, hpLabel;
     @FXML
-    private Button backButton, nextButton, previousButton;
+    private Button backButton, nextButton, previousButton, closeMoveInfoButton;
     @FXML
     private ImageView pokemonPortrait;
     @FXML
     private HBox typeBox, baseStatBox, ivBox, totalStatBox, firstMoveBox, secondMoveBox, thirdMoveBox, fourthMoveBox;
     @FXML
-    private VBox moveBox;
+    private VBox moveBox, moveInfoBox;
 
     private List<Pokemon> party;
     private Scene previousScene;
@@ -49,6 +49,10 @@ public class SummaryController {
     }
 
     public void displayPokemonStat(int index) {
+
+        moveInfoBox.setVisible(false);
+        closeMoveInfoButton.setVisible(false);
+
         currentIndex = index;
         Pokemon pokemon = party.get(index);
 
@@ -112,17 +116,74 @@ public class SummaryController {
         for (int i=0; i < moveBox.getChildren().size(); i++) {
             HBox moveHBox = (HBox) moveBox.getChildren().get(i);
             Label moveType = (Label) moveHBox.getChildren().get(0);
-            Color moveTypeColor = pokemon.getMoveList(i).getType().getTypeEnum().getTypeColor();
-            String colorHex = toHexString(moveTypeColor);
-            moveType.setStyle(styleString + colorHex);
-            moveType.setText(pokemon.getMoveList(i).getType().getTypeEnum().toString());
-
             Label moveName = (Label) moveHBox.getChildren().get(1);
-            moveName.setText(pokemon.getMoveList(i).getName().toString());
-
             Label ppLabel = (Label) moveHBox.getChildren().get(3);
-            ppLabel.setText(String.format("%2d / %-2d", pokemon.getMoveList(i).getPp(), pokemon.getMoveList(i).getMaxpp()));
+            if (i < pokemon.getMoveList().size()) {
+                moveType.setVisible(true);
+                Color moveTypeColor = pokemon.getMoveList(i).getType().getTypeEnum().getTypeColor();
+                String colorHex = toHexString(moveTypeColor);
+                moveType.setStyle(styleString + colorHex);
+                moveType.setText(pokemon.getMoveList(i).getType().getTypeEnum().toString());
+
+                moveName.setText(pokemon.getMoveList(i).getName().toString());
+
+                ppLabel.setText(String.format("%2d / %-2d", pokemon.getMoveList(i).getPp(), pokemon.getMoveList(i).getMaxpp()));
+
+                int finalI = i;
+                moveHBox.setOnMouseClicked(e -> {
+                    prepareMoveInfo(pokemon.getMoveList(finalI));
+                    moveInfoBox.setVisible(true);
+                    closeMoveInfoButton.setVisible(true);
+                });
+
+                moveHBox.setOnMouseEntered(e -> moveHBox.setStyle("-fx-background-color: lightgray;" +
+                        "-fx-border-color: black"));
+                moveHBox.setOnMouseExited(e -> moveHBox.setStyle("-fx-background-color: transparent;" +
+                        "-fx-border-color: black"));
+            }
+            else {
+                moveType.setVisible(false);
+                moveName.setText("---");
+                ppLabel.setText("-- / --");
+                moveHBox.setOnMouseClicked(null);
+                moveHBox.setOnMouseEntered(null);
+                moveHBox.setOnMouseExited(null);
+            }
         }
+    }
+
+    private void prepareMoveInfo(Move move) {
+        String styleString = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: ";
+        HBox generalInfoBox = (HBox) moveInfoBox.getChildren().get(0);
+        Label typeLabel = (Label) generalInfoBox.getChildren().get(0);
+        Label nameLabel = (Label) generalInfoBox.getChildren().get(1);
+        Label ppLabel = (Label) generalInfoBox.getChildren().get(3);
+
+        Color moveTypeColor = move.getType().getTypeEnum().getTypeColor();
+        String colorHex = toHexString(moveTypeColor);
+        typeLabel.setStyle(styleString + colorHex);
+        typeLabel.setText(move.getType().getTypeEnum().toString());
+
+        nameLabel.setText(move.getName().toString());
+
+        ppLabel.setText(String.format("%2d / %-2d", move.getPp(), move.getMaxpp()));
+
+        HBox otherInfoBox = (HBox) moveInfoBox.getChildren().get(1);
+        Label powerLabel = (Label) otherInfoBox.getChildren().get(2);
+        Label accuracyLabel = (Label) otherInfoBox.getChildren().get(4);
+
+        if (move.getPower() > 0)
+            powerLabel.setText(Integer.toString(move.getPower()));
+        else
+            powerLabel.setText("-");
+
+        if (move.getAccuracy() > 0)
+            accuracyLabel.setText(Integer.toString(move.getAccuracy()));
+        else
+            accuracyLabel.setText("-");
+
+        Label descriptionLabel = (Label) moveInfoBox.getChildren().get(2);
+        descriptionLabel.setText(move.getMoveDescription());
     }
 
     private void setListeners() {
@@ -141,5 +202,16 @@ public class SummaryController {
             currentIndex--;
             displayPokemonStat(currentIndex);
         });
+
+        closeMoveInfoButton.setOnAction(e -> {
+            moveInfoBox.setVisible(false);
+            closeMoveInfoButton.setVisible(false);
+        });
+
+        moveInfoBox.setOnMouseClicked(e -> {
+            moveInfoBox.setVisible(false);
+            closeMoveInfoButton.setVisible(false);
+        });
+
     }
 }

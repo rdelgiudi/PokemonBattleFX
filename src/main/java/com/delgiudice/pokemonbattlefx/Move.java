@@ -48,6 +48,10 @@ public class Move {
     public List<Enums.StatType> getStatTypes() {
         return template.getStatTypes();}
 
+    public String getMoveDescription() {
+        return template.getMoveDescription();
+    }
+
     public float getStatChangeProb() {
         return template.getStatChangeProb();
     }

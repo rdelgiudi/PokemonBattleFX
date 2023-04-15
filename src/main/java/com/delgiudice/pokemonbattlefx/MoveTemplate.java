@@ -48,6 +48,9 @@ public class MoveTemplate {
     private boolean twoturn = false, self = false, trap = false, charging = false, multiturn = false,
                     recoilUserHp = false, statUpDuringCharging = false, contactMove = false, multiturnConfusion = false;
 
+    // moveDescription - contains the description of the move
+    private String moveDescription = "No description";
+
     // subtype - subtype of move, Physical, Special or Status
     private final Enums.Subtypes subtype;
     // type - type of move, for example: Fire, Grass, Water, Normal
@@ -170,6 +173,10 @@ public class MoveTemplate {
         return recoil;
     }
 
+    public String getMoveDescription() {
+        return moveDescription;
+    }
+
     public boolean isStatUpDuringCharging() {
         return statUpDuringCharging;
     }
@@ -260,6 +267,10 @@ public class MoveTemplate {
 
     public void setSecondaryStatChange(int secondaryStatChange) {
         this.secondaryStatChange = secondaryStatChange;
+    }
+
+    public void setMoveDescription(String moveDescription) {
+        this.moveDescription = moveDescription;
     }
 
     public MoveTemplate(MoveEnum name, int power, int accuracy, int pp, Enums.Subtypes subtype, Type type,
