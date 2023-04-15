@@ -585,12 +585,12 @@ public class BattleController {
                 move.getMaxpp(), type));
         button.setTextAlignment(TextAlignment.CENTER);
 
-        button.setFont(Font.font("Monospaced"));
+        //button.setFont(Font.font("Monospaced"));
         Color buttonBorderColor = move.getType().getTypeEnum().getTypeColor();
         Color buttonColor = Color.LIGHTGRAY;
         String colorHex = toHexString(buttonBorderColor);
         String colorHexEnd = toHexString(buttonColor);
-        String setColorIntro = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 7; " +
+        String setColorIntro = "-fx-font: 11 monospaced; -fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 5; " +
                 "-fx-border-color: ";
         String setColorEnd = "; -fx-background-color: ";
         button.setStyle(setColorIntro + colorHex);
@@ -631,7 +631,7 @@ public class BattleController {
 
         setMoveInformation(firstMoveButton, moveList.get(0));
 
-        String setColorNoMove = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 7; " +
+        String setColorNoMove = "-fx-font: 11 monospaced; -fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 5; " +
                 "-fx-border-color: black; -fx-background-color: lightgray";
 
         if (moveList.size() > 1) {

@@ -479,5 +479,10 @@ public class Pokemon {
                 new Move(MoveTemplate.getMove(MoveEnum.ICE_BEAM)), new Move(MoveTemplate.getMove(MoveEnum.FLASH_CANNON)),
                 new Move(MoveTemplate.getMove(MoveEnum.HYDRO_CANNON)), new Move(MoveTemplate.getMove(MoveEnum.SHELL_SMASH)));
         pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.CATERPIE), 50, Ability.SHIELD_DUST,
+                new Move(MoveTemplate.getMove(MoveEnum.TACKLE)), new Move(MoveTemplate.getMove(MoveEnum.STRING_SHOT)),
+                new Move(MoveTemplate.getMove(MoveEnum.BUG_BITE)), new Move(MoveTemplate.getMove(MoveEnum.ELECTROWEB)));
+        pokemonExamples.put(example.getOriginalName(), example);
     }
 }

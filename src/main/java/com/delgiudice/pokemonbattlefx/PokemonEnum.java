@@ -11,7 +11,8 @@ public enum PokemonEnum {
     SQUIRTLE("Squirtle"),
     MACHOP("Machop"),
     WARTORTLE("Wartortle"),
-    BLASTOISE("Blastoise");
+    BLASTOISE("Blastoise"),
+    CATERPIE("Caterpie");
 
     private final String name;
 

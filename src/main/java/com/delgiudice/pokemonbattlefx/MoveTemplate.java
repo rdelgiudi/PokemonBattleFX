@@ -567,6 +567,20 @@ public class MoveTemplate {
         newmove.setStatus(Enums.Status.FROZEN);
         newmove.setStatusProb(0.1f);
         moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.STRING_SHOT, 0, 95, 40, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.BUG), false, Enums.StatType.SPEED, -2,
+                false, 1f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.BUG_BITE, 60, 100, 20, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.BUG), true); //TODO: move should steal enemy berry and use it
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.ELECTROWEB, 55, 95, 15, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.ELECTRIC), false, Enums.StatType.SPEED, -1,
+                false, 1f);
+        moveMap.put(newmove.getName(), newmove);
     }
 
 }

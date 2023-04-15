@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 
-public class PokemonSpecie {
+public class PokemonSpecie implements Comparable<PokemonSpecie>{
 
     // pokemonMap - a map of all available Pokemon species
     private static final HashMap<PokemonEnum, PokemonSpecie> pokemonMap = new HashMap<>();
@@ -179,6 +179,11 @@ public class PokemonSpecie {
         this.pokedexNumber = original.pokedexNumber;
     }
 
+    @Override
+    public int compareTo(PokemonSpecie pokemonSpecie) {
+        return pokemonSpecie.getPokedexNumber() - this.getPokedexNumber();
+    }
+
     public static void setPokemonMap(){        //fills pokemon list, maybe some alternatives on how to execute this?
         MoveTemplate.setMoveMap(); //first we initialize movelist
 
@@ -234,6 +239,11 @@ public class PokemonSpecie {
         newpkmn = new PokemonSpecie(9, PokemonEnum.BLASTOISE, Type.getTypeMap(Enums.Types.WATER), 79,
                 83, 100, 85, 105, 78, "/blastoise_front.png",
                 "/blastoise_back.png");
+        pokemonMap.put(newpkmn.getName(), newpkmn);
+
+        newpkmn = new PokemonSpecie(10, PokemonEnum.CATERPIE, Type.getTypeMap(Enums.Types.BUG), 45,
+                30, 35, 20, 20, 45, "/caterpie_front.png",
+                "/caterpie_back.png");
         pokemonMap.put(newpkmn.getName(), newpkmn);
     }
 

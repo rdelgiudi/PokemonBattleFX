@@ -47,7 +47,10 @@ public enum MoveEnum {
     DIVE("Dive"),
     FLASH_CANNON("Flash Cannon"),
     ICE_BEAM("Ice Beam"),
-    HYDRO_CANNON("Hydro Cannon");
+    HYDRO_CANNON("Hydro Cannon"),
+    STRING_SHOT("String Shot"),
+    BUG_BITE("Bug Bite"),
+    ELECTROWEB("Electroweb");
 
 
     private final String name;

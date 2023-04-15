@@ -37,10 +37,13 @@ public class BattleLogic {
 
     boolean inBattle;
 
-    public BattleLogic(BattleController controller) {
+    public BattleLogic(BattleController controller, Player player, NpcTrainer enemy) {
         this.controller = controller;
         inBattle = true;
-        setup();
+
+        this.player = player;
+        this.enemy = enemy;
+
         initBattleLoop();
     }
 
@@ -55,7 +58,7 @@ public class BattleLogic {
 
         player.addPokemon(new Pokemon(Pokemon.getPokemonExamples().get(PokemonEnum.CHARIZARD)));
 
-        Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.VENOSAUR), 100, Ability.NONE,
+        Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.VENOSAUR), 50, Ability.NONE,
                 new Move(MoveTemplate.getMoveMap().get(MoveEnum.TAIL_WHIP)));
         //Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 50, Ability.GUTS,
         //        new Move(MoveTemplate.getMoveMap().get("Scratch")) , new Move(MoveTemplate.getMoveMap().get("Growl")),
@@ -214,12 +217,7 @@ public class BattleLogic {
         }
 
         if (allyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
-            Timeline rechargeMessage = controller.getBattleTextAnimation(String.format(
-                    RECHARGE_INFO, allyPokemon.getBattleName()), true);
-            Timeline pause = controller.generatePause(2000);
-            rechargeMessage.setOnFinished(e -> pause.play());
-            pause.setOnFinished(e -> battleTurn(null));
-            rechargeMessage.play();
+            battleTurn(null);
             return;
         }
 
@@ -457,9 +455,13 @@ public class BattleLogic {
         // If ally is recharging, their turn is skipped
         if (allyMove == null && allyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)
             && enemyMove != null) {
+            Timeline allyRechargeMessage = controller.getBattleTextAnimation(String.format(
+                    RECHARGE_INFO, allyPokemon.getBattleName()), true);
             battleTimeLine = useMove(enemyMove, enemyPokemon, allyPokemon, false);
-            checkFainted(battleTimeLine);
+            battleTimeLine.add(0, controller.generatePause(2000));
+            battleTimeLine.add(0, allyRechargeMessage);
             allyPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
+            checkFainted(battleTimeLine);
             return;
         }
         //**************************************
@@ -472,8 +474,8 @@ public class BattleLogic {
             battleTimeLine = useMove(allyMove, allyPokemon, enemyPokemon, false);
             battleTimeLine.add(0, pause);
             battleTimeLine.add(0, rechargeMessage);
-            checkFainted(battleTimeLine);
             enemyPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
+            checkFainted(battleTimeLine);
             return;
         }
         //*************************************************
@@ -528,8 +530,11 @@ public class BattleLogic {
             }
 
             applyStatusEffect(battleTimeLine);
+            return;
         }
         // *********************************************************
+        if (allyMove == null || enemyMove == null)
+            throw new IllegalStateException("Ally move or enemy move is null!");
 
         // Move of higher priority is always faster
         if (allyMove.getPriority() > enemyMove.getPriority()) {
