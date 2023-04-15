@@ -25,6 +25,7 @@ public class BattleLogic {
     private static final String POKEMON_FAINTED_STRING = "%s fainted!";
     private static final String POKEMON_SENT_OUT_STRING = "Go! %s!";
     private static final String MOVE_NO_EFFECT_STRING = "It doesn't affect%n%s...";
+    private static final String RECHARGE_INFO = "%s needs to recharge!";
     private static final Font MAIN_FONT = Font.font("Monospaced");
 
     private Player player;
@@ -47,7 +48,7 @@ public class BattleLogic {
         Pokemon.generatePokemonExamples();
 
         // For testing purposes only, delete later
-        Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get(PokemonEnum.WARTORTLE));
+        Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get(PokemonEnum.BLASTOISE));
         player = new Player("Red",  allyPokemon);
 
         player.addPokemon(new Pokemon(Pokemon.getPokemonExamples().get(PokemonEnum.VENOSAUR)));
@@ -55,7 +56,7 @@ public class BattleLogic {
         player.addPokemon(new Pokemon(Pokemon.getPokemonExamples().get(PokemonEnum.CHARIZARD)));
 
         Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.VENOSAUR), 100, Ability.NONE,
-                new Move(MoveTemplate.getMoveMap().get(MoveEnum.SOLAR_BEAM)));
+                new Move(MoveTemplate.getMoveMap().get(MoveEnum.TAIL_WHIP)));
         //Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 50, Ability.GUTS,
         //        new Move(MoveTemplate.getMoveMap().get("Scratch")) , new Move(MoveTemplate.getMoveMap().get("Growl")),
         //        new Move(MoveTemplate.getMoveMap().get("Quick Attack")));
@@ -209,6 +210,16 @@ public class BattleLogic {
         if (allyPokemon.getMultiTurnMove() != null && allyPokemon.getMultiTurnCounter() > 0) {
             //allyPokemon.setMultiTurnCounter(allyPokemon.getMultiTurnCounter() - 1);
             battleTurn(allyPokemon.getMultiTurnMove());
+            return;
+        }
+
+        if (allyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
+            Timeline rechargeMessage = controller.getBattleTextAnimation(String.format(
+                    RECHARGE_INFO, allyPokemon.getBattleName()), true);
+            Timeline pause = controller.generatePause(2000);
+            rechargeMessage.setOnFinished(e -> pause.play());
+            pause.setOnFinished(e -> battleTurn(null));
+            rechargeMessage.play();
             return;
         }
 
@@ -440,6 +451,34 @@ public class BattleLogic {
         Pokemon allyPokemon = player.getParty(currentAllyPokemon);
         Pokemon enemyPokemon = enemy.getParty(currentEnemyPokemon);
 
+        List<Timeline> battleTimeLine;
+        Move enemyMove = generateEnemyMove(enemyPokemon);
+
+        // If ally is recharging, their turn is skipped
+        if (allyMove == null && allyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)
+            && enemyMove != null) {
+            battleTimeLine = useMove(enemyMove, enemyPokemon, allyPokemon, false);
+            checkFainted(battleTimeLine);
+            allyPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
+            return;
+        }
+        //**************************************
+        // If enemy is recharging, their turn is skipped
+        if (enemyMove == null && enemyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)
+        && allyMove != null) {
+            Timeline rechargeMessage = controller.getBattleTextAnimation(String.format(
+                    RECHARGE_INFO, enemyPokemon.getBattleName()), true);
+            Timeline pause = controller.generatePause(2000);
+            battleTimeLine = useMove(allyMove, allyPokemon, enemyPokemon, false);
+            battleTimeLine.add(0, pause);
+            battleTimeLine.add(0, rechargeMessage);
+            checkFainted(battleTimeLine);
+            enemyPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
+            return;
+        }
+        //*************************************************
+
+        // Speed calculation
         double playerSpeed = allyPokemon.getStats().get(Enums.StatType.SPEED);
         double enemySpeed = enemyPokemon.getStats().get(Enums.StatType.SPEED);
         playerSpeed = allyPokemon.getStatus() == Enums.Status.PARALYZED ? playerSpeed / 2: playerSpeed;
@@ -462,9 +501,35 @@ public class BattleLogic {
 
         boolean faster = playerSpeed > enemySpeed;
         boolean tied = playerSpeed == enemySpeed;
+        //******************************************
 
-        List<Timeline> battleTimeLine;
-        Move enemyMove = generateEnemyMove(enemyPokemon);
+        // If both Pokemon need to recharge this turn, the turn starts only applying status effect and other
+        // non move damaging factors
+        if (allyMove == null & enemyMove == null && allyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE) &&
+        enemyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
+            Timeline enemyRechargeMessage = controller.getBattleTextAnimation(String.format(
+                    RECHARGE_INFO, enemyPokemon.getBattleName()), true);
+            Timeline allyRechargeMessage = controller.getBattleTextAnimation(String.format(
+                    RECHARGE_INFO, allyPokemon.getBattleName()), true);
+            battleTimeLine = new LinkedList<>();
+            allyPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
+            enemyPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
+            if (faster || tied) {
+                battleTimeLine.add(allyRechargeMessage);
+                battleTimeLine.add(controller.generatePause(2000));
+                battleTimeLine.add(enemyRechargeMessage);
+                battleTimeLine.add(controller.generatePause(2000));
+            }
+            else{
+                battleTimeLine.add(enemyRechargeMessage);
+                battleTimeLine.add(controller.generatePause(2000));
+                battleTimeLine.add(allyRechargeMessage);
+                battleTimeLine.add(controller.generatePause(2000));
+            }
+
+            applyStatusEffect(battleTimeLine);
+        }
+        // *********************************************************
 
         // Move of higher priority is always faster
         if (allyMove.getPriority() > enemyMove.getPriority()) {
@@ -500,15 +565,17 @@ public class BattleLogic {
 
         if (enemyPokemon.getMultiTurnMove() != null & enemyPokemon.getTwoTurnMove() != null)
             throw new IllegalStateException("Both multiturn and two turn active at the same time");
-        else if (enemyPokemon.getMultiTurnMove() != null && enemyPokemon.getMultiTurnCounter() > 0) {
+        if (enemyPokemon.getMultiTurnMove() != null && enemyPokemon.getMultiTurnCounter() > 0) {
             enemyMove = enemyPokemon.getMultiTurnMove();
             return enemyMove;
         }
-        else if (enemyPokemon.getTwoTurnMove() != null) {
+        if (enemyPokemon.getTwoTurnMove() != null) {
             enemyMove = enemyPokemon.getTwoTurnMove();
             return enemyMove;
         }
-
+        if (enemyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
+            return null;
+        }
         boolean[] moveAvailable = enemyPokemon.checkAvailableMoves();
         List<Integer> availableIndices = new ArrayList<>();
 
@@ -1037,7 +1104,7 @@ public class BattleLogic {
     }
 
     private Timeline getTwoTurnMoveInfo(Move move, Pokemon user) {
-        Timeline timeline = null;
+        Timeline timeline;
         switch(move.getName()) {
             case DIG:
                 timeline = controller.getBattleTextAnimation(String.format(
@@ -1065,8 +1132,13 @@ public class BattleLogic {
 
         boolean digEarthquake = Objects.equals(twoturnmove.getName(), MoveEnum.DIG) && Objects.equals(move.getName(),
                 MoveEnum.EARTHQUAKE);
+        boolean diveWhirlpool = Objects.equals(twoturnmove.getName(), MoveEnum.DIVE) && Objects.equals(move.getName(),
+                MoveEnum.WHIRLPOOL);
 
         if (digEarthquake) {
+            return 2;
+        }
+        if (diveWhirlpool) {
             return 2;
         }
 
@@ -1195,7 +1267,7 @@ public class BattleLogic {
             processTwoTurnMoveComplete(moveTimeLine, user);
     }
 
-    // Processes using a move, as well as status effects that might prevent from using it
+    // Processes using a move, as well as status effects or accuracy checks that might prevent from using it
     private List<Timeline> useMove(Move move, Pokemon user, Pokemon target, boolean first) {
 
         // Initiating the list of animations to be performed during move and an RNG
@@ -1277,6 +1349,7 @@ public class BattleLogic {
                 return moveTimeLine;
             }
         }
+        //******************************************************
 
         // Checks related to twoturn moves, non charging moves set Pokemon to a semi-invulnerable state,
         // otherwise just lock the Pokemon out of a choice next turn during charging
@@ -1306,6 +1379,7 @@ public class BattleLogic {
 
             return moveTimeLine;
         }
+        //**************************************************************
 
         System.out.println(user.getBattleName() + " used " + move.getName());
         Timeline moveUsedDialog = controller.getBattleTextAnimation(user.getBattleName() + " used\n" + move.getName() + "!",
@@ -1431,6 +1505,10 @@ public class BattleLogic {
             //***************************************************************
 
         }
+
+        // Apply recharge if recharge move
+        if (move.isRecharge())
+            user.getSubStatuses().add(Enums.SubStatus.RECHARGE);
 
         // Check if Pokemon in first turn of a multiturn move
         // generates the number of moves that it can use before being confused and

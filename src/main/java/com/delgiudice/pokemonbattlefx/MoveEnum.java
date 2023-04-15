@@ -43,7 +43,11 @@ public enum MoveEnum {
     SHELL_SMASH("Shell Smash"),
     ROLLOUT("Rollout"),
     WHIRLPOOL("Whirlpool"),
-    ICE_PUNCH("Ice Punch");
+    ICE_PUNCH("Ice Punch"),
+    DIVE("Dive"),
+    FLASH_CANNON("Flash Cannon"),
+    ICE_BEAM("Ice Beam"),
+    HYDRO_CANNON("Hydro Cannon");
 
 
     private final String name;

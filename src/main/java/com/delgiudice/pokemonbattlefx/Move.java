@@ -136,6 +136,10 @@ public class Move {
         return template.isMultiturnConfusion();
     }
 
+    public boolean isRecharge() {
+        return template.isRecharge();
+    }
+
     public Move(MoveTemplate template) {
         this.template = template;
         pp = template.getMaxpp();

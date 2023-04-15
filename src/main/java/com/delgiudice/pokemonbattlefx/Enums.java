@@ -118,7 +118,8 @@ public class Enums {
         NONE("no abnormal status"),
         CONFUSED("became confused"),
         FLINCHED("flinched"),
-        ATTRACTED("fell in love"); //TODO: implementation of Pokemon genders
+        ATTRACTED("fell in love"), //TODO: implementation of Pokemon genders
+        RECHARGE("recharge");
 
         final private String statusString;
 

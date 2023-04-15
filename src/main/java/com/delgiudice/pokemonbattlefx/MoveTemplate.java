@@ -45,8 +45,10 @@ public class MoveTemplate {
     // contactMove - check if the move makes contact for calculations related to some Pokemon abilities,
     // such as static
     // multiturnConfusion - checks if the move causes confusion at the end of its execution (such as Outrage)
+    // recharge - determines whether a move needs a turn to recharge after use
     private boolean twoturn = false, self = false, trap = false, charging = false, multiturn = false,
-                    recoilUserHp = false, statUpDuringCharging = false, contactMove = false, multiturnConfusion = false;
+                    recoilUserHp = false, statUpDuringCharging = false, contactMove = false, multiturnConfusion = false,
+                    recharge = false;
 
     // moveDescription - contains the description of the move
     private String moveDescription = "No description";
@@ -177,6 +179,10 @@ public class MoveTemplate {
         return moveDescription;
     }
 
+    public boolean isRecharge() {
+        return recharge;
+    }
+
     public boolean isStatUpDuringCharging() {
         return statUpDuringCharging;
     }
@@ -263,6 +269,10 @@ public class MoveTemplate {
 
     public void setStatUpDuringCharging(boolean statUpDuringCharging) {
         this.statUpDuringCharging = statUpDuringCharging;
+    }
+
+    public void setRecharge(boolean recharge) {
+        this.recharge = recharge;
     }
 
     public void setSecondaryStatChange(int secondaryStatChange) {
@@ -536,6 +546,24 @@ public class MoveTemplate {
 
         newmove = new MoveTemplate(MoveEnum.ICE_PUNCH, 75, 100, 15, Enums.Subtypes.PHYSICAL,
                 Type.getTypeMap(Enums.Types.ICE), true);
+        newmove.setStatus(Enums.Status.FROZEN);
+        newmove.setStatusProb(0.1f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.FLASH_CANNON, 80, 100, 10, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.STEEL), false);
+        newmove.getStatTypes().add(Enums.StatType.SPECIAL_DEFENSE);
+        newmove.setStatChange(-1);
+        newmove.setStatChangeProb(0.1f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.HYDRO_CANNON, 150, 90, 5, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.WATER), false);
+        newmove.setRecharge(true);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.ICE_BEAM, 90, 100, 10, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.ICE), false);
         newmove.setStatus(Enums.Status.FROZEN);
         newmove.setStatusProb(0.1f);
         moveMap.put(newmove.getName(), newmove);
