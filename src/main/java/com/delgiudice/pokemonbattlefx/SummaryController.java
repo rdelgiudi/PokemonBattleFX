@@ -30,6 +30,10 @@ public class SummaryController {
     private Scene previousScene;
     private int currentIndex;
 
+    public void initialize() {
+        setListeners();
+    }
+
     public void setParty(List<Pokemon> party) {
         this.party = party;
     }
@@ -74,8 +78,6 @@ public class SummaryController {
         setMoves(pokemon);
 
         pokemonPortrait.setImage(pokemon.getSpecie().getFrontSprite());
-
-        setListeners();
     }
 
     private void setPokemonTypes(Pokemon pokemon) {

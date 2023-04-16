@@ -67,7 +67,6 @@ public class TeamBuilderController {
         preparePartyButtons(enemyPartyBox, enemyParty, false);
 
         addPokemonLoader = new FXMLLoader(BattleApplication.class.getResource("addpokemon-view.fxml"));
-
         try {
             addPokemonScene = new Scene(addPokemonLoader.load(), 1280, 720);
         } catch (IOException ex) {
@@ -121,7 +120,7 @@ public class TeamBuilderController {
     }
 
     private Timeline setButtonsFlashingEffect(HBox partyBox, boolean player) {
-        final Timeline timeline;
+        Timeline timeline;
         String color1 = player ? "#87CEEB": "lightcoral";
         String color2 = player ? "powderblue": "lightpink";
         String styleString = "-fx-background-color: ";
@@ -213,7 +212,6 @@ public class TeamBuilderController {
                 playerPokemonButton.setText(playerParty.get(i).getName());
                 playerPokemonButton.setDisable(false);
 
-                int finalI = i;
                 playerPokemonButton.setOnMouseClicked(e -> {
                     playerPokemonButton.getContextMenu().show(playerPokemonButton, e.getScreenX(), e.getScreenY());
                 });
@@ -227,7 +225,6 @@ public class TeamBuilderController {
                 enemyPokemonButton.setText(enemyParty.get(i).getName());
                 enemyPokemonButton.setDisable(false);
 
-                int finalI = i;
                 enemyPokemonButton.setOnMouseClicked(e -> {
                     enemyPokemonButton.getContextMenu().show(enemyPokemonButton, e.getScreenX(), e.getScreenY());
                 });
@@ -238,10 +235,7 @@ public class TeamBuilderController {
                 enemyPokemonButton.setDisable(true);
             }
         }
-        if (playerParty.size() >= 1 && enemyParty.size() >= 1)
-            startBattleButton.setDisable(false);
-        else
-            startBattleButton.setDisable(true);
+        startBattleButton.setDisable(playerParty.size() < 1 || enemyParty.size() < 1);
     }
 
     public void setButtonEffect(Button button) {

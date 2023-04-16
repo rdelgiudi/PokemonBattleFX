@@ -9,7 +9,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,6 +36,7 @@ public class AddPokemonController {
     private int editModeIndex = -1;
 
     public void initialize() {
+        setStatisticsListeners();
     }
 
     public void setAddData(Pokemon pokemon, List<Pokemon> playerParty, List<Pokemon> enemyParty, Scene scene,
@@ -125,9 +125,9 @@ public class AddPokemonController {
         abilityDescriptionLabel.setText("No description");
 
         setPokemonTypes();
-        setStatisticsListeners();
-        setPokemonStatistics();
-        setNatureChoiceBox();
+        //setStatisticsListeners();
+        refreshPokemonStatistics();
+        //setNatureChoiceBox();
         pokemonPortrait.setImage(currentPokemon.getSpecie().getFrontSprite());
         setPokemonMoves();
     }
@@ -157,21 +157,22 @@ public class AddPokemonController {
             natureChoiceBox.getItems().add(nature.toString());
         }
 
-        natureChoiceBox.setValue(currentPokemon.getNature().toString());
+        //natureChoiceBox.setValue(currentPokemon.getNature().toString());
 
         natureChoiceBox.valueProperty().addListener((observableValue, oldValue, newValue) -> {
             currentPokemon.setNature(Enums.Nature.valueOf(natureChoiceBox.getSelectionModel().getSelectedIndex()));
-            setPokemonStatistics();
+            refreshPokemonStatistics();
         });
     }
 
-    private void setPokemonStatistics() {
+    private void refreshPokemonStatistics() {
 
         pokemonLevel.getValueFactory().setValue(currentPokemon.getLevel());
 
         for (int i=1; i < baseStatBox.getChildren().size(); i++) {
             TextField baseStat = (TextField) baseStatBox.getChildren().get(i);
             TextField totalStat = (TextField) totalStatBox.getChildren().get(i);
+            Spinner<Integer> ivStat = (Spinner<Integer>) ivBox.getChildren().get(i);
 
             if (i > 1) {
                if (currentPokemon.getNature().getStatTab()[i - 2] == 0)
@@ -184,12 +185,18 @@ public class AddPokemonController {
 
             baseStat.setText(currentPokemon.getSpecie().getBaseStats().get(Enums.StatType.getFromBaseStatId(i-1)).toString());
             totalStat.setText(Integer.toString(currentPokemon.getStats(Enums.StatType.getFromBaseStatId(i-1))));
+
+            ivStat.getValueFactory().setValue(currentPokemon.getIvs()[i-1]);
         }
+
+        natureChoiceBox.setValue(currentPokemon.getNature().toString());
     }
 
     public void setStatisticsListeners() {
+        setNatureChoiceBox();
+
         SpinnerValueFactory<Integer> levelValueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, currentPokemon.getLevel());
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1);
         pokemonLevel.setValueFactory(levelValueFactory);
 
         pokemonLevel.valueProperty().addListener((observableValue, oldValue, newValue) -> {
@@ -197,7 +204,7 @@ public class AddPokemonController {
             pokemonLevel.setDisable(true);
             currentPokemon.setLevel(newValue);
             currentPokemon.calculateStats();
-            setPokemonStatistics();
+            refreshPokemonStatistics();
             statTab.setDisable(false);
             pokemonLevel.setDisable(false);
         });
@@ -211,7 +218,7 @@ public class AddPokemonController {
             Spinner<Integer> ivStat = (Spinner<Integer>) ivBox.getChildren().get(i);
 
             SpinnerValueFactory<Integer> valueFactory =
-                    new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 31, currentPokemon.getIvs()[i - 1]);
+                    new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 31, 0);
             ivStat.setValueFactory(valueFactory);
 
             int finalI = i;
@@ -220,9 +227,32 @@ public class AddPokemonController {
                 pokemonLevel.setDisable(true);
                 currentPokemon.getIvs()[finalI - 1] = newValue;
                 currentPokemon.calculateStats();
-                setPokemonStatistics();
+                refreshPokemonStatistics();
                 statTab.setDisable(false);
                 pokemonLevel.setDisable(false);
+            });
+        }
+
+        for (int i=0; i < moveBox.getChildren().size(); i++) {
+            HBox hBox = (HBox) moveBox.getChildren().get(i);
+            TextField moveField = (TextField) hBox.getChildren().get(0);
+            Label moveOkLabel = (Label) hBox.getChildren().get(1);
+            Button moveInfoButton = (Button) hBox.getChildren().get(2);
+
+            moveField.textProperty().addListener((observable, oldValue, newValue) -> {
+                if (MoveEnum.findByName(newValue) != null ||
+                        Objects.equals(newValue, "")) {
+                    moveOkLabel.setText("ok");
+                    moveInfoButton.setDisable(Objects.equals(newValue, ""));
+                    moveOkLabel.setTextFill(Color.GREEN);
+                } else {
+                    moveOkLabel.setText("not found");
+                    moveInfoButton.setDisable(true);
+                    moveOkLabel.setTextFill(Color.RED);
+                }
+
+                addPlayerButton.setDisable(!(checkOkPlayer() && (editModeAlly || editModeIndex == -1)));
+                addEnemyButton.setDisable(!(checkEnemyOk() && (!editModeAlly || editModeIndex == -1)));
             });
         }
     }
@@ -305,23 +335,6 @@ public class AddPokemonController {
                 prepareMoveInfo(MoveTemplate.getMove(MoveEnum.findByName(moveField.getText())));
                 moveInfoBox.setVisible(true);
                 closeMoveInfoButton.setVisible(true);
-            });
-
-            moveField.textProperty().addListener((observable, oldValue, newValue) -> {
-                if (MoveEnum.findByName(newValue) != null ||
-                        Objects.equals(newValue, "")) {
-                    moveOkLabel.setText("ok");
-                    moveInfoButton.setDisable(Objects.equals(newValue, ""));
-                    moveOkLabel.setTextFill(Color.GREEN);
-                }
-                else {
-                    moveOkLabel.setText("not found");
-                    moveInfoButton.setDisable(true);
-                    moveOkLabel.setTextFill(Color.RED);
-                }
-
-                addPlayerButton.setDisable(!(checkOkPlayer() && (editModeAlly || editModeIndex == -1)));
-                addEnemyButton.setDisable(!(checkEnemyOk() && (!editModeAlly || editModeIndex == -1)));
             });
         }
     }
