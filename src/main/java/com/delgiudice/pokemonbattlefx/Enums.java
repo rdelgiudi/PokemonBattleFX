@@ -82,7 +82,7 @@ public class Enums {
             return baseStatId;
         }
 
-        public static StatType fromBaseStatId(int val) {
+        public static StatType getFromBaseStatId(int val) {
             for (StatType statType : StatType.values())
                 if (statType.baseStatId == val)
                     return statType;

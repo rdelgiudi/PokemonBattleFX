@@ -34,6 +34,7 @@ public class TeamBuilderController {
 
     public void initialize() {
         populatePokemonGrid();
+        refreshParties();
     }
 
     public void populatePokemonGrid() {
@@ -65,11 +66,75 @@ public class TeamBuilderController {
                 }
                 Pokemon pokemonExample = Pokemon.getPokemonExamples().get(pokemon.getName());
                 AddPokemonController controller = fxmlLoader.getController();
-                controller.setData(pokemonExample, startBattleButton.getScene());
+                controller.setAddData(pokemonExample, playerParty, enemyParty, startBattleButton.getScene(), this);
+                controller.enterAddMode();
                 stage.setTitle("Add Pokemon!");
                 stage.setScene(scene);
             });
         }
+    }
+
+    public void refreshParties() {
+        for (int i=0; i < playerPartyBox.getChildren().size(); i++) {
+            Button playerPokemonButton = (Button) playerPartyBox.getChildren().get(i);
+            Button enemyPokemonButton = (Button) enemyPartyBox.getChildren().get(i);
+            if (i < playerParty.size()) {
+                playerPokemonButton.setText(playerParty.get(i).getName());
+                playerPokemonButton.setDisable(false);
+
+                int finalI = i;
+                playerPokemonButton.setOnAction(e -> {
+                    FXMLLoader fxmlLoader = new FXMLLoader(BattleApplication.class.getResource("addpokemon-view.fxml"));
+                    Stage stage = (Stage) startBattleButton.getScene().getWindow();
+                    Scene scene = null;
+                    try {
+                        scene = new Scene(fxmlLoader.load(), 1280, 720);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    AddPokemonController controller = fxmlLoader.getController();
+                    controller.setAddData(playerParty.get(finalI), playerParty, enemyParty, startBattleButton.getScene(), this);
+                    stage.setTitle("Edit Pokemon!");
+                    controller.enterEditMode(true, finalI);
+                    stage.setScene(scene);
+                });
+            }
+            else {
+                playerPokemonButton.setText("");
+                playerPokemonButton.setDisable(true);
+            }
+
+            if (i < enemyParty.size()) {
+                enemyPokemonButton.setText(enemyParty.get(i).getName());
+                enemyPokemonButton.setDisable(false);
+
+                int finalI = i;
+                enemyPokemonButton.setOnAction(e -> {
+                    FXMLLoader fxmlLoader = new FXMLLoader(BattleApplication.class.getResource("addpokemon-view.fxml"));
+                    Stage stage = (Stage) startBattleButton.getScene().getWindow();
+                    Scene scene = null;
+                    try {
+                        scene = new Scene(fxmlLoader.load(), 1280, 720);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    AddPokemonController controller = fxmlLoader.getController();
+                    controller.setAddData(enemyParty.get(finalI), playerParty, enemyParty, startBattleButton.getScene(), this);
+                    stage.setTitle("Edit Pokemon!");
+                    controller.enterEditMode(false, finalI);
+                    stage.setScene(scene);
+                });
+            }
+
+            else {
+                enemyPokemonButton.setText("");
+                enemyPokemonButton.setDisable(true);
+            }
+        }
+        if (playerParty.size() >= 1 && enemyParty.size() >= 1)
+            startBattleButton.setDisable(false);
+        else
+            startBattleButton.setDisable(true);
     }
 
     @FXML

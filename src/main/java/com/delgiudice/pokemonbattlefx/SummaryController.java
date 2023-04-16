@@ -104,9 +104,9 @@ public class SummaryController {
             TextField ivStat = (TextField) ivBox.getChildren().get(i);
             TextField totalStat = (TextField) totalStatBox.getChildren().get(i);
 
-            baseStat.setText(pokemon.getSpecie().getBaseStats().get(Enums.StatType.fromBaseStatId(i-1)).toString());
+            baseStat.setText(pokemon.getSpecie().getBaseStats().get(Enums.StatType.getFromBaseStatId(i-1)).toString());
             ivStat.setText(Integer.toString(pokemon.getIvs()[i-1]));
-            totalStat.setText(Integer.toString(pokemon.getStats(Enums.StatType.fromBaseStatId(i-1))));
+            totalStat.setText(Integer.toString(pokemon.getStats(Enums.StatType.getFromBaseStatId(i-1))));
         }
     }
 

@@ -59,6 +59,17 @@ public enum MoveEnum {
         this.name = name;
     }
 
+    public static MoveEnum findByName(String name) {
+        MoveEnum result = null;
+        for (MoveEnum moveEnum : values()) {
+            if (moveEnum.name.equalsIgnoreCase(name)) {
+                result = moveEnum;
+                break;
+            }
+        }
+        return result;
+    }
+
     public String toString() {
         return name;
     }

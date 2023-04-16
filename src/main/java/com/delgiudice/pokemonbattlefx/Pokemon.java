@@ -195,6 +195,15 @@ public class Pokemon {
         this.owner = owner;
     }
 
+    public void setNature(Enums.Nature nature) {
+        this.nature = nature;
+        calculateStats();
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
     public void setTrappedTimer(int trappedTimer) {
         this.trappedTimer = trappedTimer;
     }
@@ -303,7 +312,7 @@ public class Pokemon {
         this.specie = original.specie;
         this.level = original.level;
         this.ability = original.ability;
-        this.ivs = original.ivs;
+        this.ivs = original.ivs.clone();
         this.nature = original.nature;
         calculateStats();
         for (Move move : original.getMoveList())
