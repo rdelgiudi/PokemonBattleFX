@@ -23,7 +23,7 @@ public class AddPokemonController {
     @FXML
     private HBox typeBox, baseStatBox, ivBox, totalStatBox, firstMoveBox, secondMoveBox, thirdMoveBox, fourthMoveBox;
     @FXML
-    private VBox moveBox;
+    private VBox moveBox, statTab, moveInfoBox;
     @FXML
     private Spinner<Integer> pokemonLevel;
     @FXML
@@ -124,28 +124,25 @@ public class AddPokemonController {
         abilityLabel.setText(currentPokemon.getAbility().toString());
         abilityDescriptionLabel.setText("No description");
 
-        setPokemonTypes(currentPokemon);
-
-        setPokemonStatistics(currentPokemon);
-
-        setNatureChoiceBox(currentPokemon);
-
+        setPokemonTypes();
+        setStatisticsListeners();
+        setPokemonStatistics();
+        setNatureChoiceBox();
         pokemonPortrait.setImage(currentPokemon.getSpecie().getFrontSprite());
-
-        setPokemonMoves(currentPokemon);
+        setPokemonMoves();
     }
 
-    private void setPokemonTypes(Pokemon pokemon) {
+    private void setPokemonTypes() {
         String styleString = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: ";
         Label firstType = (Label) typeBox.getChildren().get(0);
-        firstType.setText(pokemon.getType()[0].getTypeEnum().toString());
-        Color firstTypeColor = pokemon.getType()[0].getTypeEnum().getTypeColor();
+        firstType.setText(currentPokemon.getType()[0].getTypeEnum().toString());
+        Color firstTypeColor = currentPokemon.getType()[0].getTypeEnum().getTypeColor();
         String colorHex = toHexString(firstTypeColor);
         firstType.setStyle(styleString + colorHex);
         Label secondType = (Label) typeBox.getChildren().get(1);
-        if (pokemon.getType()[1].getTypeEnum() != Enums.Types.NO_TYPE) {
-            secondType.setText(pokemon.getType()[1].getTypeEnum().toString());
-            Color secondTypeColor = pokemon.getType()[1].getTypeEnum().getTypeColor();
+        if (currentPokemon.getType()[1].getTypeEnum() != Enums.Types.NO_TYPE) {
+            secondType.setText(currentPokemon.getType()[1].getTypeEnum().toString());
+            Color secondTypeColor = currentPokemon.getType()[1].getTypeEnum().getTypeColor();
             String secondColorHex = toHexString(secondTypeColor);
             secondType.setStyle(styleString + secondColorHex);
             secondType.setVisible(true);
@@ -155,48 +152,113 @@ public class AddPokemonController {
         }
     }
 
-    private void setNatureChoiceBox(Pokemon pokemon) {
+    private void setNatureChoiceBox() {
         for (Enums.Nature nature : Enums.Nature.values()) {
             natureChoiceBox.getItems().add(nature.toString());
         }
 
-        natureChoiceBox.setValue(pokemon.getNature().toString());
+        natureChoiceBox.setValue(currentPokemon.getNature().toString());
 
         natureChoiceBox.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-            pokemon.setNature(Enums.Nature.valueOf(natureChoiceBox.getSelectionModel().getSelectedIndex()));
-            setPokemonStatistics(pokemon);
+            currentPokemon.setNature(Enums.Nature.valueOf(natureChoiceBox.getSelectionModel().getSelectedIndex()));
+            setPokemonStatistics();
         });
     }
 
-    private void setPokemonStatistics(Pokemon pokemon) {
+    private void setPokemonStatistics() {
+
+        pokemonLevel.getValueFactory().setValue(currentPokemon.getLevel());
+
+        for (int i=1; i < baseStatBox.getChildren().size(); i++) {
+            TextField baseStat = (TextField) baseStatBox.getChildren().get(i);
+            TextField totalStat = (TextField) totalStatBox.getChildren().get(i);
+
+            if (i > 1) {
+               if (currentPokemon.getNature().getStatTab()[i - 2] == 0)
+                   totalStat.setStyle("-fx-text-fill: black");
+               else if (currentPokemon.getNature().getStatTab()[i - 2] == 1)
+                   totalStat.setStyle("-fx-text-fill: red");
+               else
+                   totalStat.setStyle("-fx-text-fill: blue");
+            }
+
+            baseStat.setText(currentPokemon.getSpecie().getBaseStats().get(Enums.StatType.getFromBaseStatId(i-1)).toString());
+            totalStat.setText(Integer.toString(currentPokemon.getStats(Enums.StatType.getFromBaseStatId(i-1))));
+        }
+    }
+
+    public void setStatisticsListeners() {
         SpinnerValueFactory<Integer> levelValueFactory =
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, currentPokemon.getLevel());
         pokemonLevel.setValueFactory(levelValueFactory);
 
         pokemonLevel.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-            pokemon.setLevel(newValue);
-            pokemon.calculateStats();
-            setPokemonStatistics(pokemon);
+            statTab.setDisable(true);
+            pokemonLevel.setDisable(true);
+            currentPokemon.setLevel(newValue);
+            currentPokemon.calculateStats();
+            setPokemonStatistics();
+            statTab.setDisable(false);
+            pokemonLevel.setDisable(false);
+        });
+
+        closeMoveInfoButton.setOnAction(e -> {
+            moveInfoBox.setVisible(false);
+            closeMoveInfoButton.setVisible(false);
         });
 
         for (int i=1; i < baseStatBox.getChildren().size(); i++) {
-            TextField baseStat = (TextField) baseStatBox.getChildren().get(i);
             Spinner<Integer> ivStat = (Spinner<Integer>) ivBox.getChildren().get(i);
-            TextField totalStat = (TextField) totalStatBox.getChildren().get(i);
 
-            baseStat.setText(pokemon.getSpecie().getBaseStats().get(Enums.StatType.getFromBaseStatId(i-1)).toString());
             SpinnerValueFactory<Integer> valueFactory =
-                    new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 31, pokemon.getIvs()[i-1]);
+                    new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 31, currentPokemon.getIvs()[i - 1]);
             ivStat.setValueFactory(valueFactory);
-            totalStat.setText(Integer.toString(pokemon.getStats(Enums.StatType.getFromBaseStatId(i-1))));
 
             int finalI = i;
             ivStat.valueProperty().addListener((observableValue, oldValue, newValue) -> {
-                pokemon.getIvs()[finalI - 1] = newValue;
-                pokemon.calculateStats();
-                setPokemonStatistics(pokemon);
+                statTab.setDisable(true);
+                pokemonLevel.setDisable(true);
+                currentPokemon.getIvs()[finalI - 1] = newValue;
+                currentPokemon.calculateStats();
+                setPokemonStatistics();
+                statTab.setDisable(false);
+                pokemonLevel.setDisable(false);
             });
         }
+    }
+
+    private void prepareMoveInfo(MoveTemplate move) {
+        String styleString = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: ";
+        HBox generalInfoBox = (HBox) moveInfoBox.getChildren().get(0);
+        Label typeLabel = (Label) generalInfoBox.getChildren().get(0);
+        Label nameLabel = (Label) generalInfoBox.getChildren().get(1);
+        Label ppLabel = (Label) generalInfoBox.getChildren().get(3);
+
+        Color moveTypeColor = move.getType().getTypeEnum().getTypeColor();
+        String colorHex = toHexString(moveTypeColor);
+        typeLabel.setStyle(styleString + colorHex);
+        typeLabel.setText(move.getType().getTypeEnum().toString());
+
+        nameLabel.setText(move.getName().toString());
+
+        ppLabel.setText(String.format("%2d", move.getMaxpp()));
+
+        HBox otherInfoBox = (HBox) moveInfoBox.getChildren().get(1);
+        Label powerLabel = (Label) otherInfoBox.getChildren().get(2);
+        Label accuracyLabel = (Label) otherInfoBox.getChildren().get(4);
+
+        if (move.getPower() > 0)
+            powerLabel.setText(Integer.toString(move.getPower()));
+        else
+            powerLabel.setText("-");
+
+        if (move.getAccuracy() > 0)
+            accuracyLabel.setText(Integer.toString(move.getAccuracy()));
+        else
+            accuracyLabel.setText("-");
+
+        Label descriptionLabel = (Label) moveInfoBox.getChildren().get(2);
+        descriptionLabel.setText(move.getMoveDescription());
     }
 
     private boolean checkMovesOk() {
@@ -225,31 +287,41 @@ public class AddPokemonController {
         return true;
     }
 
-    private void setPokemonMoves(Pokemon pokemon) {
+    private void setPokemonMoves() {
         for (int i=0; i < moveBox.getChildren().size(); i++) {
             HBox hBox = (HBox) moveBox.getChildren().get(i);
             TextField moveField = (TextField) hBox.getChildren().get(0);
             Label moveOkLabel = (Label) hBox.getChildren().get(1);
+            Button moveInfoButton = (Button) hBox.getChildren().get(2);
             moveOkLabel.setTextFill(Color.GREEN);
-            if (i >= pokemon.getMoveList().size()) {
+            if (i >= currentPokemon.getMoveList().size()) {
                 moveField.setText(" ");
             }
             else {
-                moveField.setText(pokemon.getMoveList(i).getName().toString());
+                moveField.setText(currentPokemon.getMoveList(i).getName().toString());
             }
+
+            moveInfoButton.setOnMouseClicked(e -> {
+                prepareMoveInfo(MoveTemplate.getMove(MoveEnum.findByName(moveField.getText())));
+                moveInfoBox.setVisible(true);
+                closeMoveInfoButton.setVisible(true);
+            });
 
             moveField.textProperty().addListener((observable, oldValue, newValue) -> {
                 if (MoveEnum.findByName(newValue) != null ||
                         Objects.equals(newValue, "")) {
                     moveOkLabel.setText("ok");
+                    moveInfoButton.setDisable(Objects.equals(newValue, ""));
                     moveOkLabel.setTextFill(Color.GREEN);
                 }
                 else {
                     moveOkLabel.setText("not found");
+                    moveInfoButton.setDisable(true);
                     moveOkLabel.setTextFill(Color.RED);
                 }
-                addPlayerButton.setDisable(!(checkOkPlayer() && editModeAlly));
-                addEnemyButton.setDisable(!(checkEnemyOk() && !editModeAlly));
+
+                addPlayerButton.setDisable(!(checkOkPlayer() && (editModeAlly || editModeIndex == -1)));
+                addEnemyButton.setDisable(!(checkEnemyOk() && (!editModeAlly || editModeIndex == -1)));
             });
         }
     }

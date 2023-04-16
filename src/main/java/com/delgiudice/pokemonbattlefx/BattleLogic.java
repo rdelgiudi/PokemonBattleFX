@@ -291,9 +291,8 @@ public class BattleLogic {
 
     private void setPokemonSwapListeners(boolean allyFainted) {
 
-        int iLimit = Math.min(player.getParty().size(), 2);
+        int iLimit = Math.min(player.getParty().size() - 1, 2);
         int jLimit = player.getParty().size() > 3 ? 1: 0;
-;
         controller.updateSelectPokemonButtons(player.getParty());
 
         if (allyFainted) {
