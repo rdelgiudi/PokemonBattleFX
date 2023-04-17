@@ -104,6 +104,10 @@ public class Move {
         return template.isTrap();
     }
 
+    public boolean isOneHitKOMove() {
+        return template.isOneHitKOMove();
+    }
+
     public boolean isMultiturn() {
         return template.isMultiturn();
     }
@@ -118,6 +122,10 @@ public class Move {
 
     public float getRecoil() {
         return template.getRecoil();
+    }
+
+    public Enums.BattlefieldCondition getCondition() {
+        return template.getCondition();
     }
 
     public boolean isStatUpDuringCharging() {

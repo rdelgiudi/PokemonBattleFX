@@ -51,7 +51,11 @@ public enum MoveEnum {
     STRING_SHOT("String Shot"),
     BUG_BITE("Bug Bite"),
     ELECTROWEB("Electroweb"),
-    IRON_DEFENSE("Iron Defense");
+    IRON_DEFENSE("Iron Defense"),
+    TAILWIND("Tailwind"),
+    BUG_BUZZ("Bug Buzz"),
+    PSYCHIC("Psychic"),
+    GIGA_DRAIN("Giga Drain");
 
 
     private final String name;

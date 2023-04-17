@@ -15,7 +15,9 @@ public enum Ability {
     GUTS("Guts"),
     SHED_SKIN("Shed Skin",
             "The Pokémon may cure its own status conditions by shedding its skin."),
-    INTIMIDATE("Intimidate");
+    INTIMIDATE("Intimidate"),
+    COMPOUND_EYES("Compound Eyes",
+            "The Pokémon's accuracy goes up.");
 
     final private String ability;
     private String description = "No description";

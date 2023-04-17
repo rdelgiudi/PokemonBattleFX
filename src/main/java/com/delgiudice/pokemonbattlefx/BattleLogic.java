@@ -10,13 +10,11 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static javafx.application.Platform.exit;
 
@@ -33,12 +31,15 @@ public class BattleLogic {
     private Player player;
     private NpcTrainer enemy;
 
-    private int currentAllyPokemon = 0, currentEnemyPokemon = 0;
-
-    private boolean enemySentOut, allySentOut;
-
     private final FXMLLoader summaryLoader;
     private final Scene summaryScene;
+
+    private int currentAllyPokemon = 0, currentEnemyPokemon = 0;
+    private boolean enemySentOut, allySentOut;
+    private final HashMap<Enums.BattlefieldCondition, Integer> allyBattlefieldConditions =
+            new HashMap<Enums.BattlefieldCondition, Integer>();
+    private final HashMap<Enums.BattlefieldCondition, Integer> enemyBattlefieldConditions =
+            new HashMap<Enums.BattlefieldCondition, Integer>();
 
     boolean inBattle;
 
@@ -448,8 +449,20 @@ public class BattleLogic {
         });
     }
 
+    private void processBattlefieldConditionsTimer() {
+        for (Map.Entry<Enums.BattlefieldCondition, Integer> condition : allyBattlefieldConditions.entrySet()) {
+            condition.setValue(condition.getValue() - 1);
+        }
+        for (Map.Entry<Enums.BattlefieldCondition, Integer> condition : enemyBattlefieldConditions.entrySet()) {
+            condition.setValue(condition.getValue() - 1);
+        }
+    }
+
     private void battleTurn(Move allyMove) {
         SecureRandom generator = new SecureRandom();
+
+        // sets timers to timer-1, then a check is made at the end of the turn that erases conditions that should be disabled
+        processBattlefieldConditionsTimer();
 
         controller.getMoveGrid().setVisible(false);
         controller.switchToPlayerChoice(false);
@@ -508,6 +521,12 @@ public class BattleLogic {
 
         playerSpeed = Math.round(playerSpeed);
         enemySpeed = Math.round(enemySpeed);
+
+
+        if (allyBattlefieldConditions.containsKey(Enums.BattlefieldCondition.TAILWIND))
+            playerSpeed *= 2;
+        if (enemyBattlefieldConditions.containsKey(Enums.BattlefieldCondition.TAILWIND))
+            enemySpeed *= 2;
 
         boolean faster = playerSpeed > enemySpeed;
         boolean tied = playerSpeed == enemySpeed;
@@ -758,6 +777,8 @@ public class BattleLogic {
 
         }
 
+        deleteEndedConditions(battleTimeLine);
+
         initAnimationQueue(battleTimeLine);
 
         battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
@@ -765,6 +786,27 @@ public class BattleLogic {
         });
 
         battleTimeLine.get(0).play();
+    }
+
+    // Deletes battlefield conditions that have reached their end
+    private void deleteEndedConditions(List<Timeline> battleTimeLine) {
+        for (Map.Entry<Enums.BattlefieldCondition, Integer> condition : allyBattlefieldConditions.entrySet()) {
+            if (condition.getValue() <= 0) {
+                battleTimeLine.add(controller.getBattleTextAnimation(String.format("Ally's %s has ended!",
+                        condition.getKey()), true));
+                battleTimeLine.add(controller.generatePause(2000));
+                allyBattlefieldConditions.remove(condition.getKey());
+            }
+        }
+
+        for (Map.Entry<Enums.BattlefieldCondition, Integer> condition : enemyBattlefieldConditions.entrySet()) {
+            if (condition.getValue() <= 0) {
+                battleTimeLine.add(controller.getBattleTextAnimation(String.format("Foe's %s has ended!",
+                        condition.getKey()), true));
+                battleTimeLine.add(controller.generatePause(2000));
+                enemyBattlefieldConditions.remove(condition.getKey());
+            }
+        }
     }
 
     private void initAnimationQueue(List<Timeline> battleTimeLine) {
@@ -1307,6 +1349,55 @@ public class BattleLogic {
             processTwoTurnMoveComplete(moveTimeLine, user);
     }
 
+    private float calculateMoveAccuracyModifier(Pokemon user, Pokemon target, Move move) {
+        int statAccuracy = user.getStatModifiers().get(Enums.StatType.ACCURACY) - target.getStatModifiers().get(Enums.StatType.EVASIVENESS);
+        if (statAccuracy > 6)
+            statAccuracy = 6;
+        else if (statAccuracy < -6)
+            statAccuracy = -6;
+
+        float accuracyModifier;
+        if (statAccuracy < 0) {
+            accuracyModifier = 3.0f / (3-statAccuracy);
+        }
+        else
+            accuracyModifier = (float)(3+statAccuracy) / 3.0f;
+
+        if (user.getAbility() == Ability.COMPOUND_EYES && !move.isOneHitKOMove()) {
+            accuracyModifier *= 1.3;
+        }
+
+        return accuracyModifier;
+    }
+
+    private void processBattlefieldConditionMove(List<Timeline> moveTimeline, Move move, Pokemon user) {
+
+        Timeline conditionMessage = null;
+
+        switch (move.getCondition()) {
+            case TAILWIND:
+                if (user.getOwner().isPlayer() &&
+                        !allyBattlefieldConditions.containsKey(Enums.BattlefieldCondition.TAILWIND)) {
+                    conditionMessage = controller.getBattleTextAnimation("The Tailwind blew from behind your team!",
+                            true);
+                    allyBattlefieldConditions.put(move.getCondition(), 4);
+                }
+                else if (!user.getOwner().isPlayer() &&
+                        !enemyBattlefieldConditions.containsKey(Enums.BattlefieldCondition.TAILWIND)){
+                    conditionMessage = controller.getBattleTextAnimation("The Tailwind blew from behind the Foe's team!",
+                            true);
+                    enemyBattlefieldConditions.put(move.getCondition(), 4);
+                }
+                else {
+                    conditionMessage = controller.getBattleTextAnimation("But it failed!",
+                            true);
+                }
+        }
+
+        moveTimeline.add(conditionMessage);
+        moveTimeline.add(controller.generatePause(2000));
+    }
+
     // Processes using a move, as well as status effects or accuracy checks that might prevent from using it
     private List<Timeline> useMove(Move move, Pokemon user, Pokemon target, boolean first) {
 
@@ -1434,21 +1525,15 @@ public class BattleLogic {
         int moveAccuracy = move.getAccuracy();
         int twoTurnModifier = checkTwoTurnMiss(move, target);
 
+        // If move applies a battlefield condition, apply the effect
+        if (move.getCondition() != Enums.BattlefieldCondition.NONE) {
+            processBattlefieldConditionMove(moveTimeLine, move, user);
+            return moveTimeLine;
+        }
+
         // Move hit calculations, if move misses the function ends
         if (moveAccuracy != 0) {
-            int statAccuracy = user.getStatModifiers().get(Enums.StatType.ACCURACY) - target.getStatModifiers().get(Enums.StatType.EVASIVENESS);
-            if (statAccuracy > 6)
-                statAccuracy = 6;
-            else if (statAccuracy < -6)
-                statAccuracy = -6;
-
-            float accuracyModifier;
-            if (statAccuracy < 0) {
-                accuracyModifier = 3.0f / (3-statAccuracy);
-            }
-            else
-                accuracyModifier = (float)(3+statAccuracy) / 3.0f;
-
+            float accuracyModifier = calculateMoveAccuracyModifier(user, target, move);
             float hit = moveAccuracy * accuracyModifier;
             int r = generator.nextInt(100) + 1;
             if (r > hit || twoTurnModifier == 0) {
@@ -1532,7 +1617,7 @@ public class BattleLogic {
                 moveTimeLine.add(damageDealtAnimation);
 
                 System.out.println("Hit " + i+1 + ": " + move.getName() + " dealt " + damage + " damage to " +
-                        target.getBattleName() + "!");
+                        target.getBattleNameMiddle() + "!");
 
                 if (damageInfo.critical) {
                     final Timeline criticalInfo = controller.getBattleTextAnimation("A critical hit!", true);
@@ -1593,6 +1678,40 @@ public class BattleLogic {
             moveTimeLine.add(hitsInformation);
         }
         //********************************************************
+
+        //Applies life restore if move has lifsteal
+        if (move.getLifesteal() > 0) {
+            float lifeStolen = move.getLifesteal() * damage;
+            int lifeStolenInteger = Math.round(lifeStolen);
+
+            if (lifeStolenInteger == 0)
+                lifeStolenInteger = 1;
+
+            int oldUserHp = user.getHp();
+
+            if (lifeStolenInteger + oldUserHp >= user.getMaxHP())
+                lifeStolenInteger = user.getMaxHP() - oldUserHp;
+
+            user.setHp(oldUserHp + lifeStolenInteger);
+            Timeline energyRestoreAnimation;
+
+            if (user.getOwner().isPlayer())
+                energyRestoreAnimation = controller.getAllyHpAnimation(oldUserHp, user.getHp(), user.getMaxHP());
+            else
+                energyRestoreAnimation = controller.getEnemyHpAnimation(oldUserHp, user.getHp(), user.getMaxHP());
+
+            if (energyRestoreAnimation != null)
+                moveTimeLine.add(energyRestoreAnimation);
+
+            Timeline energyDrainedMessage = controller.getBattleTextAnimation(String.format(
+                    "%s had its%nenergy drained!", target.getBattleName()), true);
+            moveTimeLine.add(energyDrainedMessage);
+
+            moveTimeLine.add(controller.generatePause(2000));
+
+            System.out.printf("%s drained %d HP from %s", user.getBattleName(), lifeStolenInteger ,target.getBattleNameMiddle());
+        }
+        //******************************************************
 
         // Recoil handling
         float recoil = move.getTemplate().getRecoil();

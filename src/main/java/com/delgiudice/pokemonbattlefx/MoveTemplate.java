@@ -46,11 +46,12 @@ public class MoveTemplate {
     // such as static
     // multiturnConfusion - checks if the move causes confusion at the end of its execution (such as Outrage)
     // recharge - determines whether a move needs a turn to recharge after use
+    // oneHitKOMove - determines wheter a move is a one hit KO move (if move hits enemy Pokemon faints)
     private boolean twoturn = false, self = false, trap = false, charging = false, multiturn = false,
                     recoilUserHp = false, statUpDuringCharging = false, contactMove = false, multiturnConfusion = false,
-                    recharge = false;
+                    recharge = false, oneHitKOMove = false;
 
-    // moveDescription - contains the description of the move
+    // moveDescription - contains the description of the move, displayed in summary menu
     private String moveDescription = "No description";
 
     // subtype - subtype of move, Physical, Special or Status
@@ -66,6 +67,7 @@ public class MoveTemplate {
     // subStatus - secondary status effect that the move inflicts, secondary effects usually don't last very long or can
     // be cured by switching out a Pokemon
     private Enums.SubStatus subStatus = Enums.SubStatus.NONE;
+    private Enums.BattlefieldCondition condition = Enums.BattlefieldCondition.NONE;
 
     public MoveEnum getName() {
         return name;
@@ -138,6 +140,10 @@ public class MoveTemplate {
         return trap;
     }
 
+    public boolean isOneHitKOMove() {
+        return oneHitKOMove;
+    }
+
     public int getCritIncrease() {
         return critIncrease;
     }
@@ -152,6 +158,10 @@ public class MoveTemplate {
 
     public List<Enums.StatType> getSecondaryStatTypes() {
         return secondaryStatTypes;
+    }
+
+    public Enums.BattlefieldCondition getCondition() {
+        return condition;
     }
 
     public boolean isSelf() {
@@ -223,6 +233,10 @@ public class MoveTemplate {
         this.statChange = statChange;
     }
 
+    public void setOneHitKOMove(boolean oneHitKOMove) {
+        this.oneHitKOMove = oneHitKOMove;
+    }
+
     public void setStatChangeProb(float statChangeProb) {
         this.statChangeProb = statChangeProb;
     }
@@ -269,6 +283,10 @@ public class MoveTemplate {
 
     public void setStatUpDuringCharging(boolean statUpDuringCharging) {
         this.statUpDuringCharging = statUpDuringCharging;
+    }
+
+    public void setCondition(Enums.BattlefieldCondition condition) {
+        this.condition = condition;
     }
 
     public void setRecharge(boolean recharge) {
@@ -634,6 +652,30 @@ public class MoveTemplate {
                 Type.getTypeMap(Enums.Types.STEEL), false, Enums.StatType.DEFENSE, 2,
                 true, 1f);
         newmove.setMoveDescription("The user hardens its body's surface like iron, sharply boosting its Defense stat.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.TAILWIND, 0, 0, 15, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.FLYING), false);
+        newmove.setMoveDescription("The user whips up a turbulent whirlwind that boosts the Speed stats of itself and its allies for four turns.");
+        newmove.setCondition(Enums.BattlefieldCondition.TAILWIND);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.BUG_BUZZ, 90, 100, 10, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.BUG), false, Enums.StatType.SPECIAL_DEFENSE, -1,
+                false, 0.1f);
+        newmove.setMoveDescription("The user vibrates to generate a damaging sound wave. This may also lower the target's Sp. Def stat.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.PSYCHIC, 90, 100, 10, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.PSYCHIC), false, Enums.StatType.SPECIAL_DEFENSE, -1,
+                false, 0.1f);
+        newmove.setMoveDescription("The target is hit with a strong telekinetic force to inflict damage. This may also lower the target’s Sp. Def stat.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.GIGA_DRAIN, 75, 100, 10, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.GRASS), false);
+        newmove.setMoveDescription("A nutrient-draining attack. The user's HP is restored by up to half the damage taken by the target.");
+        newmove.setLifesteal(0.5f);
         moveMap.put(newmove.getName(), newmove);
     }
 

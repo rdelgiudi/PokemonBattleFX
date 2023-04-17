@@ -497,5 +497,10 @@ public class Pokemon {
         example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.METAPOD), 50, Ability.SHED_SKIN,
                 new Move(MoveTemplate.getMove(MoveEnum.IRON_DEFENSE)), new Move(MoveTemplate.getMove(MoveEnum.ELECTROWEB)));
         pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.BUTTERFREE), 50, Ability.COMPOUND_EYES,
+                new Move(MoveTemplate.getMove(MoveEnum.BUG_BUZZ)), new Move(MoveTemplate.getMove(MoveEnum.PSYCHIC)),
+                new Move(MoveTemplate.getMove(MoveEnum.GIGA_DRAIN)), new Move(MoveTemplate.getMove(MoveEnum.TAILWIND)));
+        pokemonExamples.put(example.getOriginalName(), example);
     }
 }
