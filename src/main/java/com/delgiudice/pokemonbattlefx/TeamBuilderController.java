@@ -304,14 +304,13 @@ public class TeamBuilderController {
             enemy.addPokemon(enemyParty.get(i));
 
         FXMLLoader fxmlLoader = new FXMLLoader(BattleApplication.class.getResource("battle-view.fxml"));
+        Scene teamBuilderScene = startBattleButton.getScene();
         Stage stage = (Stage) startBattleButton.getScene().getWindow();
         Scene scene = new Scene(fxmlLoader.load(), 1280, 720);
         stage.setTitle("Battle!");
         stage.setScene(scene);
 
         BattleController controller = fxmlLoader.getController();
-        BattleLogic logic = new BattleLogic(controller, player, enemy);
-
-        stage.show();
+        BattleLogic logic = new BattleLogic(controller, player, enemy, teamBuilderScene);
     }
 }

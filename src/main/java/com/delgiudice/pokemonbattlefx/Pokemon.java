@@ -46,7 +46,7 @@ public class Pokemon {
     private Ability ability = Ability.NONE;
     // trapped - determines whether the Pokemon is currently under effects of a trapping move
     // underFocusEnergy - determines whether the Pokemon is under the effects of the move Focus Energy
-    private boolean trapped, underFocusEnergy = false;
+    private boolean trapped = false, underFocusEnergy = false;
 
     public String getBattleName() {
         if (owner.isPlayer())
@@ -329,6 +329,32 @@ public class Pokemon {
         }
 
         return availableMoves;
+    }
+
+    public void restoreAll() {
+        hp = getMaxHP();
+        for (Move move : moveList)
+            move.setPp(move.getMaxpp());
+        status = Enums.Status.NONE;
+
+        poisonCounter = 1;
+        sleepCounter = 0;
+        critIncrease = 0;
+
+        twoTurnMove = null;
+        multiTurnMove = null;
+        trapMove = null;
+
+        twoTurnCounter = 0;
+        multiTurnCounter = 0;
+        confusionTimer = 0;
+        trappedTimer = 0;
+
+        subStatuses.clear();
+        statModifiers.clear();
+
+        trapped = false;
+        underFocusEnergy = false;
     }
 
     public void levelUp()       //raises level, updates stats
