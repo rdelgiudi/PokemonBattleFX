@@ -176,6 +176,11 @@ public class BattleController {
         optionGrid.setVisible(choice);
     }
 
+    public void wipeText() {
+        battleText.setText("");
+        battleTextFull.setText("");
+    }
+
     public Timeline getBattleTextAnimation(String text, boolean full) {
         final List<KeyFrame> characterList = new LinkedList<>();
         for (int i = 0; i <= text.length(); i++) {
