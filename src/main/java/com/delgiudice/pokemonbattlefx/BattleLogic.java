@@ -37,8 +37,8 @@ public class BattleLogic {
 
     private boolean enemySentOut, allySentOut;
 
-    private FXMLLoader summaryLoader;
-    private Scene summaryScene;
+    private final FXMLLoader summaryLoader;
+    private final Scene summaryScene;
 
     boolean inBattle;
 

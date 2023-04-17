@@ -80,6 +80,7 @@ public class AddPokemonController {
     @FXML
     public void returnToBuilder() {
         Stage stage = (Stage) backButton.getScene().getWindow();
+        stage.setTitle("Pokemon Battle FX");
         stage.setScene(previousScene);
     }
 

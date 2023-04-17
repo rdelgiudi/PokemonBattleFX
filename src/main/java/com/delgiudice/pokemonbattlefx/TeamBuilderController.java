@@ -3,21 +3,20 @@ package com.delgiudice.pokemonbattlefx;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.util.*;
 
 public class TeamBuilderController {
@@ -28,6 +27,8 @@ public class TeamBuilderController {
     private GridPane pokemonGrid;
     @FXML
     private Button playerSettingsButton, enemySettingsButton, startBattleButton;
+    @FXML
+    private ScrollPane scrollPane;
 
     List<Pokemon> playerParty = new ArrayList<>(), enemyParty = new ArrayList<>();
 
@@ -39,6 +40,9 @@ public class TeamBuilderController {
 
     FXMLLoader addPokemonLoader;
     Scene addPokemonScene;
+
+    private int FONT_SIZE = 13, POKEMON_BUTTON_WIDTH = 125, POKEMON_BUTTON_HEIGHT = 100, POKEMON_PANE_SIZE = 450;
+    private int PARTY_BUTTON_WIDTH = 100, PARTY_BUTTON_HEIGHT = 100;
 
     public TeamBuilderController() {
         Pokemon.generatePokemonExamples();
@@ -72,6 +76,32 @@ public class TeamBuilderController {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    public void setUiResizeListener() {
+        Scene scene = startBattleButton.getScene();
+
+        scene.widthProperty().addListener((observable, oldValue, newValue) -> {
+            FONT_SIZE = (int)Math.round(scene.getWidth() / 98.46);
+            POKEMON_BUTTON_WIDTH = (int)Math.round(scene.getWidth() / 10.24);
+            //POKEMON_BUTTON_HEIGHT = (int)Math.round(scene.getWidth() / 12.8);
+            PARTY_BUTTON_WIDTH = (int)Math.round(scene.getWidth() / 12.8);
+            //POKEMON_PANE_SIZE = (int)Math.round(scene.getWidth() / 2.84);
+            refreshUi();
+        });
+
+        scene.heightProperty().addListener((observable, oldValue, newValue) -> {
+            POKEMON_BUTTON_HEIGHT = (int)Math.round(scene.getHeight() / 7.2);
+            POKEMON_PANE_SIZE = (int)Math.round(scene.getHeight() / 1.6);
+            PARTY_BUTTON_HEIGHT = (int)Math.round(scene.getHeight() / 7.2);
+            refreshUi();
+        });
+    }
+
+    private void refreshUi() {
+        populatePokemonGrid();
+        refreshParties();
+        scrollPane.setPrefHeight(POKEMON_PANE_SIZE);
     }
 
     public void preparePartyButtons(HBox partyBox, List<Pokemon> party, boolean player) {
@@ -167,15 +197,18 @@ public class TeamBuilderController {
 
     public void populatePokemonGrid() {
 
+        pokemonGrid.getChildren().clear();
+
         int i = 0, j = 0;
 
         for (PokemonSpecie pokemon : sortedPokemon) {
             Button pokemonButton = new Button();
             pokemonButton.setText(pokemon.getName().toString());
+            pokemonButton.setFont(Font.font("Monospaced", FONT_SIZE));
             pokemonGrid.add(pokemonButton, i, j);
 
-            pokemonButton.setPrefHeight(100);
-            pokemonButton.setPrefWidth(125);
+            pokemonButton.setPrefHeight(POKEMON_BUTTON_HEIGHT);
+            pokemonButton.setPrefWidth(POKEMON_BUTTON_WIDTH);
 
             i++;
             if (i > 8) {
@@ -205,9 +238,15 @@ public class TeamBuilderController {
     }
 
     public void refreshParties() {
+        playerPartyBox.setPrefSize((PARTY_BUTTON_WIDTH +5) * 6, PARTY_BUTTON_HEIGHT);
+        enemyPartyBox.setPrefSize((PARTY_BUTTON_WIDTH +5) * 6, PARTY_BUTTON_HEIGHT);
         for (int i=0; i < playerPartyBox.getChildren().size(); i++) {
             Button playerPokemonButton = (Button) playerPartyBox.getChildren().get(i);
             Button enemyPokemonButton = (Button) enemyPartyBox.getChildren().get(i);
+            playerPokemonButton.setFont(Font.font("Monospaced", FONT_SIZE));
+            enemyPokemonButton.setFont(Font.font("Monospaced", FONT_SIZE));
+            playerPokemonButton.setPrefSize(PARTY_BUTTON_WIDTH, PARTY_BUTTON_HEIGHT);
+            enemyPokemonButton.setPrefSize(PARTY_BUTTON_WIDTH, PARTY_BUTTON_HEIGHT);
             if (i < playerParty.size()) {
                 playerPokemonButton.setText(playerParty.get(i).getName());
                 playerPokemonButton.setDisable(false);
