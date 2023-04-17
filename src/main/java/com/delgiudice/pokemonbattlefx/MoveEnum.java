@@ -50,7 +50,8 @@ public enum MoveEnum {
     HYDRO_CANNON("Hydro Cannon"),
     STRING_SHOT("String Shot"),
     BUG_BITE("Bug Bite"),
-    ELECTROWEB("Electroweb");
+    ELECTROWEB("Electroweb"),
+    IRON_DEFENSE("Iron Defense");
 
 
     private final String name;

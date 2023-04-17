@@ -51,6 +51,7 @@ public class AddPokemonController {
     }
 
     public void enterAddMode() {
+        editModeIndex = -1;
         refreshStats();
     }
 
@@ -122,7 +123,7 @@ public class AddPokemonController {
         pokemonNameLabel.setText(currentPokemon.getName());
         itemLabel.setText("None");
         abilityLabel.setText(currentPokemon.getAbility().toString());
-        abilityDescriptionLabel.setText("No description");
+        abilityDescriptionLabel.setText(currentPokemon.getAbility().getDescription());
 
         setPokemonTypes();
         //setStatisticsListeners();
@@ -274,8 +275,11 @@ public class AddPokemonController {
         ppLabel.setText(String.format("%2d", move.getMaxpp()));
 
         HBox otherInfoBox = (HBox) moveInfoBox.getChildren().get(1);
-        Label powerLabel = (Label) otherInfoBox.getChildren().get(2);
-        Label accuracyLabel = (Label) otherInfoBox.getChildren().get(4);
+        Label categoryLabel = (Label) otherInfoBox.getChildren().get(2);
+        Label powerLabel = (Label) otherInfoBox.getChildren().get(4);
+        Label accuracyLabel = (Label) otherInfoBox.getChildren().get(6);
+
+        categoryLabel.setText(move.getSubtype().toString());
 
         if (move.getPower() > 0)
             powerLabel.setText(Integer.toString(move.getPower()));
@@ -292,13 +296,17 @@ public class AddPokemonController {
     }
 
     private boolean checkMovesOk() {
+        boolean anyMove = false;
         for (int i=0; i < moveBox.getChildren().size(); i++) {
             HBox hBox = (HBox) moveBox.getChildren().get(i);
             Label moveOkLabel = (Label) hBox.getChildren().get(1);
+            TextField moveField = (TextField) hBox.getChildren().get(0);
             if (!Objects.equals(moveOkLabel.getText(), "ok"))
                 return false;
+            if (!Objects.equals(moveField.getText(), ""))
+                anyMove = true;
         }
-        return true;
+        return anyMove;
     }
 
     private boolean checkOkPlayer() {
@@ -325,7 +333,7 @@ public class AddPokemonController {
             Button moveInfoButton = (Button) hBox.getChildren().get(2);
             moveOkLabel.setTextFill(Color.GREEN);
             if (i >= currentPokemon.getMoveList().size()) {
-                moveField.setText(" ");
+                moveField.setText("");
             }
             else {
                 moveField.setText(currentPokemon.getMoveList(i).getName().toString());

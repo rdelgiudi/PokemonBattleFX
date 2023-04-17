@@ -555,7 +555,23 @@
             </HBox>
             <HBox prefHeight="34.0" prefWidth="778.0">
                <children>
-                  <Label alignment="CENTER" prefHeight="34.0" prefWidth="434.0" style="-fx-background-color: linear-gradient(to left, darkmagenta, indigo);" text="Description:" textFill="WHITE">
+                  <Label alignment="CENTER" prefHeight="31.0" prefWidth="201.0" style="-fx-background-color: linear-gradient(to left, darkmagenta, indigo);" text="Description:" textFill="WHITE">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <font>
+                        <Font name="Monospaced Regular" size="20.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER" prefHeight="31.0" prefWidth="134.0" style="-fx-background-color: linear-gradient(to left, darkmagenta, indigo);" text="Category:" textFill="WHITE">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <font>
+                        <Font name="Monospaced Regular" size="20.0" />
+                     </font>
+                  </Label>
+                  <Label alignment="CENTER" prefHeight="31.0" prefWidth="122.0" style="-fx-border-color: black;" text="???">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
@@ -587,7 +603,7 @@
                         <Font name="Monospaced Regular" size="20.0" />
                      </font>
                   </Label>
-                  <Label alignment="CENTER" prefHeight="31.0" prefWidth="80.0" style="-fx-border-color: black;" text="???">
+                  <Label alignment="CENTER" prefHeight="31.0" prefWidth="66.0" style="-fx-border-color: black;" text="???">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
@@ -597,7 +613,7 @@
                   </Label>
                </children>
             </HBox>
-            <Label alignment="TOP_LEFT" prefHeight="75.0" prefWidth="789.0" text="Label description">
+            <Label alignment="TOP_LEFT" prefHeight="75.0" prefWidth="789.0" text="Label description" wrapText="true">
                <VBox.margin>
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </VBox.margin>

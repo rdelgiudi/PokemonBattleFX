@@ -67,7 +67,7 @@ public class SummaryController {
         levelLabel.setText(String.format("Lv. %3d", pokemon.getLevel()));
         itemLabel.setText("None");
         abilityLabel.setText(pokemon.getAbility().toString());
-        abilityDescriptionLabel.setText("No description");
+        abilityDescriptionLabel.setText(pokemon.getAbility().getDescription());
 
         setPokemonTypes(pokemon);
         hpLabel.setText(String.format("%3d / %-3d", pokemon.getHp(), pokemon.getMaxHP()));
@@ -105,6 +105,15 @@ public class SummaryController {
             TextField baseStat = (TextField) baseStatBox.getChildren().get(i);
             TextField ivStat = (TextField) ivBox.getChildren().get(i);
             TextField totalStat = (TextField) totalStatBox.getChildren().get(i);
+
+            if (i > 1) {
+                if (pokemon.getNature().getStatTab()[i - 2] == 0)
+                    totalStat.setStyle("-fx-text-fill: black");
+                else if (pokemon.getNature().getStatTab()[i - 2] == 1)
+                    totalStat.setStyle("-fx-text-fill: red");
+                else
+                    totalStat.setStyle("-fx-text-fill: blue");
+            }
 
             baseStat.setText(pokemon.getSpecie().getBaseStats().get(Enums.StatType.getFromBaseStatId(i-1)).toString());
             ivStat.setText(Integer.toString(pokemon.getIvs()[i-1]));
@@ -171,8 +180,11 @@ public class SummaryController {
         ppLabel.setText(String.format("%2d / %-2d", move.getPp(), move.getMaxpp()));
 
         HBox otherInfoBox = (HBox) moveInfoBox.getChildren().get(1);
-        Label powerLabel = (Label) otherInfoBox.getChildren().get(2);
-        Label accuracyLabel = (Label) otherInfoBox.getChildren().get(4);
+        Label categoryLabel = (Label) otherInfoBox.getChildren().get(2);
+        Label powerLabel = (Label) otherInfoBox.getChildren().get(4);
+        Label accuracyLabel = (Label) otherInfoBox.getChildren().get(6);
+
+        categoryLabel.setText(move.getSubtype().toString());
 
         if (move.getPower() > 0)
             powerLabel.setText(Integer.toString(move.getPower()));

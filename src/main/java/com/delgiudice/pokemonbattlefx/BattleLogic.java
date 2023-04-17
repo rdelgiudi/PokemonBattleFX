@@ -37,6 +37,9 @@ public class BattleLogic {
 
     private boolean enemySentOut, allySentOut;
 
+    private FXMLLoader summaryLoader;
+    private Scene summaryScene;
+
     boolean inBattle;
 
     public BattleLogic(BattleController controller, Player player, NpcTrainer enemy) {
@@ -45,6 +48,13 @@ public class BattleLogic {
 
         this.player = player;
         this.enemy = enemy;
+
+        summaryLoader = new FXMLLoader(BattleApplication.class.getResource("summary-view.fxml"));
+        try {
+            summaryScene = new Scene(summaryLoader.load(), 1280, 720);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
 
         initBattleLoop();
     }
@@ -316,7 +326,6 @@ public class BattleLogic {
                 button.setContextMenu(contextMenu);
 
                 switchOut.setOnAction(event -> {
-                    controller.getPokemonSubmenu().setVisible(false);
 
                     if (player.getParty(currentAllyPokemon).getTrapMove() != null && !allyFainted) {
                         controller.getPokemonGrid().setDisable(true);
@@ -399,29 +408,21 @@ public class BattleLogic {
                 });
 
                 summary.setOnAction(event -> {
-                    controller.getPokemonSubmenu().setVisible(false);
                     Scene scene = button.getScene();
-                    FXMLLoader fxmlLoader = new FXMLLoader(BattleApplication.class.getResource("summary-view.fxml"));
-                    Scene nextScene;
-                    try {
-                        nextScene = new Scene(fxmlLoader.load(), 1280, 720);
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
 
                     Stage stage = (Stage) button.getScene().getWindow();
-                    SummaryController summaryController = fxmlLoader.getController();
+                    SummaryController summaryController = summaryLoader.getController();
                     summaryController.setParty(player.getParty());
                     summaryController.displayPokemonStat(partyIndex);
                     summaryController.setPreviousScene(scene);
 
-                    stage.setScene(nextScene);
+                    stage.setScene(summaryScene);
                     stage.show();
                 });
 
                 //Button cancelButton = (Button) controller.getPokemonSubmenu().getChildren().get(2);
 
-                cancel.setOnAction(event -> controller.getPokemonSubmenu().setVisible(false));
+                cancel.setOnAction(event -> contextMenu.hide());
 
                 contextMenu.getItems().addAll(switchOut, summary, cancel);
 
@@ -443,7 +444,6 @@ public class BattleLogic {
 
         button.setOnAction(e -> {
             controller.getPokemonGrid().setVisible(false);
-            controller.getPokemonSubmenu().setVisible(false);
             controller.switchToPlayerChoice(true);
         });
     }
@@ -537,7 +537,7 @@ public class BattleLogic {
                 battleTimeLine.add(controller.generatePause(2000));
             }
 
-            applyStatusEffect(battleTimeLine);
+            checkFainted(battleTimeLine);
             return;
         }
         // *********************************************************
@@ -573,6 +573,7 @@ public class BattleLogic {
         checkFainted(battleTimeLine);
     }
 
+    // For now enemy move is randomly generated, maybe gym leader AI implementation in the future
     private Move generateEnemyMove(Pokemon enemyPokemon) {
         Move enemyMove;
 
@@ -832,6 +833,32 @@ public class BattleLogic {
         double damageDouble = 0;
         Timeline damageInfoTimeline = null;
         String poisonDamageMessage = "%s was hurt by%npoison!";
+        boolean damagingStatusEffect = pokemon.getStatus() == Enums.Status.BURNED ||
+                pokemon.getStatus() == Enums.Status.POISONED || pokemon.getStatus() == Enums.Status.BADLY_POISONED;
+
+        if (pokemon.getAbility() == Ability.SHED_SKIN && damagingStatusEffect) {
+            SecureRandom random = new SecureRandom();
+            int rand = random.nextInt(3);
+
+            if (rand == 0) {
+                List<Timeline> timelineList = new LinkedList<>();
+                pokemon.setStatus(Enums.Status.NONE);
+                Timeline abilityPopup;
+                if (pokemon.getOwner().isPlayer())
+                    abilityPopup = controller.getAllyAbilityInfoAnimation(pokemon);
+                else
+                    abilityPopup = controller.getEnemyAbilityInfoAnimation(pokemon);
+
+                timelineList.add(abilityPopup);
+                damageInfoTimeline = controller.getBattleTextAnimation(String.format(
+                        "%s was cured of its status effect!", pokemon.getBattleName()), true);
+                damageInfoTimeline.setDelay(Duration.seconds(2));
+                timelineList.add(damageInfoTimeline);
+                timelineList.add(controller.updateStatus(pokemon, pokemon.getOwner().isPlayer()));
+                timelineList.add(controller.generatePause(1000));
+                return timelineList;
+            }
+        }
 
         switch (pokemon.getStatus()) {
             case BURNED:

@@ -24,6 +24,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
+import java.security.Key;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -40,12 +41,12 @@ public class BattleController {
     private Button fightButton, bagButton, pokemonButton, runButton, firstMoveButton, secondMoveButton, thirdMoveButton,
             fourthMoveButton, backMoveButton, pokemonBackButton;
     @FXML
-    private VBox allyPokemonInfo, enemyPokemonInfo, pokemonSubmenu;
+    private VBox allyPokemonInfo, enemyPokemonInfo;
     @FXML
     private ImageView allyPokemonSprite, enemyPokemonSprite, textArrowView;
     @FXML
     private Label enemyNameLabel, enemyLvLabel, allyNameLabel, allyHpLabel, allyLvLabel, allyStatusLabel,
-                    enemyStatusLabel;
+                    enemyStatusLabel, allyAbilityInfo, enemyAbilityInfo;
     @FXML
     private ProgressBar enemyHpBar, allyHpBar;
 
@@ -113,10 +114,6 @@ public class BattleController {
 
     public Button getPokemonBackButton() {
         return pokemonBackButton;
-    }
-
-    public VBox getPokemonSubmenu() {
-        return pokemonSubmenu;
     }
 
     public void initialize() {
@@ -299,6 +296,67 @@ public class BattleController {
 
         final Timeline timeline = new Timeline();
         timeline.getKeyFrames().addAll(keyFrameList);
+        return timeline;
+    }
+
+    public Timeline getAllyAbilityInfoAnimation(Pokemon pokemon) {
+        final List<KeyFrame> keyFrameList = new LinkedList<>();
+        double width = allyAbilityInfo.getPrefWidth();
+
+        final KeyFrame configAbilityLabel = new KeyFrame(Duration.ZERO, e -> {
+            allyAbilityInfo.setVisible(false);
+            allyAbilityInfo.setText(String.format("%s's%n%s", pokemon.getName(), pokemon.getAbility()));
+
+            allyAbilityInfo.setLayoutX(-width);
+            allyAbilityInfo.setVisible(true);
+        });
+
+        keyFrameList.add(configAbilityLabel);
+
+        for (int i = 0; i <= width; i++) {
+            int finalI = i;
+            final KeyFrame kf = new KeyFrame(Duration.millis(i), e -> {
+                allyAbilityInfo.setLayoutX(finalI - width);
+            });
+            keyFrameList.add(kf);
+        }
+
+        Timeline timeline = new Timeline();
+        timeline.setAutoReverse(true);
+        timeline.setCycleCount(2);
+        timeline.getKeyFrames().addAll(keyFrameList);
+        timeline.getKeyFrames().addAll(generatePause(1000).getKeyFrames());
+        return timeline;
+    }
+
+    public Timeline getEnemyAbilityInfoAnimation(Pokemon pokemon) {
+        final List<KeyFrame> keyFrameList = new LinkedList<>();
+        double width = enemyAbilityInfo.getPrefWidth();
+        double screenWidth = enemyAbilityInfo.getScene().getWidth();
+
+        final KeyFrame configAbilityLabel = new KeyFrame(Duration.ZERO, e -> {
+            enemyAbilityInfo.setVisible(false);
+            enemyAbilityInfo.setText(String.format("%s's%n%s", pokemon.getName(), pokemon.getAbility()));
+
+            enemyAbilityInfo.setLayoutX(screenWidth);
+            enemyAbilityInfo.setVisible(true);
+        });
+
+        keyFrameList.add(configAbilityLabel);
+
+        for (int i = 0; i <= width; i++) {
+            int finalI = i;
+            final KeyFrame kf = new KeyFrame(Duration.millis(i), e -> {
+                enemyAbilityInfo.setLayoutX(screenWidth - finalI);
+            });
+            keyFrameList.add(kf);
+        }
+
+        Timeline timeline = new Timeline();
+        timeline.setAutoReverse(true);
+        timeline.setCycleCount(2);
+        timeline.getKeyFrames().addAll(keyFrameList);
+        timeline.getKeyFrames().addAll(generatePause(1000).getKeyFrames());
         return timeline;
     }
 

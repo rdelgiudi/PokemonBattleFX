@@ -80,7 +80,7 @@ public class TeamBuilderController {
             ContextMenu contextMenu = new ContextMenu();
             MenuItem editPokemon = new MenuItem("Edit");
             MenuItem deletePokemon = new MenuItem("Delete");
-            MenuItem movePokemon = new MenuItem("Move Pokemon");
+            MenuItem movePokemon = new MenuItem("Move");
             MenuItem cancel = new MenuItem("Cancel");
 
             int finalI = i;
@@ -200,7 +200,7 @@ public class TeamBuilderController {
         AddPokemonController controller = addPokemonLoader.getController();
         controller.setAddData(party.get(index), playerParty, enemyParty, startBattleButton.getScene(), this);
         stage.setTitle("Edit Pokemon!");
-        controller.enterEditMode(true, index);
+        controller.enterEditMode(playerParty.equals(party), index);
         stage.setScene(addPokemonScene);
     }
 
