@@ -17,7 +17,9 @@ public enum Ability {
             "The Pokémon may cure its own status conditions by shedding its skin."),
     INTIMIDATE("Intimidate"),
     COMPOUND_EYES("Compound Eyes",
-            "The Pokémon's accuracy goes up.");
+            "The Pokémon's accuracy goes up."),
+    SWARM("Swarm",
+            "Powers up Bug-type moves when the Pokémon's HP is low.");
 
     final private String ability;
     private String description = "No description";

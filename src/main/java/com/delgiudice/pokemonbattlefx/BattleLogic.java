@@ -10,13 +10,10 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javafx.util.Pair;
 
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.*;
-
-import static javafx.application.Platform.exit;
 
 public class BattleLogic {
 
@@ -41,6 +38,10 @@ public class BattleLogic {
             new HashMap<Enums.BattlefieldCondition, Integer>();
     private final HashMap<Enums.BattlefieldCondition, Integer> enemyBattlefieldConditions =
             new HashMap<Enums.BattlefieldCondition, Integer>();
+    private final HashMap<Enums.Spikes, Integer> allySpikes =
+            new HashMap<Enums.Spikes, Integer>();
+    private final HashMap<Enums.Spikes, Integer> enemySpikes =
+            new HashMap<Enums.Spikes, Integer>();
 
     boolean inBattle;
 
@@ -223,6 +224,25 @@ public class BattleLogic {
         battleWonMsg1.play();
     }
 
+    private void processToxicSpikeEffect(List<Timeline> moveStartTimeLine, Pokemon target) {
+        boolean toxicSpikeImmuneType = target.containsType(Enums.Types.FLYING) ||
+                target.containsType(Enums.Types.POISON) || target.containsType(Enums.Types.STEEL);
+        boolean toxicSpikeImmuneAbility = false; //TODO: Add abilities
+        if (!toxicSpikeImmuneType && !toxicSpikeImmuneAbility) {
+            int spikeCount = enemySpikes.get(Enums.Spikes.TOXIC_SPIKES);
+            Timeline statusChange;
+            if (spikeCount == 1)
+                statusChange = processStatusChange(Enums.Status.POISONED, target);
+
+            else
+                statusChange = processStatusChange(Enums.Status.BADLY_POISONED, target);
+
+            moveStartTimeLine.add(statusChange);
+            moveStartTimeLine.add(controller.updateStatus(target, target.getOwner().isPlayer()));
+            moveStartTimeLine.add(controller.generatePause(2000));
+        }
+    }
+
     private void battleLoop() {
 
         controller.wipeText();
@@ -231,36 +251,56 @@ public class BattleLogic {
         Pokemon enemyPokemon = enemy.getParty(currentEnemyPokemon);
         allyPokemon.getSubStatuses().remove(Enums.SubStatus.FLINCHED);
         enemyPokemon.getSubStatuses().remove(Enums.SubStatus.FLINCHED);
-
-        if (enemySentOut) {
-            enemySentOut = false;
-            //TODO: Processing events at the start of the turn
-        }
-        if (allySentOut) {
-            allySentOut = false;
-            //TODO: Processing events at the start of the turn
-        }
-
-        if (allyPokemon.getTwoTurnMove() != null) {
-            battleTurn(allyPokemon.getTwoTurnMove());
-            return;
-        }
-        if (allyPokemon.getMultiTurnMove() != null && allyPokemon.getMultiTurnCounter() > 0) {
-            //allyPokemon.setMultiTurnCounter(allyPokemon.getMultiTurnCounter() - 1);
-            battleTurn(allyPokemon.getMultiTurnMove());
-            return;
-        }
-
-        if (allyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
-            battleTurn(null);
-            return;
-        }
+        Timeline done = controller.generatePause(1);
 
         Timeline playerChoiceDialog = controller.getBattleTextAnimation(String.format("What will%n%s do?",
                 player.getParty(currentAllyPokemon).getBattleName()), false);
-        //playerChoiceDialog.setDelay(Duration.seconds(2));
-        controller.switchToPlayerChoice(true);
-        playerChoiceDialog.play();
+        done.setOnFinished(e -> {
+            playerChoiceDialog.play();
+            controller.switchToPlayerChoice(true);
+
+            if (allyPokemon.getTwoTurnMove() != null) {
+                battleTurn(allyPokemon.getTwoTurnMove());
+                return;
+            }
+            if (allyPokemon.getMultiTurnMove() != null && allyPokemon.getMultiTurnCounter() > 0) {
+                //allyPokemon.setMultiTurnCounter(allyPokemon.getMultiTurnCounter() - 1);
+                battleTurn(allyPokemon.getMultiTurnMove());
+                return;
+            }
+
+            if (allyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
+                battleTurn(null);
+                return;
+            }
+        });
+
+        List<Timeline> moveStartTimeLine = new LinkedList<>();
+
+        if (enemySentOut) {
+            enemySentOut = false;
+
+            if (enemySpikes.containsKey(Enums.Spikes.TOXIC_SPIKES)) {
+                processToxicSpikeEffect(moveStartTimeLine, enemyPokemon);
+            }
+        }
+        else if (allySentOut) {
+            allySentOut = false;
+
+            if (enemySpikes.containsKey(Enums.Spikes.TOXIC_SPIKES)) {
+                processToxicSpikeEffect(moveStartTimeLine, allyPokemon);
+            }
+        }
+
+        if (moveStartTimeLine.size() > 0) {
+            initAnimationQueue(moveStartTimeLine);
+            moveStartTimeLine.get(moveStartTimeLine.size() - 1).setOnFinished(e -> done.play());
+            moveStartTimeLine.get(0).play();
+        }
+        else {
+            done.play();
+        }
+        //playerChoiceDialog.play();
 
         Button fightButton = controller.getFightButton();
         Button backButton = controller.getBackMoveButton();
@@ -682,12 +722,12 @@ public class BattleLogic {
             //return;
         }
 
-        applyStatusEffect(battleTimeLine);
+        applyStatusEffectDamage(battleTimeLine);
         //finalChecks(battleTimeLine, enemyFainted);
     }
 
     // Applies damaging status effect if applicable
-    private void applyStatusEffect(List<Timeline> battleTimeLine) {
+    private void applyStatusEffectDamage(List<Timeline> battleTimeLine) {
         boolean allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
         boolean enemyFainted = enemy.getParty(currentEnemyPokemon).getHp() == 0;
         List<Timeline> allyStatusEffect = null;
@@ -1537,12 +1577,29 @@ public class BattleLogic {
         }
         //**********************************************
 
+        boolean statusMovesExceptionGround = move.getType().getTypeEnum() == Enums.Types.ELECTRIC &&
+                (target.getType()[0].getTypeEnum() == Enums.Types.ELECTRIC ||
+                        target.getType()[0].getTypeEnum() == Enums.Types.ELECTRIC);
+
         Enums.Subtypes moveType = move.getSubtype();
         MoveDamageInfo damageInfo = new MoveDamageInfo(0, false, MoveDamageInfo.NOT_APPLICABLE);
         int i;
         int damage = 0;
         int hits = move.isMultiturn() ? 1 : move.getHits();
 
+        if (hits == MoveTemplate.HITS_RANDOM) {
+            int hitsRand = generator.nextInt(100);
+            int hitsTemp;
+            if (hitsRand < 35)
+                hitsTemp = 2;
+            if (hitsRand < 70)
+                hitsTemp = 3;
+            if (hitsRand < 85)
+                hitsTemp = 4;
+            else
+                hitsTemp = 5;
+            hits = hitsTemp;
+        }
 
         for (i=0; i<hits; i++) {
             if (target.getHp() == 0)
@@ -1568,10 +1625,7 @@ public class BattleLogic {
 
             // Type effect calculation, if the move can't hit a Pokemon the function returns
             // Status moves generally ignore all type interactions, however there are some exceptions to this rule
-
-            boolean statusMovesExceptionGround = move.getType().getTypeEnum() == Enums.Types.ELECTRIC &&
-                    (target.getType()[0].getTypeEnum() == Enums.Types.ELECTRIC ||
-                            target.getType()[0].getTypeEnum() == Enums.Types.ELECTRIC);
+            // TODO:This check should be moved outside the for loop but it requires to change how type effect is checked
 
             if (damageInfo.typeEffect == 0 && (move.getSubtype() != Enums.Subtypes.STATUS || statusMovesExceptionGround)) {
                 final Timeline effectInfo = controller.getBattleTextAnimation(String.format(MOVE_NO_EFFECT_STRING,
@@ -1610,8 +1664,8 @@ public class BattleLogic {
 
                 moveTimeLine.add(damageDealtAnimation);
                 moveTimeLine.add(controller.generatePause(1500));
-
-                System.out.println("Hit " + i+1 + ": " + move.getName() + " dealt " + damage + " damage to " +
+                int displayHits = i+1;
+                System.out.println("Hit " + displayHits + ": " + move.getName() + " dealt " + damage + " damage to " +
                         target.getBattleNameMiddle() + "!");
 
                 if (damageInfo.critical) {
@@ -1667,7 +1721,7 @@ public class BattleLogic {
         //***************************************
 
         // Check related to number of hits for moves that hit multiple times
-        if (move.getHits() > 1 && damageInfo.typeEffect != 0) {
+        if (i > 1 && damageInfo.typeEffect != 0) {
             Timeline hitsInformation = controller.getBattleTextAnimation(String.format("It hit %d time(s)!",
                     i), true);
             //hitsInformation.setDelay(Duration.seconds(2));
@@ -1688,6 +1742,21 @@ public class BattleLogic {
             processRecoil(moveTimeLine, user, damage, move);
         }
         //********************************************************
+
+        if (move.getSpikeType() != Enums.Spikes.NONE) {
+            HashMap<Enums.Spikes, Integer> spikes = user.getOwner().isPlayer() ? enemySpikes : allySpikes;
+            if (!spikes.containsKey(move.getSpikeType()))
+                spikes.put(move.getSpikeType(), 1);
+            else if (spikes.get(move.getSpikeType()) == 1)
+                spikes.put(move.getSpikeType(), 2);
+            else {
+                Timeline failureMessage = controller.getBattleTextAnimation("But it failed!", true);
+                moveTimeLine.add(failureMessage);
+                moveTimeLine.add(controller.generatePause(1500));
+                return moveTimeLine;
+            }
+            processSpikesPlaced(moveTimeLine ,user, move);
+        }
 
         // Checks related to moves that increase or decrease stats
         boolean targetFainted = target.getHp() == 0;
@@ -1750,7 +1819,7 @@ public class BattleLogic {
         boolean statusImmunity = firePokemonImmunity || electricPokemonImmunity || poisonPokemonImmunity;
 
         if (move.getStatus() != Enums.Status.NONE && prob >= rand && !secondaryEffectsImmune && !statusImmunity) {
-            Timeline statusChangeInfo = processStatusChange(move, target);
+            Timeline statusChangeInfo = processStatusChange(move.getStatus(), target);
             //statusChangeInfo.setDelay(Duration.seconds(1));
             moveTimeLine.add(statusChangeInfo);
 
@@ -1802,6 +1871,21 @@ public class BattleLogic {
         //*********************************************************************
 
         return moveTimeLine;
+    }
+
+    private void processSpikesPlaced(List<Timeline> moveTimeLine, Pokemon user, Move move) {
+        switch (move.getSpikeType()) {
+            case TOXIC_SPIKES:
+                Timeline spikeMessage;
+                if (user.getOwner().isPlayer())
+                    spikeMessage = controller.getBattleTextAnimation(
+                            "Spikes were scattered all around\nthe foe's team's feet!", true);
+                else
+                    spikeMessage = controller.getBattleTextAnimation(
+                            "Spikes were scattered all around\nthe your team's feet!", true);
+                moveTimeLine.add(spikeMessage);
+                moveTimeLine.add(controller.generatePause(2000));
+        }
     }
 
     private void processLifesteal(List<Timeline> moveTimeLine, Move move, Pokemon user, Pokemon target, int damage) {
@@ -1924,7 +2008,7 @@ public class BattleLogic {
         return pokemonTrappedMessage;
     }
 
-    private Timeline processStatusChange(Move move, Pokemon target) {
+    private Timeline processStatusChange(Enums.Status status, Pokemon target) {
         final Timeline statusChangeInfo;
         SecureRandom generator = new SecureRandom();
 
@@ -1934,11 +2018,11 @@ public class BattleLogic {
             System.out.printf("%s is already %s!%n", target.getBattleName(), target.getStatus().toString());
         }
         else {
-            target.setStatus(move.getStatus());
+            target.setStatus(status);
             statusChangeInfo = controller.getBattleTextAnimation(String.format("%s is%n%s!",
-                    target.getBattleName(), move.getStatus().toString()), true);
-            System.out.printf("%s is %s!%n", target.getBattleName(), move.getStatus().toString());
-            if (move.getStatus() == Enums.Status.SLEEPING) {
+                    target.getBattleName(), status.toString()), true);
+            System.out.printf("%s is %s!%n", target.getBattleName(), status.toString());
+            if (status == Enums.Status.SLEEPING) {
                 int sleepTurns = generator.nextInt(3) + 1;
                 target.setSleepCounter(sleepTurns);
             }
@@ -2190,17 +2274,16 @@ public class BattleLogic {
             case TORRENT:
                 boostedType = Enums.Types.WATER;
                 break;
+            case SWARM:
+                boostedType = Enums.Types.BUG;
+                break;
             default:
                 return 1.0;
         }
 
         double hpThreshold = (double) user.getMaxHP() / 3;
-        if (user.getHp() > hpThreshold)
+        if (user.getHp() > hpThreshold && move.getType().getTypeEnum() != boostedType)
             return 1.0;
-
-        if (move.getType().getTypeEnum() != boostedType)
-            return 1.0;
-
         return 1.5;
     }
 

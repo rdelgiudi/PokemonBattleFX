@@ -128,6 +128,10 @@ public class Move {
         return template.getCondition();
     }
 
+    public Enums.Spikes getSpikeType() {
+        return template.getSpikeType();
+    }
+
     public boolean isStatUpDuringCharging() {
         return template.isStatUpDuringCharging();
     }

@@ -32,7 +32,7 @@ public class TeamBuilderController {
 
     List<Pokemon> playerParty = new ArrayList<>(), enemyParty = new ArrayList<>();
 
-    ArrayList<PokemonSpecie> sortedPokemon = new ArrayList<>();
+    ArrayList<Pokemon> sortedPokemon = new ArrayList<>();
 
     String playerName = "Red", enemyName = "Joey";
 
@@ -50,13 +50,13 @@ public class TeamBuilderController {
 
     public void initialize() {
 
-        for (Map.Entry<PokemonEnum, PokemonSpecie> entry : PokemonSpecie.getPokemonMap().entrySet()) {
+        for (Map.Entry<PokemonEnum, Pokemon> entry : Pokemon.getPokemonExamples().entrySet()) {
             sortedPokemon.add(entry.getValue());
         }
 
-        sortedPokemon.sort(new Comparator<PokemonSpecie>() {
+        sortedPokemon.sort(new Comparator<Pokemon>() {
             @Override
-            public int compare(PokemonSpecie o1, PokemonSpecie o2) {
+            public int compare(Pokemon o1, Pokemon o2) {
                 return o1.getPokedexNumber() - o2.getPokedexNumber();
             }
         });
@@ -201,9 +201,9 @@ public class TeamBuilderController {
 
         int i = 0, j = 0;
 
-        for (PokemonSpecie pokemon : sortedPokemon) {
+        for (Pokemon pokemon : sortedPokemon) {
             Button pokemonButton = new Button();
-            pokemonButton.setText(pokemon.getName().toString());
+            pokemonButton.setText(pokemon.getOriginalName().toString());
             pokemonButton.setFont(Font.font("Monospaced", FONT_SIZE));
             pokemonGrid.add(pokemonButton, i, j);
 
@@ -218,9 +218,9 @@ public class TeamBuilderController {
 
             pokemonButton.setOnAction(e -> {
                 Stage stage = (Stage) startBattleButton.getScene().getWindow();
-                Pokemon pokemonExample = Pokemon.getPokemonExamples().get(pokemon.getName());
+                //Pokemon pokemonExample = Pokemon.getPokemonExamples().get(pokemon.getOriginalName());
                 AddPokemonController controller = addPokemonLoader.getController();
-                controller.setAddData(pokemonExample, playerParty, enemyParty, startBattleButton.getScene(), this);
+                controller.setAddData(pokemon, playerParty, enemyParty, startBattleButton.getScene(), this);
                 controller.enterAddMode();
                 stage.setTitle("Add Pokemon!");
                 stage.setScene(addPokemonScene);

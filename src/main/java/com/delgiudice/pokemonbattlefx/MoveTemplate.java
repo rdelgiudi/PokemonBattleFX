@@ -6,6 +6,10 @@ import java.util.List;
 
 ///Class which allows to describe a move
 public class MoveTemplate {
+    // HITS_RANDOM - when the number of hits is randomly generated between 2 and 5
+    public static int HITS_RANDOM = -1;
+    // NOT_APPLICABLE - when a move doesn't have power (status moves) or accuracy (always hits)
+    public static int NOT_APPLICABLE = 0;
 
     // moveMap - a map of all moves available
     private static final HashMap<MoveEnum, MoveTemplate> moveMap = new HashMap<>();
@@ -67,7 +71,11 @@ public class MoveTemplate {
     // subStatus - secondary status effect that the move inflicts, secondary effects usually don't last very long or can
     // be cured by switching out a Pokemon
     private Enums.SubStatus subStatus = Enums.SubStatus.NONE;
+    // condition - condition applied on the battlefield, mostly temporary stat boosts
     private Enums.BattlefieldCondition condition = Enums.BattlefieldCondition.NONE;
+    // spikeType - type of spike that the move represents, spikes scatter on enemy field and apply various effects on
+    // Pokemon that are sent out
+    private Enums.Spikes spikeType = Enums.Spikes.NONE;
 
     public MoveEnum getName() {
         return name;
@@ -189,6 +197,10 @@ public class MoveTemplate {
         return moveDescription;
     }
 
+    public Enums.Spikes getSpikeType() {
+        return spikeType;
+    }
+
     public boolean isRecharge() {
         return recharge;
     }
@@ -301,6 +313,10 @@ public class MoveTemplate {
         this.moveDescription = moveDescription;
     }
 
+    public void setSpikeType(Enums.Spikes spikeType) {
+        this.spikeType = spikeType;
+    }
+
     public MoveTemplate(MoveEnum name, int power, int accuracy, int pp, Enums.Subtypes subtype, Type type,
                         boolean contactMove, Enums.StatType statTypes, int statChange, boolean self,
                         float statChangeProb) {
@@ -337,12 +353,12 @@ public class MoveTemplate {
         Type.setTypeList(); //init types
 
         //This is not a move, it should only be used to process confusion damage
-        MoveTemplate newmove = new MoveTemplate(MoveEnum.CONFUSION_DAMAGE, 40, 0, 1, Enums.Subtypes.PHYSICAL,
+        MoveTemplate newmove = new MoveTemplate(MoveEnum.CONFUSION_DAMAGE, 40, NOT_APPLICABLE, 1, Enums.Subtypes.PHYSICAL,
                 Type.getTypeMap().get(Enums.Types.NO_TYPE), false);
         moveMap.put(newmove.getName(), newmove);
 
         //Struggle, used only when all moves are out of PP
-        newmove = new MoveTemplate(MoveEnum.STRUGGLE, 50, 0, 1, Enums.Subtypes.PHYSICAL,
+        newmove = new MoveTemplate(MoveEnum.STRUGGLE, 50, NOT_APPLICABLE, 1, Enums.Subtypes.PHYSICAL,
                 Type.getTypeMap().get(Enums.Types.NO_TYPE), true);
         newmove.setMoveDescription("This attack is used in desperation only if the user has no remaining PP. It also damages the user a little.");
         newmove.setRecoil(1/4f);
@@ -354,7 +370,7 @@ public class MoveTemplate {
         newmove.setMoveDescription("A physical attack in which the user charges and slams into the target with its whole body.");
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.GROWL, 0, 100, 40, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.GROWL, NOT_APPLICABLE, 100, 40, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.NORMAL), false, Enums.StatType.ATTACK, -1,
                 false, 1);
         newmove.setMoveDescription("The user growls in an endearing way, making opposing Pokémon less wary. This lowers their Attack stats.");
@@ -377,7 +393,7 @@ public class MoveTemplate {
         newmove.setStatusProb(0.1f);
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.TAIL_WHIP, 0, 100, 30, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.TAIL_WHIP, NOT_APPLICABLE, 100, 30, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.NORMAL), false, Enums.StatType.DEFENSE, -1, false, 1);
         newmove.setMoveDescription("The user wags its tail cutely, making opposing Pokémon less wary. This lowers their Defense stats.");
         moveMap.put(newmove.getName(), newmove);
@@ -451,7 +467,7 @@ public class MoveTemplate {
         newmove.setRecoil(1.0f/3.0f);
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.SLEEP_POWDER, 0, 75, 15, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.SLEEP_POWDER, NOT_APPLICABLE, 75, 15, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.GRASS), false);
         newmove.setMoveDescription("The user scatters a cloud of soporific dust that puts the target to sleep.");
         newmove.setStatus(Enums.Status.SLEEPING);
@@ -463,13 +479,13 @@ public class MoveTemplate {
         newmove.setMoveDescription("The user attacks by slamming a barrage of hard-shelled seeds down on the target from above.");
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.SYNTHESIS, 0, 0, 5, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.SYNTHESIS, NOT_APPLICABLE, NOT_APPLICABLE, 5, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.GRASS), false);
         newmove.setMoveDescription("The user restores its own HP. The amount of HP regained varies with the weather.");
         newmove.setHpRestore(0.5f);
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.SWEET_SCENT, 0, 100, 20, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.SWEET_SCENT, NOT_APPLICABLE, 100, 20, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.NORMAL), false, Enums.StatType.EVASIVENESS, -1,
                 false, 1);
         newmove.setMoveDescription("The user releases a scent that harshly lowers opposing Pokémon's evasiveness.");
@@ -494,14 +510,14 @@ public class MoveTemplate {
         newmove.setMoveDescription("The user stirs up a violent petal blizzard and damages everything around it.");
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.CONFUSE_RAY, 0, 100, 10, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.CONFUSE_RAY, NOT_APPLICABLE, 100, 10, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.GHOST), false);
         newmove.setMoveDescription("The target is exposed to a sinister ray that causes confusion.");
         newmove.setSubStatus(Enums.SubStatus.CONFUSED);
         newmove.setStatusProb(1.0f);
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.WILL_O_WISP, 0, 85, 15, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.WILL_O_WISP, NOT_APPLICABLE, 85, 15, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.FIRE), false);
         newmove.setMoveDescription("The user shoots a sinister flame at the target to inflict a burn.");
         newmove.setStatus(Enums.Status.BURNED);
@@ -515,7 +531,7 @@ public class MoveTemplate {
         newmove.setStatChangeProb(1.0f);
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.SCARY_FACE, 0, 100, 10, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.SCARY_FACE, NOT_APPLICABLE, 100, 10, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.NORMAL), false, Enums.StatType.SPEED, -2, false, 1.0f);
         newmove.setMoveDescription("The user frightens the target with a scary face to harshly lower its Speed stat.");
         moveMap.put(newmove.getName(), newmove);
@@ -546,7 +562,7 @@ public class MoveTemplate {
         newmove.setStatChangeProb(0.1f);
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.DRAGON_DANCE, 0, 0, 20, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.DRAGON_DANCE, NOT_APPLICABLE, NOT_APPLICABLE, 20, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.DRAGON), false, Enums.StatType.ATTACK, 1, true, 1.0f);
         newmove.setMoveDescription("The user vigorously performs a mystic, powerful dance that raises its Attack and Speed stats.");
         newmove.getStatTypes().add(Enums.StatType.SPEED);
@@ -578,7 +594,7 @@ public class MoveTemplate {
         newmove.setCharging(true);
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.SHELL_SMASH, 0, 0, 15, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.SHELL_SMASH, NOT_APPLICABLE, NOT_APPLICABLE, 15, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.NORMAL), false, Enums.StatType.DEFENSE, -1,
                 true, 1.0f);
         newmove.setMoveDescription("The user breaks its shell, which lowers its Defense and Sp. Def stats but sharply boosts its Attack, Sp. Atk, and Speed stats.");
@@ -631,7 +647,7 @@ public class MoveTemplate {
         newmove.setStatusProb(0.1f);
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.STRING_SHOT, 0, 95, 40, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.STRING_SHOT, NOT_APPLICABLE, 95, 40, Enums.Subtypes.STATUS,
                 Type.getTypeMap(Enums.Types.BUG), false, Enums.StatType.SPEED, -2,
                 false, 1f);
         newmove.setMoveDescription("The user blows silk from its mouth that binds opposing Pokémon and harshly lowers their Speed stats.");
@@ -648,13 +664,13 @@ public class MoveTemplate {
         newmove.setMoveDescription("The user captures opposing Pokémon in an electric net to inflict damage. This also lowers their Speed stats.");
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.IRON_DEFENSE, 0, 0, 15, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.IRON_DEFENSE, NOT_APPLICABLE, NOT_APPLICABLE, 15, Enums.Subtypes.STATUS,
                 Type.getTypeMap(Enums.Types.STEEL), false, Enums.StatType.DEFENSE, 2,
                 true, 1f);
         newmove.setMoveDescription("The user hardens its body's surface like iron, sharply boosting its Defense stat.");
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.TAILWIND, 0, 0, 15, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.TAILWIND, NOT_APPLICABLE, NOT_APPLICABLE, 15, Enums.Subtypes.STATUS,
                 Type.getTypeMap(Enums.Types.FLYING), false);
         newmove.setMoveDescription("The user whips up a turbulent whirlwind that boosts the Speed stats of itself and its allies for four turns.");
         newmove.setCondition(Enums.BattlefieldCondition.TAILWIND);
@@ -676,6 +692,44 @@ public class MoveTemplate {
                 Type.getTypeMap(Enums.Types.GRASS), false);
         newmove.setMoveDescription("A nutrient-draining attack. The user's HP is restored by up to half the damage taken by the target.");
         newmove.setLifesteal(0.5f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.POISON_STING, 15, 100, 35, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.POISON), false);
+        newmove.setMoveDescription("The user stabs the target with a poisonous stinger to inflict damage. This may also poison the target.");
+        newmove.setStatus(Enums.Status.POISONED);
+        newmove.setStatusProb(0.3f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.HARDEN, NOT_APPLICABLE, NOT_APPLICABLE, 30, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.NORMAL), false, Enums.StatType.DEFENSE, 1, true,
+                1f);
+        newmove.setMoveDescription("The user stiffens all the muscles in its body to boost its Defense stat.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.PIN_MISSILE, 25, 95, 20, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.BUG), false);
+        newmove.setHits(HITS_RANDOM);
+        newmove.setMoveDescription("The user attacks by shooting sharp spikes at the target. This move hits two to five times in a row.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.POISON_JAB, 80, 100, 20, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.POISON), true);
+        newmove.setMoveDescription("The target is stabbed with a tentacle, an arm, or the like steeped in poison. This may also poison the target.");
+        newmove.setStatus(Enums.Status.POISONED);
+        newmove.setStatusProb(0.3f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.TOXIC_SPIKES, NOT_APPLICABLE, NOT_APPLICABLE, 20, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.POISON), false);
+        newmove.setMoveDescription("The user lays a trap of poison spikes at the feet of the opposing team. The spikes will poison opposing Pokémon that switch into battle.");
+        newmove.setSpikeType(Enums.Spikes.TOXIC_SPIKES);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.AGILITY, NOT_APPLICABLE, NOT_APPLICABLE, 30, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.PSYCHIC), false, Enums.StatType.SPEED, 2, true,
+                1.0f);
+        newmove.setMoveDescription("The user relaxes and lightens its body to move faster. This sharply boosts its Speed stat.");
         moveMap.put(newmove.getName(), newmove);
     }
 

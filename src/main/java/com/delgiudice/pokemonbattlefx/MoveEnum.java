@@ -55,7 +55,13 @@ public enum MoveEnum {
     TAILWIND("Tailwind"),
     BUG_BUZZ("Bug Buzz"),
     PSYCHIC("Psychic"),
-    GIGA_DRAIN("Giga Drain");
+    GIGA_DRAIN("Giga Drain"),
+    POISON_STING("Poison Sting"),
+    HARDEN("Harden"),
+    PIN_MISSILE("Pin Missile"),
+    POISON_JAB("Poison Jab"),
+    TOXIC_SPIKES("Toxic Spikes"),
+    AGILITY("Agility");
 
 
     private final String name;

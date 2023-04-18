@@ -187,6 +187,10 @@ public class Pokemon {
         return trapMove;
     }
 
+    public int getPokedexNumber() {
+        return specie.getPokedexNumber();
+    }
+
     public boolean isUnderFocusEnergy() {
         return underFocusEnergy;
     }
@@ -386,6 +390,13 @@ public class Pokemon {
             System.out.println(statname + ": " + statval);
         }
     }
+
+    public boolean containsType(Enums.Types type) {
+        if (getType()[0].getTypeEnum() == type)
+            return true;
+        else return getType()[1].getTypeEnum() == type;
+    }
+
     public void addMove(Move move)      //adding a move (in game through leveling or tms)
     {
         if(moveList.size() < 4) {
@@ -528,5 +539,20 @@ public class Pokemon {
                 new Move(MoveTemplate.getMove(MoveEnum.BUG_BUZZ)), new Move(MoveTemplate.getMove(MoveEnum.PSYCHIC)),
                 new Move(MoveTemplate.getMove(MoveEnum.GIGA_DRAIN)), new Move(MoveTemplate.getMove(MoveEnum.TAILWIND)));
         pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.WEEDLE), 50, Ability.SHIELD_DUST,
+                new Move(MoveTemplate.getMove(MoveEnum.POISON_STING)), new Move(MoveTemplate.getMove(MoveEnum.BUG_BITE)),
+                new Move(MoveTemplate.getMove(MoveEnum.STRING_SHOT)));
+        pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.KAKUNA), 50, Ability.SHIELD_DUST,
+                new Move(MoveTemplate.getMove(MoveEnum.HARDEN)));
+        pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.BEEDRILL), 50, Ability.SWARM,
+                new Move(MoveTemplate.getMove(MoveEnum.PIN_MISSILE)), new Move(MoveTemplate.getMove(MoveEnum.POISON_JAB)),
+                new Move(MoveTemplate.getMove(MoveEnum.TOXIC_SPIKES)), new Move(MoveTemplate.getMove(MoveEnum.AGILITY)));
+        pokemonExamples.put(example.getOriginalName(), example);
+
     }
 }

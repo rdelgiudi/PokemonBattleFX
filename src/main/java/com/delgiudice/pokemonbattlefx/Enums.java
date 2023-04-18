@@ -147,6 +147,21 @@ public class Enums {
         }
     }
 
+    public enum Spikes {
+        NONE("No spikes"),
+        TOXIC_SPIKES("Toxic Spikes");
+
+        final private String name;
+
+        public String toString() {
+            return name;
+        }
+
+        Spikes(String name) {
+            this.name = name;
+        }
+    }
+
     public enum Nature {       //lista natur
         HARDY(0, "Hardy", 0, 0, 0, 0, 0),
         LONELY(1,"Lonely", 1, -1, 0, 0, 0),
