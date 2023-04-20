@@ -295,9 +295,6 @@ public class BattleLogic {
         Timeline playerChoiceDialog = controller.getBattleTextAnimation(String.format("What will%n%s do?",
                 player.getParty(currentAllyPokemon).getBattleName()), false);
         done.setOnFinished(e -> {
-            playerChoiceDialog.play();
-            controller.switchToPlayerChoice(true);
-
             if (allyPokemon.getTwoTurnMove() != null) {
                 battleTurn(allyPokemon.getTwoTurnMove());
                 return;
@@ -312,10 +309,14 @@ public class BattleLogic {
                 battleTurn(null);
                 return;
             }
+
+            playerChoiceDialog.play();
+            controller.switchToPlayerChoice(true);
         });
 
         List<Timeline> moveStartTimeLine = new LinkedList<>();
 
+        deleteEndedConditions(moveStartTimeLine);
         applySentOutEffects(moveStartTimeLine);
 
 
@@ -407,6 +408,9 @@ public class BattleLogic {
             for (int i = 0; i <= iLimit; i++) {
                 int partyIndex = i + (3 * j);
 
+                if (partyIndex >= player.getParty().size())
+                    break;
+
                 Button button = (Button) controller.getNodeFromGridPane(controller.getPokemonGrid(), i, j);
                 Pokemon pokemon = player.getParty(partyIndex);
                 ContextMenu contextMenu = new ContextMenu();
@@ -420,7 +424,7 @@ public class BattleLogic {
                     if (player.getParty(currentAllyPokemon).getTrapMove() != null && !allyFainted) {
                         controller.getPokemonGrid().setDisable(true);
                         Timeline trappedInfo = controller.getBattleTextAnimation(String.format(
-                                "%s is trapped in vortex!%nCan't switch!",
+                                "%s is trapped!%nCan't switch!",
                                 player.getParty(currentAllyPokemon).getName()), false);
                         Timeline resetText = controller.getBattleTextAnimation(String.format("What will%n%s do?",
                                 player.getParty(currentAllyPokemon).getName()), false);
@@ -791,10 +795,11 @@ public class BattleLogic {
                 battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
                     battleLost();
                 });
+
+                battleTimeLine.get(0).play();
+                return true;
             }
 
-            battleTimeLine.get(0).play();
-            return true;
         }
 
         if (enemyFainted) {
@@ -828,6 +833,9 @@ public class BattleLogic {
                 controller.switchToPlayerChoice(true);
                 setPokemonSwapListeners(true);
             });
+            initAnimationQueue(battleTimeLine);
+            battleTimeLine.get(0).play();
+            return;
         }
 
         if (enemyFainted) {
@@ -848,8 +856,6 @@ public class BattleLogic {
                     enemy.getParty(currentEnemyPokemon).getHp());
             battleTimeLine.add(pokemonIntroAnimation);
         }
-
-        deleteEndedConditions(battleTimeLine);
 
         initAnimationQueue(battleTimeLine);
 
@@ -1084,7 +1090,7 @@ public class BattleLogic {
 
     }
 
-    // Process turn depending on which Pokemon moves first
+    // Process turn depending on which Pokemon moves first (named firstPokemon and firstMove)
     private List<Timeline> processTurn(Move firstMove, Pokemon firstPokemon, Move secondMove, Pokemon secondPokemon) {
 
         List<Timeline> moveTimeLine = new LinkedList<>();
@@ -1097,9 +1103,7 @@ public class BattleLogic {
             moveTimeLine.add(controller.generatePause(2000));
             firstPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
         }
-        else if (firstMove == null)
-            throw new IllegalStateException("First Pokemon move null and not recharging!");
-        else
+        else if (firstMove != null)
             moveTimeLine.addAll(useMove(firstMove, firstPokemon,
                 secondPokemon, true));
 
@@ -1114,9 +1118,7 @@ public class BattleLogic {
             moveTimeLine.add(controller.generatePause(2000));
             secondPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
         }
-        else if (secondMove == null)
-            throw new IllegalStateException("Second Pokemon move null and not recharging!");
-        else
+        else if (secondMove != null)
             moveTimeLine.addAll(useMove(secondMove,
                 secondPokemon, firstPokemon, false));
 
@@ -1607,12 +1609,13 @@ public class BattleLogic {
             int hitsTemp;
             if (hitsRand < 35)
                 hitsTemp = 2;
-            if (hitsRand < 70)
+            else if (hitsRand < 70)
                 hitsTemp = 3;
-            if (hitsRand < 85)
+            else if (hitsRand < 85)
                 hitsTemp = 4;
             else
                 hitsTemp = 5;
+
             hits = hitsTemp;
         }
 
