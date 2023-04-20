@@ -13,6 +13,7 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.sql.Time;
 import java.util.*;
 
 public class BattleLogic {
@@ -89,6 +90,7 @@ public class BattleLogic {
 
     // function that initiates a battle, adding looping checks here should be avoided
     private void initBattleLoop() {
+
         boolean allyPokemonSelected = checkIfAllyAbleToBattle(true);
         boolean enemyPokemonSelected = checkIfEnemyAbleToBattle(true);
 
@@ -224,12 +226,15 @@ public class BattleLogic {
         battleWonMsg1.play();
     }
 
-    private void processToxicSpikeEffect(List<Timeline> moveStartTimeLine, Pokemon target) {
+    private void processToxicSpikeEffect(List<Timeline> battleTimeLine, Pokemon target) {
         boolean toxicSpikeImmuneType = target.containsType(Enums.Types.FLYING) ||
                 target.containsType(Enums.Types.POISON) || target.containsType(Enums.Types.STEEL);
         boolean toxicSpikeImmuneAbility = false; //TODO: Add abilities
+
+        HashMap<Enums.Spikes, Integer> spikes = target.getOwner().isPlayer() ? allySpikes : enemySpikes;
+
         if (!toxicSpikeImmuneType && !toxicSpikeImmuneAbility) {
-            int spikeCount = enemySpikes.get(Enums.Spikes.TOXIC_SPIKES);
+            int spikeCount = spikes.get(Enums.Spikes.TOXIC_SPIKES);
             Timeline statusChange;
             if (spikeCount == 1)
                 statusChange = processStatusChange(Enums.Status.POISONED, target);
@@ -237,10 +242,44 @@ public class BattleLogic {
             else
                 statusChange = processStatusChange(Enums.Status.BADLY_POISONED, target);
 
-            moveStartTimeLine.add(statusChange);
-            moveStartTimeLine.add(controller.updateStatus(target, target.getOwner().isPlayer()));
-            moveStartTimeLine.add(controller.generatePause(2000));
+            battleTimeLine.add(statusChange);
+            battleTimeLine.add(controller.updateStatus(target, target.getOwner().isPlayer()));
+            battleTimeLine.add(controller.generatePause(2000));
         }
+    }
+
+    private void applySentOutEffects(List<Timeline> battleTimeLine) {
+
+        Pokemon allyPokemon = player.getParty(currentAllyPokemon);
+        Pokemon enemyPokemon = enemy.getParty(currentEnemyPokemon);
+
+        if (enemySentOut) {
+            enemySentOut = false;
+
+            if (enemySpikes.containsKey(Enums.Spikes.TOXIC_SPIKES)) {
+                processToxicSpikeEffect(battleTimeLine, enemyPokemon);
+            }
+
+            boolean enemyFainted = enemy.getParty(currentEnemyPokemon).getHp() == 0;
+            if (enemyFainted) {
+                processEnemyFainted(battleTimeLine);
+            }
+        }
+        else if (allySentOut) {
+            allySentOut = false;
+
+            if (allySpikes.containsKey(Enums.Spikes.TOXIC_SPIKES)) {
+                processToxicSpikeEffect(battleTimeLine, allyPokemon);
+            }
+
+            boolean allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
+            if (allyFainted) {
+                processAllyFainted(battleTimeLine);
+            }
+        }
+
+        if (checkBattleEnd(battleTimeLine))
+            return;
     }
 
     private void battleLoop() {
@@ -277,20 +316,8 @@ public class BattleLogic {
 
         List<Timeline> moveStartTimeLine = new LinkedList<>();
 
-        if (enemySentOut) {
-            enemySentOut = false;
+        applySentOutEffects(moveStartTimeLine);
 
-            if (enemySpikes.containsKey(Enums.Spikes.TOXIC_SPIKES)) {
-                processToxicSpikeEffect(moveStartTimeLine, enemyPokemon);
-            }
-        }
-        else if (allySentOut) {
-            allySentOut = false;
-
-            if (enemySpikes.containsKey(Enums.Spikes.TOXIC_SPIKES)) {
-                processToxicSpikeEffect(moveStartTimeLine, allyPokemon);
-            }
-        }
 
         if (moveStartTimeLine.size() > 0) {
             initAnimationQueue(moveStartTimeLine);
@@ -531,7 +558,10 @@ public class BattleLogic {
     }
 
     private void battleTurn(Move allyMove) {
+        List<Timeline> battleTimeLine = new LinkedList<>();
+
         SecureRandom generator = new SecureRandom();
+        applySentOutEffects(battleTimeLine);
 
         // sets timers to timer-1, then a check is made at the end of the turn that erases conditions that should be disabled
         processBattlefieldConditionsTimer();
@@ -544,36 +574,8 @@ public class BattleLogic {
         processStatusEffectCounters(allyPokemon);
         processStatusEffectCounters(enemyPokemon);
 
-        List<Timeline> battleTimeLine;
-        Move enemyMove = generateEnemyMove(enemyPokemon);
-
-        // If ally is recharging, their turn is skipped
-        if (allyMove == null && allyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)
-            && enemyMove != null) {
-            Timeline allyRechargeMessage = controller.getBattleTextAnimation(String.format(
-                    RECHARGE_INFO, allyPokemon.getBattleName()), true);
-            battleTimeLine = useMove(enemyMove, enemyPokemon, allyPokemon, false);
-            battleTimeLine.add(0, controller.generatePause(2000));
-            battleTimeLine.add(0, allyRechargeMessage);
-            allyPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
-            checkFainted(battleTimeLine);
-            return;
-        }
-        //**************************************
-        // If enemy is recharging, their turn is skipped
-        if (enemyMove == null && enemyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)
-        && allyMove != null) {
-            Timeline rechargeMessage = controller.getBattleTextAnimation(String.format(
-                    RECHARGE_INFO, enemyPokemon.getBattleName()), true);
-            Timeline pause = controller.generatePause(2000);
-            battleTimeLine = useMove(allyMove, allyPokemon, enemyPokemon, false);
-            battleTimeLine.add(0, pause);
-            battleTimeLine.add(0, rechargeMessage);
-            enemyPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
-            checkFainted(battleTimeLine);
-            return;
-        }
-        //*************************************************
+        Move enemyMove = !enemyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE) ?
+                generateEnemyMove(enemyPokemon) : null;
 
         // Speed calculation
         double playerSpeed = allyPokemon.getStats().get(Enums.StatType.SPEED);
@@ -606,70 +608,37 @@ public class BattleLogic {
         boolean tied = playerSpeed == enemySpeed;
         //******************************************
 
-        // If both Pokemon need to recharge this turn, the turn starts only applying status effect and other
-        // non move damaging factors
-        if (allyMove == null & enemyMove == null && allyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE) &&
-        enemyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
-            Timeline enemyRechargeMessage = controller.getBattleTextAnimation(String.format(
-                    RECHARGE_INFO, enemyPokemon.getBattleName()), true);
-            Timeline allyRechargeMessage = controller.getBattleTextAnimation(String.format(
-                    RECHARGE_INFO, allyPokemon.getBattleName()), true);
-            battleTimeLine = new LinkedList<>();
-            allyPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
-            enemyPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
-            if (faster || tied) {
-                battleTimeLine.add(allyRechargeMessage);
-                battleTimeLine.add(controller.generatePause(2000));
-                battleTimeLine.add(enemyRechargeMessage);
-                battleTimeLine.add(controller.generatePause(2000));
-            }
-            else{
-                battleTimeLine.add(enemyRechargeMessage);
-                battleTimeLine.add(controller.generatePause(2000));
-                battleTimeLine.add(allyRechargeMessage);
-                battleTimeLine.add(controller.generatePause(2000));
-            }
 
-            checkFainted(battleTimeLine);
-            return;
-        }
-        if (allyMove == null) {
-            battleTimeLine = useMove(enemyMove, enemyPokemon, allyPokemon, false);
-            battleTimeLine.add(0, controller.generatePause(2000));
-            checkFainted(battleTimeLine);
-            return;
-        }
-        // *********************************************************
-        if (enemyMove == null)
-            throw new IllegalStateException("Enemy move is null and not recharging!");
+        int allyPriority = allyMove != null ? allyMove.getPriority() : 0;
+        int enemyPriority = enemyMove != null ? enemyMove.getPriority() : 0;
 
         // Move of higher priority is always faster
-        if (allyMove.getPriority() > enemyMove.getPriority()) {
-            battleTimeLine = processTurnAllyFaster(allyMove, enemyMove);
+        if (allyPriority > enemyPriority) {
+            battleTimeLine.addAll(processTurn(allyMove, allyPokemon, enemyMove, enemyPokemon));
         }
-        else if (enemyMove.getPriority() < allyMove.getPriority()) {
-            battleTimeLine = processTurnAllySlower(allyMove, enemyMove);
+        else if (allyPriority < enemyPriority) {
+            battleTimeLine.addAll(processTurn(enemyMove, enemyPokemon, allyMove, allyPokemon));
         }
         // If both or neither parties are using priority moves, being faster depends on speed
         else if (faster) {
-            battleTimeLine = processTurnAllyFaster(allyMove, enemyMove);
+            battleTimeLine.addAll(processTurn(allyMove, allyPokemon, enemyMove, enemyPokemon));
         }
         //On speed tie, the first attacker is randomized
         else if (tied) {
             int flip = generator.nextInt(2);
             if (flip == 1) {
-                battleTimeLine = processTurnAllyFaster(allyMove, enemyMove);
+                battleTimeLine.addAll(processTurn(allyMove, allyPokemon, enemyMove, enemyPokemon));
             }
             else {
-                battleTimeLine = processTurnAllySlower(allyMove, enemyMove);
+                battleTimeLine.addAll(processTurn(enemyMove, enemyPokemon, allyMove, allyPokemon));
             }
         }
         //Here is what happens if enemy Pokemon is faster
         else {
-            battleTimeLine = processTurnAllySlower(allyMove, enemyMove);
+            battleTimeLine.addAll(processTurn(enemyMove, enemyPokemon, allyMove, allyPokemon));
         }
 
-        checkFainted(battleTimeLine);
+        battleTurnEnd(battleTimeLine);
     }
 
     // For now enemy move is randomly generated, maybe gym leader AI implementation in the future
@@ -709,18 +678,19 @@ public class BattleLogic {
         return enemyMove;
     }
 
-    private void checkFainted(List<Timeline> battleTimeLine) {
+    private void battleTurnEnd(List<Timeline> battleTimeLine) {
         boolean allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
         boolean enemyFainted = enemy.getParty(currentEnemyPokemon).getHp() == 0;
 
         if (allyFainted) {
             processAllyFainted(battleTimeLine);
-            //return;
         }
         if (enemyFainted) {
             processEnemyFainted(battleTimeLine);
-            //return;
         }
+
+        if (checkBattleEnd(battleTimeLine))
+            return;
 
         applyStatusEffectDamage(battleTimeLine);
         //finalChecks(battleTimeLine, enemyFainted);
@@ -733,12 +703,9 @@ public class BattleLogic {
         List<Timeline> allyStatusEffect = null;
         List<Timeline> enemyStatusEffect = null;
 
-        if (!allyFainted)
-            allyStatusEffect = processDamageStatusEffects(player.getParty(currentAllyPokemon));
         if (!enemyFainted)
             enemyStatusEffect = processDamageStatusEffects(enemy.getParty(currentEnemyPokemon));
 
-        allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
         enemyFainted = enemy.getParty(currentEnemyPokemon).getHp() == 0;
 
         if (enemyStatusEffect != null) {
@@ -748,12 +715,20 @@ public class BattleLogic {
             }
         }
 
+        if (!allyFainted)
+            allyStatusEffect = processDamageStatusEffects(player.getParty(currentAllyPokemon));
+
+        allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
+
         if (allyStatusEffect != null) {
             battleTimeLine.addAll(allyStatusEffect);
             if (allyFainted) {
                 processAllyFainted(battleTimeLine);
             }
         }
+
+        if (checkBattleEnd(battleTimeLine))
+            return;
 
         applyTrappedEffects(battleTimeLine);
     }
@@ -764,12 +739,20 @@ public class BattleLogic {
         List<Timeline> allyTrappedEffect = null;
         List<Timeline> enemyTrappedEffect = null;
 
+
         if (!allyFainted)
             allyTrappedEffect = processDamageTrapped(player.getParty(currentAllyPokemon));
+        allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
+
+        if (allyTrappedEffect != null) {
+            battleTimeLine.addAll(allyTrappedEffect);
+            if (allyFainted) {
+                processAllyFainted(battleTimeLine);
+            }
+        }
+
         if (!enemyFainted)
             enemyTrappedEffect = processDamageTrapped(enemy.getParty(currentEnemyPokemon));
-
-        allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
         enemyFainted = enemy.getParty(currentEnemyPokemon).getHp() == 0;
 
         if (enemyTrappedEffect != null) {
@@ -779,20 +762,12 @@ public class BattleLogic {
             }
         }
 
-        if (allyTrappedEffect != null) {
-            battleTimeLine.addAll(allyTrappedEffect);
-            if (allyFainted) {
-                processAllyFainted(battleTimeLine);
-            }
-        }
+        if (checkBattleEnd(battleTimeLine))
+            return;
 
         finalChecks(battleTimeLine);
     }
-
-    // Send out new ally Pokemon if available, else game over for the player, even if enemy also out of Pokemon
-    // Send out new enemy Pokemon and config timeline list
-    private void finalChecks(List<Timeline> battleTimeLine) {
-
+    private boolean checkBattleEnd(List<Timeline> battleTimeLine) {
         boolean allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
         boolean enemyFainted = enemy.getParty(currentEnemyPokemon).getHp() == 0;
 
@@ -805,12 +780,11 @@ public class BattleLogic {
                 });
 
                 battleTimeLine.get(0).play();
-                return;
+                return true;
             }
         }
 
         if (allyFainted) {
-
             initAnimationQueue(battleTimeLine);
 
             if (!checkIfAllyAbleToBattle(false)) {
@@ -818,19 +792,13 @@ public class BattleLogic {
                     battleLost();
                 });
             }
-            else {
-                battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
-                    controller.pokemonButtonPressed(player.getParty());
-                    controller.switchToPlayerChoice(true);
-                    setPokemonSwapListeners(true);
-                });
-            }
+
             battleTimeLine.get(0).play();
-            return;
+            return true;
         }
 
         if (enemyFainted) {
-            if (!checkIfEnemyAbleToBattle(true)) {
+            if (!checkIfEnemyAbleToBattle(false)) {
                 initAnimationQueue(battleTimeLine);
 
                 battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
@@ -838,8 +806,33 @@ public class BattleLogic {
                 });
 
                 battleTimeLine.get(0).play();
-                return;
+                return true;
             }
+        }
+        return false;
+    }
+
+    // Send out new ally Pokemon if available, else game over for the player, even if enemy also out of Pokemon
+    // Send out new enemy Pokemon and config timeline list
+    private void finalChecks(List<Timeline> battleTimeLine) {
+
+        if (checkBattleEnd(battleTimeLine))
+            return;
+
+        boolean allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
+        boolean enemyFainted = enemy.getParty(currentEnemyPokemon).getHp() == 0;
+
+        if (allyFainted) {
+            battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+                controller.pokemonButtonPressed(player.getParty());
+                controller.switchToPlayerChoice(true);
+                setPokemonSwapListeners(true);
+            });
+        }
+
+        if (enemyFainted) {
+
+            checkIfEnemyAbleToBattle(true);
 
             Timeline enemyNewPokemonInfo = controller.getBattleTextAnimation(String.format("%s %s sends out%n%s!",
                             enemy.getTrainerType().toString(), enemy.getName(), enemy.getParty(currentEnemyPokemon).getName()),
@@ -854,7 +847,6 @@ public class BattleLogic {
             Timeline pokemonIntroAnimation = controller.getEnemyInfoAnimation(enemy.getParty(currentEnemyPokemon),
                     enemy.getParty(currentEnemyPokemon).getHp());
             battleTimeLine.add(pokemonIntroAnimation);
-
         }
 
         deleteEndedConditions(battleTimeLine);
@@ -897,6 +889,7 @@ public class BattleLogic {
         }
     }
 
+    // Calculates damage dealt as a result of vortex traps like Fire Spin
     private List<Timeline> processDamageTrapped(Pokemon pokemon) {
 
         List<Timeline> timelineList = new LinkedList<>();
@@ -949,7 +942,7 @@ public class BattleLogic {
         return null;
     }
 
-    //Processes damaging status effects
+    //Processes damaging status effects (poison and burn)
     private List<Timeline> processDamageStatusEffects(Pokemon pokemon) {
 
         double damageDouble = 0;
@@ -1091,25 +1084,47 @@ public class BattleLogic {
 
     }
 
-    // Events when ally Pokemon is faster
-    private List<Timeline> processTurnAllyFaster(Move allyMove, Move enemyMove) {
+    // Process turn depending on which Pokemon moves first
+    private List<Timeline> processTurn(Move firstMove, Pokemon firstPokemon, Move secondMove, Pokemon secondPokemon) {
+
+        List<Timeline> moveTimeLine = new LinkedList<>();
+
         //Random generator = new Random();
-
-        List<Timeline> allyMoveTimeLine = useMove(allyMove, player.getParty(currentAllyPokemon),
-                enemy.getParty(currentEnemyPokemon), true);
-        if (enemy.getParty(currentEnemyPokemon).getHp() == 0 || player.getParty(currentAllyPokemon).getHp() == 0) {
-            return allyMoveTimeLine;
+        if (firstMove == null && firstPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
+            Timeline firstRechargeMessage = controller.getBattleTextAnimation(String.format(
+                    RECHARGE_INFO, firstPokemon.getBattleName()), true);
+            moveTimeLine.add(firstRechargeMessage);
+            moveTimeLine.add(controller.generatePause(2000));
+            firstPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
         }
-        //int enemyMove = generator.nextInt(enemy.getParty(currentEnemyPokemon).getMoveList().size());
-        List<Timeline> enemyMoveTimeLine = useMove(enemyMove,
-                enemy.getParty(currentEnemyPokemon), player.getParty(currentAllyPokemon), false);
+        else if (firstMove == null)
+            throw new IllegalStateException("First Pokemon move null and not recharging!");
+        else
+            moveTimeLine.addAll(useMove(firstMove, firstPokemon,
+                secondPokemon, true));
 
-        allyMoveTimeLine.addAll(enemyMoveTimeLine);
+        if (secondPokemon.getHp() == 0 || firstPokemon.getHp() == 0) {
+            return moveTimeLine;
+        }
 
-        return allyMoveTimeLine;
+        if (secondMove == null && secondPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
+            Timeline secondRechargeMessage = controller.getBattleTextAnimation(String.format(
+                    RECHARGE_INFO, secondPokemon.getBattleName()), true);
+            moveTimeLine.add(secondRechargeMessage);
+            moveTimeLine.add(controller.generatePause(2000));
+            secondPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
+        }
+        else if (secondMove == null)
+            throw new IllegalStateException("Second Pokemon move null and not recharging!");
+        else
+            moveTimeLine.addAll(useMove(secondMove,
+                secondPokemon, firstPokemon, false));
+
+        return moveTimeLine;
     }
 
     // Events when ally Pokemon is slower
+    // TODO: old implementation, delete after checking the new one
     private List<Timeline> processTurnAllySlower(Move allyMove, Move enemyMove) {
         //Random generator = new Random();
 
@@ -1882,7 +1897,7 @@ public class BattleLogic {
                             "Spikes were scattered all around\nthe foe's team's feet!", true);
                 else
                     spikeMessage = controller.getBattleTextAnimation(
-                            "Spikes were scattered all around\nthe your team's feet!", true);
+                            "Spikes were scattered all around\nyour team's feet!", true);
                 moveTimeLine.add(spikeMessage);
                 moveTimeLine.add(controller.generatePause(2000));
         }

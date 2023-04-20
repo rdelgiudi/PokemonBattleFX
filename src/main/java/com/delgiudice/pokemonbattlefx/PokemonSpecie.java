@@ -253,7 +253,7 @@ public class PokemonSpecie{
 
         newpkmn = new PokemonSpecie(13, PokemonEnum.WEEDLE, Type.getTypeMap(Enums.Types.BUG), Type.getTypeMap(Enums.Types.POISON),
                 40, 35, 30, 20, 20, 50, "/weedle_front.png",
-                "weedle_back.png");
+                "/weedle_back.png");
         pokemonMap.put(newpkmn.getName(), newpkmn);
 
         newpkmn = new PokemonSpecie(14, PokemonEnum.KAKUNA, Type.getTypeMap(Enums.Types.BUG), Type.getTypeMap(Enums.Types.POISON),
