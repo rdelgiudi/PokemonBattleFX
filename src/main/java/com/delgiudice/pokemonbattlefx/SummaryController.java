@@ -16,7 +16,8 @@ import java.util.List;
 public class SummaryController {
 
     @FXML
-    private Label pokemonNameLabel, levelLabel, itemLabel, abilityLabel, abilityDescriptionLabel, natureLabel, hpLabel;
+    private Label pokemonNameLabel, levelLabel, itemLabel, abilityLabel, abilityDescriptionLabel, natureLabel, hpLabel,
+                    statusLabel;
     @FXML
     private Button backButton, nextButton, previousButton, closeMoveInfoButton;
     @FXML
@@ -78,6 +79,8 @@ public class SummaryController {
         setMoves(pokemon);
 
         pokemonPortrait.setImage(pokemon.getSpecie().getFrontSprite());
+
+        BattleController.setStatusStyle(pokemon, statusLabel);
     }
 
     private void setPokemonTypes(Pokemon pokemon) {

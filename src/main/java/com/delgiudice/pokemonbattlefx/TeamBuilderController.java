@@ -240,6 +240,9 @@ public class TeamBuilderController {
     public void refreshParties() {
         playerPartyBox.setPrefSize((PARTY_BUTTON_WIDTH +5) * 6, PARTY_BUTTON_HEIGHT);
         enemyPartyBox.setPrefSize((PARTY_BUTTON_WIDTH +5) * 6, PARTY_BUTTON_HEIGHT);
+
+        String buttonText = "%s%nLv. %-3d";
+
         for (int i=0; i < playerPartyBox.getChildren().size(); i++) {
             Button playerPokemonButton = (Button) playerPartyBox.getChildren().get(i);
             Button enemyPokemonButton = (Button) enemyPartyBox.getChildren().get(i);
@@ -248,7 +251,7 @@ public class TeamBuilderController {
             playerPokemonButton.setPrefSize(PARTY_BUTTON_WIDTH, PARTY_BUTTON_HEIGHT);
             enemyPokemonButton.setPrefSize(PARTY_BUTTON_WIDTH, PARTY_BUTTON_HEIGHT);
             if (i < playerParty.size()) {
-                playerPokemonButton.setText(playerParty.get(i).getName());
+                playerPokemonButton.setText(String.format(buttonText, playerParty.get(i).getName(), playerParty.get(i).getLevel()));
                 playerPokemonButton.setDisable(false);
 
                 playerPokemonButton.setOnMouseClicked(e -> {
@@ -261,7 +264,7 @@ public class TeamBuilderController {
             }
 
             if (i < enemyParty.size()) {
-                enemyPokemonButton.setText(enemyParty.get(i).getName());
+                enemyPokemonButton.setText(String.format(buttonText, enemyParty.get(i).getName(), enemyParty.get(i).getLevel()));
                 enemyPokemonButton.setDisable(false);
 
                 enemyPokemonButton.setOnMouseClicked(e -> {

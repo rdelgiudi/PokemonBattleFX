@@ -176,9 +176,18 @@ public class BattleController {
         optionGrid.setVisible(choice);
     }
 
-    public void wipeText() {
-        battleText.setText("");
-        battleTextFull.setText("");
+    public Timeline wipeText(boolean inTimeline) {
+        KeyFrame kf = new KeyFrame(Duration.millis(1), e -> {
+            battleText.setText("");
+            battleTextFull.setText("");
+        });
+
+        Timeline timeline = new Timeline(kf);
+
+        if (!inTimeline)
+            timeline.play();
+
+        return timeline;
     }
 
     public Timeline getBattleTextAnimation(String text, boolean full) {
@@ -467,6 +476,49 @@ public class BattleController {
         return timeline;
     }
 
+    public static void setStatusStyle(Pokemon pokemon, Label statusLabel) {
+        statusLabel.setTextFill(Color.WHITE);
+
+        final String style = "-fx-border-radius: 10; -fx-background-radius: 10";
+        String finalStyle = "";
+
+        switch (pokemon.getStatus()) {
+            case NONE:
+                statusLabel.setVisible(false);
+                break;
+            case PARALYZED:
+                statusLabel.setText("PAR");
+                finalStyle = style + "; -fx-background-color: #B8B818";
+                break;
+            case POISONED:
+                statusLabel.setText("PSN");
+                finalStyle = style + "; -fx-background-color: purple";
+                break;
+            case BADLY_POISONED:
+                statusLabel.setText("PSN");
+                statusLabel.setTextFill(Color.LIGHTPINK);
+                finalStyle = style + "; -fx-background-color: purple";
+                break;
+            case SLEEPING:
+                statusLabel.setText("SLP");
+                finalStyle = style + "; -fx-background-color: gray";
+                break;
+            case BURNED:
+                statusLabel.setText("BRN");
+                finalStyle = style + "; -fx-background-color: chocolate";
+                break;
+            case FROZEN:
+                statusLabel.setText("FRZ");
+                finalStyle = style + "; -fx-background-color: dodgerblue";
+                break;
+        }
+
+        if (pokemon.getStatus() != Enums.Status.NONE) {
+            statusLabel.setStyle(finalStyle);
+            statusLabel.setVisible(true);
+        }
+    }
+
     public Timeline updateStatus(Pokemon pokemon, boolean ally) {
 
         final Label statusLabel;
@@ -475,47 +527,8 @@ public class BattleController {
         else
             statusLabel = enemyStatusLabel;
 
-        final String style = "-fx-border-radius: 10; -fx-background-radius: 10";
-        final String[] finalStyle = new String[1];
-
         final KeyFrame kf = new KeyFrame(Duration.millis(1), e-> {
-
-            statusLabel.setTextFill(Color.WHITE);
-
-            switch (pokemon.getStatus()) {
-                case NONE:
-                    statusLabel.setVisible(false);
-                    break;
-                case PARALYZED:
-                    statusLabel.setText("PAR");
-                    finalStyle[0] = style + "; -fx-background-color: #B8B818";
-                    break;
-                case POISONED:
-                    statusLabel.setText("PSN");
-                    finalStyle[0] = style + "; -fx-background-color: purple";
-                    break;
-                case BADLY_POISONED:
-                    statusLabel.setText("PSN");
-                    statusLabel.setTextFill(Color.LIGHTPINK);
-                    finalStyle[0] = style + "; -fx-background-color: purple";
-                    break;
-                case SLEEPING:
-                    statusLabel.setText("SLP");
-                    finalStyle[0] = style + "; -fx-background-color: gray";
-                    break;
-                case BURNED:
-                    statusLabel.setText("BRN");
-                    finalStyle[0] = style + "; -fx-background-color: chocolate";
-                    break;
-                case FROZEN:
-                    statusLabel.setText("FRZ");
-                    finalStyle[0] = style + "; -fx-background-color: dodgerblue";
-                    break;
-            }
-            if (pokemon.getStatus() != Enums.Status.NONE) {
-                statusLabel.setStyle(finalStyle[0]);
-                statusLabel.setVisible(true);
-            }
+            setStatusStyle(pokemon, statusLabel);
         });
 
         return new Timeline(kf);

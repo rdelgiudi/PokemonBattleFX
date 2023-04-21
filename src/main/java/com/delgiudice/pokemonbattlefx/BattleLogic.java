@@ -284,7 +284,7 @@ public class BattleLogic {
 
     private void battleLoop() {
 
-        controller.wipeText();
+        controller.wipeText(false);
 
         Pokemon allyPokemon = player.getParty(currentAllyPokemon);
         Pokemon enemyPokemon = enemy.getParty(currentEnemyPokemon);
@@ -1690,6 +1690,7 @@ public class BattleLogic {
                     final Timeline criticalInfo = controller.getBattleTextAnimation("A critical hit!", true);
                     moveTimeLine.add(criticalInfo);
                     moveTimeLine.add(controller.generatePause(1000));
+                    moveTimeLine.add(controller.wipeText(true));
                 }
 
             }
