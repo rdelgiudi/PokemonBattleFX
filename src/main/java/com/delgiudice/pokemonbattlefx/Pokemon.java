@@ -24,14 +24,15 @@ public class Pokemon {
     // sleepCounter - a counter used when a Pokemon sleeps, the counter decreases with each turn
     // critIncrease - critical hit chance increases applied to the Pokemon (Focus Energy, items)
     private int poisonCounter = 1, sleepCounter = 0, critIncrease = 0;
-    // twoTurnMove - twoturn move that is currently in use
-    // multiTurnMove - a multiturn move that is currently in use
+    // state - information if Pokemon is in a self-induced state, caused by some moves
+    private Enums.States state = Enums.States.NONE;
+    // stateMove - move that is linked with state in some way, for twoturn and multiturn it's a move that the Pokemon
+    // is forced to use for a set amount of time
     // trapMove - a trap move that is currently affecting the Pokemon
-    private Move twoTurnMove = null, multiTurnMove = null, trapMove = null;
-    // twoTurnCounter - counter that was planned to be used when processing twoturn moves, currently unused
-    // multiTurnCounter - counter that tracks how many multiturn moves are to be executed
+    private Move stateMove = null, trapMove = null;
+    // stateCounter - counter that is used to keep track of moves left or the amount of moves during state
     // trappedTimer - counter that tracks how many more turns the Pokemon should be affected by trapping moves
-    private int twoTurnCounter = 0, multiTurnCounter = 0, confusionTimer = 0, trappedTimer = 0;
+    private int stateCounter = 0 ,confusionTimer = 0, trappedTimer = 0;
     // ivs - Individual Values - random values between 0-31 that increase stats
     private int[] ivs = {0, 0, 0, 0, 0, 0};
     // nature - the nature of the Pokemon, that sometimes impact some of its stats
@@ -41,7 +42,7 @@ public class Pokemon {
     // specie - specie of the Pokemon
     private PokemonSpecie specie;
     // subStatuses - currently applied subStatuses
-    private List<Enums.SubStatus> subStatuses = new LinkedList<>();
+    private List<Enums.SubStatus> subStatuses = new ArrayList<>();
     // ability - ability of the Pokemon
     private Ability ability = Ability.NONE;
     // trapped - determines whether the Pokemon is currently under effects of a trapping move
@@ -86,6 +87,14 @@ public class Pokemon {
         return ability;
     }
 
+    public Move getStateMove() {
+        return stateMove;
+    }
+
+    public int getStateCounter() {
+        return stateCounter;
+    }
+
     public static HashMap<PokemonEnum, Pokemon> getPokemonExamples() {
         return pokemonExamples;
     }
@@ -117,6 +126,10 @@ public class Pokemon {
 
     public int getSleepCounter() {
         return sleepCounter;
+    }
+
+    public Enums.States getState() {
+        return state;
     }
 
     public List<Enums.SubStatus> getSubStatuses() {
@@ -157,22 +170,6 @@ public class Pokemon {
 
     public int getCritIncrease() {
         return critIncrease;
-    }
-
-    public Move getTwoTurnMove() {
-        return twoTurnMove;
-    }
-
-    public Move getMultiTurnMove() {
-        return multiTurnMove;
-    }
-
-    public int getTwoTurnCounter() {
-        return twoTurnCounter;
-    }
-
-    public int getMultiTurnCounter() {
-        return multiTurnCounter;
     }
 
     public int getConfusionTimer() {
@@ -240,20 +237,16 @@ public class Pokemon {
         this.underFocusEnergy = underFocusEnergy;
     }
 
-    public void setTwoTurnMove(Move twoTurnMove) {
-        this.twoTurnMove = twoTurnMove;
+    public void setStateMove(Move stateMove) {
+        this.stateMove = stateMove;
     }
 
-    public void setMultiTurnMove(Move multiTurnMove) {
-        this.multiTurnMove = multiTurnMove;
+    public void setStateCounter(int stateCounter) {
+        this.stateCounter = stateCounter;
     }
 
-    public void setTwoTurnCounter(int twoTurnCounter) {
-        this.twoTurnCounter = twoTurnCounter;
-    }
-
-    public void setMultiTurnCounter(int multiTurnCounter) {
-        this.multiTurnCounter = multiTurnCounter;
+    public void setState(Enums.States state) {
+        this.state = state;
     }
 
     public void setTrapMove(Move trapMove) {
@@ -345,12 +338,12 @@ public class Pokemon {
         sleepCounter = 0;
         critIncrease = 0;
 
-        twoTurnMove = null;
-        multiTurnMove = null;
+        state = Enums.States.NONE;
+
+        stateMove = null;
         trapMove = null;
 
-        twoTurnCounter = 0;
-        multiTurnCounter = 0;
+        stateCounter = 0;
         confusionTimer = 0;
         trappedTimer = 0;
 

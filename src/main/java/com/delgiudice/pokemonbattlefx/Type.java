@@ -19,8 +19,8 @@ public class Type {
     }
 
     private final Enums.Types type;
-    private final List<Enums.Types> weakAgainst = new LinkedList<>();
-    private final List<Enums.Types> strongAgainst = new LinkedList<>();
+    private final List<Enums.Types> weakAgainst = new ArrayList<>();
+    private final List<Enums.Types> strongAgainst = new ArrayList<>();
     private Enums.Types noEffectAgainst = Enums.Types.MISSING;
 
     public Type(Enums.Types type) {

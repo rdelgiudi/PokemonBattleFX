@@ -226,6 +226,13 @@ public class Enums {
             this.value = value;
         }
     }
+    public enum States{
+        NONE,
+        TWOTURN,
+        MULTITURN,
+        RAGE;
+    }
+
     public enum TrainerTypes{
         ACE_TRAINER("Ace Trainer"),
         YOUNGSTER("Youngster");

@@ -48,6 +48,8 @@ public class AddPokemonController {
         this.previousController = previousController;
         addPlayerButton.setDisable(playerParty.size() >= 6);
         addEnemyButton.setDisable(enemyParty.size() >= 6);
+        moveInfoBox.setVisible(false);
+        closeMoveInfoButton.setVisible(false);
     }
 
     public void enterAddMode() {

@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -25,6 +26,7 @@ import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
 import java.security.Key;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -191,7 +193,7 @@ public class BattleController {
     }
 
     public Timeline getBattleTextAnimation(String text, boolean full) {
-        final List<KeyFrame> characterList = new LinkedList<>();
+        final List<KeyFrame> characterList = new ArrayList<>();
         for (int i = 0; i <= text.length(); i++) {
             int finalI = i;
             final KeyFrame kf;
@@ -250,7 +252,7 @@ public class BattleController {
 
     private Timeline getTextArrowAnimation() {
 
-        List<KeyFrame> keyFrameList = new LinkedList<>();
+        List<KeyFrame> keyFrameList = new ArrayList<>();
 
         for (int i=10; i < 20; i++) {
             double finalI = i;
@@ -271,7 +273,7 @@ public class BattleController {
         double width = allyPokemonSprite.getFitWidth();
         double height = allyPokemonSprite.getFitHeight();
 
-        final List<KeyFrame> keyFrameList = new LinkedList<>();
+        final List<KeyFrame> keyFrameList = new ArrayList<>();
 
         final double[] outside = new double[1];
 
@@ -314,7 +316,7 @@ public class BattleController {
     }
 
     public Timeline getAllyAbilityInfoAnimation(Pokemon pokemon) {
-        final List<KeyFrame> keyFrameList = new LinkedList<>();
+        final List<KeyFrame> keyFrameList = new ArrayList<>();
         double width = allyAbilityInfo.getPrefWidth();
 
         final KeyFrame configAbilityLabel = new KeyFrame(Duration.ZERO, e -> {
@@ -344,7 +346,7 @@ public class BattleController {
     }
 
     public Timeline getEnemyAbilityInfoAnimation(Pokemon pokemon) {
-        final List<KeyFrame> keyFrameList = new LinkedList<>();
+        final List<KeyFrame> keyFrameList = new ArrayList<>();
         double width = enemyAbilityInfo.getPrefWidth();
         double screenWidth = enemyAbilityInfo.getScene().getWidth();
 
@@ -379,7 +381,7 @@ public class BattleController {
         double width = enemyPokemonSprite.getFitWidth();
         double height = enemyPokemonSprite.getFitHeight();
 
-        final List<KeyFrame> keyFrameList = new LinkedList<>();
+        final List<KeyFrame> keyFrameList = new ArrayList<>();
 
         final KeyFrame configPokemonSprite = new KeyFrame(Duration.ZERO, e -> {
 
@@ -422,7 +424,7 @@ public class BattleController {
         enemyNameLabel.setText(pokemon.getName());
         enemyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
 
-        enemyPokemonSprite.setImage(pokemon.getSpecie().getFrontSprite());
+        centerImage(pokemon.getSpecie().getFrontSprite(), enemyPokemonSprite);
 
         setEnemyHpBar(pokemon.getHp(), pokemon.getMaxHP());
     }
@@ -431,7 +433,7 @@ public class BattleController {
         enemyNameLabel.setText(pokemon.getName());
         enemyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
 
-        enemyPokemonSprite.setImage(pokemon.getSpecie().getFrontSprite());
+        centerImage(pokemon.getSpecie().getFrontSprite(), enemyPokemonSprite);
 
         setEnemyHpBar(overrideHp, pokemon.getMaxHP());
     }
@@ -452,7 +454,7 @@ public class BattleController {
     }
 
     public Timeline getEnemyHpAnimation(int from, int to, int max) {
-        final List<KeyFrame> keyFrameList = new LinkedList<>();
+        final List<KeyFrame> keyFrameList = new ArrayList<>();
 
         if (from == to)
             return null;
@@ -534,11 +536,31 @@ public class BattleController {
         return new Timeline(kf);
     }
 
+    //https://stackoverflow.com/questions/32781362/centering-an-image-in-an-imageview
+    public void centerImage(Image img, ImageView imageView) {
+        double w;
+        double h;
+
+        double ratioX = imageView.getFitWidth() / img.getWidth();
+        double ratioY = imageView.getFitHeight() / img.getHeight();
+
+        double reducCoeff = Math.min(ratioX, ratioY);
+
+        w = img.getWidth() * reducCoeff;
+        h = img.getHeight() * reducCoeff;
+
+        imageView.setTranslateX((imageView.getFitWidth() - w) / 2);
+        imageView.setTranslateY((imageView.getFitHeight() - h) / 2);
+
+        imageView.setImage(img);
+
+    }
+
     public void setAllyInformation(Pokemon pokemon) {
         allyNameLabel.setText(pokemon.getName());
         allyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
 
-        allyPokemonSprite.setImage(pokemon.getSpecie().getBackSprite());
+        centerImage(pokemon.getSpecie().getBackSprite(), allyPokemonSprite);
 
         setAllyHpBar(pokemon.getHp(), pokemon.getMaxHP());
     }
@@ -547,7 +569,8 @@ public class BattleController {
         allyNameLabel.setText(pokemon.getName());
         allyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
 
-        allyPokemonSprite.setImage(pokemon.getSpecie().getBackSprite());
+        centerImage(pokemon.getSpecie().getBackSprite(), allyPokemonSprite);
+        //allyPokemonSprite.setImage(pokemon.getSpecie().getBackSprite());
 
         setAllyHpBar(overrideHp, pokemon.getMaxHP());
     }
@@ -558,7 +581,7 @@ public class BattleController {
             currentHpPercentage = 0.03;
 
         allyHpBar.setProgress(currentHpPercentage);
-        allyHpLabel.setText(String.format("%d\t / \t%d", hp, maxhp));
+        allyHpLabel.setText(String.format("%3d/%-3d", hp, maxhp));
 
         if (currentHpPercentage > 0.56)
             allyHpBar.setStyle("-fx-accent: green");
@@ -569,7 +592,7 @@ public class BattleController {
     }
 
     public Timeline getAllyHpAnimation(int from, int to, int max) {
-        final List<KeyFrame> keyFrameList = new LinkedList<>();
+        final List<KeyFrame> keyFrameList = new ArrayList<>();
 
         if (from == to || max < to || max < from)
             return null;
@@ -598,7 +621,7 @@ public class BattleController {
 
     public Timeline getPokemonFaintedAnimation(boolean ally) {
 
-        final List<KeyFrame> keyFrameList = new LinkedList<>();
+        final List<KeyFrame> keyFrameList = new ArrayList<>();
 
         double height;
 
@@ -661,15 +684,15 @@ public class BattleController {
                 move.getMaxpp(), type));
         button.setTextAlignment(TextAlignment.CENTER);
 
-        //button.setFont(Font.font("Monospaced"));
+        button.setFont(Font.font("Monospaced", 11));
         Color buttonBorderColor = move.getType().getTypeEnum().getTypeColor();
-        Color buttonColor = Color.LIGHTGRAY;
+        Color buttonColor = Color.GAINSBORO;
         String colorHex = toHexString(buttonBorderColor);
         String colorHexEnd = toHexString(buttonColor);
-        String setColorIntro = "-fx-font: 11 monospaced; -fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 5; " +
+        String setColorIntro = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 5; " +
                 "-fx-border-color: ";
         String setColorEnd = "; -fx-background-color: ";
-        button.setStyle(setColorIntro + colorHex);
+        button.setStyle(setColorIntro + colorHex + setColorEnd + colorHexEnd);
         button.setOnMouseExited(e -> button.setStyle(setColorIntro + colorHex + setColorEnd + colorHexEnd));
         button.setOnMouseReleased(e -> button.setStyle(setColorIntro + colorHex + setColorEnd + colorHexEnd));
 

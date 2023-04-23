@@ -1,5 +1,6 @@
 package com.delgiudice.pokemonbattlefx;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -65,7 +66,7 @@ public class MoveTemplate {
     // statTypes - a list of stat changes that the move inflicts
     // secondaryStatTypes - another list of stat changes that the move inflicts, used in case they increase or decrease
     // by a different value than the primary stat change
-    private List<Enums.StatType> statTypes = new LinkedList<>(), secondaryStatTypes = new LinkedList<>();
+    private List<Enums.StatType> statTypes = new ArrayList<>(), secondaryStatTypes = new ArrayList<>();
     // status - status effect that the move inflicts
     private Enums.Status status = Enums.Status.NONE;
     // subStatus - secondary status effect that the move inflicts, secondary effects usually don't last very long or can
