@@ -547,5 +547,15 @@ public class Pokemon {
                 new Move(MoveTemplate.getMove(MoveEnum.TOXIC_SPIKES)), new Move(MoveTemplate.getMove(MoveEnum.AGILITY)));
         pokemonExamples.put(example.getOriginalName(), example);
 
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.PIDGEY), 50, Ability.KEEN_EYE,
+                new Move(MoveTemplate.getMove(MoveEnum.AIR_SLASH)), new Move(MoveTemplate.getMove(MoveEnum.AERIAL_ACE)),
+                new Move(MoveTemplate.getMove(MoveEnum.QUICK_ATTACK)), new Move(MoveTemplate.getMove(MoveEnum.SAND_ATTACK)));
+        pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.PIDGEOTTO), 50, Ability.KEEN_EYE,
+                new Move(MoveTemplate.getMove(MoveEnum.HURRICANE)), new Move(MoveTemplate.getMove(MoveEnum.AERIAL_ACE)),
+                new Move(MoveTemplate.getMove(MoveEnum.ROOST)), new Move(MoveTemplate.getMove(MoveEnum.DOUBLE_TEAM)));
+        pokemonExamples.put(example.getOriginalName(), example);
+
     }
 }

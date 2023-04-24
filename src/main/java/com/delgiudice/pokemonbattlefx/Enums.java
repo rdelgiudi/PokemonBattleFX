@@ -119,7 +119,8 @@ public class Enums {
         CONFUSED("became confused"),
         FLINCHED("flinched"),
         ATTRACTED("fell in love"), //TODO: implementation of Pokemon genders
-        RECHARGE("recharge");
+        RECHARGE("recharge"),
+        ROOST("roost");
 
         final private String statusString;
 

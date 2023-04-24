@@ -732,6 +732,38 @@ public class MoveTemplate {
                 1.0f);
         newmove.setMoveDescription("The user relaxes and lightens its body to move faster. This sharply boosts its Speed stat.");
         moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.AERIAL_ACE, 60, NOT_APPLICABLE, 20, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.FLYING), true);
+        newmove.setMoveDescription("The user confounds the target with speed, then slashes. This attack never misses.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.SAND_ATTACK, NOT_APPLICABLE, NOT_APPLICABLE, 15, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.GROUND), false, Enums.StatType.ACCURACY, -1, false,
+                1f);
+        newmove.setMoveDescription("Sand is hurled in the target's face, lowering the target's accuracy.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.HURRICANE, 110, 70, 10, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.FLYING), false);
+        newmove.setMoveDescription("The user attacks by wrapping its opponent in a fierce wind. This may also confuse the target.");
+        newmove.setSubStatus(Enums.SubStatus.CONFUSED);
+        newmove.setStatusProb(0.3f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.ROOST, NOT_APPLICABLE, NOT_APPLICABLE, 5, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.FLYING), false);
+        newmove.setMoveDescription("The user lands and rests its body. This move restores the user's HP by up to half its max HP.");
+        newmove.setHpRestore(0.5f);
+        newmove.setSubStatus(Enums.SubStatus.ROOST);
+        newmove.setStatusProb(1f); // redundant
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.DOUBLE_TEAM, NOT_APPLICABLE, NOT_APPLICABLE, 15, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.NORMAL), false, Enums.StatType.EVASIVENESS, 1, true,
+                1f);
+        newmove.setMoveDescription("By moving rapidly, the user makes illusory copies of itself to boost its evasiveness.");
+        moveMap.put(newmove.getName(), newmove);
     }
 
 }

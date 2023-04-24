@@ -265,6 +265,16 @@ public class PokemonSpecie{
                 65, 90, 40, 45, 80, 75, "/beedrill_front.png",
                 "/beedrill_back.png");
         pokemonMap.put(newpkmn.getName(), newpkmn);
+
+        newpkmn = new PokemonSpecie(16, PokemonEnum.PIDGEY, Type.getTypeMap(Enums.Types.NORMAL), Type.getTypeMap(Enums.Types.FLYING),
+                40, 45, 40, 35, 35, 56, "/pidgey_front.png",
+                "/pidgey_back.png");
+        pokemonMap.put(newpkmn.getName(), newpkmn);
+
+        newpkmn = new PokemonSpecie(17, PokemonEnum.PIDGEOTTO, Type.getTypeMap(Enums.Types.NORMAL), Type.getTypeMap(Enums.Types.FLYING),
+                63, 60, 55, 50, 50 ,71, "/pidgeotto_front.png",
+                "/pidgeotto_back.png");
+        pokemonMap.put(newpkmn.getName(), newpkmn);
     }
 
     //https://stackoverflow.com/questions/16089304/javafx-imageview-without-any-smoothing

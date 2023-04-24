@@ -61,7 +61,15 @@ public enum MoveEnum {
     PIN_MISSILE("Pin Missile"),
     POISON_JAB("Poison Jab"),
     TOXIC_SPIKES("Toxic Spikes"),
-    AGILITY("Agility");
+    AGILITY("Agility"),
+    AERIAL_ACE("Aerial Ace"),
+    SAND_ATTACK("Sand Attack"),
+    HURRICANE("Hurricane"),
+    ROOST("Roost"),
+    DOUBLE_TEAM("Double Team"),
+    FLY("Fly"),
+    BOUNCE("Bounce"),
+    SKY_DROP("Sky Drop");
 
 
     private final String name;

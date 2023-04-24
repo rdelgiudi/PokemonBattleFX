@@ -73,9 +73,11 @@ public class AddPokemonController {
             TextField moveField = (TextField) hBox.getChildren().get(0);
             if (Objects.equals(moveField.getText(), ""))
                 continue;
-
-            Move move = new Move(MoveTemplate.getMove(MoveEnum.findByName(moveField.getText())));
-            currentPokemon.getMoveList().add(move);
+            MoveTemplate moveTemplate = MoveTemplate.getMove(MoveEnum.findByName(moveField.getText()));
+            if (moveTemplate != null) {
+                Move move = new Move(MoveTemplate.getMove(MoveEnum.findByName(moveField.getText())));
+                currentPokemon.getMoveList().add(move);
+            }
         }
     }
 
@@ -244,7 +246,10 @@ public class AddPokemonController {
             Button moveInfoButton = (Button) hBox.getChildren().get(2);
 
             moveField.textProperty().addListener((observable, oldValue, newValue) -> {
-                if (MoveEnum.findByName(newValue) != null ||
+
+                MoveTemplate moveTemplate = MoveTemplate.getMove(MoveEnum.findByName(newValue));
+
+                if (moveTemplate != null ||
                         Objects.equals(newValue, "")) {
                     moveOkLabel.setText("ok");
                     moveInfoButton.setDisable(Objects.equals(newValue, ""));

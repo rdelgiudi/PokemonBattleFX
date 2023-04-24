@@ -288,8 +288,12 @@ public class BattleLogic {
 
         Pokemon allyPokemon = player.getParty(currentAllyPokemon);
         Pokemon enemyPokemon = enemy.getParty(currentEnemyPokemon);
+
         allyPokemon.getSubStatuses().remove(Enums.SubStatus.FLINCHED);
         enemyPokemon.getSubStatuses().remove(Enums.SubStatus.FLINCHED);
+        allyPokemon.getSubStatuses().remove(Enums.SubStatus.ROOST);
+        enemyPokemon.getSubStatuses().remove(Enums.SubStatus.ROOST);
+
         Timeline done = controller.generatePause(1);
 
         Timeline playerChoiceDialog = controller.getBattleTextAnimation(String.format("What will%n%s do?",
@@ -1258,20 +1262,31 @@ public class BattleLogic {
 
     private int checkTwoTurnMiss(Move move, Pokemon target) {
         Move twoturnmove = target.getStateMove();
+
         if (target.getState() != Enums.States.TWOTURN || twoturnmove == null || twoturnmove.isCharging())
             return 1;
 
-        boolean digEarthquake = Objects.equals(twoturnmove.getName(), MoveEnum.DIG) && Objects.equals(move.getName(),
-                MoveEnum.EARTHQUAKE);
-        boolean diveWhirlpool = Objects.equals(twoturnmove.getName(), MoveEnum.DIVE) && Objects.equals(move.getName(),
-                MoveEnum.WHIRLPOOL);
+        MoveEnum twoturnName = twoturnmove.getName();
+        MoveEnum attackingMoveName = move.getName();
 
+        boolean digEarthquake = Objects.equals(twoturnName, MoveEnum.DIG) && Objects.equals(attackingMoveName,
+                MoveEnum.EARTHQUAKE);
         if (digEarthquake) {
             return 2;
         }
+
+        boolean diveWhirlpool = Objects.equals(twoturnName, MoveEnum.DIVE) && Objects.equals(attackingMoveName,
+                MoveEnum.WHIRLPOOL);
         if (diveWhirlpool) {
             return 2;
         }
+
+        boolean hurricaneInteraction = (Objects.equals(twoturnName, MoveEnum.FLY) ||
+                Objects.equals(twoturnName, MoveEnum.BOUNCE) ||
+                Objects.equals(twoturnName, MoveEnum.SKY_DROP)) && Objects.equals(attackingMoveName,
+                MoveEnum.HURRICANE);
+        if (hurricaneInteraction)
+            return 1;
 
         return 0;
     }
@@ -1301,6 +1316,9 @@ public class BattleLogic {
             System.out.printf("%s restored %d health%n", user.getBattleName(), healthChangeInt);
             moveTimeLine.add(userHealthInfo);
 
+            // If Roost used
+            if (move.getSubStatus() == Enums.SubStatus.ROOST)
+                user.getSubStatuses().add(Enums.SubStatus.ROOST);
         }
         else {
             moveTimeLine.add(controller.generatePause(1000));
@@ -1404,7 +1422,13 @@ public class BattleLogic {
     }
 
     private float calculateMoveAccuracyModifier(Pokemon user, Pokemon target, Move move) {
-        int statAccuracy = user.getStatModifiers().get(Enums.StatType.ACCURACY) - target.getStatModifiers().get(Enums.StatType.EVASIVENESS);
+        int statAccuracy;
+        if (user.getAbility() != Ability.KEEN_EYE)
+            statAccuracy = user.getStatModifiers().get(Enums.StatType.ACCURACY) -
+                    target.getStatModifiers().get(Enums.StatType.EVASIVENESS);
+        else
+            statAccuracy = user.getStatModifiers().get(Enums.StatType.ACCURACY);
+
         if (statAccuracy > 6)
             statAccuracy = 6;
         else if (statAccuracy < -6)
@@ -1594,6 +1618,41 @@ public class BattleLogic {
             return moveTimeLine;
         }
 
+        // Type effect calculation, if the move can't hit a Pokemon the function returns
+        // Status moves generally ignore all type interactions, however there are some exceptions to this rule
+        Type firstTargetType = target.getType()[0];
+        Type secondTargetType = target.getType()[1];
+
+        // Check if target under Roost, which disables flying type interactions, effectively taking it away
+        // if the target is monotype, it makes the target Normal type instead
+        if (target.getSubStatuses().contains(Enums.SubStatus.ROOST)) {
+            if (firstTargetType.getTypeEnum() == Enums.Types.FLYING)
+                firstTargetType = secondTargetType.getTypeEnum() != Enums.Types.NO_TYPE ?
+                        Type.getTypeMap(Enums.Types.NO_TYPE) : Type.getTypeMap(Enums.Types.NORMAL);
+            else if (secondTargetType.getTypeEnum() == Enums.Types.FLYING)
+                secondTargetType = Type.getTypeMap(Enums.Types.NO_TYPE);
+        }
+
+        boolean moveTypeNoEffectOnTarget = move.getType().getNoEffectAgainst().equals(firstTargetType.getTypeEnum())
+                || move.getType().getNoEffectAgainst().equals(secondTargetType.getTypeEnum());
+
+        boolean statusMovesExceptionGround = move.getType().getTypeEnum() == Enums.Types.ELECTRIC &&
+                (firstTargetType.getTypeEnum() == Enums.Types.GROUND ||
+                        secondTargetType.getTypeEnum() == Enums.Types.GROUND);
+
+        if (moveTypeNoEffectOnTarget && (move.getSubtype() != Enums.Subtypes.STATUS || statusMovesExceptionGround)) {
+            final Timeline effectInfo = controller.getBattleTextAnimation(String.format(MOVE_NO_EFFECT_STRING,
+                    target.getBattleNameMiddle()), true);
+            //effectInfo.setDelay(Duration.seconds(2));
+            System.out.println("No effect on " + target.getBattleNameMiddle());
+
+            moveTimeLine.add(effectInfo);
+            moveTimeLine.add(controller.generatePause(2000));
+
+            return moveTimeLine;
+        }
+        //****************************************************
+
         // Move hit calculations, if move misses the function ends
         if (moveAccuracy != 0) {
             float accuracyModifier = calculateMoveAccuracyModifier(user, target, move);
@@ -1605,10 +1664,6 @@ public class BattleLogic {
             }
         }
         //**********************************************
-
-        boolean statusMovesExceptionGround = move.getType().getTypeEnum() == Enums.Types.ELECTRIC &&
-                (target.getType()[0].getTypeEnum() == Enums.Types.ELECTRIC ||
-                        target.getType()[0].getTypeEnum() == Enums.Types.ELECTRIC);
 
         Enums.Subtypes moveType = move.getSubtype();
         MoveDamageInfo damageInfo = new MoveDamageInfo(0, false, MoveDamageInfo.NOT_APPLICABLE);
@@ -1653,25 +1708,8 @@ public class BattleLogic {
             }
             //****************************************
 
-            // Type effect calculation, if the move can't hit a Pokemon the function returns
-            // Status moves generally ignore all type interactions, however there are some exceptions to this rule
-            // TODO:This check should be moved outside the for loop but it requires to change how type effect is checked
-
-            if (damageInfo.typeEffect == 0 && (move.getSubtype() != Enums.Subtypes.STATUS || statusMovesExceptionGround)) {
-                final Timeline effectInfo = controller.getBattleTextAnimation(String.format(MOVE_NO_EFFECT_STRING,
-                                target.getBattleNameMiddle()), true);
-                //effectInfo.setDelay(Duration.seconds(2));
-                System.out.println("No effect on " + target.getBattleNameMiddle());
-
-                moveTimeLine.add(effectInfo);
-                moveTimeLine.add(controller.generatePause(2000));
-
-                return moveTimeLine;
-            }
-            //****************************************************
-
             // Applying damage as well as the UI animations connected to it
-            else if (damageInfo.damage > 0) {
+            if (damageInfo.damage > 0) {
 
                 damage = damageInfo.damage;
 
@@ -1806,13 +1844,13 @@ public class BattleLogic {
 
         if (!move.getStatTypes().isEmpty() && move.isSelf() && prob >= rand && !userFainted) {
             processStatChange(moveTimeLine, move, user, true);
-            if(move.getSecondaryStatTypes().size() > 0)
+            if (move.getSecondaryStatTypes().size() > 0)
                 processStatChange(moveTimeLine, move, user, false);
             //moveTimeLine.addAll(statChangeInfo);
         }
         else if (!move.getStatTypes().isEmpty() && prob >= rand && !secondaryEffectsImmune) {
             processStatChange(moveTimeLine, move, target, true);
-            if(move.getSecondaryStatTypes().size() > 0)
+            if (move.getSecondaryStatTypes().size() > 0)
                 processStatChange(moveTimeLine, move, target, false);
             //moveTimeLine.addAll(statChangeInfo);
         }
@@ -1884,8 +1922,7 @@ public class BattleLogic {
             moveTimeLine.add(applyConfusion(target));
             moveTimeLine.add(controller.generatePause(1000));
         }
-
-        if (move.getSubStatus() == Enums.SubStatus.FLINCHED && prob >= rand && !secondaryEffectsImmune &&
+        else if (move.getSubStatus() == Enums.SubStatus.FLINCHED && prob >= rand && !secondaryEffectsImmune &&
                 !target.getSubStatuses().contains(Enums.SubStatus.FLINCHED) && first) {
             target.getSubStatuses().add(Enums.SubStatus.FLINCHED);
         }
@@ -1960,7 +1997,6 @@ public class BattleLogic {
         Timeline recoilText = controller.getBattleTextAnimation(String.format(
                 "%s took damage%nfrom recoil!",user.getBattleName()),true);
 
-        recoilText.setDelay(Duration.seconds(1));
         moveTimeLine.add(recoilText);
 
         double recoilDamage;
@@ -2065,7 +2101,7 @@ public class BattleLogic {
         return statusChangeInfo;
     }
 
-    private void processStatChange(List<Timeline> moveTimeLine ,Move move, Pokemon target, boolean primary) {
+    private void processStatChange(List<Timeline> moveTimeLine, Move move, Pokemon target, boolean primary) {
 
         List<Enums.StatType> statTypes;
         if (primary)
@@ -2079,6 +2115,22 @@ public class BattleLogic {
                 change = move.getStatChange();
             else
                 change = move.getSecondaryStatChange();
+
+            if (statType == Enums.StatType.ACCURACY && target.getAbility() == Ability.KEEN_EYE && change < 0) {
+                Timeline abilityAnimation;
+                if (target.getOwner().isPlayer())
+                    abilityAnimation = controller.getAllyAbilityInfoAnimation(target);
+                else
+                    abilityAnimation = controller.getEnemyAbilityInfoAnimation(target);
+                moveTimeLine.add(abilityAnimation);
+
+                Timeline abilityInfo = controller.getBattleTextAnimation(String.format(
+                        "%s's Keen Eye%nprevents accuracy drops!", target.getBattleName()), true);
+                moveTimeLine.add(abilityInfo);
+                moveTimeLine.add(controller.generatePause(1500));
+
+                continue;
+            }
 
             int currentStatModifier = target.getStatModifiers().get(statType);
             int statup = currentStatModifier + change;
@@ -2241,7 +2293,11 @@ public class BattleLogic {
         double part1 = ((2.0 * user.getLevel())/5.0) + 2;
         float rand = (generator.nextInt(16) + 85)/100.0f;
         float stab;
-        if (move.getType().equals(user.getType()[0]) || move.getType().equals(user.getType()[1]))
+
+        Type firstUserType = user.getType()[0];
+        Type secondUserType = user.getType()[1];
+
+        if (move.getType().equals(firstUserType) || move.getType().equals(secondUserType))
             stab = 1.5f;
         else
             stab = 1f;
@@ -2250,21 +2306,27 @@ public class BattleLogic {
             burn = 0.5f;
 
         //Checking how the type of the move is going to affect the damage
+        Type firstTargetType = target.getType()[0];
+        Type secondTargetType = target.getType()[1];
+
+        if (target.getSubStatuses().contains(Enums.SubStatus.ROOST)) {
+            if (firstTargetType.getTypeEnum() == Enums.Types.FLYING)
+                firstTargetType = secondTargetType.getTypeEnum() != Enums.Types.NO_TYPE ?
+                        Type.getTypeMap(Enums.Types.NO_TYPE) : Type.getTypeMap(Enums.Types.NORMAL);
+            else if (secondTargetType.getTypeEnum() == Enums.Types.FLYING)
+                secondTargetType = Type.getTypeMap(Enums.Types.NO_TYPE);
+        }
+
         float typeEffect = 1;
-        if (move.getType().getNoEffectAgainst().equals(target.getType()[0].getTypeEnum())
-                || move.getType().getNoEffectAgainst().equals(target.getType()[1].getTypeEnum())) {
-            typeEffect = 0;
+        for (Enums.Types type : move.getType().getStrongAgainst()){
+            if(type.equals(firstTargetType.getTypeEnum()) || type.equals(secondTargetType.getTypeEnum()))
+                typeEffect *= 2;
         }
-        else {
-            for (Enums.Types type : move.getType().getStrongAgainst()){
-                if(type.equals(target.getType()[0].getTypeEnum()) || type.equals(target.getType()[1].getTypeEnum()))
-                    typeEffect *= 2;
-            }
-            for (Enums.Types type : move.getType().getWeakAgainst()){
-                if(type.equals(target.getType()[0].getTypeEnum()) || type.equals(target.getType()[1].getTypeEnum()))
-                    typeEffect *= 0.5f;
-            }
+        for (Enums.Types type : move.getType().getWeakAgainst()){
+            if(type.equals(firstTargetType.getTypeEnum()) || type.equals(secondTargetType.getTypeEnum()))
+                typeEffect *= 0.5f;
         }
+
         //Final damage calculations
         double modifier = critMod * rand * stab * typeEffect * burn * twoTurnModifier;
         int power = move.getPower();
