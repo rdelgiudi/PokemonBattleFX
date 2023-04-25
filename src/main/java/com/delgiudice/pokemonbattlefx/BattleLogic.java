@@ -1253,6 +1253,10 @@ public class BattleLogic {
                 timeline = controller.getBattleTextAnimation(String.format(
                         "%s tucked in its head!", user.getBattleName()), true);
                 break;
+            case FLY:
+                timeline = controller.getBattleTextAnimation(String.format(
+                        "%s flew%nup high!", user.getBattleName()), true);
+                break;
             default:
                 throw new IllegalStateException("Unidentified twoturn move: "
             + move.getName());

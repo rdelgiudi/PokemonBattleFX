@@ -8,7 +8,7 @@ This project was written with Java 8 in mind. It requires JDK 1.8 or higher and 
 This is a work in progress. The engine aims to imitate mechanics from more recent generations but with graphics more akin to generation 3. So far, the project contains:
 - Working (but somewhat incomplete) battle system with proper turn order.
 - 15+ Pokémon species with 30+ unique moves.
-- Fully implemented non-volatile status effects: Poison (and badly Poisoned), Paralysis, Burn and Freeze.
+- Fully implemented non-volatile status effects: Poison (and badly Poisoned), Paralysis, Sleep, Burn and Freeze.
 - Some secondary status effects, such as confusion and flinching.
 - Battlefield effects (such as Tailwind).
 - Pokémon abilities.

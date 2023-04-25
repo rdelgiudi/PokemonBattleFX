@@ -557,5 +557,10 @@ public class Pokemon {
                 new Move(MoveTemplate.getMove(MoveEnum.ROOST)), new Move(MoveTemplate.getMove(MoveEnum.DOUBLE_TEAM)));
         pokemonExamples.put(example.getOriginalName(), example);
 
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.PIDGEOT), 50, Ability.KEEN_EYE,
+                new Move(MoveTemplate.getMove(MoveEnum.HURRICANE)), new Move(MoveTemplate.getMove(MoveEnum.FLY)),
+                new Move(MoveTemplate.getMove(MoveEnum.FEATHER_DANCE)), new Move(MoveTemplate.getMove(MoveEnum.HYPER_BEAM)));
+        pokemonExamples.put(example.getOriginalName(), example);
+
     }
 }

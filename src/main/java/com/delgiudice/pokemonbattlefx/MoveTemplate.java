@@ -764,6 +764,24 @@ public class MoveTemplate {
                 1f);
         newmove.setMoveDescription("By moving rapidly, the user makes illusory copies of itself to boost its evasiveness.");
         moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.FEATHER_DANCE, NOT_APPLICABLE, NOT_APPLICABLE, 15, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.FLYING), false, Enums.StatType.ATTACK, -2, false,
+                1f);
+        newmove.setMoveDescription("The user covers the target's body with a mass of down that harshly lowers its Attack stat.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.FLY, 90, 95, 15, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.FLYING), true);
+        newmove.setTwoturn(true);
+        newmove.setMoveDescription("The user flies up into the sky on the first turn, then attacks on the next turn.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.HYPER_BEAM, 150, 90, 5, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.NORMAL), false);
+        newmove.setRecharge(true);
+        newmove.setMoveDescription("The target is attacked with a powerful beam. The user can't move on the next turn.");
+        moveMap.put(newmove.getName(), newmove);
     }
 
 }

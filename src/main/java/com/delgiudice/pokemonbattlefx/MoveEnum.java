@@ -69,7 +69,9 @@ public enum MoveEnum {
     DOUBLE_TEAM("Double Team"),
     FLY("Fly"),
     BOUNCE("Bounce"),
-    SKY_DROP("Sky Drop");
+    SKY_DROP("Sky Drop"),
+    HYPER_BEAM("Hyper Beam"),
+    FEATHER_DANCE("Feather Dance");
 
 
     private final String name;

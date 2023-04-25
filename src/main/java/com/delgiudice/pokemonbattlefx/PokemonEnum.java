@@ -19,7 +19,8 @@ public enum PokemonEnum {
     KAKUNA("Kakuna"),
     BEEDRILL("Beedrill"),
     PIDGEY("Pidgey"),
-    PIDGEOTTO("Pidgeotto");
+    PIDGEOTTO("Pidgeotto"),
+    PIDGEOT("Pidgeot");
 
     private final String name;
 
