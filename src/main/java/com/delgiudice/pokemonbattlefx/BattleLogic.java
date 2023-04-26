@@ -2390,7 +2390,7 @@ public class BattleLogic {
             // Some abilities block burn damage from decreasing physical damage
             boolean userAffectedByBurn = user.getStatus() == Enums.Status.BURNED && user.getAbility() != Ability.GUTS;
             // Some moves also block burn damage from decreasing physical damage
-            boolean ignoresBurn = move.getName() == MoveEnum.CONFUSION_DAMAGE;
+            boolean ignoresBurn = move.getName() == MoveEnum.CONFUSION_DAMAGE || move.getName() == MoveEnum.FACADE;
             if (userAffectedByBurn && !ignoresBurn)
                 burn = 0.5f;
         }
@@ -2408,7 +2408,7 @@ public class BattleLogic {
                 secondTargetType = Type.getTypeMap(Enums.Types.NO_TYPE);
         }
 
-        // Calculation of type effect: since a lot of Pokemon is dual type, moves can deal from 0.25x to 4x of its
+        // Calculation of type effect: since a lot of Pokemon are dual type, moves can deal from 0.25x to 4x of its
         // original damage
         float typeEffect = 1;
         for (Enums.Types type : move.getType().getStrongAgainst()){
@@ -2423,6 +2423,10 @@ public class BattleLogic {
         //Final damage calculations
         double modifier = critMod * rand * stab * typeEffect * burn * twoTurnModifier;
         int power = move.getPower();
+
+        // If under non immobilizing status condition and using Facade, double the power
+        if (move.getName() == MoveEnum.FACADE && user.getStatus() != Enums.Status.NONE)
+            power *= 2;
 
         // If under the effect of a multiturn stacking move (multiturn + doesn't cause confusion + hits set to 1)
         // increase power twofold every turn it is used

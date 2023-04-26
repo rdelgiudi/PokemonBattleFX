@@ -78,7 +78,12 @@ public enum MoveEnum {
     TAKE_DOWN("Take Down"),
     BITE("Bite"),
     CRUNCH("Crunch"),
-    LASER_FOCUS("Laser Focus");
+    LASER_FOCUS("Laser Focus"),
+    DRILL_PECK("Drill Peck"),
+    WING_ATTACK("Wing Attack"),
+    DRILL_RUN("Drill Run"),
+    GIGA_IMPACT("Giga Impact"),
+    FACADE("Facade");
 
 
     private final String name;

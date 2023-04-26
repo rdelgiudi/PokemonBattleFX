@@ -571,5 +571,15 @@ public class Pokemon {
                 new Move(MoveTemplate.getMove(MoveEnum.CRUNCH)), new Move(MoveTemplate.getMove(MoveEnum.DOUBLE_EDGE)),
                 new Move(MoveTemplate.getMove(MoveEnum.SUPER_FANG)), new Move(MoveTemplate.getMove(MoveEnum.LASER_FOCUS)));
         pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.SPEAROW), 50, Ability.KEEN_EYE,
+                new Move(MoveTemplate.getMove(MoveEnum.DRILL_PECK)), new Move(MoveTemplate.getMove(MoveEnum.WING_ATTACK)),
+                new Move(MoveTemplate.getMove(MoveEnum.TAKE_DOWN)), new Move(MoveTemplate.getMove(MoveEnum.ROOST)));
+        pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.FEAROW), 50, Ability.KEEN_EYE,
+                new Move(MoveTemplate.getMove(MoveEnum.DRILL_PECK)), new Move(MoveTemplate.getMove(MoveEnum.DRILL_RUN)),
+                new Move(MoveTemplate.getMove(MoveEnum.GIGA_IMPACT)), new Move(MoveTemplate.getMove(MoveEnum.FACADE)));
+        pokemonExamples.put(example.getOriginalName(), example);
     }
 }

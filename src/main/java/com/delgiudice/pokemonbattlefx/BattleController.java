@@ -307,6 +307,7 @@ public class BattleController {
 
         final KeyFrame resetAnchor = new KeyFrame(Duration.millis(maxI + 1), e -> {
             AnchorPane.setRightAnchor(allyPokemonInfo, 15.0);
+            centerImage(allyPokemonSprite);
         });
         keyFrameList.add(resetAnchor);
 
@@ -412,6 +413,7 @@ public class BattleController {
 
         final KeyFrame resetAnchor = new KeyFrame(Duration.millis(maxI + 1), e -> {
            AnchorPane.setLeftAnchor(enemyPokemonInfo, 15.0);
+           centerImage(enemyPokemonSprite);
         });
 
         keyFrameList.add(resetAnchor);
@@ -424,7 +426,8 @@ public class BattleController {
         enemyNameLabel.setText(pokemon.getName());
         enemyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
 
-        centerImage(pokemon.getSpecie().getFrontSprite(), enemyPokemonSprite);
+        enemyPokemonSprite.setImage(pokemon.getSpecie().getFrontSprite());
+        //centerImage(enemyPokemonSprite);
 
         setEnemyHpBar(pokemon.getHp(), pokemon.getMaxHP());
     }
@@ -433,7 +436,8 @@ public class BattleController {
         enemyNameLabel.setText(pokemon.getName());
         enemyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
 
-        centerImage(pokemon.getSpecie().getFrontSprite(), enemyPokemonSprite);
+        enemyPokemonSprite.setImage(pokemon.getSpecie().getFrontSprite());
+        //centerImage(enemyPokemonSprite);
 
         setEnemyHpBar(overrideHp, pokemon.getMaxHP());
     }
@@ -537,30 +541,34 @@ public class BattleController {
     }
 
     //https://stackoverflow.com/questions/32781362/centering-an-image-in-an-imageview
-    public void centerImage(Image img, ImageView imageView) {
-        double w;
-        double h;
+    public void centerImage(ImageView imageView) {
+        Image img = imageView.getImage();
 
-        double ratioX = imageView.getFitWidth() / img.getWidth();
-        double ratioY = imageView.getFitHeight() / img.getHeight();
+        if (img != null) {
+            double w;
+            double h;
 
-        double reducCoeff = Math.min(ratioX, ratioY);
+            double ratioX = imageView.getFitWidth() / img.getWidth();
+            double ratioY = imageView.getFitHeight() / img.getHeight();
 
-        w = img.getWidth() * reducCoeff;
-        h = img.getHeight() * reducCoeff;
+            double reducCoeff = Math.min(ratioX, ratioY);
 
-        imageView.setTranslateX((imageView.getFitWidth() - w) / 2);
-        imageView.setTranslateY((imageView.getFitHeight() - h) / 2);
+            w = img.getWidth() * reducCoeff;
+            h = img.getHeight() * reducCoeff;
 
-        imageView.setImage(img);
+            imageView.setTranslateX((imageView.getFitWidth() - w) / 2);
+            imageView.setTranslateY((imageView.getFitHeight() - h));
 
+            //imageView.setImage(img);
+        }
     }
 
     public void setAllyInformation(Pokemon pokemon) {
         allyNameLabel.setText(pokemon.getName());
         allyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
 
-        centerImage(pokemon.getSpecie().getBackSprite(), allyPokemonSprite);
+        allyPokemonSprite.setImage(pokemon.getSpecie().getBackSprite());
+        //centerImage(allyPokemonSprite);
 
         setAllyHpBar(pokemon.getHp(), pokemon.getMaxHP());
     }
@@ -569,8 +577,8 @@ public class BattleController {
         allyNameLabel.setText(pokemon.getName());
         allyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
 
-        centerImage(pokemon.getSpecie().getBackSprite(), allyPokemonSprite);
-        //allyPokemonSprite.setImage(pokemon.getSpecie().getBackSprite());
+        allyPokemonSprite.setImage(pokemon.getSpecie().getBackSprite());
+        //centerImage(allyPokemonSprite);
 
         setAllyHpBar(overrideHp, pokemon.getMaxHP());
     }

@@ -824,6 +824,34 @@ public class MoveTemplate {
         newmove.setSubStatus(Enums.SubStatus.LASER_FOCUS);
         newmove.setStatusProb(1f);
         moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.DRILL_PECK, 80, 100, 20, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.FLYING), true);
+        newmove.setMoveDescription("A corkscrewing attack that strikes the target with a sharp beak acting as a drill.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.WING_ATTACK, 60, 100, 35, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.FLYING), true);
+        newmove.setMoveDescription("The target is struck with large, imposing wings spread wide to inflict damage.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.DRILL_RUN, 80, 95, 10, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.GROUND), true);
+        newmove.setMoveDescription("The user crashes into the target while rotating its body like a drill. This move has a heightened chance of landing a critical hit.");
+        newmove.setCritTemporaryIncrease(1);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.GIGA_IMPACT, 150, 90, 5, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.NORMAL), true);
+        newmove.setMoveDescription("The user charges at the target using every bit of its power. The user can't move on the next turn.");
+        newmove.setRecharge(true);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.FACADE, 70, 100, 20, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.NORMAL), true);
+        newmove.setMoveDescription("This move's power is doubled if the user is poisoned, burned, or paralyzed.");
+        moveMap.put(newmove.getName(), newmove);
+
     }
 
 }

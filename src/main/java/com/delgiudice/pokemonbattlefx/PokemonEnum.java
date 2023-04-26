@@ -21,7 +21,11 @@ public enum PokemonEnum {
     PIDGEY("Pidgey"),
     PIDGEOTTO("Pidgeotto"),
     PIDGEOT("Pidgeot"),
-    RATICATE("Raticate");
+    RATICATE("Raticate"),
+    SPEAROW("Spearow"),
+    FEAROW("Fearow"),
+    EKANS("Ekans"),
+    ARBOK("Arbok");
 
     private final String name;
 
