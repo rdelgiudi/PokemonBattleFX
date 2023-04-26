@@ -782,6 +782,48 @@ public class MoveTemplate {
         newmove.setRecharge(true);
         newmove.setMoveDescription("The target is attacked with a powerful beam. The user can't move on the next turn.");
         moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.SUPER_FANG, NOT_APPLICABLE, 90, 10, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.NORMAL), true);
+        newmove.setMoveDescription("The user chomps hard on the target with its sharp front fangs. This cuts the target's HP in half.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.FOCUS_ENERGY, NOT_APPLICABLE, NOT_APPLICABLE, 30, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.NORMAL), false);
+        newmove.setSubStatus(Enums.SubStatus.FOCUS_ENERGY);
+        newmove.setMoveDescription("The user takes a deep breath and focuses so that its future attacks have a heightened chance of landing critical hits.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.BITE, 60, 100, 25, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.DARK), true);
+        newmove.setMoveDescription("The target is bitten with viciously sharp fangs. This may also make the target flinch.");
+        newmove.setSubStatus(Enums.SubStatus.FLINCHED);
+        newmove.setStatusProb(0.3f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.TAKE_DOWN, 90, 85, 20, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.NORMAL), true);
+        newmove.setMoveDescription("A reckless full-body charge attack for slamming into the target. This also damages the user a little.");
+        newmove.setRecoil(0.25f);
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.ENDEAVOR, NOT_APPLICABLE, 100, 5, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.NORMAL), true);
+        newmove.setMoveDescription("The user inflicts damage by cutting down the target's HP to roughly equal the user's HP.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.CRUNCH, 80, 100, 15, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.DARK), true, Enums.StatType.DEFENSE, -1, false,
+                0.2f);
+        newmove.setMoveDescription("The user crunches up the target with sharp fangs. This may also lower the target's Defense stat.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.LASER_FOCUS, NOT_APPLICABLE, NOT_APPLICABLE, 30, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.NORMAL), false);
+        newmove.setMoveDescription("The user concentrates intensely. The attack on the next turn always results in a critical hit.");
+        newmove.setSubStatus(Enums.SubStatus.LASER_FOCUS);
+        newmove.setStatusProb(1f);
+        moveMap.put(newmove.getName(), newmove);
     }
 
 }

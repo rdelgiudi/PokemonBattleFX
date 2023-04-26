@@ -11,8 +11,9 @@
   <component name="ChangeListManager">
     <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="Pidgey and Pidgeotto, Roost mechanics">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Ability.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Ability.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleLogic.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Enums.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Enums.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveEnum.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveEnum.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveTemplate.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveTemplate.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Pokemon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Pokemon.java" afterDir="false" />
@@ -56,14 +57,14 @@
   &quot;keyToString&quot;: {
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/krp8_/IdeaProjects/PokemonBattleFX/src/main/resources&quot;
+    &quot;last_opened_file_path&quot;: &quot;/home/rdelgiudi/IdeaProjects/PokemonBattleFXCopy/src/main/resources&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources" />
       <recent name="C:\Users\krp8_\IdeaProjects\PokemonBattleFX\src\main\resources" />
       <recent name="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx" />
-      <recent name="$PROJECT_DIR$/src/main/resources" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\krp8_\IdeaProjects\PokemonBattleFX\src\main\resources" />

@@ -280,6 +280,11 @@ public class PokemonSpecie{
                 83, 80, 75, 70, 70, 101, "/pidgeot_front.png",
                 "/pidgeot_back.png");
         pokemonMap.put(newpkmn.getName(), newpkmn);
+
+        newpkmn = new PokemonSpecie(20, PokemonEnum.RATICATE, Type.getTypeMap(Enums.Types.NORMAL), 55,
+                81, 60, 50, 70, 97, "/raticate_front.png",
+                "/raticate_back.png");
+        pokemonMap.put(newpkmn.getName(), newpkmn);
     }
 
     //https://stackoverflow.com/questions/16089304/javafx-imageview-without-any-smoothing

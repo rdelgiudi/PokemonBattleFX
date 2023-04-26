@@ -13,7 +13,6 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import java.sql.Time;
 import java.util.*;
 
 public class BattleLogic {
@@ -289,6 +288,17 @@ public class BattleLogic {
         Pokemon allyPokemon = player.getParty(currentAllyPokemon);
         Pokemon enemyPokemon = enemy.getParty(currentEnemyPokemon);
 
+        // Check if laser focus was activated last turn, if expired deletes substatus
+        if (allyPokemon.isLaserFocusActive())
+            allyPokemon.setLaserFocusActive(false);
+        else
+            allyPokemon.getSubStatuses().remove(Enums.SubStatus.LASER_FOCUS);
+        if (enemyPokemon.isLaserFocusActive())
+            enemyPokemon.setLaserFocusActive(false);
+        else
+            enemyPokemon.getSubStatuses().remove(Enums.SubStatus.LASER_FOCUS);
+
+        // Deletes substatuses that last only during the turn they are caused
         allyPokemon.getSubStatuses().remove(Enums.SubStatus.FLINCHED);
         enemyPokemon.getSubStatuses().remove(Enums.SubStatus.FLINCHED);
         allyPokemon.getSubStatuses().remove(Enums.SubStatus.ROOST);
@@ -579,8 +589,6 @@ public class BattleLogic {
 
         Pokemon allyPokemon = player.getParty(currentAllyPokemon);
         Pokemon enemyPokemon = enemy.getParty(currentEnemyPokemon);
-        //processStatusEffectCounters(allyPokemon);
-        //processStatusEffectCounters(enemyPokemon);
 
         Move enemyMove = !enemyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE) ?
                 generateEnemyMove(enemyPokemon) : null;
@@ -1386,8 +1394,8 @@ public class BattleLogic {
         moveTimeLine.add(messageConfusion);
         moveTimeLine.add(controller.generatePause(500));
 
-        MoveDamageInfo confusionDamageInfo = calculateMoveDamage(0,
-                new Move(MoveTemplate.getMoveMap().get(MoveEnum.CONFUSION_DAMAGE)), user, user, 1, false);
+        MoveDamageInfo confusionDamageInfo = calculateMoveDamage(new Move(
+                MoveTemplate.getMoveMap().get(MoveEnum.CONFUSION_DAMAGE)), user, user, 1, false);
 
         int confusionDamage = confusionDamageInfo.damage;
         if (confusionDamage > user.getHp())
@@ -1695,20 +1703,14 @@ public class BattleLogic {
                 break;
 
             // Check move type and calculate damage
-            switch (moveType) {
-                case PHYSICAL:
-                    damageInfo = calculateMoveDamage(0, move, user, target, twoTurnModifier, true);
-                    break;
-                case SPECIAL:
-                    damageInfo = calculateMoveDamage(1, move, user, target, twoTurnModifier, true);
-                    break;
-                case STATUS:
-                    if (move.getHpRestore() > 0)
-                        return processHealthRestore(moveTimeLine, move, user);
-                    break;
-
-                default:
-                    throw new IllegalStateException("Unexpected value: " + moveType);
+            if (moveType != Enums.Subtypes.STATUS && move.getPower() == MoveTemplate.NOT_APPLICABLE) {
+                damageInfo = processNonStandardDamagingMove(move, user, target);
+            }
+            else if (moveType != Enums.Subtypes.STATUS)
+                damageInfo = calculateMoveDamage(move, user, target, twoTurnModifier, true);
+            else {
+                if (move.getHpRestore() > 0)
+                    return processHealthRestore(moveTimeLine, move, user);
             }
             //****************************************
 
@@ -1716,8 +1718,6 @@ public class BattleLogic {
             if (damageInfo.damage > 0) {
 
                 damage = damageInfo.damage;
-
-                //List<Timeline> hitTimeline = new ArrayList<>();
 
                 if (damage > target.getHp())
                     damage = target.getHp();
@@ -1732,8 +1732,6 @@ public class BattleLogic {
                 else
                     damageDealtAnimation = controller.getEnemyHpAnimation(oldHp, target.getHp(), target.getMaxHP());
 
-                //damageDealtAnimation.setDelay(Duration.seconds(2));
-
                 moveTimeLine.add(damageDealtAnimation);
                 moveTimeLine.add(controller.generatePause(1500));
                 int displayHits = i+1;
@@ -1747,6 +1745,12 @@ public class BattleLogic {
                     moveTimeLine.add(controller.wipeText(true));
                 }
 
+            }
+            else if (moveType != Enums.Subtypes.STATUS) {
+                Timeline moveFailedMessage = controller.getBattleTextAnimation("But it failed!", true);
+                moveTimeLine.add(moveFailedMessage);
+                moveTimeLine.add(controller.generatePause(1500));
+                return moveTimeLine;
             }
             //***************************************************************
 
@@ -1806,7 +1810,7 @@ public class BattleLogic {
         }
         //********************************************************
 
-        //Applies life restore if move has lifsteal
+        //Applies life restore if move has lifesteal
         if (move.getLifesteal() > 0) {
             processLifesteal(moveTimeLine, move, user, target, damage);
         }
@@ -1841,45 +1845,51 @@ public class BattleLogic {
                 target.getAbility() == Ability.SHIELD_DUST;
         boolean secondaryEffectsImmune = targetFainted || targetProtectedAbility;
 
-        //final List<Timeline> statChangeInfo;
-
-        float prob = move.getStatChangeProb() * 100.0f;
-        int rand = generator.nextInt(100) + 1;
-
-        if (!move.getStatTypes().isEmpty() && move.isSelf() && prob >= rand && !userFainted) {
-            processStatChange(moveTimeLine, move, user, true);
-            if (move.getSecondaryStatTypes().size() > 0)
-                processStatChange(moveTimeLine, move, user, false);
-            //moveTimeLine.addAll(statChangeInfo);
+        if (!move.getStatTypes().isEmpty()) {
+            processStatUpApplication(moveTimeLine, move, user, target, userFainted, secondaryEffectsImmune);
+            return moveTimeLine;
         }
-        else if (!move.getStatTypes().isEmpty() && prob >= rand && !secondaryEffectsImmune) {
-            processStatChange(moveTimeLine, move, target, true);
-            if (move.getSecondaryStatTypes().size() > 0)
-                processStatChange(moveTimeLine, move, target, false);
-            //moveTimeLine.addAll(statChangeInfo);
-        }
+
         //*******************************************************
 
-        // Check related to moves that increase critcal hit chance (only Focus Energy?)
-        if (move.getCritIncrease() > 0) {
-            Timeline critChangeInfo;
-            if(!user.isUnderFocusEnergy()) {
-                critChangeInfo = controller.getBattleTextAnimation(String.format("%s is getting pumped!", user.getBattleName()),
-                        true);
-                user.setCritIncrease(user.getCritIncrease() + 2);
-                user.setUnderFocusEnergy(true);
-            }
-            else
-                critChangeInfo = controller.getBattleTextAnimation("But it failed!", true);
-
-            moveTimeLine.add(critChangeInfo);
-            moveTimeLine.add(controller.generatePause(1500));
+        // Apply applicable substatus TODO: Unify all substatus applying moves under this method
+        if (move.getSubStatus() != Enums.SubStatus.NONE) {
+            processSubStatusApplication(moveTimeLine, move, user, target, secondaryEffectsImmune, first);
+            return moveTimeLine;
         }
         //*******************************************************
 
         // Checks related to moves that inflict status effects
-        prob = Math.round(move.getStatusProb() * 100.0f);
-        rand = generator.nextInt(100) + 1;
+        if (move.getStatus() != Enums.Status.NONE) {
+            processStatusApplication(moveTimeLine, move, user, target, secondaryEffectsImmune);
+            return moveTimeLine;
+        }
+        //*********************************************************
+
+        //Trap target in vortex if its hp is higher than 0 and is not a Ghost type Pokemon
+        boolean targetGhost = target.getType()[0].getTypeEnum() == Enums.Types.GHOST ||
+                target.getType()[0].getTypeEnum() == Enums.Types.GHOST;
+        if (!targetFainted && move.isTrap() && target.getTrapMove() == null && !targetGhost) {
+            moveTimeLine.add(processInVortex(move ,target));
+            moveTimeLine.add(controller.generatePause(1000));
+        }
+        //*****************************************************
+
+        // If multiturn counter has reached 0 and causes confusion, then a multiturn move is disabled
+        // and the target becomes confused
+        if (move.isMultiturn() && user.getStateCounter() == 0 && user.getStateMove() != null &&
+        move.isMultiturnConfusion() && user.getState() == Enums.States.MULTITURN)
+            processMultiturnMoveCompleted(moveTimeLine, user);
+        //*********************************************************************
+
+        return moveTimeLine;
+    }
+
+    private void processStatusApplication(List<Timeline> moveTimeLine, Move move, Pokemon user, Pokemon target,
+                                          boolean secondaryEffectsImmune) {
+        SecureRandom generator = new SecureRandom();
+        int prob = Math.round(move.getStatusProb() * 100.0f);
+        int rand = generator.nextInt(100) + 1;
 
         boolean firePokemonImmunity = move.getStatus() == Enums.Status.BURNED &&
                 (target.getType()[0].getTypeEnum() == Enums.Types.FIRE ||
@@ -1894,7 +1904,7 @@ public class BattleLogic {
 
         boolean statusImmunity = firePokemonImmunity || electricPokemonImmunity || poisonPokemonImmunity;
 
-        if (move.getStatus() != Enums.Status.NONE && prob >= rand && !secondaryEffectsImmune && !statusImmunity) {
+        if (prob >= rand && !secondaryEffectsImmune && !statusImmunity) {
             Timeline statusChangeInfo = processStatusChange(move.getStatus(), target);
             //statusChangeInfo.setDelay(Duration.seconds(1));
             moveTimeLine.add(statusChangeInfo);
@@ -1917,37 +1927,101 @@ public class BattleLogic {
 
             moveTimeLine.add(effectInfo);
             moveTimeLine.add(controller.generatePause(2000));
-            return moveTimeLine;
         }
-        //*********************************************************
+    }
 
-        if (move.getSubStatus() == Enums.SubStatus.CONFUSED && prob >= rand && !secondaryEffectsImmune &&
-        !target.getSubStatuses().contains(Enums.SubStatus.CONFUSED)) {
-            moveTimeLine.add(applyConfusion(target));
-            moveTimeLine.add(controller.generatePause(1000));
+    private void processStatUpApplication(List<Timeline> moveTimeLine, Move move, Pokemon user, Pokemon target,
+                                          boolean userFainted, boolean secondaryEffectsImmune) {
+        SecureRandom generator = new SecureRandom();
+        float prob = move.getStatChangeProb() * 100.0f;
+        int rand = generator.nextInt(100) + 1;
+
+        if (move.isSelf() && prob >= rand && !userFainted) {
+            processStatChange(moveTimeLine, move, user, true);
+            if (!move.getSecondaryStatTypes().isEmpty())
+                processStatChange(moveTimeLine, move, user, false);
         }
-        else if (move.getSubStatus() == Enums.SubStatus.FLINCHED && prob >= rand && !secondaryEffectsImmune &&
-                !target.getSubStatuses().contains(Enums.SubStatus.FLINCHED) && first) {
-            target.getSubStatuses().add(Enums.SubStatus.FLINCHED);
+        else if (prob >= rand && !secondaryEffectsImmune) {
+            processStatChange(moveTimeLine, move, target, true);
+            if (!move.getSecondaryStatTypes().isEmpty())
+                processStatChange(moveTimeLine, move, target, false);
         }
+    }
 
-        //Trap target in vortex if its hp is higher than 0 and is not a Ghost type Pokemon
-        boolean targetGhost = target.getType()[0].getTypeEnum() == Enums.Types.GHOST ||
-                target.getType()[0].getTypeEnum() == Enums.Types.GHOST;
-        if (!targetFainted && move.isTrap() && target.getTrapMove() == null && !targetGhost) {
-            moveTimeLine.add(processInVortex(move ,target));
-            moveTimeLine.add(controller.generatePause(1000));
+    private void processSubStatusApplication(List<Timeline> moveTimeLine ,Move move, Pokemon user, Pokemon target,
+                                             boolean secondaryEffectsImmune, boolean first) {
+        SecureRandom generator = new SecureRandom();
+        float prob = move.getStatChangeProb() * 100.0f;
+        int rand = generator.nextInt(100) + 1;
+        Enums.SubStatus moveSubStatus = move.getSubStatus();
+
+        switch (moveSubStatus) {
+            case CONFUSED:
+                if (prob >= rand && !secondaryEffectsImmune && !target.getSubStatuses().contains(moveSubStatus)) {
+                    moveTimeLine.add(applyConfusion(target));
+                    moveTimeLine.add(controller.generatePause(1000));
+                }
+                break;
+            case FLINCHED:
+                if (prob >= rand && !secondaryEffectsImmune && !target.getSubStatuses().contains(moveSubStatus) && first) {
+                    target.getSubStatuses().add(Enums.SubStatus.FLINCHED);
+                }
+                break;
+            case LASER_FOCUS:
+                Timeline laserFocusMessage;
+                if (!user.getSubStatuses().contains(moveSubStatus)) {
+                    user.getSubStatuses().add(Enums.SubStatus.LASER_FOCUS);
+                    laserFocusMessage = controller.getBattleTextAnimation(String.format(
+                            "%s concentrated intensely!", user.getBattleName()), true);
+                    user.setLaserFocusActive(true);
+                }
+                else
+                    laserFocusMessage = controller.getBattleTextAnimation("But it failed!", true);
+                moveTimeLine.add(laserFocusMessage);
+                moveTimeLine.add(controller.generatePause(1500));
+                break;
+            case FOCUS_ENERGY:
+                Timeline critChangeInfo;
+                if(!user.getSubStatuses().contains(moveSubStatus)) {
+                    critChangeInfo = controller.getBattleTextAnimation(String.format("%s is getting pumped!", user.getBattleName()),
+                            true);
+                    user.setCritIncrease(user.getCritIncrease() + 2);
+                    user.getSubStatuses().add(moveSubStatus);
+                }
+                else
+                    critChangeInfo = controller.getBattleTextAnimation("But it failed!", true);
+
+                moveTimeLine.add(critChangeInfo);
+                moveTimeLine.add(controller.generatePause(1500));
+                break;
+            default:
+                throw new IllegalStateException("Unexpected sub status applied: " + moveSubStatus);
         }
-        //*****************************************************
+    }
 
-        // If multiturn counter has reached 0 and causes confusion, then a multiturn move is disabled
-        // and the target becomes confused
-        if (move.isMultiturn() && user.getStateCounter() == 0 && user.getStateMove() != null &&
-        move.isMultiturnConfusion() && user.getState() == Enums.States.MULTITURN)
-            processMultiturnMoveCompleted(moveTimeLine, user);
-        //*********************************************************************
+    private MoveDamageInfo processNonStandardDamagingMove(Move move, Pokemon user, Pokemon target) {
 
-        return moveTimeLine;
+        int damage;
+
+        switch (move.getName()) {
+            case SUPER_FANG:
+                damage = (int)Math.floor(target.getHp() / 2.0);
+                if (damage == 0)
+                    damage = 1;
+
+                return new MoveDamageInfo(damage, false, 1);
+
+            case ENDEAVOR:
+                if (user.getHp() >= target.getHp())
+                    return new MoveDamageInfo(0, false, 1);
+
+                damage = target.getHp() - user.getHp();
+                return new MoveDamageInfo(damage, false, 1);
+
+            default:
+                throw new IllegalStateException("Unidentified move matched non standard damaging move criteria: " +
+                        move.getName());
+        }
     }
 
     private void processSpikesPlaced(List<Timeline> moveTimeLine, Pokemon user, Move move) {
@@ -2194,7 +2268,7 @@ public class BattleLogic {
         }
     }
 
-    private MoveDamageInfo calculateMoveDamage(int movetype, Move move, Pokemon user, Pokemon target, int twoTurnModifier,
+    private MoveDamageInfo calculateMoveDamage(Move move, Pokemon user, Pokemon target, int twoTurnModifier,
                                        boolean canCrit)
     {
         SecureRandom generator = new SecureRandom();
@@ -2219,6 +2293,9 @@ public class BattleLogic {
                 break;
         }
 
+        if (user.getSubStatuses().contains(Enums.SubStatus.LASER_FOCUS))
+            bound = 1;
+
         int critNum = generator.nextInt(bound);
         boolean isCrit = false;
         float critMod;
@@ -2230,19 +2307,21 @@ public class BattleLogic {
 
         // Check if the executed move is a special or physical move, then grab the corresponding stats
         // Attack for user and defense for target (or Special Attack and Special Defense)
-        switch (movetype) {
-            case 0:
+        switch (move.getSubtype()) {
+            case PHYSICAL:
                 attackTemp = user.getStats(Enums.StatType.ATTACK);
                 attackMod = user.getStatModifiers().get(Enums.StatType.ATTACK);
                 defenseTemp = target.getStats(Enums.StatType.DEFENSE);
                 defenseMod = target.getStatModifiers().get(Enums.StatType.DEFENSE);
                 break;
-            case 1:
+            case SPECIAL:
                 attackTemp = user.getStats(Enums.StatType.SPECIAL_ATTACK);
                 attackMod = user.getStatModifiers().get(Enums.StatType.SPECIAL_ATTACK);
                 defenseTemp = target.getStats(Enums.StatType.SPECIAL_DEFENSE);
                 defenseMod = target.getStatModifiers().get(Enums.StatType.SPECIAL_DEFENSE);
                 break;
+            default:
+                throw new IllegalStateException("Move of type " + move.getSubtype() + " is impossible to process");
 
         }
         //Final effective attack and defense stat
@@ -2293,7 +2372,7 @@ public class BattleLogic {
         double abilityMultiplier = processAbilityMultiplier(move, user);
         attack = attack * abilityMultiplier;
 
-        //Miscellaneous stats calculation (stab, random factor, burn debuff)
+        // Miscellaneous stats calculation (stab, random factor, burn debuff)
         double part1 = ((2.0 * user.getLevel())/5.0) + 2;
         float rand = (generator.nextInt(16) + 85)/100.0f;
         float stab;
@@ -2305,14 +2384,22 @@ public class BattleLogic {
             stab = 1.5f;
         else
             stab = 1f;
-        float burn = 1;
-        if (movetype == 0 && user.getStatus() == Enums.Status.BURNED)
-            burn = 0.5f;
 
-        //Checking how the type of the move is going to affect the damage
+        float burn = 1;
+        if (move.getSubtype() == Enums.Subtypes.PHYSICAL) {
+            // Some abilities block burn damage from decreasing physical damage
+            boolean userAffectedByBurn = user.getStatus() == Enums.Status.BURNED && user.getAbility() != Ability.GUTS;
+            // Some moves also block burn damage from decreasing physical damage
+            boolean ignoresBurn = move.getName() == MoveEnum.CONFUSION_DAMAGE;
+            if (userAffectedByBurn && !ignoresBurn)
+                burn = 0.5f;
+        }
+
+        // Checking how the type of the move is going to affect the damage
         Type firstTargetType = target.getType()[0];
         Type secondTargetType = target.getType()[1];
 
+        // If target is under the effects of Roost, its Flying typing is discarded (or replaced with Normal if monotype)
         if (target.getSubStatuses().contains(Enums.SubStatus.ROOST)) {
             if (firstTargetType.getTypeEnum() == Enums.Types.FLYING)
                 firstTargetType = secondTargetType.getTypeEnum() != Enums.Types.NO_TYPE ?
@@ -2321,6 +2408,8 @@ public class BattleLogic {
                 secondTargetType = Type.getTypeMap(Enums.Types.NO_TYPE);
         }
 
+        // Calculation of type effect: since a lot of Pokemon is dual type, moves can deal from 0.25x to 4x of its
+        // original damage
         float typeEffect = 1;
         for (Enums.Types type : move.getType().getStrongAgainst()){
             if(type.equals(firstTargetType.getTypeEnum()) || type.equals(secondTargetType.getTypeEnum()))
@@ -2334,7 +2423,8 @@ public class BattleLogic {
         //Final damage calculations
         double modifier = critMod * rand * stab * typeEffect * burn * twoTurnModifier;
         int power = move.getPower();
-        // if under the effect of a multiturn stacking move (multiturn + doesn't cause confusion + hits set to 1)
+
+        // If under the effect of a multiturn stacking move (multiturn + doesn't cause confusion + hits set to 1)
         // increase power twofold every turn it is used
         boolean nonConfusionMultiturn = move.isMultiturn() && !move.isMultiturnConfusion();
         if (nonConfusionMultiturn && move.getHits() == 1 && user.getStateMove() == move &&
@@ -2345,9 +2435,10 @@ public class BattleLogic {
         double damageDouble = Math.round(((((part1 * power * ((attack/defense)/50.0)) + 2) * modifier)));
         int damage = (int) damageDouble;
 
+        // Type printed to console
         System.out.println(user.getBattleName() + " used a " + move.getType().toString() + " type move!");
 
-        //Critical hit message
+        // Critical hit message
         if(isCrit && typeEffect != 0) {
             System.out.println("A critical hit!");
         }
@@ -2364,7 +2455,8 @@ public class BattleLogic {
     }
 
     private double processAbilityMultiplier(Move move, Pokemon user) {
-        Enums.Types boostedType;
+        Enums.Types boostedType = Enums.Types.MISSING;
+        boolean generalBoost = false;
         switch (user.getAbility()) {
             case OVERGROW:
                 boostedType = Enums.Types.GRASS;
@@ -2378,14 +2470,20 @@ public class BattleLogic {
             case SWARM:
                 boostedType = Enums.Types.BUG;
                 break;
+            case GUTS:
+                if (user.getStatus() != Enums.Status.NONE)
+                    generalBoost = true;
+                break;
             default:
                 return 1.0;
         }
 
         double hpThreshold = (double) user.getMaxHP() / 3;
-        if (user.getHp() > hpThreshold || move.getType().getTypeEnum() != boostedType)
-            return 1.0;
-        return 1.5;
+        boolean typeBoost = user.getHp() <= hpThreshold && move.getType().getTypeEnum() == boostedType;
+
+        if (typeBoost || generalBoost)
+            return 1.5;
+        return 1.0;
     }
 
     private void switchPokemon(boolean ally, int slot) {
@@ -2420,11 +2518,13 @@ public class BattleLogic {
 
         pokemon.setPoisonCounter(1);
         pokemon.getSubStatuses().clear();
-        pokemon.setUnderFocusEnergy(false);
         pokemon.setCritIncrease(0);
         pokemon.setStateMove(null);
         pokemon.setStateCounter(0);
         pokemon.setState(Enums.States.NONE);
         pokemon.setConfusionTimer(0);
+        pokemon.setTrapped(false);
+        pokemon.setTrappedTimer(0);
+        pokemon.setLaserFocusActive(false);
     }
 }

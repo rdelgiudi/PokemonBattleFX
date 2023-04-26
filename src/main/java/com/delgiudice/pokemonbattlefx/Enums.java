@@ -120,6 +120,8 @@ public class Enums {
         FLINCHED("flinched"),
         ATTRACTED("fell in love"), //TODO: implementation of Pokemon genders
         RECHARGE("recharge"),
+        FOCUS_ENERGY("focus energy"),
+        LASER_FOCUS("laser focus"),
         ROOST("roost");
 
         final private String statusString;

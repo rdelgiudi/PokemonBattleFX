@@ -32,7 +32,7 @@ public class Pokemon {
     private Move stateMove = null, trapMove = null;
     // stateCounter - counter that is used to keep track of moves left or the amount of moves during state
     // trappedTimer - counter that tracks how many more turns the Pokemon should be affected by trapping moves
-    private int stateCounter = 0 ,confusionTimer = 0, trappedTimer = 0;
+    private int stateCounter = 0, confusionTimer = 0, trappedTimer = 0;
     // ivs - Individual Values - random values between 0-31 that increase stats
     private int[] ivs = {0, 0, 0, 0, 0, 0};
     // nature - the nature of the Pokemon, that sometimes impact some of its stats
@@ -46,8 +46,8 @@ public class Pokemon {
     // ability - ability of the Pokemon
     private Ability ability = Ability.NONE;
     // trapped - determines whether the Pokemon is currently under effects of a trapping move
-    // underFocusEnergy - determines whether the Pokemon is under the effects of the move Focus Energy
-    private boolean trapped = false, underFocusEnergy = false;
+    // laserFocusActive - check whether Laser Focus condition should be active
+    private boolean trapped = false, laserFocusActive = false;
 
     public String getBattleName() {
         if (owner.isPlayer())
@@ -184,12 +184,16 @@ public class Pokemon {
         return trapMove;
     }
 
+    public boolean isLaserFocusActive() {
+        return laserFocusActive;
+    }
+
     public int getPokedexNumber() {
         return specie.getPokedexNumber();
     }
 
-    public boolean isUnderFocusEnergy() {
-        return underFocusEnergy;
+    public void setLaserFocusActive(boolean laserFocusActive) {
+        this.laserFocusActive = laserFocusActive;
     }
 
     public void setOwner(Trainer owner) {
@@ -231,10 +235,6 @@ public class Pokemon {
 
     public void setCritIncrease(int critIncrease) {
         this.critIncrease = critIncrease;
-    }
-
-    public void setUnderFocusEnergy(boolean underFocusEnergy) {
-        this.underFocusEnergy = underFocusEnergy;
     }
 
     public void setStateMove(Move stateMove) {
@@ -351,7 +351,7 @@ public class Pokemon {
         statModifiers.clear();
 
         trapped = false;
-        underFocusEnergy = false;
+        laserFocusActive = false;
     }
 
     public void levelUp()       //raises level, updates stats
@@ -562,5 +562,14 @@ public class Pokemon {
                 new Move(MoveTemplate.getMove(MoveEnum.FEATHER_DANCE)), new Move(MoveTemplate.getMove(MoveEnum.HYPER_BEAM)));
         pokemonExamples.put(example.getOriginalName(), example);
 
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.RATTATA), 50, Ability.GUTS,
+                new Move(MoveTemplate.getMove(MoveEnum.BITE)), new Move(MoveTemplate.getMove(MoveEnum.TAKE_DOWN)),
+                new Move(MoveTemplate.getMove(MoveEnum.ENDEAVOR)), new Move(MoveTemplate.getMove(MoveEnum.FOCUS_ENERGY)));
+        pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.RATICATE), 50, Ability.GUTS,
+                new Move(MoveTemplate.getMove(MoveEnum.CRUNCH)), new Move(MoveTemplate.getMove(MoveEnum.DOUBLE_EDGE)),
+                new Move(MoveTemplate.getMove(MoveEnum.SUPER_FANG)), new Move(MoveTemplate.getMove(MoveEnum.LASER_FOCUS)));
+        pokemonExamples.put(example.getOriginalName(), example);
     }
 }

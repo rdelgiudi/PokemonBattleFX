@@ -71,7 +71,14 @@ public enum MoveEnum {
     BOUNCE("Bounce"),
     SKY_DROP("Sky Drop"),
     HYPER_BEAM("Hyper Beam"),
-    FEATHER_DANCE("Feather Dance");
+    FEATHER_DANCE("Feather Dance"),
+    SUPER_FANG("Super Fang"),
+    FOCUS_ENERGY("Focus Energy"),
+    ENDEAVOR("Endeavor"),
+    TAKE_DOWN("Take Down"),
+    BITE("Bite"),
+    CRUNCH("Crunch"),
+    LASER_FOCUS("Laser Focus");
 
 
     private final String name;
