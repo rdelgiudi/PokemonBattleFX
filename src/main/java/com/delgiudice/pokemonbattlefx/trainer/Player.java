@@ -1,4 +1,6 @@
-package com.delgiudice.pokemonbattlefx;
+package com.delgiudice.pokemonbattlefx.trainer;
+
+import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 
 public class Player extends Trainer {
 

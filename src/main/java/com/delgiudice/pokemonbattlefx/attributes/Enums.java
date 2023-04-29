@@ -1,4 +1,4 @@
-package com.delgiudice.pokemonbattlefx;
+package com.delgiudice.pokemonbattlefx.attributes;
 
 import javafx.scene.paint.Color;
 

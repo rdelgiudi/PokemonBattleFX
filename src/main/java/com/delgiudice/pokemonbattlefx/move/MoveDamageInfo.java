@@ -1,4 +1,4 @@
-package com.delgiudice.pokemonbattlefx;
+package com.delgiudice.pokemonbattlefx.move;
 
 public class MoveDamageInfo {
     public static final int NOT_APPLICABLE = -1;

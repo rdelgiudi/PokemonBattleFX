@@ -1,5 +1,8 @@
-package com.delgiudice.pokemonbattlefx;
+package com.delgiudice.pokemonbattlefx.pokemon;
 
+import com.delgiudice.pokemonbattlefx.attributes.Enums;
+import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
+import com.delgiudice.pokemonbattlefx.attributes.Type;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;

@@ -1,5 +1,13 @@
-package com.delgiudice.pokemonbattlefx;
+package com.delgiudice.pokemonbattlefx.teambuilder;
 
+import com.delgiudice.pokemonbattlefx.*;
+import com.delgiudice.pokemonbattlefx.attributes.Enums;
+import com.delgiudice.pokemonbattlefx.battle.BattleController;
+import com.delgiudice.pokemonbattlefx.battle.BattleLogic;
+import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
+import com.delgiudice.pokemonbattlefx.pokemon.PokemonEnum;
+import com.delgiudice.pokemonbattlefx.trainer.NpcTrainer;
+import com.delgiudice.pokemonbattlefx.trainer.Player;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;

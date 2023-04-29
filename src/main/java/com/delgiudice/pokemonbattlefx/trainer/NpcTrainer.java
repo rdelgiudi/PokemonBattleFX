@@ -1,4 +1,7 @@
-package com.delgiudice.pokemonbattlefx;
+package com.delgiudice.pokemonbattlefx.trainer;
+
+import com.delgiudice.pokemonbattlefx.attributes.Enums;
+import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;

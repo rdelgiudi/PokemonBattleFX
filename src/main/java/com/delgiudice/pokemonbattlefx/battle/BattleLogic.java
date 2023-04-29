@@ -1,5 +1,19 @@
-package com.delgiudice.pokemonbattlefx;
+package com.delgiudice.pokemonbattlefx.battle;
 
+import com.delgiudice.pokemonbattlefx.*;
+import com.delgiudice.pokemonbattlefx.attributes.Enums;
+import com.delgiudice.pokemonbattlefx.attributes.Type;
+import com.delgiudice.pokemonbattlefx.item.Item;
+import com.delgiudice.pokemonbattlefx.move.Move;
+import com.delgiudice.pokemonbattlefx.move.MoveDamageInfo;
+import com.delgiudice.pokemonbattlefx.move.MoveEnum;
+import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
+import com.delgiudice.pokemonbattlefx.pokemon.Ability;
+import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
+import com.delgiudice.pokemonbattlefx.pokemon.PokemonEnum;
+import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
+import com.delgiudice.pokemonbattlefx.trainer.NpcTrainer;
+import com.delgiudice.pokemonbattlefx.trainer.Player;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXMLLoader;
@@ -1134,25 +1148,6 @@ public class BattleLogic {
                 secondPokemon, firstPokemon, false));
 
         return moveTimeLine;
-    }
-
-    // Events when ally Pokemon is slower
-    // TODO: old implementation, delete after checking the new one
-    private List<Timeline> processTurnAllySlower(Move allyMove, Move enemyMove) {
-        //Random generator = new Random();
-
-        //int enemyMove = generator.nextInt(enemy.getParty(currentEnemyPokemon).getMoveList().size());
-        List<Timeline> enemyMoveTimeLine = useMove(enemyMove, enemy.getParty(currentEnemyPokemon),
-                player.getParty(currentAllyPokemon), true);
-
-        if (enemy.getParty(currentEnemyPokemon).getHp() == 0 || player.getParty(currentAllyPokemon).getHp() == 0)  {
-            return enemyMoveTimeLine;
-        }
-        List<Timeline> allyMoveTimeLine = useMove(allyMove, player.getParty(currentAllyPokemon),
-                enemy.getParty(currentEnemyPokemon), false);
-
-        enemyMoveTimeLine.addAll(allyMoveTimeLine);
-        return enemyMoveTimeLine;
     }
 
     private void itemTurn(Item item) {

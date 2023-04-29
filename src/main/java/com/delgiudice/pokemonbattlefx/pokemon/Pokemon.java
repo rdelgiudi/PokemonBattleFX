@@ -1,4 +1,11 @@
-package com.delgiudice.pokemonbattlefx;
+package com.delgiudice.pokemonbattlefx.pokemon;
+
+import com.delgiudice.pokemonbattlefx.attributes.Enums;
+import com.delgiudice.pokemonbattlefx.attributes.Type;
+import com.delgiudice.pokemonbattlefx.move.Move;
+import com.delgiudice.pokemonbattlefx.move.MoveEnum;
+import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
+import com.delgiudice.pokemonbattlefx.trainer.Trainer;
 
 import java.security.SecureRandom;
 import java.util.*;

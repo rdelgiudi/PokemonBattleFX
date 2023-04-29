@@ -1,8 +1,7 @@
-package com.delgiudice.pokemonbattlefx;
+package com.delgiudice.pokemonbattlefx.attributes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 ///This class indicates the typing of move/Pokemon as well as contains type strengths and weaknesses

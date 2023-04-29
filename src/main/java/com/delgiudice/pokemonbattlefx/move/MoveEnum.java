@@ -1,4 +1,4 @@
-package com.delgiudice.pokemonbattlefx;
+package com.delgiudice.pokemonbattlefx.move;
 
 public enum MoveEnum {
     CONFUSION_DAMAGE("Confusion Damage"),

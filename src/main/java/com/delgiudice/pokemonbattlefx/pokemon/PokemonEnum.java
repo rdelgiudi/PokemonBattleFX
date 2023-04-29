@@ -1,4 +1,4 @@
-package com.delgiudice.pokemonbattlefx;
+package com.delgiudice.pokemonbattlefx.pokemon;
 
 public enum PokemonEnum {
     BULBASAUR("Bulbasaur"),

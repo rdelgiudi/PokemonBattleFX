@@ -1,4 +1,4 @@
-package com.delgiudice.pokemonbattlefx;
+package com.delgiudice.pokemonbattlefx.pokemon;
 
 public enum Ability {
     NONE("No ability"),

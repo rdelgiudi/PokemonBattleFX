@@ -1,12 +1,12 @@
 package com.delgiudice.pokemonbattlefx;
 
+import com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.Objects;
 
 public class BattleApplication extends Application {
     @Override
