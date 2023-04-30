@@ -297,7 +297,7 @@ public class BattleLogic {
 
         Timeline done = controller.generatePause(1);
 
-        Timeline playerChoiceDialog = controller.getBattleTextAnimation(String.format("What will%n%s do?",
+        Timeline playerChoiceDialog = controller.getBattleText(String.format("What will%n%s do?",
                 player.getParty(currentAllyPokemon).getBattleName()), false);
         done.setOnFinished(e -> {
             if (allyPokemon.getStateMove() != null && allyPokemon.getState() == Enums.States.TWOTURN) {
@@ -354,7 +354,7 @@ public class BattleLogic {
                 moveButton.setOnAction(e -> {
                     controller.getMoveGrid().setDisable(true);
                     Timeline outOfPPInfo = controller.getBattleTextAnimation("This move is out of PP!", false);
-                    Timeline playerChoiceDialog2 = controller.getBattleTextAnimation(String.format("What will%n%s do?",
+                    Timeline playerChoiceDialog2 = controller.getBattleText(String.format("What will%n%s do?",
                             player.getParty(currentAllyPokemon).getBattleName()), false);
                     playerChoiceDialog2.setDelay(Duration.seconds(1));
                     outOfPPInfo.setOnFinished(event -> playerChoiceDialog2.play());
@@ -431,7 +431,7 @@ public class BattleLogic {
                         Timeline trappedInfo = controller.getBattleTextAnimation(String.format(
                                 "%s is trapped!%nCan't switch!",
                                 player.getParty(currentAllyPokemon).getName()), false);
-                        Timeline resetText = controller.getBattleTextAnimation(String.format("What will%n%s do?",
+                        Timeline resetText = controller.getBattleText(String.format("What will%n%s do?",
                                 player.getParty(currentAllyPokemon).getName()), false);
                         resetText.setDelay(Duration.seconds(1));
                         trappedInfo.setOnFinished(actionEvent -> resetText.play());
@@ -447,7 +447,7 @@ public class BattleLogic {
                         controller.getPokemonGrid().setDisable(true);
                         Timeline alreadyInBattleInfo = controller.getBattleTextAnimation(String.format(
                                 "%s is already%nin battle!", pokemon.getBattleName()), false);
-                        Timeline resetText = controller.getBattleTextAnimation(String.format("What will%n%s do?",
+                        Timeline resetText = controller.getBattleText(String.format("What will%n%s do?",
                                 pokemon.getBattleName()), false);
                         resetText.setDelay(Duration.seconds(1));
                         alreadyInBattleInfo.setOnFinished(actionEvent -> resetText.play());

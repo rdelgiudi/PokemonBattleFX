@@ -1,6 +1,7 @@
 package com.delgiudice.pokemonbattlefx.battle;
 
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
+import com.delgiudice.pokemonbattlefx.attributes.Type;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import javafx.animation.Animation;
@@ -40,12 +41,12 @@ public class BattleController {
     private Button fightButton, bagButton, pokemonButton, runButton, firstMoveButton, secondMoveButton, thirdMoveButton,
             fourthMoveButton, backMoveButton, pokemonBackButton;
     @FXML
-    private VBox allyPokemonInfo, enemyPokemonInfo;
+    private VBox allyPokemonInfo, enemyPokemonInfo, moveTypeBox;
     @FXML
     private ImageView allyPokemonSprite, enemyPokemonSprite, textArrowView;
     @FXML
     private Label enemyNameLabel, enemyLvLabel, allyNameLabel, allyHpLabel, allyLvLabel, allyStatusLabel,
-                    enemyStatusLabel, allyAbilityInfo, enemyAbilityInfo;
+                    enemyStatusLabel, allyAbilityInfo, enemyAbilityInfo, moveTypeLabel, movePPLabel;
     @FXML
     private ProgressBar enemyHpBar, allyHpBar;
 
@@ -221,6 +222,16 @@ public class BattleController {
             timeline.play();
 
         return timeline;
+    }
+
+    public Timeline getBattleText(String text, boolean full) {
+        KeyFrame kf;
+        if (full)
+            kf = new KeyFrame(Duration.millis(1), e -> battleTextFull.setText(text));
+        else
+            kf = new KeyFrame(Duration.millis(1), e -> battleText.setText(text));
+
+        return new Timeline(kf);
     }
 
     public Timeline getBattleTextAnimation(String text, boolean full) {
@@ -770,17 +781,44 @@ public class BattleController {
                 .toUpperCase();
     }
 
+    private void setMoveTypeBox(Move move) {
+
+        Type type = move.getType();
+
+        String styleString = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: ";
+        moveTypeLabel.setText(type.getTypeEnum().toString());
+        Color firstTypeColor = type.getTypeEnum().getTypeColor();
+        String colorHex = toHexString(firstTypeColor);
+        moveTypeLabel.setStyle(styleString + colorHex);
+        movePPLabel.setText(String.format("%-2d/%2d", move.getPp(), move.getMaxpp()));
+
+        // looks good like this so far, needs more testing
+        Color textColorRegular = Color.BLACK;
+        Color textColorWarning = Color.GOLDENROD;
+        Color textColorLow = Color.DARKORANGE;
+        Color textColorNoPP = Color.FIREBRICK;
+
+        float percentage = (float)move.getPp() / move.getMaxpp();
+        if (percentage > 0.5)
+            movePPLabel.setTextFill(textColorRegular);
+        else if (percentage > 0.25)
+            movePPLabel.setTextFill(textColorWarning);
+        else if (percentage > 0)
+            movePPLabel.setTextFill(textColorLow);
+        else
+            movePPLabel.setTextFill(textColorNoPP);
+    }
+
     private void setMoveInformation(Button button, Move move) {
 
-        String ppInfo = "%s%nPP: %-2d/%2d%nType: %s";
-        String type;
-        type = move.getType().getTypeEnum().toString();
+        //String ppInfo = "%s%nPP: %-2d/%2d%nType: %s";
 
-        button.setText(String.format(ppInfo, move.getName(), move.getPp(),
-                move.getMaxpp(), type));
+        //button.setText(String.format(ppInfo, move.getName(), move.getPp(),
+        //        move.getMaxpp(), type));
+        button.setText(move.getName().toString());
         button.setTextAlignment(TextAlignment.CENTER);
 
-        button.setFont(Font.font("Monospaced", 11));
+        button.setFont(Font.font("Monospaced", 20));
         Color buttonBorderColor = move.getType().getTypeEnum().getTypeColor();
         Color buttonColor = Color.GAINSBORO;
         String colorHex = toHexString(buttonBorderColor);
@@ -789,7 +827,11 @@ public class BattleController {
                 "-fx-border-color: ";
         String setColorEnd = "; -fx-background-color: ";
         button.setStyle(setColorIntro + colorHex + setColorEnd + colorHexEnd);
-        button.setOnMouseExited(e -> button.setStyle(setColorIntro + colorHex + setColorEnd + colorHexEnd));
+        button.setOnMouseExited(e -> {
+            button.setStyle(setColorIntro + colorHex + setColorEnd + colorHexEnd);
+            moveTypeBox.getChildren().get(0).setVisible(false);
+            moveTypeBox.getChildren().get(1).setVisible(false);
+        });
         button.setOnMouseReleased(e -> button.setStyle(setColorIntro + colorHex + setColorEnd + colorHexEnd));
 
         Color buttonBorderColorPressed = buttonBorderColor.darker();
@@ -802,23 +844,12 @@ public class BattleController {
         Color buttonColorHover = buttonColor.brighter();
         String colorHexHover = toHexString(buttonBorderColorHover);
         String colorHexHoverEnd = toHexString(buttonColorHover);
-        button.setOnMouseEntered(e -> button.setStyle(setColorIntro + colorHexHover + setColorEnd + colorHexHoverEnd));
-
-        // looks good like this so far, needs more testing
-        Color textColorRegular = Color.BLACK;
-        Color textColorWarning = Color.GOLDENROD;
-        Color textColorLow = Color.DARKORANGE;
-        Color textColorNoPP = Color.FIREBRICK;
-
-        float percentage = (float)move.getPp() / move.getMaxpp();
-        if (percentage > 0.5)
-            button.setTextFill(textColorRegular);
-        else if (percentage > 0.25)
-            button.setTextFill(textColorWarning);
-        else if (percentage > 0)
-            button.setTextFill(textColorLow);
-        else
-            button.setTextFill(textColorNoPP);
+        button.setOnMouseEntered(e -> {
+            button.setStyle(setColorIntro + colorHexHover + setColorEnd + colorHexHoverEnd);
+            setMoveTypeBox(move);
+            moveTypeBox.getChildren().get(0).setVisible(true);
+            moveTypeBox.getChildren().get(1).setVisible(true);
+        });
     }
 
     public void updateAvailableMoves(Pokemon pokemon) {
