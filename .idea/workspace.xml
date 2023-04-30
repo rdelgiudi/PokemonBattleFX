@@ -9,33 +9,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="Pidgey and Pidgeotto, Roost mechanics">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+    <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="Reorganized files into folders">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Ability.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/pokemon/Ability.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/AddPokemonController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/teambuilder/AddPokemonController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/BattleLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleLogic.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Enums.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/attributes/Enums.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Item.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/item/Item.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Move.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/move/Move.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveDamageInfo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/move/MoveDamageInfo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveEnum.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/move/MoveEnum.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/MoveTemplate.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/move/MoveTemplate.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/NpcTrainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/trainer/NpcTrainer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Player.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/trainer/Player.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Pokemon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/pokemon/Pokemon.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/PokemonEnum.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/pokemon/PokemonEnum.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/PokemonSpecie.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/pokemon/PokemonSpecie.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/SummaryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/SummaryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/TeamBuilderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/teambuilder/TeamBuilderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Trainer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/trainer/Trainer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/Type.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/attributes/Type.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/addpokemon-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/addpokemon-view.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/battle-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/battle-view.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/summary-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/summary-view.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/teambuilder-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/teambuilder-view.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleLogic.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -212,7 +189,14 @@
       <option name="project" value="LOCAL" />
       <updated>1682363503432</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Reorganized files into folders">
+      <created>1682764432504</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1682764432504</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -240,7 +224,8 @@
     <MESSAGE value="fixes battle turn handling bugs and random hit moves generation" />
     <MESSAGE value="minor ui changes and fixes" />
     <MESSAGE value="Pidgey and Pidgeotto, Roost mechanics" />
-    <option name="LAST_COMMIT_MESSAGE" value="Pidgey and Pidgeotto, Roost mechanics" />
+    <MESSAGE value="Reorganized files into folders" />
+    <option name="LAST_COMMIT_MESSAGE" value="Reorganized files into folders" />
   </component>
   <component name="XDebuggerManager">
     <pin-to-top-manager>

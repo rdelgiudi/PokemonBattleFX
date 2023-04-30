@@ -78,29 +78,6 @@ public class BattleLogic {
         initBattleLoop();
     }
 
-    private void setup() {
-        Pokemon.generatePokemonExamples();
-
-        // For testing purposes only, delete later
-        Pokemon allyPokemon = new Pokemon(Pokemon.getPokemonExamples().get(PokemonEnum.BLASTOISE));
-        player = new Player("Red",  allyPokemon);
-
-        player.addPokemon(new Pokemon(Pokemon.getPokemonExamples().get(PokemonEnum.VENOSAUR)));
-
-        player.addPokemon(new Pokemon(Pokemon.getPokemonExamples().get(PokemonEnum.CHARIZARD)));
-
-        Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.VENOSAUR), 50, Ability.NONE,
-                new Move(MoveTemplate.getMoveMap().get(MoveEnum.TAIL_WHIP)));
-        //Pokemon enemyPokemon = new Pokemon(PokemonSpecie.getPokemonMap().get("Rattata"), 50, Ability.GUTS,
-        //        new Move(MoveTemplate.getMoveMap().get("Scratch")) , new Move(MoveTemplate.getMoveMap().get("Growl")),
-        //        new Move(MoveTemplate.getMoveMap().get("Quick Attack")));
-
-        enemy = new NpcTrainer("Joey", Enums.TrainerTypes.YOUNGSTER ,enemyPokemon);
-
-        //enemy.addPokemon(new Pokemon(Pokemon.getPokemonExamples().get("Charmander")));
-
-    }
-
     // function that initiates a battle, adding looping checks here should be avoided
     private void initBattleLoop() {
 
@@ -1720,14 +1697,19 @@ public class BattleLogic {
                 int oldHp = target.getHp();
                 target.setHp(target.getHp() - damage);
 
-                final Timeline damageDealtAnimation;
+                final Timeline damageDealtAnimation, hpAnimation;
 
-                if (target.getOwner().isPlayer())
-                    damageDealtAnimation = controller.getAllyHpAnimation(oldHp, target.getHp(), target.getMaxHP());
-                else
-                    damageDealtAnimation = controller.getEnemyHpAnimation(oldHp, target.getHp(), target.getMaxHP());
+                if (target.getOwner().isPlayer()) {
+                    damageDealtAnimation = controller.getAllyMoveDamageAnimation();
+                    hpAnimation = controller.getAllyHpAnimation(oldHp, target.getHp(), target.getMaxHP());
+                }
+                else {
+                    damageDealtAnimation = controller.getEnemyMoveDamageAnimation();
+                    hpAnimation = controller.getEnemyHpAnimation(oldHp, target.getHp(), target.getMaxHP());
+                }
 
                 moveTimeLine.add(damageDealtAnimation);
+                moveTimeLine.add(hpAnimation);
                 moveTimeLine.add(controller.generatePause(1500));
                 int displayHits = i+1;
                 System.out.println("Hit " + displayHits + ": " + move.getName() + " dealt " + damage + " damage to " +

@@ -49,6 +49,8 @@ public class BattleController {
     @FXML
     private ProgressBar enemyHpBar, allyHpBar;
 
+    private Timeline idleAnimation;
+
     private final static String FIGHT_BUTTON_PRESSED = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: darkred;";
     private final static String FIGHT_BUTTON_RELEASE = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: firebrick;";
     private final static String FIGHT_BUTTON_HOVER = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: crimson;";
@@ -121,6 +123,8 @@ public class BattleController {
         battleTextFull.setMouseTransparent(true);
         battleTextFull.setFocusTraversable(false);
 
+        idleAnimation = getBattleIdleAnimation();
+
         setupButtons();
     }
 
@@ -169,10 +173,40 @@ public class BattleController {
         });
     }
 
+    private Timeline getBattleIdleAnimation() {
+        final KeyFrame kf1 = new KeyFrame(Duration.ZERO, e -> {
+            AnchorPane.setBottomAnchor(allyPokemonSprite, 63.0);
+            AnchorPane.setBottomAnchor(allyPokemonInfo, 220.0);
+        });
+        final KeyFrame kf2 = new KeyFrame(Duration.seconds(0.3), e -> {
+            AnchorPane.setBottomAnchor(allyPokemonSprite, 60.0);
+            AnchorPane.setBottomAnchor(allyPokemonInfo, 217.0);
+        });
+
+        Timeline timeline = new Timeline(kf1, kf2);
+        timeline.setAutoReverse(true);
+        timeline.setCycleCount(Animation.INDEFINITE);
+
+        timeline.setOnFinished(e -> {
+            AnchorPane.setBottomAnchor(allyPokemonSprite, 63.0);
+            AnchorPane.setBottomAnchor(allyPokemonInfo, 220.0);
+        });
+
+        return timeline;
+    }
+
     public void switchToPlayerChoice(boolean choice) {
         battleTextFull.setVisible(!choice);
         battleText.setVisible(choice);
         optionGrid.setVisible(choice);
+        if (choice) {
+            idleAnimation.play();
+        }
+        else {
+            idleAnimation.stop();
+            AnchorPane.setBottomAnchor(allyPokemonSprite, 63.0);
+            AnchorPane.setBottomAnchor(allyPokemonInfo, 220.0);
+        }
     }
 
     public Timeline wipeText(boolean inTimeline) {
@@ -479,6 +513,32 @@ public class BattleController {
         return timeline;
     }
 
+    public Timeline getEnemyMoveDamageAnimation() {
+
+        int animationDuration = 10;
+        Timeline timeline = new Timeline();
+
+        for (int i = 0; i <= animationDuration; i++) {
+            KeyFrame kf1, kf2;
+
+            kf1 = new KeyFrame(Duration.millis(25 * i), e -> {
+                enemyPokemonSprite.setVisible(false);
+                AnchorPane.setTopAnchor(enemyPokemonInfo, 76.0);
+            });
+
+            timeline.getKeyFrames().add(kf1);
+
+            kf2 = new KeyFrame(Duration.millis(50 * i), e -> {
+                enemyPokemonSprite.setVisible(true);
+                AnchorPane.setTopAnchor(enemyPokemonInfo, 79.0);
+            });
+
+            timeline.getKeyFrames().add(kf2);
+        }
+
+        return timeline;
+    }
+
     public static void setStatusStyle(Pokemon pokemon, Label statusLabel) {
         statusLabel.setTextFill(Color.WHITE);
 
@@ -628,6 +688,32 @@ public class BattleController {
         Timeline timeline = new Timeline();
 
         timeline.getKeyFrames().addAll(keyFrameList);
+        return timeline;
+    }
+
+    public Timeline getAllyMoveDamageAnimation() {
+
+        int animationDuration = 10;
+        Timeline timeline = new Timeline();
+
+        for (int i = 0; i <= animationDuration; i++) {
+            KeyFrame kf1, kf2;
+
+            kf1 = new KeyFrame(Duration.millis(25 * i), e -> {
+                allyPokemonSprite.setVisible(false);
+                AnchorPane.setBottomAnchor(allyPokemonInfo, 217.0);
+            });
+
+            timeline.getKeyFrames().add(kf1);
+
+            kf2 = new KeyFrame(Duration.millis(50 * i), e -> {
+                allyPokemonSprite.setVisible(true);
+                AnchorPane.setBottomAnchor(allyPokemonInfo, 220.0);
+            });
+
+            timeline.getKeyFrames().add(kf2);
+        }
+
         return timeline;
     }
 
