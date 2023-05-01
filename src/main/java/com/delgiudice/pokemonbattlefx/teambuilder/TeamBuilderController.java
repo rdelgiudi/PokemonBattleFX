@@ -211,7 +211,7 @@ public class TeamBuilderController {
 
         for (Pokemon pokemon : sortedPokemon) {
             Button pokemonButton = new Button();
-            pokemonButton.setText(pokemon.getOriginalName().toString());
+            pokemonButton.setText(String.format("No. %03d%n%s", pokemon.getPokedexNumber(), pokemon.getOriginalName().toString()));
             pokemonButton.setFont(Font.font("Monospaced", FONT_SIZE));
             pokemonGrid.add(pokemonButton, i, j);
 

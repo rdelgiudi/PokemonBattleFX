@@ -25,9 +25,9 @@ public class PokemonSpecie{
     private Type[] type = {new Type(Enums.Types.NO_TYPE), new Type(Enums.Types.NO_TYPE)};
     // baseStats - base statistics of a specie, from which their actual stats are calculated
     private LinkedHashMap<Enums.StatType, Integer> baseStats = new LinkedHashMap<>();
-    // frontSprite - image of the Pokemon front sprite (enemy)
-    // backSprite - image of the Pokemon back sprite (ally)
-    private Image frontSprite, backSprite, frontSpriteAnim, backSpriteAnim;
+    // frontSprite - path to image of the Pokemon front sprite (enemy)
+    // backSprite - path to image of the Pokemon back sprite (ally)
+    private String frontSprite, backSprite, frontSpriteAnim, backSpriteAnim;
     public int getPokedexNumber() {
         return pokedexNumber;
     }
@@ -45,7 +45,17 @@ public class PokemonSpecie{
     }
 
     public Image getFrontSprite() {
-        return frontSprite;}
+        Image image;
+        URL frontSpriteUrl = getClass().getResource(frontSprite);
+
+        if (frontSpriteUrl != null)
+            image = new Image(frontSprite);
+        else
+            image = new Image("default.png");
+
+        image = resample(image, 10);
+        return image;
+    }
 
     //public Image getFrontSpriteAnim() {
     //    return frontSpriteAnim;}
@@ -54,7 +64,16 @@ public class PokemonSpecie{
     //    return backSpriteAnim;}
 
     public Image getBackSprite() {
-        return backSprite;
+        Image image;
+        URL frontSpriteUrl = getClass().getResource(backSprite);
+
+        if (frontSpriteUrl != null)
+            image = new Image(backSprite);
+        else
+            image = new Image("default.png");
+
+        image = resample(image, 10);
+        return image;
     }
 
     public void setPokedexNumber(int pokedexNumber) {
@@ -76,12 +95,12 @@ public class PokemonSpecie{
         baseStats.put(Enums.StatType.SPECIAL_ATTACK, spAttack);
         baseStats.put(Enums.StatType.SPECIAL_DEFENSE, spDefense);
         baseStats.put(Enums.StatType.SPEED, speed);
-        frontSprite = new Image("default.png");
-        backSprite = new Image("default.png");
-        this.frontSprite = resample(this.frontSprite, 10);
-        this.backSprite = resample(this.backSprite, 10);
-        this.frontSpriteAnim = null;
-        this.backSpriteAnim = null;
+        frontSprite = "default.png";
+        backSprite = "default.png";
+        //this.frontSprite = resample(this.frontSprite, 10);
+        //this.backSprite = resample(this.backSprite, 10);
+        //this.frontSpriteAnim = null;
+        //this.backSpriteAnim = null;
         this.pokedexNumber = pokedexNumber;
     }
 
@@ -96,13 +115,8 @@ public class PokemonSpecie{
         baseStats.put(Enums.StatType.SPECIAL_ATTACK, spAttack);
         baseStats.put(Enums.StatType.SPECIAL_DEFENSE, spDefense);
         baseStats.put(Enums.StatType.SPEED, speed);
-        URL frontSpriteUrl = getClass().getResource(frontSprite);
+        /*URL frontSpriteUrl = getClass().getResource(frontSprite);
         URL backSrpiteUrl = getClass().getResource(backSprite);
-        //String frontSpriteAnim = frontSprite.split("\\.")[0];
-
-        //frontSpriteAnim = frontSpriteAnim + "_anim.png";
-        //URL frontSpriteAnimUrl = getClass().getResource(frontSpriteAnim);
-
         if (frontSpriteUrl != null)
             this.frontSprite = new Image(frontSprite);
         else
@@ -112,17 +126,13 @@ public class PokemonSpecie{
             this.backSprite = new Image(backSprite);
         else
             this.backSprite = new Image("default.png");
-        //if (frontSpriteAnimUrl != null)
-        //    this.frontSpriteAnim = new Image(frontSpriteAnim);
-        //else
-        //    this.frontSpriteAnim = null;
 
 
         this.frontSprite = resample(this.frontSprite, 10);
-        this.backSprite = resample(this.backSprite, 10);
-        //if (this.frontSpriteAnim != null)
-        //    this.frontSpriteAnim = resample(this.frontSpriteAnim, 10);
+        this.backSprite = resample(this.backSprite, 10);*/
 
+        this.frontSprite = frontSprite;
+        this.backSprite = backSprite;
         this.pokedexNumber = pokedexNumber;
     }
 
@@ -135,11 +145,11 @@ public class PokemonSpecie{
         baseStats.put(Enums.StatType.SPECIAL_ATTACK, spAttack);
         baseStats.put(Enums.StatType.SPECIAL_DEFENSE, spDefense);
         baseStats.put(Enums.StatType.SPEED, speed);
-        frontSprite = new Image("default.png");
-        backSprite = new Image("default.png");
+        frontSprite = "default.png";
+        backSprite = "default.png";
 
-        this.frontSprite = resample(this.frontSprite, 10);
-        this.backSprite = resample(this.backSprite, 10);
+        //this.frontSprite = resample(this.frontSprite, 10);
+        //this.backSprite = resample(this.backSprite, 10);
 
         this.pokedexNumber = pokedexNumber;
     }
@@ -154,9 +164,8 @@ public class PokemonSpecie{
         baseStats.put(Enums.StatType.SPECIAL_ATTACK, spAttack);
         baseStats.put(Enums.StatType.SPECIAL_DEFENSE, spDefense);
         baseStats.put(Enums.StatType.SPEED, speed);
-        URL frontSpriteUrl = getClass().getResource(frontSprite);
+        /*URL frontSpriteUrl = getClass().getResource(frontSprite);
         URL backSrpiteUrl = getClass().getResource(backSprite);
-
         if (frontSpriteUrl != null)
             this.frontSprite = new Image(frontSprite);
         else
@@ -167,8 +176,12 @@ public class PokemonSpecie{
         else
             this.backSprite = new Image("default.png");
 
+
         this.frontSprite = resample(this.frontSprite, 10);
-        this.backSprite = resample(this.backSprite, 10);
+        this.backSprite = resample(this.backSprite, 10);*/
+
+        this.frontSprite = frontSprite;
+        this.backSprite = backSprite;
 
         this.pokedexNumber = pokedexNumber;
     }

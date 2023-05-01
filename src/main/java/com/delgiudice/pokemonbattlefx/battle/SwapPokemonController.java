@@ -188,7 +188,7 @@ public class SwapPokemonController {
                 Timeline alreadyInBattleInfo;
                 if (!allyFainted)
                     alreadyInBattleInfo = getInfoText(String.format(
-                            "%s is already%nin battle!", pokemon.getBattleName()));
+                            "%s is already in battle!", pokemon.getBattleName()));
                 else
                     alreadyInBattleInfo = getInfoText(String.format(
                             "%s has just fainted!", pokemon.getBattleName()));
