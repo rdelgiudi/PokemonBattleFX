@@ -9,10 +9,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="updated move select menu">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/SwapPokemonController.java" afterDir="false" />
+    <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="fully working new Pokemon swap menu">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleLogic.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/SwapPokemonController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/SwapPokemonController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/move/MoveTemplate.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/move/MoveTemplate.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/swappokemon-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/swappokemon-view.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -252,18 +253,10 @@
     <MESSAGE value="Added small animation when getting hit by moves" />
     <MESSAGE value="adjusted hit animation tempo" />
     <MESSAGE value="updated move select menu" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated move select menu" />
+    <MESSAGE value="fully working new Pokemon swap menu" />
+    <option name="LAST_COMMIT_MESSAGE" value="fully working new Pokemon swap menu" />
   </component>
   <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/SwapPokemonController.java</url>
-          <line>48</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
     <pin-to-top-manager>
       <pinned-members>
         <PinnedItemInfo parentTag="javafx.animation.Timeline" memberName="keyFrames" />

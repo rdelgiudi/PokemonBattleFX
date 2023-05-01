@@ -34,7 +34,7 @@ public class BattleLogic {
     private final BattleController controller;
 
     private static final String POKEMON_FAINTED_STRING = "%s fainted!";
-    private static final String POKEMON_SENT_OUT_STRING = "Go! %s!";
+    public static final String POKEMON_SENT_OUT_STRING = "Go! %s!";
     private static final String MOVE_NO_EFFECT_STRING = "It doesn't affect%n%s...";
     private static final String RECHARGE_INFO = "%s needs to recharge!";
     private static final Font MAIN_FONT = Font.font("Monospaced");
@@ -42,8 +42,8 @@ public class BattleLogic {
     private Player player;
     private NpcTrainer enemy;
 
-    private final FXMLLoader summaryLoader;
-    private final Scene summaryScene;
+    private final FXMLLoader swapPokemonLoader;
+    private final Scene swapPokemonScene;
     private final Scene teamBuilderScene;
 
     private int currentAllyPokemon = 0, currentEnemyPokemon = 0;
@@ -70,9 +70,9 @@ public class BattleLogic {
         this.player = player;
         this.enemy = enemy;
 
-        summaryLoader = new FXMLLoader(BattleApplication.class.getResource("summary-view.fxml"));
+        swapPokemonLoader = new FXMLLoader(BattleApplication.class.getResource("swappokemon-view.fxml"));
         try {
-            summaryScene = new Scene(summaryLoader.load(), 1280, 720);
+            swapPokemonScene = new Scene(swapPokemonLoader.load(), 1280, 720);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -398,23 +398,15 @@ public class BattleLogic {
             //controller.pokemonButtonPressed(player.getParty());
             //setPokemonSwapListeners(false);
 
-            FXMLLoader loader = new FXMLLoader(BattleApplication.class.getResource("swappokemon-view.fxml"));
-            Scene scene;
-            try {
-                scene = new Scene(loader.load(), 1280, 720);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-
             Stage stage = (Stage) pokemonButton.getScene().getWindow();
-            SwapPokemonController swapPokemonController = loader.getController();
-            swapPokemonController.initVariables(pokemonButton.getScene(), this, player.getParty());
-            stage.setScene(scene);
+            SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
+            swapPokemonController.initVariables(pokemonButton.getScene(), this, controller, player.getParty());
+            stage.setScene(swapPokemonScene);
         });
 
     }
 
-    private void setPokemonSwapListeners(boolean allyFainted) {
+   /* private void setPokemonSwapListeners(boolean allyFainted) {
 
         int iLimit = Math.min(player.getParty().size() - 1, 2);
         int jLimit = player.getParty().size() > 3 ? 1: 0;
@@ -565,7 +557,7 @@ public class BattleLogic {
             controller.getPokemonGrid().setVisible(false);
             controller.switchToPlayerChoice(true);
         });
-    }
+    }*/
 
     private void processBattlefieldConditionsTimer() {
         for (Map.Entry<Enums.BattlefieldCondition, Integer> condition : allyBattlefieldConditions.entrySet()) {
@@ -583,7 +575,7 @@ public class BattleLogic {
             pokemon.setConfusionTimer(pokemon.getConfusionTimer() - 1);
     }
 
-    private void battleTurn(Move allyMove) {
+    public void battleTurn(Move allyMove) {
         List<Timeline> battleTimeLine = new ArrayList<>();
 
         SecureRandom generator = new SecureRandom();
@@ -838,7 +830,7 @@ public class BattleLogic {
 
     // Send out new ally Pokemon if available, else game over for the player, even if enemy also out of Pokemon
     // Send out new enemy Pokemon and config timeline list
-    private void finalChecks(List<Timeline> battleTimeLine) {
+    public void finalChecks(List<Timeline> battleTimeLine) {
 
         if (checkBattleEnd(battleTimeLine))
             return;
@@ -848,9 +840,17 @@ public class BattleLogic {
 
         if (allyFainted) {
             battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
-                controller.pokemonButtonPressed(player.getParty());
-                controller.switchToPlayerChoice(true);
-                setPokemonSwapListeners(true);
+                //controller.pokemonButtonPressed(player.getParty());
+                //controller.switchToPlayerChoice(true);
+                //setPokemonSwapListeners(true);
+
+
+                Button pokemonButton = controller.getPokemonButton();
+
+                Stage stage = (Stage) pokemonButton.getScene().getWindow();
+                SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
+                swapPokemonController.initVariables(pokemonButton.getScene(), this, controller, player.getParty());
+                stage.setScene(swapPokemonScene);
             });
             initAnimationQueue(battleTimeLine);
             battleTimeLine.get(0).play();
@@ -906,7 +906,7 @@ public class BattleLogic {
         }
     }
 
-    private void initAnimationQueue(List<Timeline> battleTimeLine) {
+    public void initAnimationQueue(List<Timeline> battleTimeLine) {
         for (int i=1; i<battleTimeLine.size(); i++) {
             final int finalI = i;
             if (battleTimeLine.get(i-1).getOnFinished() == null)
@@ -1314,7 +1314,7 @@ public class BattleLogic {
             Timeline userHealthInfo = controller.getBattleTextAnimation(String.format(
                     "%s restored health!", user.getBattleName()), true);
 
-            System.out.printf("%s restored %d health%n", user.getBattleName(), healthChangeInt);
+            System.out.printf("%s restored %d health%n", user.getBattleName(), healthChangeInt - oldHp);
             moveTimeLine.add(userHealthInfo);
 
             // If Roost used
@@ -1341,6 +1341,7 @@ public class BattleLogic {
             System.out.println(user.getBattleName() + " multiturn has ended, became confused");
 
             moveTimeLine.add(userConfusedMsg);
+            moveTimeLine.add(controller.generatePause(1500));
             applyConfusion(user);
         }
         processMultiturnMoveInterrupted(user);
@@ -1641,7 +1642,7 @@ public class BattleLogic {
                 (firstTargetType.getTypeEnum() == Enums.Types.GROUND ||
                         secondTargetType.getTypeEnum() == Enums.Types.GROUND);
 
-        if (moveTypeNoEffectOnTarget && (move.getSubtype() != Enums.Subtypes.STATUS || statusMovesExceptionGround)) {
+        if (!move.isSelf() && moveTypeNoEffectOnTarget && (move.getSubtype() != Enums.Subtypes.STATUS || statusMovesExceptionGround)) {
             final Timeline effectInfo = controller.getBattleTextAnimation(String.format(MOVE_NO_EFFECT_STRING,
                     target.getBattleNameMiddle()), true);
             //effectInfo.setDelay(Duration.seconds(2));
@@ -2484,7 +2485,7 @@ public class BattleLogic {
         return 1.0;
     }
 
-    private void switchPokemon(boolean ally, int slot) {
+    public void switchPokemon(boolean ally, int slot) {
 
         Pokemon pokemon, opponent;
 

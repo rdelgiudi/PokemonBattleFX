@@ -320,6 +320,10 @@ public class MoveTemplate {
         this.spikeType = spikeType;
     }
 
+    public void setSelf(boolean self) {
+        this.self = self;
+    }
+
     public MoveTemplate(MoveEnum name, int power, int accuracy, int pp, Enums.Subtypes subtype, Type type,
                         boolean contactMove, Enums.StatType statTypes, int statChange, boolean self,
                         float statChangeProb) {
@@ -486,6 +490,7 @@ public class MoveTemplate {
                 Type.getTypeMap().get(Enums.Types.GRASS), false);
         newmove.setMoveDescription("The user restores its own HP. The amount of HP regained varies with the weather.");
         newmove.setHpRestore(0.5f);
+        newmove.setSelf(true);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.SWEET_SCENT, NOT_APPLICABLE, 100, 20, Enums.Subtypes.STATUS,
@@ -677,6 +682,7 @@ public class MoveTemplate {
                 Type.getTypeMap(Enums.Types.FLYING), false);
         newmove.setMoveDescription("The user whips up a turbulent whirlwind that boosts the Speed stats of itself and its allies for four turns.");
         newmove.setCondition(Enums.BattlefieldCondition.TAILWIND);
+        newmove.setSelf(true);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.BUG_BUZZ, 90, 100, 10, Enums.Subtypes.SPECIAL,
@@ -727,6 +733,7 @@ public class MoveTemplate {
                 Type.getTypeMap(Enums.Types.POISON), false);
         newmove.setMoveDescription("The user lays a trap of poison spikes at the feet of the opposing team. The spikes will poison opposing Pokémon that switch into battle.");
         newmove.setSpikeType(Enums.Spikes.TOXIC_SPIKES);
+        newmove.setSelf(true);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.AGILITY, NOT_APPLICABLE, NOT_APPLICABLE, 30, Enums.Subtypes.STATUS,
@@ -758,6 +765,7 @@ public class MoveTemplate {
         newmove.setMoveDescription("The user lands and rests its body. This move restores the user's HP by up to half its max HP.");
         newmove.setHpRestore(0.5f);
         newmove.setSubStatus(Enums.SubStatus.ROOST);
+        newmove.setSelf(true);
         newmove.setStatusProb(1f); // redundant
         moveMap.put(newmove.getName(), newmove);
 
@@ -793,6 +801,7 @@ public class MoveTemplate {
         newmove = new MoveTemplate(MoveEnum.FOCUS_ENERGY, NOT_APPLICABLE, NOT_APPLICABLE, 30, Enums.Subtypes.STATUS,
                 Type.getTypeMap(Enums.Types.NORMAL), false);
         newmove.setSubStatus(Enums.SubStatus.FOCUS_ENERGY);
+        newmove.setSelf(true);
         newmove.setMoveDescription("The user takes a deep breath and focuses so that its future attacks have a heightened chance of landing critical hits.");
         moveMap.put(newmove.getName(), newmove);
 
@@ -824,6 +833,7 @@ public class MoveTemplate {
                 Type.getTypeMap(Enums.Types.NORMAL), false);
         newmove.setMoveDescription("The user concentrates intensely. The attack on the next turn always results in a critical hit.");
         newmove.setSubStatus(Enums.SubStatus.LASER_FOCUS);
+        newmove.setSelf(true);
         newmove.setStatusProb(1f);
         moveMap.put(newmove.getName(), newmove);
 
