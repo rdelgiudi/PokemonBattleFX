@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: linear-gradient(to top left, lightblue, darkblue);" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.delgiudice.pokemonbattlefx.battle.SummaryController">
+<AnchorPane prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: linear-gradient(to top left, lightblue, darkblue);" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.delgiudice.pokemonbattlefx.battle.SwapPokemonController">
    <children>
       <Button fx:id="backButton" layoutX="1176.0" layoutY="681.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="90.0" text="Cancel" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="1176.0">
          <font>
@@ -80,12 +80,12 @@
       </HBox>
       <VBox fx:id="pokemonBox" layoutX="185.0" layoutY="47.0" prefHeight="640.0" prefWidth="700.0" spacing="10.0" AnchorPane.bottomAnchor="90.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="40.0">
          <children>
-            <HBox prefHeight="140.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                <children>
-                  <ImageView fitHeight="130.0" fitWidth="130.0" pickOnBounds="true" preserveRatio="true" />
-                  <VBox prefHeight="150.0" prefWidth="300.0">
+                  <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                  <VBox alignment="CENTER" prefHeight="70.0" prefWidth="300.0">
                      <children>
-                        <Label prefHeight="150.0" prefWidth="299.0" text="Pokemon name">
+                        <Label prefHeight="50.0" prefWidth="299.0" text="Pokemon name">
                            <padding>
                               <Insets left="20.0" />
                            </padding>
@@ -93,16 +93,80 @@
                               <Font name="Monospaced Regular" size="25.0" />
                            </font>
                         </Label>
-                        <Label alignment="CENTER" prefHeight="100.0" prefWidth="300.0" text="Lv???">
+                        <Label alignment="CENTER" prefHeight="20.0" prefWidth="300.0" text="Lv???">
                            <font>
                               <Font name="Monospaced Regular" size="20.0" />
                            </font>
                         </Label>
                      </children>
                   </VBox>
-                  <VBox alignment="CENTER" prefHeight="150.0" prefWidth="250.0">
+                  <VBox alignment="CENTER" prefHeight="70.0" prefWidth="250.0">
                      <children>
-                        <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0" spacing="10.0">
+                        <HBox alignment="CENTER" prefHeight="21.0" prefWidth="312.0" spacing="10.0">
+                           <children>
+                              <Label text="HP">
+                                 <font>
+                                    <Font name="Monospaced Regular" size="14.0" />
+                                 </font>
+                              </Label>
+                              <ProgressBar prefHeight="20.0" prefWidth="300.0" progress="1.0" style="-fx-accent: green;" />
+                           </children>
+                           <VBox.margin>
+                              <Insets right="10.0" />
+                           </VBox.margin>
+                        </HBox>
+                        <Label alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="310.0" text="??/??">
+                           <font>
+                              <Font name="Monospaced Regular" size="18.0" />
+                           </font>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
+                           <VBox.margin>
+                              <Insets right="10.0" />
+                           </VBox.margin>
+                        </Label>
+                        <Label alignment="CENTER" prefHeight="25.0" prefWidth="60.0" style="-fx-background-color: purple; -fx-border-radius: 10; -fx-background-radius: 10;" text="PSN" textFill="WHITE" visible="false">
+                           <font>
+                              <Font name="Monospaced Regular" size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding>
+                  </VBox>
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </HBox>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
+               <children>
+                  <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                  <VBox alignment="CENTER" prefHeight="70.0" prefWidth="300.0">
+                     <children>
+                        <Label prefHeight="50.0" prefWidth="299.0" text="Pokemon name">
+                           <padding>
+                              <Insets left="20.0" />
+                           </padding>
+                           <font>
+                              <Font name="Monospaced Regular" size="25.0" />
+                           </font>
+                        </Label>
+                        <Label alignment="CENTER" prefHeight="20.0" prefWidth="300.0" text="Lv???">
+                           <font>
+                              <Font name="Monospaced Regular" size="20.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  <VBox alignment="CENTER" prefHeight="70.0" prefWidth="250.0">
+                     <children>
+                        <HBox alignment="CENTER" prefHeight="21.0" prefWidth="312.0" spacing="10.0">
                            <children>
                               <Label text="HP">
                                  <font>
@@ -141,12 +205,12 @@
                   </VBox>
                </children>
             </HBox>
-            <HBox prefHeight="140.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                <children>
-                  <ImageView fitHeight="130.0" fitWidth="130.0" pickOnBounds="true" preserveRatio="true" />
-                  <VBox prefHeight="150.0" prefWidth="300.0">
+                  <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                  <VBox alignment="CENTER" prefHeight="70.0" prefWidth="300.0">
                      <children>
-                        <Label prefHeight="150.0" prefWidth="299.0" text="Pokemon name">
+                        <Label prefHeight="50.0" prefWidth="299.0" text="Pokemon name">
                            <padding>
                               <Insets left="20.0" />
                            </padding>
@@ -154,16 +218,16 @@
                               <Font name="Monospaced Regular" size="25.0" />
                            </font>
                         </Label>
-                        <Label alignment="CENTER" prefHeight="100.0" prefWidth="300.0" text="Lv???">
+                        <Label alignment="CENTER" prefHeight="20.0" prefWidth="300.0" text="Lv???">
                            <font>
                               <Font name="Monospaced Regular" size="20.0" />
                            </font>
                         </Label>
                      </children>
                   </VBox>
-                  <VBox fx:id="allyPokemonInfo" alignment="CENTER" prefHeight="150.0" prefWidth="250.0">
+                  <VBox alignment="CENTER" prefHeight="70.0" prefWidth="250.0">
                      <children>
-                        <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0" spacing="10.0">
+                        <HBox alignment="CENTER" prefHeight="21.0" prefWidth="312.0" spacing="10.0">
                            <children>
                               <Label text="HP">
                                  <font>
@@ -202,12 +266,12 @@
                   </VBox>
                </children>
             </HBox>
-            <HBox prefHeight="140.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                <children>
-                  <ImageView fitHeight="130.0" fitWidth="130.0" pickOnBounds="true" preserveRatio="true" />
-                  <VBox prefHeight="150.0" prefWidth="300.0">
+                  <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                  <VBox alignment="CENTER" prefHeight="70.0" prefWidth="300.0">
                      <children>
-                        <Label prefHeight="150.0" prefWidth="299.0" text="Pokemon name">
+                        <Label prefHeight="50.0" prefWidth="299.0" text="Pokemon name">
                            <padding>
                               <Insets left="20.0" />
                            </padding>
@@ -215,16 +279,16 @@
                               <Font name="Monospaced Regular" size="25.0" />
                            </font>
                         </Label>
-                        <Label alignment="CENTER" prefHeight="100.0" prefWidth="300.0" text="Lv???">
+                        <Label alignment="CENTER" prefHeight="20.0" prefWidth="300.0" text="Lv???">
                            <font>
                               <Font name="Monospaced Regular" size="20.0" />
                            </font>
                         </Label>
                      </children>
                   </VBox>
-                  <VBox fx:id="allyPokemonInfo1" alignment="CENTER" prefHeight="150.0" prefWidth="250.0">
+                  <VBox alignment="CENTER" prefHeight="70.0" prefWidth="250.0">
                      <children>
-                        <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0" spacing="10.0">
+                        <HBox alignment="CENTER" prefHeight="21.0" prefWidth="312.0" spacing="10.0">
                            <children>
                               <Label text="HP">
                                  <font>
@@ -263,12 +327,12 @@
                   </VBox>
                </children>
             </HBox>
-            <HBox prefHeight="140.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                <children>
-                  <ImageView fitHeight="130.0" fitWidth="130.0" pickOnBounds="true" preserveRatio="true" />
-                  <VBox prefHeight="150.0" prefWidth="300.0">
+                  <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                  <VBox alignment="CENTER" prefHeight="70.0" prefWidth="300.0">
                      <children>
-                        <Label prefHeight="150.0" prefWidth="299.0" text="Pokemon name">
+                        <Label prefHeight="50.0" prefWidth="299.0" text="Pokemon name">
                            <padding>
                               <Insets left="20.0" />
                            </padding>
@@ -276,16 +340,16 @@
                               <Font name="Monospaced Regular" size="25.0" />
                            </font>
                         </Label>
-                        <Label alignment="CENTER" prefHeight="100.0" prefWidth="300.0" text="Lv???">
+                        <Label alignment="CENTER" prefHeight="20.0" prefWidth="300.0" text="Lv???">
                            <font>
                               <Font name="Monospaced Regular" size="20.0" />
                            </font>
                         </Label>
                      </children>
                   </VBox>
-                  <VBox fx:id="allyPokemonInfo2" alignment="CENTER" prefHeight="150.0" prefWidth="250.0">
+                  <VBox alignment="CENTER" prefHeight="70.0" prefWidth="250.0">
                      <children>
-                        <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0" spacing="10.0">
+                        <HBox alignment="CENTER" prefHeight="21.0" prefWidth="312.0" spacing="10.0">
                            <children>
                               <Label text="HP">
                                  <font>
@@ -326,7 +390,7 @@
             </HBox>
          </children>
       </VBox>
-      <Label layoutY="648.0" prefHeight="67.0" prefWidth="1120.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 15; -fx-border-radius: 10; -fx-background-color: white;" text="Choose a POKEMON." AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0">
+      <Label layoutY="648.0" prefHeight="67.0" prefWidth="1120.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 15; -fx-border-radius: 10; -fx-background-color: white;" text="Choose a POKÉMON." AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0">
          <padding>
             <Insets left="15.0" />
          </padding>

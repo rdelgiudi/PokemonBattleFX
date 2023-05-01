@@ -57,12 +57,16 @@ public class BattleLogic {
     private final HashMap<Enums.Spikes, Integer> enemySpikes =
             new HashMap<Enums.Spikes, Integer>();
 
-    boolean inBattle;
+    public int getCurrentAllyPokemon() {
+        return currentAllyPokemon;
+    }
+
+    public void setCurrentAllyPokemon(int currentAllyPokemon) {
+        this.currentAllyPokemon = currentAllyPokemon;
+    }
 
     public BattleLogic(BattleController controller, Player player, NpcTrainer enemy, Scene teamBuilderScene) {
         this.controller = controller;
-        inBattle = true;
-
         this.player = player;
         this.enemy = enemy;
 
@@ -391,8 +395,21 @@ public class BattleLogic {
         });
 
         pokemonButton.setOnAction( e -> {
-            controller.pokemonButtonPressed(player.getParty());
-            setPokemonSwapListeners(false);
+            //controller.pokemonButtonPressed(player.getParty());
+            //setPokemonSwapListeners(false);
+
+            FXMLLoader loader = new FXMLLoader(BattleApplication.class.getResource("swappokemon-view.fxml"));
+            Scene scene;
+            try {
+                scene = new Scene(loader.load(), 1280, 720);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            Stage stage = (Stage) pokemonButton.getScene().getWindow();
+            SwapPokemonController swapPokemonController = loader.getController();
+            swapPokemonController.initVariables(pokemonButton.getScene(), this, player.getParty());
+            stage.setScene(scene);
         });
 
     }
