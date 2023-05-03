@@ -17,8 +17,6 @@ public class BattleApplication extends Application {
         //stage.maxHeightProperty().bind(stage.widthProperty().multiply(0.5625));
         stage.setTitle("Pokemon Battle FX");
         stage.setScene(scene);
-        stage.setMinHeight(scene.getHeight());
-        stage.setMinWidth(scene.getWidth());
         TeamBuilderController controller = fxmlLoader.getController();
         controller.setUiResizeListener();
 
@@ -26,6 +24,10 @@ public class BattleApplication extends Application {
         //BattleLogic logic = new BattleLogic(controller);
 
         stage.show();
+        stage.setMinHeight(stage.getHeight());
+        stage.setMinWidth(stage.getWidth());
+        stage.setMaxHeight(stage.getHeight());
+        stage.setMaxWidth(stage.getWidth());
     }
 
     public static void main(String[] args) {
