@@ -101,6 +101,15 @@
             </HBox>
             <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0">
                <children>
+                  <HBox alignment="CENTER_LEFT" prefHeight="21.0" prefWidth="45.0">
+                     <children>
+                        <Label fx:id="allyStatusLabel" alignment="CENTER" prefHeight="17.0" prefWidth="42.0" style="-fx-background-color: purple; -fx-border-radius: 10; -fx-background-radius: 10;" text="PSN" textFill="WHITE" visible="false">
+                           <font>
+                              <Font name="Monospaced Regular" size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
                   <Label alignment="CENTER" prefHeight="10.0" prefWidth="28.0" style="-fx-background-color: black; -fx-background-radius: 3;" text="HP" textFill="DODGERBLUE">
                      <font>
                         <Font name="Monospaced Bold" size="16.0" />
@@ -114,11 +123,6 @@
             </HBox>
             <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="350.0">
                <children>
-                  <Label fx:id="allyStatusLabel" alignment="CENTER" prefHeight="17.0" prefWidth="42.0" style="-fx-background-color: purple; -fx-border-radius: 10; -fx-background-radius: 10;" text="PSN" textFill="WHITE" visible="false">
-                     <font>
-                        <Font name="Monospaced Regular" size="12.0" />
-                     </font>
-                  </Label>
                   <Label fx:id="allyHpLabel" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="310.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="??/??" textFill="WHITE">
                      <font>
                         <Font name="Monospaced Bold" size="20.0" />
@@ -170,7 +174,7 @@
             </HBox>
             <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0">
                <children>
-                  <HBox alignment="CENTER_LEFT" prefHeight="21.0" prefWidth="43.0">
+                  <HBox alignment="CENTER_LEFT" prefHeight="21.0" prefWidth="45.0">
                      <children>
                         <Label fx:id="enemyStatusLabel" alignment="CENTER" prefHeight="17.0" prefWidth="42.0" style="-fx-background-color: purple; -fx-border-radius: 10; -fx-background-radius: 10;" text="PSN" textFill="WHITE" visible="false">
                            <font>
