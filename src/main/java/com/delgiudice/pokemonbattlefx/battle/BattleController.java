@@ -175,13 +175,20 @@ public class BattleController {
     }
 
     private Timeline getBattleIdleAnimation() {
+
+        double infoBottomAnchorPos = AnchorPane.getBottomAnchor(allyPokemonInfo);
+        double infoBottomAnchorMov = infoBottomAnchorPos - 3;
+
+        double spriteBottomAnchorPos = AnchorPane.getBottomAnchor(allyPokemonSprite);
+        double spriteBottomAnchorMov = spriteBottomAnchorPos - 3;
+
         final KeyFrame kf1 = new KeyFrame(Duration.ZERO, e -> {
-            AnchorPane.setBottomAnchor(allyPokemonSprite, 63.0);
-            AnchorPane.setBottomAnchor(allyPokemonInfo, 220.0);
+            AnchorPane.setBottomAnchor(allyPokemonSprite, spriteBottomAnchorPos);
+            AnchorPane.setBottomAnchor(allyPokemonInfo, infoBottomAnchorPos);
         });
         final KeyFrame kf2 = new KeyFrame(Duration.seconds(0.3), e -> {
-            AnchorPane.setBottomAnchor(allyPokemonSprite, 60.0);
-            AnchorPane.setBottomAnchor(allyPokemonInfo, 217.0);
+            AnchorPane.setBottomAnchor(allyPokemonSprite, spriteBottomAnchorMov);
+            AnchorPane.setBottomAnchor(allyPokemonInfo, infoBottomAnchorMov);
         });
 
         Timeline timeline = new Timeline(kf1, kf2);
@@ -189,8 +196,8 @@ public class BattleController {
         timeline.setCycleCount(Animation.INDEFINITE);
 
         timeline.setOnFinished(e -> {
-            AnchorPane.setBottomAnchor(allyPokemonSprite, 63.0);
-            AnchorPane.setBottomAnchor(allyPokemonInfo, 220.0);
+            AnchorPane.setBottomAnchor(allyPokemonSprite, spriteBottomAnchorPos);
+            AnchorPane.setBottomAnchor(allyPokemonInfo, infoBottomAnchorPos);
         });
 
         return timeline;
@@ -530,18 +537,21 @@ public class BattleController {
         Timeline timeline = new Timeline();
         timeline.setCycleCount(animationDuration);
 
+        double infoTopAnchorPos = AnchorPane.getTopAnchor(enemyPokemonInfo);
+        double infoTopAnchorMov = infoTopAnchorPos - 3;
+
         KeyFrame kf1, kf2;
 
         kf1 = new KeyFrame(Duration.millis(50), e -> {
             enemyPokemonSprite.setVisible(false);
-            AnchorPane.setTopAnchor(enemyPokemonInfo, 76.0);
+            AnchorPane.setTopAnchor(enemyPokemonInfo, infoTopAnchorMov);
         });
 
         timeline.getKeyFrames().add(kf1);
 
         kf2 = new KeyFrame(Duration.millis(100), e -> {
             enemyPokemonSprite.setVisible(true);
-            AnchorPane.setTopAnchor(enemyPokemonInfo, 79.0);
+            AnchorPane.setTopAnchor(enemyPokemonInfo, infoTopAnchorPos);
         });
 
         timeline.getKeyFrames().add(kf2);
@@ -707,18 +717,21 @@ public class BattleController {
         Timeline timeline = new Timeline();
         timeline.setCycleCount(animationDuration);
 
+        double infoBottomAnchorPos = AnchorPane.getBottomAnchor(allyPokemonInfo);
+        double infoBottomAnchorMov = infoBottomAnchorPos - 3;
+
         KeyFrame kf1, kf2;
 
         kf1 = new KeyFrame(Duration.millis(50), e -> {
             allyPokemonSprite.setVisible(false);
-            AnchorPane.setBottomAnchor(allyPokemonInfo, 217.0);
+            AnchorPane.setBottomAnchor(allyPokemonInfo, infoBottomAnchorMov);
         });
 
         timeline.getKeyFrames().add(kf1);
 
         kf2 = new KeyFrame(Duration.millis(100), e -> {
             allyPokemonSprite.setVisible(true);
-            AnchorPane.setBottomAnchor(allyPokemonInfo, 220.0);
+            AnchorPane.setBottomAnchor(allyPokemonInfo, infoBottomAnchorPos);
         });
 
         timeline.getKeyFrames().add(kf2);

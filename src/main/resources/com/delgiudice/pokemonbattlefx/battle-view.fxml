@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/8.0.362" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.delgiudice.pokemonbattlefx.battle.BattleController">
+<AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: linear-gradient(to bottom, lightskyblue, darkorange);" xmlns="http://javafx.com/javafx/8.0.362" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.delgiudice.pokemonbattlefx.battle.BattleController">
    <children>
       <ImageView fitHeight="300.0" fitWidth="400.0" layoutX="775.0" layoutY="75.0" pickOnBounds="true" preserveRatio="true" AnchorPane.rightAnchor="105.0" AnchorPane.topAnchor="75.0">
          <image>
@@ -80,53 +80,58 @@
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
          </padding>
       </GridPane>
-      <VBox fx:id="allyPokemonInfo" alignment="TOP_RIGHT" layoutY="382.0" prefHeight="118.0" prefWidth="410.0" style="-fx-border-color: black; -fx-background-color: white;" visible="false" AnchorPane.bottomAnchor="220.0" AnchorPane.rightAnchor="15.0">
+      <VBox fx:id="allyPokemonInfo" alignment="TOP_RIGHT" layoutY="382.0" prefHeight="100.0" prefWidth="400.0" style="-fx-background-image: url('pokemon_hp_background.png'); -fx-background-repeat: stretch; -fx-background-position: center center; -fx-background-size: 400 100;" visible="false" AnchorPane.bottomAnchor="230.0" AnchorPane.rightAnchor="15.0">
          <children>
-            <HBox prefHeight="43.0" prefWidth="312.0">
+            <HBox prefHeight="43.0" prefWidth="390.0">
                <children>
-                  <Label fx:id="allyNameLabel" prefHeight="25.0" prefWidth="330.0" text="Ally Pokemon Name">
+                  <Label fx:id="allyNameLabel" prefHeight="25.0" prefWidth="330.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="Ally Pokemon Name" textFill="WHITE">
                      <font>
-                        <Font name="Monospaced Regular" size="18.0" />
+                        <Font name="Monospaced Bold" size="20.0" />
                      </font>
                      <padding>
                         <Insets left="15.0" />
                      </padding>
                   </Label>
-                  <Label fx:id="allyLvLabel" alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="152.0" text="Lv. ???">
+                  <Label fx:id="allyLvLabel" alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="152.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="Lv. ???" textFill="WHITE">
                      <font>
-                        <Font name="Monospaced Regular" size="18.0" />
+                        <Font name="Monospaced Bold" size="20.0" />
                      </font>
                   </Label>
                </children>
             </HBox>
-            <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0" spacing="10.0">
+            <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0">
                <children>
-                  <Label fx:id="allyStatusLabel" alignment="CENTER" prefHeight="17.0" prefWidth="42.0" style="-fx-background-color: purple; -fx-border-radius: 10; -fx-background-radius: 10;" text="PSN" textFill="WHITE" visible="false">
+                  <Label alignment="CENTER" prefHeight="10.0" prefWidth="28.0" style="-fx-background-color: black; -fx-background-radius: 3;" text="HP" textFill="DODGERBLUE">
                      <font>
-                        <Font name="Monospaced Regular" size="12.0" />
+                        <Font name="Monospaced Bold" size="16.0" />
                      </font>
                   </Label>
-                  <Label text="HP">
-                     <font>
-                        <Font name="Monospaced Regular" size="14.0" />
-                     </font></Label>
                   <ProgressBar fx:id="allyHpBar" prefHeight="20.0" prefWidth="300.0" progress="1.0" style="-fx-accent: green;" />
                </children>
                <VBox.margin>
                   <Insets right="10.0" />
                </VBox.margin>
             </HBox>
-            <Label fx:id="allyHpLabel" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="310.0" text="??/??">
-               <font>
-                  <Font name="Monospaced Regular" size="18.0" />
-               </font>
-               <opaqueInsets>
-                  <Insets />
-               </opaqueInsets>
+            <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="350.0">
+               <children>
+                  <Label fx:id="allyStatusLabel" alignment="CENTER" prefHeight="17.0" prefWidth="42.0" style="-fx-background-color: purple; -fx-border-radius: 10; -fx-background-radius: 10;" text="PSN" textFill="WHITE" visible="false">
+                     <font>
+                        <Font name="Monospaced Regular" size="12.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="allyHpLabel" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="310.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="??/??" textFill="WHITE">
+                     <font>
+                        <Font name="Monospaced Bold" size="20.0" />
+                     </font>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </Label>
+               </children>
                <VBox.margin>
-                  <Insets right="10.0" />
+                  <Insets left="30.0" />
                </VBox.margin>
-            </Label>
+            </HBox>
          </children>
          <opaqueInsets>
             <Insets />
@@ -135,13 +140,13 @@
             <Insets right="10.0" />
          </padding>
       </VBox>
-      <VBox fx:id="enemyPokemonInfo" alignment="TOP_RIGHT" layoutX="15.0" layoutY="79.0" prefHeight="118.0" prefWidth="410.0" style="-fx-border-color: black; -fx-background-color: white;" visible="false" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="79.0">
+      <VBox fx:id="enemyPokemonInfo" alignment="TOP_RIGHT" layoutX="15.0" layoutY="79.0" prefHeight="75.0" prefWidth="400.0" style="-fx-background-image: url('pokemon_hp_background_mini.png'); -fx-background-repeat: stretch; -fx-background-position: center center; -fx-background-size: 400 75;" visible="false" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="80.0">
          <children>
             <HBox prefHeight="43.0" prefWidth="312.0">
                <children>
-                  <Label fx:id="enemyNameLabel" prefHeight="25.0" prefWidth="330.0" text="Enemy Pokemon Name">
+                  <Label fx:id="enemyNameLabel" prefHeight="25.0" prefWidth="330.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="Enemy Pokemon Name" textFill="WHITE">
                      <font>
-                        <Font name="Monospaced Regular" size="18.0" />
+                        <Font name="Monospaced Bold" size="20.0" />
                      </font>
                      <opaqueInsets>
                         <Insets />
@@ -153,9 +158,9 @@
                         <Insets left="15.0" />
                      </padding>
                   </Label>
-                  <Label fx:id="enemyLvLabel" alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="152.0" text="Lv. ???">
+                  <Label fx:id="enemyLvLabel" alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="152.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="Lv. ???" textFill="WHITE">
                      <font>
-                        <Font name="Monospaced Regular" size="18.0" />
+                        <Font name="Monospaced Bold" size="20.0" />
                      </font>
                      <opaqueInsets>
                         <Insets />
@@ -163,17 +168,22 @@
                   </Label>
                </children>
             </HBox>
-            <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0" spacing="10.0">
+            <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0">
                <children>
-                  <Label fx:id="enemyStatusLabel" alignment="CENTER" prefHeight="17.0" prefWidth="42.0" style="-fx-background-color: purple; -fx-border-radius: 10; -fx-background-radius: 10;" text="PSN" textFill="WHITE" visible="false">
+                  <HBox alignment="CENTER_LEFT" prefHeight="21.0" prefWidth="43.0">
+                     <children>
+                        <Label fx:id="enemyStatusLabel" alignment="CENTER" prefHeight="17.0" prefWidth="42.0" style="-fx-background-color: purple; -fx-border-radius: 10; -fx-background-radius: 10;" text="PSN" textFill="WHITE" visible="false">
+                           <font>
+                              <Font name="Monospaced Regular" size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <Label alignment="CENTER" prefHeight="10.0" prefWidth="28.0" style="-fx-background-color: black; -fx-background-radius: 3;" text="HP" textFill="DODGERBLUE">
                      <font>
-                        <Font name="Monospaced Regular" size="12.0" />
+                        <Font name="Monospaced Bold" size="16.0" />
                      </font>
                   </Label>
-                  <Label text="HP">
-                     <font>
-                        <Font name="Monospaced Regular" size="14.0" />
-                     </font></Label>
                   <ProgressBar fx:id="enemyHpBar" prefHeight="20.0" prefWidth="300.0" progress="1.0" style="-fx-accent: green;" />
                </children>
                <VBox.margin>
