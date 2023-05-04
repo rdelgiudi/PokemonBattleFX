@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -34,7 +35,7 @@ public class AddPokemonController {
     private ChoiceBox<String> natureChoiceBox;
 
     private Pokemon currentPokemon;
-    private Scene previousScene;
+    private Pane previousPane;
     private List<Pokemon> playerParty, enemyParty;
     private TeamBuilderController previousController;
     private boolean editModeAlly;
@@ -44,10 +45,10 @@ public class AddPokemonController {
         setStatisticsListeners();
     }
 
-    public void setAddData(Pokemon pokemon, List<Pokemon> playerParty, List<Pokemon> enemyParty, Scene scene,
-                           TeamBuilderController previousController) {
+    public void setAddData(Pokemon pokemon, List<Pokemon> playerParty, List<Pokemon> enemyParty,
+                           TeamBuilderController previousController, Pane pane) {
         currentPokemon = new Pokemon(pokemon);
-        previousScene = scene;
+        previousPane = pane;
         this.playerParty = playerParty;
         this.enemyParty = enemyParty;
         this.previousController = previousController;
@@ -90,7 +91,7 @@ public class AddPokemonController {
     public void returnToBuilder() {
         Stage stage = (Stage) backButton.getScene().getWindow();
         stage.setTitle("Pokemon Battle FX");
-        stage.setScene(previousScene);
+        backButton.getScene().setRoot(previousPane);
     }
 
     @FXML

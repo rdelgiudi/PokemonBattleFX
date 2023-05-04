@@ -21,6 +21,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -43,8 +46,8 @@ public class BattleLogic {
     private NpcTrainer enemy;
 
     private final FXMLLoader swapPokemonLoader;
-    private final Scene swapPokemonScene;
-    private final Scene teamBuilderScene;
+    private final Pane swapPokemonPane;
+    private final Pane teamBuilderPane;
 
     private int currentAllyPokemon = 0, currentEnemyPokemon = 0;
     private boolean enemySentOut, allySentOut;
@@ -65,20 +68,22 @@ public class BattleLogic {
         this.currentAllyPokemon = currentAllyPokemon;
     }
 
-    public BattleLogic(BattleController controller, Player player, NpcTrainer enemy, Scene teamBuilderScene) {
+    public BattleLogic(BattleController controller, Player player, NpcTrainer enemy, Pane teamBuilderPane) {
         this.controller = controller;
         this.player = player;
         this.enemy = enemy;
 
         swapPokemonLoader = new FXMLLoader(BattleApplication.class.getResource("swappokemon-view.fxml"));
         try {
-            swapPokemonScene = new Scene(swapPokemonLoader.load(), 1280, 720);
+            swapPokemonPane = swapPokemonLoader.load();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
 
-        this.teamBuilderScene = teamBuilderScene;
+        this.teamBuilderPane = teamBuilderPane;
+    }
 
+    public void startBattle() {
         initBattleLoop();
     }
 
@@ -182,7 +187,10 @@ public class BattleLogic {
         //battleLostMsg1.setOnFinished(e -> battleLostMsg2.play());
         //battleLostMsg2.setOnFinished(e -> battleLostMsg3.play());
         battleLostMsg3.setOnFinished(e -> paused.play());
-        paused.setOnFinished(e -> stage.setScene(teamBuilderScene));
+        paused.setOnFinished(e -> {
+            stage.setTitle("Pokemon Battle FX");
+            controller.getFightButton().getScene().setRoot(teamBuilderPane);
+        });
 
         for (Pokemon pokemon : player.getParty()) {
             pokemon.restoreAll();
@@ -208,7 +216,10 @@ public class BattleLogic {
         controller.battleTextAdvanceByUserInput(battleWonMsg1, battleWonMsg2);
         //battleWonMsg1.setOnFinished(e -> battleWonMsg2.play());
         battleWonMsg2.setOnFinished(e -> paused.play());
-        paused.setOnFinished(e -> stage.setScene(teamBuilderScene));
+        paused.setOnFinished(e -> {
+            stage.setTitle("Pokemon Battle FX");
+            controller.getFightButton().getScene().setRoot(teamBuilderPane);
+        });
 
         for (Pokemon pokemon : player.getParty()) {
             pokemon.restoreAll();
@@ -400,8 +411,8 @@ public class BattleLogic {
 
             Stage stage = (Stage) pokemonButton.getScene().getWindow();
             SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
-            swapPokemonController.initVariables(pokemonButton.getScene(), this, controller, player.getParty());
-            stage.setScene(swapPokemonScene);
+            swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(), this, controller, player.getParty());
+            pokemonButton.getScene().setRoot(swapPokemonPane);
         });
 
     }
@@ -849,8 +860,8 @@ public class BattleLogic {
 
                 Stage stage = (Stage) pokemonButton.getScene().getWindow();
                 SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
-                swapPokemonController.initVariables(pokemonButton.getScene(), this, controller, player.getParty());
-                stage.setScene(swapPokemonScene);
+                swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(), this, controller, player.getParty());
+                pokemonButton.getScene().setRoot(swapPokemonPane);
             });
             initAnimationQueue(battleTimeLine);
             battleTimeLine.get(0).play();

@@ -20,6 +20,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -48,6 +49,7 @@ public class TeamBuilderController {
 
     FXMLLoader addPokemonLoader;
     Scene addPokemonScene;
+    Pane addPokemonPane;
 
     private int FONT_SIZE = 13, POKEMON_BUTTON_WIDTH = 125, POKEMON_BUTTON_HEIGHT = 100, POKEMON_PANE_SIZE = 450;
     private int PARTY_BUTTON_WIDTH = 100, PARTY_BUTTON_HEIGHT = 100;
@@ -79,8 +81,10 @@ public class TeamBuilderController {
         preparePartyButtons(enemyPartyBox, enemyParty, false);
 
         addPokemonLoader = new FXMLLoader(BattleApplication.class.getResource("addpokemon-view.fxml"));
+        addPokemonPane = null;
         try {
-            addPokemonScene = new Scene(addPokemonLoader.load(), 1280, 720);
+            addPokemonPane = addPokemonLoader.load();
+            //addPokemonScene = new Scene(addPokemonPane, 1280, 720);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -226,12 +230,14 @@ public class TeamBuilderController {
 
             pokemonButton.setOnAction(e -> {
                 Stage stage = (Stage) startBattleButton.getScene().getWindow();
+                Scene scene = startBattleButton.getScene();
                 //Pokemon pokemonExample = Pokemon.getPokemonExamples().get(pokemon.getOriginalName());
                 AddPokemonController controller = addPokemonLoader.getController();
-                controller.setAddData(pokemon, playerParty, enemyParty, startBattleButton.getScene(), this);
+                controller.setAddData(pokemon, playerParty, enemyParty, this,
+                        (Pane) startBattleButton.getScene().getRoot());
                 controller.enterAddMode();
                 stage.setTitle("Add Pokemon!");
-                stage.setScene(addPokemonScene);
+                scene.setRoot(addPokemonPane);
             });
         }
     }
@@ -239,15 +245,18 @@ public class TeamBuilderController {
     private void editPokemon(int index, List<Pokemon> party) {
         Stage stage = (Stage) startBattleButton.getScene().getWindow();
         AddPokemonController controller = addPokemonLoader.getController();
-        controller.setAddData(party.get(index), playerParty, enemyParty, startBattleButton.getScene(), this);
+        controller.setAddData(party.get(index), playerParty, enemyParty,this,
+                (Pane) startBattleButton.getScene().getRoot());
         stage.setTitle("Edit Pokemon!");
         controller.enterEditMode(playerParty.equals(party), index);
+        boolean isFullscreen = stage.isFullScreen();
         stage.setScene(addPokemonScene);
+        stage.setFullScreen(isFullscreen);
     }
 
     public void refreshParties() {
-        playerPartyBox.setPrefSize((PARTY_BUTTON_WIDTH +5) * 6, PARTY_BUTTON_HEIGHT);
-        enemyPartyBox.setPrefSize((PARTY_BUTTON_WIDTH +5) * 6, PARTY_BUTTON_HEIGHT);
+        //playerPartyBox.setPrefSize((PARTY_BUTTON_WIDTH +5) * 6, PARTY_BUTTON_HEIGHT);
+        //enemyPartyBox.setPrefSize((PARTY_BUTTON_WIDTH +5) * 6, PARTY_BUTTON_HEIGHT);
 
         String buttonText = "%s%nLv. %-3d";
 
@@ -315,13 +324,15 @@ public class TeamBuilderController {
             enemy.addPokemon(enemyParty.get(i));
 
         FXMLLoader fxmlLoader = new FXMLLoader(BattleApplication.class.getResource("battle-view.fxml"));
-        Scene teamBuilderScene = startBattleButton.getScene();
+        Pane teamBuilderPane = (Pane) startBattleButton.getScene().getRoot();
         Stage stage = (Stage) startBattleButton.getScene().getWindow();
-        Scene scene = new Scene(fxmlLoader.load(), 1280, 720);
+        Pane pane = fxmlLoader.load();
         stage.setTitle("Battle!");
-        stage.setScene(scene);
+        startBattleButton.getScene().setRoot(pane);
+
 
         BattleController controller = fxmlLoader.getController();
-        BattleLogic logic = new BattleLogic(controller, player, enemy, teamBuilderScene);
+        BattleLogic logic = new BattleLogic(controller, player, enemy, teamBuilderPane);
+        logic.startBattle();
     }
 }

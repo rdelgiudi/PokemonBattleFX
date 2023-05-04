@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -27,12 +28,12 @@ public class SwapPokemonController {
     private static final String hoverStyle = "-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15; " +
             "-fx-background-color: azure";
 
-    private Scene battleScene;
+    private Pane battlePane;
     private BattleLogic battleLogic;
     private BattleController battleController;
 
     private final FXMLLoader summaryLoader;
-    private final Scene summaryScene;
+    private final Pane summaryPane;
 
     private List<Pokemon> party;
 
@@ -48,22 +49,24 @@ public class SwapPokemonController {
     public SwapPokemonController() {
         summaryLoader = new FXMLLoader(BattleApplication.class.getResource("summary-view.fxml"));
         try {
-            summaryScene = new Scene(summaryLoader.load(), 1280, 720);
+            summaryPane = summaryLoader.load();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+
+        //BattleApplication.letterbox(summaryScene, pane);
     }
 
-    public void initVariables(Scene battleScene, BattleLogic logic, BattleController controller, List<Pokemon> party) {
-        this.battleScene = battleScene;
+    public void initVariables(Pane battlePane, BattleLogic logic, BattleController controller, List<Pokemon> party) {
+        this.battlePane = battlePane;
         battleLogic = logic;
         this.party = party;
         battleController = controller;
         initPokemonInfo();
 
         cancelButton.setOnAction(e -> {
-            Stage stage = (Stage) cancelButton.getScene().getWindow();
-            stage.setScene(battleScene);
+            Scene scene = cancelButton.getScene();
+            scene.setRoot(battlePane);
         });
     }
 
@@ -255,8 +258,8 @@ public class SwapPokemonController {
                     party.get(newCurrentAllyPokemon).getHp());
             battleTimeLine.add(allyInfoAnimation);
 
-            Stage stage = (Stage) pokemonBox.getScene().getWindow();
-            stage.setScene(battleScene);
+            Scene scene = pokemonBox.getScene();
+            scene.setRoot(battlePane);
 
             if (!allyFainted) {
                 battleLogic.initAnimationQueue(battleTimeLine);
@@ -271,13 +274,12 @@ public class SwapPokemonController {
         summary.setOnAction(event -> {
             Scene scene = pokemonBox.getScene();
 
-            Stage stage = (Stage) pokemonBox.getScene().getWindow();
             SummaryController summaryController = summaryLoader.getController();
             summaryController.setParty(party);
             summaryController.displayPokemonStat(index);
-            summaryController.setPreviousScene(scene);
+            summaryController.setPreviousPane((Pane) scene.getRoot());
 
-            stage.setScene(summaryScene);
+            scene.setRoot(summaryPane);
         });
 
         cancel.setOnAction(event -> contextMenu.hide());

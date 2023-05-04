@@ -8,11 +8,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public class SummaryController {
     private VBox moveBox, moveInfoBox;
 
     private List<Pokemon> party;
-    private Scene previousScene;
+    private Pane previousPane;
     private int currentIndex;
 
     public void initialize() {
@@ -42,8 +42,8 @@ public class SummaryController {
         this.party = party;
     }
 
-    public void setPreviousScene(Scene previousScene) {
-        this.previousScene = previousScene;
+    public void setPreviousPane(Pane previousPane) {
+        this.previousPane = previousPane;
     }
 
     private String format(double val) {
@@ -208,9 +208,8 @@ public class SummaryController {
 
     private void setListeners() {
         backButton.setOnAction(e -> {
-            Stage stage = (Stage) backButton.getScene().getWindow();
-            stage.setScene(previousScene);
-            //stage.show();
+            Scene scene = backButton.getScene();
+            scene.setRoot(previousPane);
         });
 
         nextButton.setOnAction(e -> {

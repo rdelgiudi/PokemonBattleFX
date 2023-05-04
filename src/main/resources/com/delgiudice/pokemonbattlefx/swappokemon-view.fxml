@@ -12,7 +12,7 @@
 
 <AnchorPane prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: linear-gradient(to top left, lightblue, darkblue);" xmlns="http://javafx.com/javafx/8.0.362" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.delgiudice.pokemonbattlefx.battle.SwapPokemonController">
    <children>
-      <Button fx:id="cancelButton" layoutX="1136.0" layoutY="681.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="130.0" text="Cancel" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="1136.0">
+      <Button fx:id="cancelButton" layoutX="1136.0" layoutY="657.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="130.0" text="Cancel">
          <font>
             <Font name="Monospaced Regular" size="12.0" />
          </font>
@@ -78,7 +78,7 @@
             </VBox>
          </children>
       </HBox>
-      <VBox fx:id="pokemonBox" layoutX="185.0" layoutY="47.0" prefHeight="640.0" prefWidth="700.0" spacing="10.0" AnchorPane.bottomAnchor="90.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="40.0">
+      <VBox fx:id="pokemonBox" layoutX="501.0" layoutY="40.0" prefHeight="600.0" prefWidth="700.0" spacing="10.0">
          <children>
             <HBox alignment="CENTER" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                <children>
@@ -375,7 +375,7 @@
             </HBox>
          </children>
       </VBox>
-      <Label fx:id="infoLabel" layoutY="648.0" prefHeight="67.0" prefWidth="1120.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 15; -fx-border-radius: 10; -fx-background-color: white;" text="Choose a POKÉMON." AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0">
+      <Label fx:id="infoLabel" layoutX="14.0" layoutY="649.0" prefHeight="67.0" prefWidth="1120.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 15; -fx-border-radius: 10; -fx-background-color: white;" text="Choose a POKÉMON.">
          <padding>
             <Insets left="15.0" />
          </padding>
