@@ -7,294 +7,303 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: linear-gradient(to bottom, lightskyblue, darkorange);" xmlns="http://javafx.com/javafx/8.0.362" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.delgiudice.pokemonbattlefx.battle.BattleController">
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/8.0.362" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.delgiudice.pokemonbattlefx.battle.BattleController">
    <children>
-      <ImageView fitHeight="300.0" fitWidth="400.0" layoutX="775.0" layoutY="75.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../pokemon_platform.png" />
-         </image>
-      </ImageView>
-      <ImageView fitHeight="600.0" fitWidth="800.0" layoutX="-35.0" layoutY="228.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../pokemon_platform.png" />
-         </image>
-      </ImageView>
-      <ImageView fx:id="allyPokemonSprite" fitHeight="380.0" fitWidth="380.0" layoutX="157.0" layoutY="277.0" pickOnBounds="true" preserveRatio="true" smooth="false" />
-      <ImageView fx:id="enemyPokemonSprite" fitHeight="260.0" fitWidth="260.0" layoutX="845.0" layoutY="39.0" pickOnBounds="true" preserveRatio="true" smooth="false" visible="false" />
-      <TextArea fx:id="battleTextFull" editable="false" layoutY="560.0" prefHeight="160.0" prefWidth="1280.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: white;">
-         <font>
-            <Font name="Monospaced Regular" size="40.0" />
-         </font>
-      </TextArea>
-      <TextArea fx:id="battleText" editable="false" layoutY="560.0" prefHeight="160.0" prefWidth="730.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: white;" visible="false">
-         <font>
-            <Font name="Monospaced Regular" size="40.0" />
-         </font>
-         <opaqueInsets>
-            <Insets />
-         </opaqueInsets>
-      </TextArea>
-      <ImageView fx:id="textArrowView" fitHeight="30.0" fitWidth="30.0" layoutX="1227.0" layoutY="680.0" pickOnBounds="true" preserveRatio="true" visible="false">
-         <image>
-            <Image url="@../../../text_arrow.png" />
-         </image>
-      </ImageView>
-      <GridPane fx:id="optionGrid" alignment="CENTER" hgap="5.0" layoutX="730.0" layoutY="560.0" prefHeight="160.0" prefWidth="550.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: lightgray;" vgap="5.0" visible="false">
-        <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" />
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="230.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-        </rowConstraints>
+      <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: linear-gradient(to bottom, lightskyblue, darkorange);">
          <children>
-            <Button fx:id="fightButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="60.0" prefWidth="533.0" style="-fx-background-color: firebrick; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Fight" textFill="WHITE" GridPane.columnSpan="3">
+            <ImageView fitHeight="300.0" fitWidth="400.0" layoutX="785.0" layoutY="85.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../pokemon_platform.png" />
+               </image>
+            </ImageView>
+            <ImageView fitHeight="600.0" fitWidth="800.0" layoutX="-24.0" layoutY="225.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../../../pokemon_platform.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="allyPokemonSprite" fitHeight="380.0" fitWidth="380.0" layoutX="167.0" layoutY="287.0" pickOnBounds="true" preserveRatio="true" smooth="false" />
+            <ImageView fx:id="enemyPokemonSprite" fitHeight="260.0" fitWidth="260.0" layoutX="855.0" layoutY="49.0" pickOnBounds="true" preserveRatio="true" smooth="false" visible="false" />
+            <TextArea fx:id="battleTextFull" editable="false" layoutY="560.0" prefHeight="160.0" prefWidth="1280.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: white;">
                <font>
-                  <Font name="Monospaced Regular" size="18.0" />
-               </font></Button>
-            <Button fx:id="bagButton" mnemonicParsing="false" prefHeight="75.0" prefWidth="165.0" style="-fx-background-color: goldenrod; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Bag" textFill="WHITE" GridPane.rowIndex="1" GridPane.rowSpan="2">
+                  <Font name="Monospaced Regular" size="40.0" />
+               </font>
+            </TextArea>
+            <TextArea fx:id="battleText" editable="false" layoutY="560.0" prefHeight="160.0" prefWidth="730.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: white;" visible="false">
                <font>
-                  <Font name="Monospaced Regular" size="18.0" />
-               </font></Button>
-            <Button fx:id="pokemonButton" mnemonicParsing="false" prefHeight="115.0" prefWidth="175.0" style="-fx-background-color: forestgreen; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Pokemon" textFill="WHITE" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="2">
-               <font>
-                  <Font name="Monospaced Regular" size="18.0" />
-               </font></Button>
-            <Button fx:id="runButton" mnemonicParsing="false" prefHeight="35.0" prefWidth="230.0" style="-fx-background-color: dodgerblue; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Run" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="2">
-               <font>
-                  <Font name="Monospaced Regular" size="18.0" />
-               </font></Button>
-         </children>
-         <padding>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-         </padding>
-      </GridPane>
-      <VBox fx:id="allyPokemonInfo" alignment="TOP_RIGHT" layoutX="866.0" layoutY="375.0" prefHeight="100.0" prefWidth="400.0" style="-fx-background-image: url('pokemon_hp_background.png'); -fx-background-repeat: stretch; -fx-background-position: center center; -fx-background-size: 400 100;" visible="false">
-         <children>
-            <HBox prefHeight="43.0" prefWidth="390.0">
+                  <Font name="Monospaced Regular" size="40.0" />
+               </font>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+            </TextArea>
+            <ImageView fx:id="textArrowView" fitHeight="30.0" fitWidth="30.0" layoutX="1237.0" layoutY="690.0" pickOnBounds="true" preserveRatio="true" visible="false">
+               <image>
+                  <Image url="@../../../text_arrow.png" />
+               </image>
+            </ImageView>
+            <GridPane fx:id="optionGrid" alignment="CENTER" hgap="5.0" layoutX="730.0" layoutY="560.0" prefHeight="160.0" prefWidth="550.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: lightgray;" vgap="5.0" visible="false">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="230.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="60.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
                <children>
-                  <Label fx:id="allyNameLabel" prefHeight="25.0" prefWidth="330.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="Ally Pokemon Name" textFill="WHITE">
+                  <Button fx:id="fightButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="60.0" prefWidth="533.0" style="-fx-background-color: firebrick; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Fight" textFill="WHITE" GridPane.columnSpan="3">
                      <font>
-                        <Font name="Monospaced Bold" size="20.0" />
+                        <Font name="Monospaced Regular" size="18.0" />
                      </font>
-                     <padding>
-                        <Insets left="15.0" />
-                     </padding>
-                  </Label>
-                  <Label fx:id="allyLvLabel" alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="152.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="Lv. ???" textFill="WHITE">
+                  </Button>
+                  <Button fx:id="bagButton" mnemonicParsing="false" prefHeight="75.0" prefWidth="165.0" style="-fx-background-color: goldenrod; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Bag" textFill="WHITE" GridPane.rowIndex="1" GridPane.rowSpan="2">
                      <font>
-                        <Font name="Monospaced Bold" size="20.0" />
+                        <Font name="Monospaced Regular" size="18.0" />
                      </font>
-                  </Label>
+                  </Button>
+                  <Button fx:id="pokemonButton" mnemonicParsing="false" prefHeight="115.0" prefWidth="175.0" style="-fx-background-color: forestgreen; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Pokemon" textFill="WHITE" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="2">
+                     <font>
+                        <Font name="Monospaced Regular" size="18.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="runButton" mnemonicParsing="false" prefHeight="35.0" prefWidth="230.0" style="-fx-background-color: dodgerblue; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Run" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                     <font>
+                        <Font name="Monospaced Regular" size="18.0" />
+                     </font>
+                  </Button>
                </children>
-            </HBox>
-            <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0">
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </GridPane>
+            <VBox fx:id="allyPokemonInfo" alignment="TOP_RIGHT" layoutX="855.0" layoutY="385.0" prefHeight="100.0" prefWidth="400.0" style="-fx-background-image: url('pokemon_hp_background.png'); -fx-background-repeat: stretch; -fx-background-position: center center; -fx-background-size: 400 100;" visible="false">
                <children>
-                  <HBox alignment="CENTER_LEFT" prefHeight="21.0" prefWidth="45.0">
+                  <HBox prefHeight="43.0" prefWidth="390.0">
                      <children>
-                        <Label fx:id="allyStatusLabel" alignment="CENTER" prefHeight="17.0" prefWidth="42.0" style="-fx-background-color: purple; -fx-border-radius: 10; -fx-background-radius: 10;" text="PSN" textFill="WHITE" visible="false">
+                        <Label fx:id="allyNameLabel" prefHeight="25.0" prefWidth="330.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="Ally Pokemon Name" textFill="WHITE">
                            <font>
-                              <Font name="Monospaced Regular" size="12.0" />
+                              <Font name="Monospaced Bold" size="20.0" />
+                           </font>
+                           <padding>
+                              <Insets left="15.0" />
+                           </padding>
+                        </Label>
+                        <Label fx:id="allyLvLabel" alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="152.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="Lv. ???" textFill="WHITE">
+                           <font>
+                              <Font name="Monospaced Bold" size="20.0" />
                            </font>
                         </Label>
                      </children>
                   </HBox>
-                  <Label alignment="CENTER" prefHeight="10.0" prefWidth="28.0" style="-fx-background-color: black; -fx-background-radius: 3;" text="HP" textFill="DODGERBLUE">
-                     <font>
-                        <Font name="Monospaced Bold" size="16.0" />
-                     </font>
-                  </Label>
-                  <ProgressBar fx:id="allyHpBar" prefHeight="20.0" prefWidth="300.0" progress="1.0" style="-fx-accent: green;" />
-               </children>
-               <VBox.margin>
-                  <Insets right="10.0" />
-               </VBox.margin>
-            </HBox>
-            <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="350.0">
-               <children>
-                  <Label fx:id="allyHpLabel" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="310.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="??/??" textFill="WHITE">
-                     <font>
-                        <Font name="Monospaced Bold" size="20.0" />
-                     </font>
-                     <opaqueInsets>
-                        <Insets />
-                     </opaqueInsets>
-                  </Label>
-               </children>
-               <VBox.margin>
-                  <Insets left="30.0" />
-               </VBox.margin>
-            </HBox>
-         </children>
-         <opaqueInsets>
-            <Insets />
-         </opaqueInsets>
-         <padding>
-            <Insets right="10.0" />
-         </padding>
-      </VBox>
-      <VBox fx:id="enemyPokemonInfo" alignment="TOP_RIGHT" layoutX="15.0" layoutY="79.0" prefHeight="75.0" prefWidth="400.0" style="-fx-background-image: url('pokemon_hp_background_mini.png'); -fx-background-repeat: stretch; -fx-background-position: center center; -fx-background-size: 400 75;" visible="false">
-         <children>
-            <HBox prefHeight="43.0" prefWidth="312.0">
-               <children>
-                  <Label fx:id="enemyNameLabel" prefHeight="25.0" prefWidth="330.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="Enemy Pokemon Name" textFill="WHITE">
-                     <font>
-                        <Font name="Monospaced Bold" size="20.0" />
-                     </font>
-                     <opaqueInsets>
-                        <Insets />
-                     </opaqueInsets>
-                     <HBox.margin>
-                        <Insets />
-                     </HBox.margin>
-                     <padding>
-                        <Insets left="15.0" />
-                     </padding>
-                  </Label>
-                  <Label fx:id="enemyLvLabel" alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="152.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="Lv. ???" textFill="WHITE">
-                     <font>
-                        <Font name="Monospaced Bold" size="20.0" />
-                     </font>
-                     <opaqueInsets>
-                        <Insets />
-                     </opaqueInsets>
-                  </Label>
-               </children>
-            </HBox>
-            <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0">
-               <children>
-                  <HBox alignment="CENTER_LEFT" prefHeight="21.0" prefWidth="45.0">
+                  <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0">
                      <children>
-                        <Label fx:id="enemyStatusLabel" alignment="CENTER" prefHeight="17.0" prefWidth="42.0" style="-fx-background-color: purple; -fx-border-radius: 10; -fx-background-radius: 10;" text="PSN" textFill="WHITE" visible="false">
+                        <HBox alignment="CENTER_LEFT" prefHeight="21.0" prefWidth="45.0">
+                           <children>
+                              <Label fx:id="allyStatusLabel" alignment="CENTER" prefHeight="17.0" prefWidth="42.0" style="-fx-background-color: purple; -fx-border-radius: 10; -fx-background-radius: 10;" text="PSN" textFill="WHITE" visible="false">
+                                 <font>
+                                    <Font name="Monospaced Regular" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <Label alignment="CENTER" prefHeight="10.0" prefWidth="28.0" style="-fx-background-color: black; -fx-background-radius: 3;" text="HP" textFill="DODGERBLUE">
                            <font>
-                              <Font name="Monospaced Regular" size="12.0" />
+                              <Font name="Monospaced Bold" size="16.0" />
                            </font>
+                        </Label>
+                        <ProgressBar fx:id="allyHpBar" prefHeight="20.0" prefWidth="300.0" progress="1.0" style="-fx-accent: green;" />
+                     </children>
+                     <VBox.margin>
+                        <Insets right="10.0" />
+                     </VBox.margin>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="350.0">
+                     <children>
+                        <Label fx:id="allyHpLabel" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="310.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="??/??" textFill="WHITE">
+                           <font>
+                              <Font name="Monospaced Bold" size="20.0" />
+                           </font>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
                         </Label>
                      </children>
+                     <VBox.margin>
+                        <Insets left="30.0" />
+                     </VBox.margin>
                   </HBox>
-                  <Label alignment="CENTER" prefHeight="10.0" prefWidth="28.0" style="-fx-background-color: black; -fx-background-radius: 3;" text="HP" textFill="DODGERBLUE">
-                     <font>
-                        <Font name="Monospaced Bold" size="16.0" />
-                     </font>
-                  </Label>
-                  <ProgressBar fx:id="enemyHpBar" prefHeight="20.0" prefWidth="300.0" progress="1.0" style="-fx-accent: green;" />
                </children>
-               <VBox.margin>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
                   <Insets right="10.0" />
-               </VBox.margin>
-            </HBox>
-         </children>
-         <padding>
-            <Insets right="10.0" />
-         </padding>
-      </VBox>
-      <GridPane fx:id="moveGrid" hgap="5.0" layoutY="560.0" prefHeight="160.0" prefWidth="1280.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: white;" vgap="5.0" visible="false">
-         <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="313.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="350.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="350.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="250.0" />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-         </rowConstraints>
-         <children>
-            <Button fx:id="firstMoveButton" mnemonicParsing="false" prefHeight="99999.0" prefWidth="99999.0" text="Move 1" GridPane.columnIndex="1" />
-            <Button fx:id="secondMoveButton" mnemonicParsing="false" prefHeight="99999.0" prefWidth="99999.0" text="Move 2" GridPane.columnIndex="2" />
-            <Button fx:id="thirdMoveButton" mnemonicParsing="false" prefHeight="99999.0" prefWidth="99999.0" text="Move 3" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Button fx:id="fourthMoveButton" mnemonicParsing="false" prefHeight="99999.0" prefWidth="99999.0" text="Move 4" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <Button fx:id="backMoveButton" mnemonicParsing="false" prefHeight="99999.0" prefWidth="99999.0" style="-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 7; -fx-border-color: black;" text="Back" GridPane.columnIndex="3" GridPane.rowIndex="1">
-               <font>
-                  <Font name="Monospaced Regular" size="20.0" />
-               </font></Button>
-            <VBox fx:id="moveTypeBox" prefHeight="99999.0" prefWidth="99999.0" style="-fx-border-color: black; -fx-border-width: 5;" GridPane.rowSpan="2">
+               </padding>
+            </VBox>
+            <VBox fx:id="enemyPokemonInfo" alignment="TOP_RIGHT" layoutX="14.0" layoutY="91.0" prefHeight="75.0" prefWidth="400.0" style="-fx-background-image: url('pokemon_hp_background_mini.png'); -fx-background-repeat: stretch; -fx-background-position: center center; -fx-background-size: 400 75;" visible="false">
                <children>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="99999.0" prefWidth="99999.0" spacing="10.0">
+                  <HBox prefHeight="43.0" prefWidth="312.0">
                      <children>
-                        <Label prefHeight="99999.0" prefWidth="99999.0" text="Type:">
+                        <Label fx:id="enemyNameLabel" prefHeight="25.0" prefWidth="330.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="Enemy Pokemon Name" textFill="WHITE">
                            <font>
-                              <Font name="Monospaced Regular" size="30.0" />
+                              <Font name="Monospaced Bold" size="20.0" />
                            </font>
-                        </Label>
-                        <Label fx:id="moveTypeLabel" alignment="CENTER" prefHeight="99999.0" prefWidth="99999.0" text="Label" textFill="WHITE">
-                           <font>
-                              <Font name="Monospaced Regular" size="25.0" />
-                           </font>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
                            <HBox.margin>
-                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                              <Insets />
                            </HBox.margin>
+                           <padding>
+                              <Insets left="15.0" />
+                           </padding>
+                        </Label>
+                        <Label fx:id="enemyLvLabel" alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="152.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="Lv. ???" textFill="WHITE">
+                           <font>
+                              <Font name="Monospaced Bold" size="20.0" />
+                           </font>
+                           <opaqueInsets>
+                              <Insets />
+                           </opaqueInsets>
                         </Label>
                      </children>
                   </HBox>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="99999.0" prefWidth="99999.0" spacing="10.0">
+                  <HBox alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="312.0">
                      <children>
-                        <Label prefHeight="99999.0" prefWidth="99999.0" text="PP:">
+                        <HBox alignment="CENTER_LEFT" prefHeight="21.0" prefWidth="45.0">
+                           <children>
+                              <Label fx:id="enemyStatusLabel" alignment="CENTER" prefHeight="17.0" prefWidth="42.0" style="-fx-background-color: purple; -fx-border-radius: 10; -fx-background-radius: 10;" text="PSN" textFill="WHITE" visible="false">
+                                 <font>
+                                    <Font name="Monospaced Regular" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <Label alignment="CENTER" prefHeight="10.0" prefWidth="28.0" style="-fx-background-color: black; -fx-background-radius: 3;" text="HP" textFill="DODGERBLUE">
                            <font>
-                              <Font name="Monospaced Regular" size="30.0" />
+                              <Font name="Monospaced Bold" size="16.0" />
                            </font>
                         </Label>
-                        <Label fx:id="movePPLabel" alignment="CENTER" prefHeight="99999.0" prefWidth="99999.0" text="?/?">
-                           <font>
-                              <Font name="Monospaced Regular" size="25.0" />
-                           </font>
-                        </Label>
+                        <ProgressBar fx:id="enemyHpBar" prefHeight="20.0" prefWidth="300.0" progress="1.0" style="-fx-accent: green;" />
                      </children>
+                     <VBox.margin>
+                        <Insets right="10.0" />
+                     </VBox.margin>
                   </HBox>
                </children>
                <padding>
-                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                  <Insets right="10.0" />
                </padding>
             </VBox>
+            <GridPane fx:id="moveGrid" hgap="5.0" layoutY="560.0" prefHeight="160.0" prefWidth="1280.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: white;" vgap="5.0" visible="false">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="313.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="350.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="350.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="250.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Button fx:id="firstMoveButton" mnemonicParsing="false" prefHeight="99999.0" prefWidth="99999.0" text="Move 1" GridPane.columnIndex="1" />
+                  <Button fx:id="secondMoveButton" mnemonicParsing="false" prefHeight="99999.0" prefWidth="99999.0" text="Move 2" GridPane.columnIndex="2" />
+                  <Button fx:id="thirdMoveButton" mnemonicParsing="false" prefHeight="99999.0" prefWidth="99999.0" text="Move 3" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Button fx:id="fourthMoveButton" mnemonicParsing="false" prefHeight="99999.0" prefWidth="99999.0" text="Move 4" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <Button fx:id="backMoveButton" mnemonicParsing="false" prefHeight="99999.0" prefWidth="99999.0" style="-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 7; -fx-border-color: black;" text="Back" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                     <font>
+                        <Font name="Monospaced Regular" size="20.0" />
+                     </font>
+                  </Button>
+                  <VBox fx:id="moveTypeBox" prefHeight="99999.0" prefWidth="99999.0" style="-fx-border-color: black; -fx-border-width: 5;" GridPane.rowSpan="2">
+                     <children>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="99999.0" prefWidth="99999.0" spacing="10.0">
+                           <children>
+                              <Label prefHeight="99999.0" prefWidth="99999.0" text="Type:">
+                                 <font>
+                                    <Font name="Monospaced Regular" size="30.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="moveTypeLabel" alignment="CENTER" prefHeight="99999.0" prefWidth="99999.0" text="Label" textFill="WHITE">
+                                 <font>
+                                    <Font name="Monospaced Regular" size="25.0" />
+                                 </font>
+                                 <HBox.margin>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </HBox.margin>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_RIGHT" prefHeight="99999.0" prefWidth="99999.0" spacing="10.0">
+                           <children>
+                              <Label prefHeight="99999.0" prefWidth="99999.0" text="PP:">
+                                 <font>
+                                    <Font name="Monospaced Regular" size="30.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="movePPLabel" alignment="CENTER" prefHeight="99999.0" prefWidth="99999.0" text="?/?">
+                                 <font>
+                                    <Font name="Monospaced Regular" size="25.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </VBox>
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </GridPane>
+            <GridPane fx:id="pokemonGrid" hgap="5.0" layoutX="730.0" layoutY="560.0" prefHeight="160.0" prefWidth="550.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-border-radius: 10; -fx-background-color: white;" vgap="5.0" visible="false">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 1" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                  <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 2" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                  <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 3" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                  <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 4" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                  <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 6" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <Button fx:id="pokemonBackButton" mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" style="-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 7; -fx-border-color: black;" text="Back" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </GridPane>
+            <Label fx:id="allyAbilityInfo" alignment="CENTER" layoutY="235.0" prefHeight="118.0" prefWidth="241.0" style="-fx-background-color: lightgray;" text="Ability Info" visible="false">
+               <font>
+                  <Font name="Monospaced Regular" size="26.0" />
+               </font>
+            </Label>
+            <Label fx:id="enemyAbilityInfo" alignment="CENTER" layoutX="1039.0" layoutY="120.0" prefHeight="118.0" prefWidth="241.0" style="-fx-background-color: lightgray;" text="Ability Info" visible="false">
+               <font>
+                  <Font name="Monospaced Regular" size="26.0" />
+               </font>
+            </Label>
          </children>
-         <padding>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-         </padding>
-      </GridPane>
-      <GridPane fx:id="pokemonGrid" hgap="5.0" layoutX="929.0" layoutY="587.0" prefHeight="160.0" prefWidth="550.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-border-radius: 10; -fx-background-color: white;" vgap="5.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0">
-         <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-         </rowConstraints>
-         <children>
-            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 1" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 2" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 3" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 4" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Button mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" text="Pokemon 6" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <Button fx:id="pokemonBackButton" mnemonicParsing="false" prefHeight="115.0" prefWidth="181.0" style="-fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 7; -fx-border-color: black;" text="Back" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-         </children>
-         <padding>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-         </padding>
-      </GridPane>
-      <Label fx:id="allyAbilityInfo" alignment="CENTER" layoutY="228.0" prefHeight="118.0" prefWidth="241.0" style="-fx-background-color: lightgray;" text="Ability Info" visible="false">
-         <font>
-            <Font name="Monospaced Regular" size="26.0" />
-         </font>
-      </Label>
-      <Label fx:id="enemyAbilityInfo" alignment="CENTER" layoutX="1039.0" layoutY="110.0" prefHeight="118.0" prefWidth="241.0" style="-fx-background-color: lightgray;" text="Ability Info" visible="false">
-         <font>
-            <Font name="Monospaced Regular" size="26.0" />
-         </font>
-      </Label>
+      </Pane>
    </children>
-</AnchorPane>
+</VBox>

@@ -61,6 +61,7 @@ public class BattleController {
     private final static String POKEMON_BUTTON_HOVER = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: limegreen;";
 
     public final int SCREEN_WIDTH = 1280, SCREEN_HEIGHT = 720;
+    private double ALLY_INFO_DEFAULT_Y, ALLY_SPRITE_DEFAULT_Y;
 
     public ImageView getAllyPokemonSprite() {
         return allyPokemonSprite;
@@ -126,6 +127,9 @@ public class BattleController {
 
         idleAnimation = getBattleIdleAnimation();
 
+        ALLY_INFO_DEFAULT_Y = allyPokemonInfo.getLayoutY();
+        ALLY_SPRITE_DEFAULT_Y = allyPokemonSprite.getLayoutY();
+
         setupButtons();
     }
 
@@ -176,19 +180,19 @@ public class BattleController {
 
     private Timeline getBattleIdleAnimation() {
 
-        double infoBottomAnchorPos = allyPokemonInfo.getLayoutY();
-        double infoBottomAnchorMov = infoBottomAnchorPos - 3;
+        double infoLayoutYPos = allyPokemonInfo.getLayoutY();
+        double infoLayoutYMov = infoLayoutYPos - 3;
 
-        double spriteBottomAnchorPos = allyPokemonSprite.getLayoutY();
-        double spriteBottomAnchorMov = spriteBottomAnchorPos - 3;
+        double spriteLayoutYPos = allyPokemonSprite.getLayoutY();
+        double spriteLayoutYMov = spriteLayoutYPos - 3;
 
         final KeyFrame kf1 = new KeyFrame(Duration.ZERO, e -> {
-            allyPokemonSprite.setLayoutY(spriteBottomAnchorPos);
-            allyPokemonInfo.setLayoutY(infoBottomAnchorPos);
+            allyPokemonSprite.setLayoutY(spriteLayoutYPos);
+            allyPokemonInfo.setLayoutY(infoLayoutYPos);
         });
         final KeyFrame kf2 = new KeyFrame(Duration.seconds(0.3), e -> {
-            allyPokemonSprite.setLayoutY(spriteBottomAnchorMov);
-            allyPokemonInfo.setLayoutY(infoBottomAnchorMov);
+            allyPokemonSprite.setLayoutY(spriteLayoutYMov);
+            allyPokemonInfo.setLayoutY(infoLayoutYMov);
         });
 
         Timeline timeline = new Timeline(kf1, kf2);
@@ -196,8 +200,8 @@ public class BattleController {
         timeline.setCycleCount(Animation.INDEFINITE);
 
         timeline.setOnFinished(e -> {
-            allyPokemonSprite.setLayoutY(spriteBottomAnchorPos);
-            allyPokemonInfo.setLayoutY(infoBottomAnchorPos);
+            allyPokemonSprite.setLayoutY(spriteLayoutYPos);
+            allyPokemonInfo.setLayoutY(infoLayoutYPos);
         });
 
         return timeline;
@@ -212,8 +216,8 @@ public class BattleController {
         }
         else {
             idleAnimation.stop();
-            allyPokemonSprite.setLayoutY(277);
-            allyPokemonInfo.setLayoutY(375);
+            allyPokemonSprite.setLayoutY(ALLY_SPRITE_DEFAULT_Y);
+            allyPokemonInfo.setLayoutY(ALLY_INFO_DEFAULT_Y);
             //AnchorPane.setBottomAnchor(allyPokemonSprite, 63.0);
             //AnchorPane.setBottomAnchor(allyPokemonInfo, 220.0);
         }

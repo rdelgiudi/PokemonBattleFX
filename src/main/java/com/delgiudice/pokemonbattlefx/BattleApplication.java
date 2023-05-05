@@ -40,7 +40,7 @@ public class BattleApplication extends Application {
         double ratio = stage.getHeight() / stage.getWidth();
         stage.minHeightProperty().bind(stage.widthProperty().multiply(ratio));
         stage.maxHeightProperty().bind(stage.widthProperty().multiply(ratio));
-        stage.setResizable(false);
+        //stage.setResizable(false);
 
         KeyCode fullscreenKey = KeyCode.F11;
 
@@ -57,15 +57,17 @@ public class BattleApplication extends Application {
         launch();
     }
 
+    //https://stackoverflow.com/questions/16606162/javafx-fullscreen-resizing-elements-based-upon-screen-size
     public static void letterbox(final Scene scene, final Pane contentPane, final double initWidth, final double initHeight) {
         //final double initWidth  = scene.getWidth();
         //final double initHeight = scene.getHeight();
-        final double ratio      = initWidth / initHeight;
+        final double ratio = initWidth / initHeight;
 
         SceneSizeChangeListener sizeListener = new SceneSizeChangeListener(scene, ratio, initHeight, initWidth, contentPane);
         scene.widthProperty().addListener(sizeListener);
         scene.heightProperty().addListener(sizeListener);
-        ChangeListener<? super Parent> changeListener = (javafx.beans.value.ChangeListener<Parent>) (observableValue, parent, t1) -> sizeListener.scale();
+        ChangeListener<? super Parent> changeListener =
+                (javafx.beans.value.ChangeListener<Parent>) (observableValue, parent, t1) -> sizeListener.scale();
         scene.rootProperty().addListener(changeListener);
     }
 }

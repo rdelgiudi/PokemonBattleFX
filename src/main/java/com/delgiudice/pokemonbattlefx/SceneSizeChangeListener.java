@@ -5,6 +5,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.transform.Scale;
+import javafx.stage.Stage;
 
 //https://stackoverflow.com/questions/16606162/javafx-fullscreen-resizing-elements-based-upon-screen-size
 public class SceneSizeChangeListener implements ChangeListener<Number> {
@@ -13,6 +14,7 @@ public class SceneSizeChangeListener implements ChangeListener<Number> {
     private final double initHeight;
     private final double initWidth;
     private final Pane contentPane;
+    private double titleBarSize;
 
     public SceneSizeChangeListener(Scene scene, double ratio, double initHeight, double initWidth, Pane contentPane) {
         this.scene = scene;
@@ -28,6 +30,9 @@ public class SceneSizeChangeListener implements ChangeListener<Number> {
     }
 
     public void scale() {
+
+        Stage stage = (Stage) scene.getWindow();
+
         final double newWidth = scene.getWidth();
         final double newHeight = scene.getHeight();
 
@@ -38,8 +43,15 @@ public class SceneSizeChangeListener implements ChangeListener<Number> {
 
         if (scaleFactor >= 1) {
             Scale scale = new Scale(scaleFactor, scaleFactor);
-            scale.setPivotX(0);
-            scale.setPivotY(0);
+            scale.setPivotX(scene.getWidth() / 2);
+            if (!stage.isFullScreen()) {
+                scale.setPivotY((scene.getHeight()) / 2);
+                double titleBarSize = stage.getHeight() - scene.getHeight();
+                if (titleBarSize > 0) this.titleBarSize = titleBarSize;
+            }
+            else {
+                scale.setPivotY((scene.getHeight()) / 2 + titleBarSize);
+            }
             scene.getRoot().getTransforms().setAll(scale);
 
             contentPane.setPrefWidth(newWidth / scaleFactor);
