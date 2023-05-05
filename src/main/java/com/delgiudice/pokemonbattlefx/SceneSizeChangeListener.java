@@ -2,9 +2,11 @@ package com.delgiudice.pokemonbattlefx;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.scene.transform.Scale;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 //https://stackoverflow.com/questions/16606162/javafx-fullscreen-resizing-elements-based-upon-screen-size
@@ -44,14 +46,7 @@ public class SceneSizeChangeListener implements ChangeListener<Number> {
         if (scaleFactor >= 1) {
             Scale scale = new Scale(scaleFactor, scaleFactor);
             scale.setPivotX(scene.getWidth() / 2);
-            if (!stage.isFullScreen()) {
-                scale.setPivotY((scene.getHeight()) / 2);
-                double titleBarSize = stage.getHeight() - scene.getHeight();
-                if (titleBarSize > 0) this.titleBarSize = titleBarSize;
-            }
-            else {
-                scale.setPivotY((scene.getHeight()) / 2 + titleBarSize);
-            }
+            scale.setPivotY((scene.getHeight()) / 2);
             scene.getRoot().getTransforms().setAll(scale);
 
             contentPane.setPrefWidth(newWidth / scaleFactor);

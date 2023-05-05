@@ -35,11 +35,11 @@ public class BattleApplication extends Application {
 
         stage.setMinHeight(stage.getHeight());
         stage.setMinWidth(stage.getWidth());
-        stage.setWidth(stage.getWidth());
-        stage.setHeight(stage.getHeight());
-        double ratio = stage.getHeight() / stage.getWidth();
-        stage.minHeightProperty().bind(stage.widthProperty().multiply(ratio));
-        stage.maxHeightProperty().bind(stage.widthProperty().multiply(ratio));
+        //stage.setWidth(stage.getWidth());
+        //stage.setHeight(stage.getHeight());
+        //double ratio = stage.getHeight() / stage.getWidth();
+        //stage.minHeightProperty().bind(stage.widthProperty().multiply(ratio));
+        //stage.maxHeightProperty().bind(stage.widthProperty().multiply(ratio));
         //stage.setResizable(false);
 
         KeyCode fullscreenKey = KeyCode.F11;

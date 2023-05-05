@@ -244,14 +244,13 @@ public class TeamBuilderController {
 
     private void editPokemon(int index, List<Pokemon> party) {
         Stage stage = (Stage) startBattleButton.getScene().getWindow();
+        Scene scene = startBattleButton.getScene();
         AddPokemonController controller = addPokemonLoader.getController();
         controller.setAddData(party.get(index), playerParty, enemyParty,this,
                 (Pane) startBattleButton.getScene().getRoot());
         stage.setTitle("Edit Pokemon!");
         controller.enterEditMode(playerParty.equals(party), index);
-        boolean isFullscreen = stage.isFullScreen();
-        stage.setScene(addPokemonScene);
-        stage.setFullScreen(isFullscreen);
+        scene.setRoot(addPokemonPane);
     }
 
     public void refreshParties() {
