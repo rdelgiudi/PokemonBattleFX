@@ -5,6 +5,7 @@ import com.delgiudice.pokemonbattlefx.attributes.Type;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import javafx.animation.Animation;
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -19,15 +20,20 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
+import javafx.scene.transform.Scale;
+import javafx.scene.transform.Transform;
 import javafx.util.Duration;
 
 import javax.sound.sampled.*;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -56,11 +62,11 @@ public class BattleController {
 
     private Timeline idleAnimation;
 
-    private final InputStream battleThemeLoopInputStream;
+    private final InputStream battleThemeLoopInputStream, victoryThemeInputStream;
 
-    MediaPlayer introPlayer;
+    MediaPlayer introPlayer, victoryIntroPlayer;
 
-    private Clip battleThemeLoopAudioClip;
+    private Clip battleThemeLoopAudioClip, victoryThemeLoopAudioClip;
 
     private Clip audioEffectsClip;
 
@@ -132,10 +138,21 @@ public class BattleController {
     }
 
     public BattleController() throws UnsupportedAudioFileException, LineUnavailableException, IOException, URISyntaxException {
-        //Firered battle theme
-        battleThemeLoopInputStream = getClass().getClassLoader().getResourceAsStream("sound/battle_theme_loop.wav");
-        if (battleThemeLoopInputStream != null)
+        // Looped battle intro, requires main loop and intro in two separate audio files
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sound/battle_theme_loop.wav");
+        if (inputStream != null) {
+            battleThemeLoopInputStream = new BufferedInputStream(inputStream);
             configBattleTheme();
+        }
+        else
+            battleThemeLoopInputStream = null;
+        inputStream = getClass().getClassLoader().getResourceAsStream("sound/victory_theme_loop.wav");
+        if (inputStream != null) {
+            victoryThemeInputStream = new BufferedInputStream(inputStream);
+            configVictoryTheme();
+        }
+        else
+            victoryThemeInputStream = null;
     }
 
     public void initialize() {
@@ -152,10 +169,26 @@ public class BattleController {
         setupButtons();
     }
 
-    private void configBattleTheme() throws UnsupportedAudioFileException, IOException, LineUnavailableException, URISyntaxException {
+    //https://stackoverflow.com/questions/40514910/set-volume-of-java-clip
+    // Converts Clip's logarithmic audio controls to a linear scale, between 0 and 1, for ease of use
+    public float getVolume(Clip clip) {
+        FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+        return (float) Math.pow(10f, gainControl.getValue() / 20f);
+    }
+
+    public void setVolume(Clip clip ,float volume) {
+        if (volume < 0f || volume > 1f)
+            throw new IllegalArgumentException("Volume not valid: " + volume);
+        FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+        gainControl.setValue(20f * (float) Math.log10(volume));
+    }
+
+    private void configBattleTheme()
+            throws UnsupportedAudioFileException, IOException, LineUnavailableException, URISyntaxException {
         Media media = new Media(Objects.requireNonNull(
                 getClass().getClassLoader().getResource("sound/battle_theme_intro.wav")).toURI().toString());
         introPlayer = new MediaPlayer(media);
+        introPlayer.setVolume(0.25f);
         introPlayer.setOnEndOfMedia(() -> {
             battleThemeLoopAudioClip.loop(Clip.LOOP_CONTINUOUSLY);
         });
@@ -165,14 +198,118 @@ public class BattleController {
         DataLine.Info infoLoop = new DataLine.Info(Clip.class, audioFormatLoop);
         battleThemeLoopAudioClip = (Clip) AudioSystem.getLine(infoLoop);
         battleThemeLoopAudioClip.open(audioStreamLoop);
+        setVolume(battleThemeLoopAudioClip, 0.25f);
     }
 
-    public void startThemePlayback() {
+    private void configVictoryTheme()
+            throws URISyntaxException, UnsupportedAudioFileException, IOException, LineUnavailableException {
+        Media media = new Media(Objects.requireNonNull(
+                getClass().getClassLoader().getResource("sound/victory_theme_intro.wav")).toURI().toString());
+        victoryIntroPlayer = new MediaPlayer(media);
+        victoryIntroPlayer.setVolume(0.25f);
+        victoryIntroPlayer.setOnEndOfMedia(() -> {
+            victoryThemeLoopAudioClip.loop(Clip.LOOP_CONTINUOUSLY);
+        });
+
+        AudioInputStream audioStreamLoop = AudioSystem.getAudioInputStream(victoryThemeInputStream);
+        AudioFormat audioFormatLoop = audioStreamLoop.getFormat();
+        DataLine.Info infoLoop = new DataLine.Info(Clip.class, audioFormatLoop);
+        victoryThemeLoopAudioClip = (Clip) AudioSystem.getLine(infoLoop);
+        victoryThemeLoopAudioClip.open(audioStreamLoop);
+        setVolume(victoryThemeLoopAudioClip, 0.25f);
+    }
+
+    private InputStream prepareHitEffect(float typeEffect) {
+        InputStream inputStream;
+
+        if (typeEffect < 1)
+            inputStream = getClass().getClassLoader().getResourceAsStream("sound/hit_effect_low.wav");
+        else if (typeEffect == 1)
+            inputStream = getClass().getClassLoader().getResourceAsStream("sound/hit_effect_regular.wav");
+        else
+            inputStream = getClass().getClassLoader().getResourceAsStream("sound/hit_effect_super.wav");
+
+        return inputStream;
+    }
+
+    private InputStream prepareStatChangeEffect(float statChange) {
+        InputStream inputStream;
+
+        if (statChange > 0)
+            inputStream = getClass().getClassLoader().getResourceAsStream("sound/stat_raised.wav");
+        else
+            inputStream = getClass().getClassLoader().getResourceAsStream("sound/stat_fell.wav");
+
+        return inputStream;
+    }
+
+    private void prepareEffectClip(InputStream inputStream)
+            throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+        AudioInputStream audioStreamLoop = AudioSystem.getAudioInputStream(bufferedInputStream);
+        AudioFormat audioFormatLoop = audioStreamLoop.getFormat();
+        DataLine.Info infoLoop = new DataLine.Info(Clip.class, audioFormatLoop);
+        audioEffectsClip = (Clip) AudioSystem.getLine(infoLoop);
+        audioEffectsClip.open(audioStreamLoop);
+        setVolume(audioEffectsClip, 0.5f);
+    }
+
+    private void playEffect() {
+        audioEffectsClip.start();
+    }
+
+    public Timeline getHitEffectClipPlayback(float typeEffect) {
+
+        KeyFrame kf = new KeyFrame(Duration.millis(1), e -> {
+            InputStream inputStream = prepareHitEffect(typeEffect);
+            if (inputStream != null) {
+                try {
+                    prepareEffectClip(inputStream);
+                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
+                    throw new RuntimeException(ex);
+                }
+                playEffect();
+            }
+        });
+
+        return new Timeline(kf);
+    }
+
+    public Timeline getStatChangeClipPlayback(int statChange) {
+        KeyFrame kf = new KeyFrame(Duration.millis(1), e -> {
+            InputStream inputStream = prepareStatChangeEffect(statChange);
+            if (inputStream != null) {
+                try {
+                    prepareEffectClip(inputStream);
+                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            playEffect();
+        });
+
+        return new Timeline(kf);
+    }
+
+    public void startVictoryThemePlayback() {
+        if (victoryIntroPlayer != null)
+            victoryIntroPlayer.play();
+    }
+
+    public void endVictoryThemePlayback() {
+        if (victoryIntroPlayer != null)
+            victoryIntroPlayer.stop();
+        if (victoryThemeLoopAudioClip != null)
+            victoryThemeLoopAudioClip.stop();
+    }
+
+    public void startBattleThemePlayback() {
         if (introPlayer != null)
             introPlayer.play();
     }
 
-    public void endThemePlayback() {
+    public void endBattleThemePlayback() {
         if (introPlayer != null)
             introPlayer.stop();
         if (battleThemeLoopAudioClip != null)
@@ -251,6 +388,35 @@ public class BattleController {
         });
 
         return timeline;
+    }
+
+    public static FadeTransition getFadeTransition(Pane pane, boolean in) {
+
+        Pane innerPane = (Pane) pane.getChildren().get(0);
+        Transform scale = pane.getTransforms().stream()
+                .filter(w -> w.getClass() == Scale.class)
+                .findFirst()
+                .orElse(null);
+
+        Rectangle rect = new Rectangle(0, 0, innerPane.getWidth(), innerPane.getHeight());
+        rect.setFill(Color.BLACK);
+        if (scale != null)
+            rect.getTransforms().addAll(scale);
+
+        innerPane.getChildren().add(rect);
+
+        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(0.5), rect);
+
+        if (in) {
+            fadeTransition.setFromValue(0);
+            fadeTransition.setToValue(1);
+        }
+        else {
+            fadeTransition.setFromValue(1);
+            fadeTransition.setToValue(0);
+        }
+
+        return fadeTransition;
     }
 
     public void switchToPlayerChoice(boolean choice) {

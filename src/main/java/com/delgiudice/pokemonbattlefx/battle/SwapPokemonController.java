@@ -2,6 +2,7 @@ package com.delgiudice.pokemonbattlefx.battle;
 
 import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
+import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;

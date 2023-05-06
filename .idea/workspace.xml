@@ -13,6 +13,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleLogic.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/SwapPokemonController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/SwapPokemonController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,19 +53,20 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "experimental",
-    "last_opened_file_path": "/home/rdelgiudi/IdeaProjects/PokemonBattleFXCopy/src/main/resources/sound",
-    "settings.editor.selected.configurable": "preferences.customizations"
+    "last_opened_file_path": "C:/Users/krp8_/IdeaProjects/PokemonBattleFX/src/main/resources/sound",
+    "settings.editor.selected.configurable": "reference.settings.ide.settings.new.ui"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src/main/resources/sound" />
+      <recent name="C:\Users\krp8_\IdeaProjects\PokemonBattleFX\src\main\resources\sound" />
       <recent name="C:\Users\krp8_\IdeaProjects\PokemonBattleFX\src\main\resources" />
+      <recent name="$PROJECT_DIR$/src/main/resources/sound" />
       <recent name="C:\Users\krp8_\IdeaProjects\PokemonBattleFX\src\main\resources\com\delgiudice\pokemonbattlefx" />
       <recent name="$PROJECT_DIR$/src/main/resources" />
-      <recent name="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\krp8_\IdeaProjects\PokemonBattleFX\src\main\resources\sound" />
       <recent name="$PROJECT_DIR$/src/main/resources/sound" />
       <recent name="$PROJECT_DIR$/src/main/resources" />
       <recent name="C:\Users\krp8_\IdeaProjects\PokemonBattleFX\src\main\resources" />

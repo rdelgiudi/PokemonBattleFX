@@ -77,7 +77,7 @@ public class BattleLogic {
     }
 
     public void startBattle() {
-        controller.startThemePlayback();
+        controller.startBattleThemePlayback();
         initBattleLoop();
     }
 
@@ -182,6 +182,7 @@ public class BattleLogic {
         //battleLostMsg2.setOnFinished(e -> battleLostMsg3.play());
         battleLostMsg3.setOnFinished(e -> paused.play());
         paused.setOnFinished(e -> {
+            controller.endBattleThemePlayback();
             stage.setTitle("Pokemon Battle FX");
             controller.getFightButton().getScene().setRoot(teamBuilderPane);
         });
@@ -211,6 +212,7 @@ public class BattleLogic {
         //battleWonMsg1.setOnFinished(e -> battleWonMsg2.play());
         battleWonMsg2.setOnFinished(e -> paused.play());
         paused.setOnFinished(e -> {
+            controller.endVictoryThemePlayback();
             stage.setTitle("Pokemon Battle FX");
             controller.getFightButton().getScene().setRoot(teamBuilderPane);
         });
@@ -223,6 +225,8 @@ public class BattleLogic {
         }
 
         battleWonMsg1.play();
+        controller.endBattleThemePlayback();
+        controller.startVictoryThemePlayback();
     }
 
     private void processToxicSpikeEffect(List<Timeline> battleTimeLine, Pokemon target) {
@@ -1722,6 +1726,9 @@ public class BattleLogic {
 
                 final Timeline damageDealtAnimation, hpAnimation;
 
+                Timeline damageSoundEffectTimeLine = controller.getHitEffectClipPlayback(damageInfo.typeEffect);
+                moveTimeLine.add(damageSoundEffectTimeLine);
+
                 if (target.getOwner().isPlayer()) {
                     damageDealtAnimation = controller.getAllyMoveDamageAnimation();
                     hpAnimation = controller.getAllyHpAnimation(oldHp, target.getHp(), target.getMaxHP());
@@ -2187,13 +2194,17 @@ public class BattleLogic {
         else
             statTypes = move.getSecondaryStatTypes();
 
-        for (Enums.StatType statType : statTypes) {
-            int change;
-            if (primary)
-                change = move.getStatChange();
-            else
-                change = move.getSecondaryStatChange();
+        int change;
+        if (primary)
+            change = move.getStatChange();
+        else
+            change = move.getSecondaryStatChange();
 
+        Timeline statChangeSoundPlayback = controller.getStatChangeClipPlayback(change);
+        int lastIndex = moveTimeLine.size();
+        boolean statChanged = false;
+
+        for (Enums.StatType statType : statTypes) {
             if (statType == Enums.StatType.ACCURACY && target.getAbility() == Ability.KEEN_EYE && change < 0) {
                 Timeline abilityAnimation;
                 if (target.getOwner().isPlayer())
@@ -2222,6 +2233,9 @@ public class BattleLogic {
                         target.getBattleName(), statType), true));
                 change = 0;
             } else {
+
+                statChanged = true;
+
                 if (statup <= 6 && statup >= -6)
                     target.getStatModifiers().put(statType, statup);
                 else if (statup > 6) {
@@ -2263,8 +2277,13 @@ public class BattleLogic {
                             "Wrong change value, should be between -3 and 3 (excluding 0), is: " + change);
                 }
             }
+
             moveTimeLine.add(controller.generatePause(1500));
             System.out.println(target.getBattleName() + " stat change to " + statType + ": " + change);
+        }
+
+        if (statChangeSoundPlayback != null && statChanged) {
+            moveTimeLine.add(lastIndex, statChangeSoundPlayback);
         }
     }
 
