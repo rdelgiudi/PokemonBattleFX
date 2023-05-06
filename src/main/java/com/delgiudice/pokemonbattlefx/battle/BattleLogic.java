@@ -10,19 +10,12 @@ import com.delgiudice.pokemonbattlefx.move.MoveEnum;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.pokemon.Ability;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
-import com.delgiudice.pokemonbattlefx.pokemon.PokemonEnum;
-import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
 import com.delgiudice.pokemonbattlefx.trainer.NpcTrainer;
 import com.delgiudice.pokemonbattlefx.trainer.Player;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -84,6 +77,7 @@ public class BattleLogic {
     }
 
     public void startBattle() {
+        controller.startThemePlayback();
         initBattleLoop();
     }
 

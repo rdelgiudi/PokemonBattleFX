@@ -10,7 +10,6 @@ import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -19,17 +18,22 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import javax.sound.sampled.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class BattleController {
 
@@ -51,6 +55,14 @@ public class BattleController {
     private ProgressBar enemyHpBar, allyHpBar;
 
     private Timeline idleAnimation;
+
+    private final InputStream battleThemeLoopInputStream;
+
+    MediaPlayer introPlayer;
+
+    private Clip battleThemeLoopAudioClip;
+
+    private Clip audioEffectsClip;
 
     private final static String FIGHT_BUTTON_PRESSED = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: darkred;";
     private final static String FIGHT_BUTTON_RELEASE = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: firebrick;";
@@ -119,6 +131,13 @@ public class BattleController {
         return pokemonBackButton;
     }
 
+    public BattleController() throws UnsupportedAudioFileException, LineUnavailableException, IOException, URISyntaxException {
+        //Firered battle theme
+        battleThemeLoopInputStream = getClass().getClassLoader().getResourceAsStream("sound/battle_theme_loop.wav");
+        if (battleThemeLoopInputStream != null)
+            configBattleTheme();
+    }
+
     public void initialize() {
         battleText.setMouseTransparent(true);
         battleText.setFocusTraversable(false);
@@ -131,6 +150,33 @@ public class BattleController {
         ALLY_SPRITE_DEFAULT_Y = allyPokemonSprite.getLayoutY();
 
         setupButtons();
+    }
+
+    private void configBattleTheme() throws UnsupportedAudioFileException, IOException, LineUnavailableException, URISyntaxException {
+        Media media = new Media(Objects.requireNonNull(
+                getClass().getClassLoader().getResource("sound/battle_theme_intro.wav")).toURI().toString());
+        introPlayer = new MediaPlayer(media);
+        introPlayer.setOnEndOfMedia(() -> {
+            battleThemeLoopAudioClip.loop(Clip.LOOP_CONTINUOUSLY);
+        });
+
+        AudioInputStream audioStreamLoop = AudioSystem.getAudioInputStream(battleThemeLoopInputStream);
+        AudioFormat audioFormatLoop = audioStreamLoop.getFormat();
+        DataLine.Info infoLoop = new DataLine.Info(Clip.class, audioFormatLoop);
+        battleThemeLoopAudioClip = (Clip) AudioSystem.getLine(infoLoop);
+        battleThemeLoopAudioClip.open(audioStreamLoop);
+    }
+
+    public void startThemePlayback() {
+        if (introPlayer != null)
+            introPlayer.play();
+    }
+
+    public void endThemePlayback() {
+        if (introPlayer != null)
+            introPlayer.stop();
+        if (battleThemeLoopAudioClip != null)
+            battleThemeLoopAudioClip.stop();
     }
 
     private void setupButtons() {
