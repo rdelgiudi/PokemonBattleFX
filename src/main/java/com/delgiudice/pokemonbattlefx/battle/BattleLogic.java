@@ -114,8 +114,7 @@ public class BattleLogic {
         //battleTextIntro.setOnFinished(e -> enemyPokemonIntro.play());
 
         //controller.setEnemyInformation(enemy.getParty(currentEnemyPokemon));
-        Timeline enemyInfoAnimation = controller.getEnemyInfoAnimation(enemy.getParty(currentEnemyPokemon),
-                enemy.getParty(currentEnemyPokemon).getHp());
+        Timeline enemyInfoAnimation = controller.getIntroAnimation(enemy.getParty(currentEnemyPokemon));
         enemyPokemonIntro.setOnFinished(e -> enemyInfoAnimation.play());
 
         Timeline allyPokemonIntro = controller.getBattleTextAnimation(String.format(POKEMON_SENT_OUT_STRING,
@@ -123,8 +122,7 @@ public class BattleLogic {
         allyPokemonIntro.setDelay(Duration.seconds(1));
         enemyInfoAnimation.setOnFinished(e -> allyPokemonIntro.play());
 
-        Timeline allyInfoAnimation = controller.getAllyInfoAnimation(player.getParty(currentAllyPokemon),
-                player.getParty(currentAllyPokemon).getHp());
+        Timeline allyInfoAnimation = controller.getIntroAnimation(player.getParty(currentAllyPokemon));
         allyPokemonIntro.setOnFinished(e -> allyInfoAnimation.play());
 
         allyInfoAnimation.setOnFinished(e -> {
@@ -880,8 +878,7 @@ public class BattleLogic {
             battleTimeLine.add(updateStatus);
             battleTimeLine.add(controller.generatePause(1000));
 
-            Timeline pokemonIntroAnimation = controller.getEnemyInfoAnimation(enemy.getParty(currentEnemyPokemon),
-                    enemy.getParty(currentEnemyPokemon).getHp());
+            Timeline pokemonIntroAnimation = controller.getIntroAnimation(enemy.getParty(currentEnemyPokemon));
             battleTimeLine.add(pokemonIntroAnimation);
         }
 

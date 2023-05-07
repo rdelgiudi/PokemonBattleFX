@@ -40,8 +40,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+import static java.util.Arrays.asList;
 
 public class BattleController {
 
@@ -61,6 +64,8 @@ public class BattleController {
                     enemyStatusLabel, allyAbilityInfo, enemyAbilityInfo, moveTypeLabel, movePPLabel;
     @FXML
     private ProgressBar enemyHpBar, allyHpBar;
+
+    List<Button> moveButtons;
 
     private Timeline idleAnimation;
 
@@ -170,6 +175,8 @@ public class BattleController {
         ALLY_INFO_DEFAULT_Y = allyPokemonInfo.getLayoutY();
         ALLY_SPRITE_DEFAULT_Y = allyPokemonSprite.getLayoutY();
 
+        moveButtons = Arrays.asList(firstMoveButton, secondMoveButton, thirdMoveButton, fourthMoveButton);
+
         setupButtons();
     }
 
@@ -259,7 +266,12 @@ public class BattleController {
         setVolume(audioEffectsClip, 0.5f);
     }
 
-    private void playEffect() {
+    private void playEffect(InputStream inputStream) {
+        try {
+            prepareEffectClip(inputStream);
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
+            throw new RuntimeException("Error while processing sound effects: " + ex);
+        }
         audioEffectsClip.start();
     }
 
@@ -268,12 +280,7 @@ public class BattleController {
         KeyFrame kf = new KeyFrame(Duration.millis(1), e -> {
             InputStream inputStream = prepareHitEffect(typeEffect);
             if (inputStream != null) {
-                try {
-                    prepareEffectClip(inputStream);
-                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
-                    throw new RuntimeException(ex);
-                }
-                playEffect();
+                playEffect(inputStream);
             }
         });
 
@@ -284,12 +291,7 @@ public class BattleController {
         KeyFrame kf = new KeyFrame(Duration.millis(1), e -> {
             InputStream inputStream = prepareStatChangeEffect(statChange);
             if (inputStream != null) {
-                try {
-                    prepareEffectClip(inputStream);
-                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
-                    throw new RuntimeException(ex);
-                }
-                playEffect();
+                playEffect(inputStream);
             }
         });
 
@@ -300,12 +302,7 @@ public class BattleController {
         return new KeyFrame(Duration.millis(1), e-> {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sound/pokemon_fainted.wav");
             if (inputStream != null) {
-                try {
-                    prepareEffectClip(inputStream);
-                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
-                    throw new RuntimeException(ex);
-                }
-                playEffect();
+                playEffect(inputStream);
             }
         });
     }
@@ -649,6 +646,70 @@ public class BattleController {
         timeline.setCycleCount(2);
         timeline.getKeyFrames().addAll(keyFrameList);
         timeline.getKeyFrames().addAll(generatePause(1000).getKeyFrames());
+        return timeline;
+    }
+
+    public Timeline getIntroAnimation(Pokemon pokemon) {
+
+        final boolean ally = pokemon.getOwner().isPlayer();
+        final ImageView sprite;
+        final VBox info;
+
+        if(ally) {
+            sprite = allyPokemonSprite;
+            info = allyPokemonInfo;
+        }
+        else {
+            sprite = enemyPokemonSprite;
+            info = enemyPokemonInfo;
+        }
+
+        final double regularWidth = sprite.getFitWidth();
+        final double regularHeight = sprite.getFitHeight();
+
+        final double bottomY = sprite.getLayoutY() + sprite.getFitHeight();
+        final double centerX = sprite.getLayoutX() + (sprite.getFitWidth() / 2);
+
+        final double infoOriginalX = info.getLayoutX();
+
+        final List<KeyFrame> keyFrameList = new ArrayList<>();
+
+        final KeyFrame configPokemonSprite = new KeyFrame(Duration.millis(1), e -> {
+
+            if (ally) setAllyInformation(pokemon, pokemon.getHp());
+            else setEnemyInformation(pokemon, pokemon.getHp());
+
+            sprite.setFitWidth(1);
+            sprite.setFitHeight(1);
+            sprite.setVisible(true);
+
+            if (ally) info.setLayoutX(SCREEN_WIDTH);
+            else info.setLayoutX(-info.getPrefWidth());
+            info.setVisible(true);
+        });
+
+        keyFrameList.add(configPokemonSprite);
+
+        double maxI = info.getPrefWidth() + 15;
+
+        for (int i = 1; i <= maxI; i++) {
+            int finalI = i;
+            final KeyFrame kf = new KeyFrame(Duration.millis(i), e -> {
+                if (ally) info.setLayoutX(SCREEN_WIDTH - finalI);
+                else info.setLayoutX(-info.getPrefWidth() + finalI);
+                sprite.setFitHeight((regularHeight * finalI) / maxI);
+                sprite.setFitWidth((regularWidth * finalI) / maxI);
+
+                double calcY = bottomY - sprite.getFitHeight();
+                double calcX = centerX - (sprite.getFitWidth() / 2);
+                sprite.setLayoutX(calcX);
+                sprite.setLayoutY(calcY);
+            });
+            keyFrameList.add(kf);
+        }
+
+        final Timeline timeline = new Timeline();
+        timeline.getKeyFrames().addAll(keyFrameList);
         return timeline;
     }
 
@@ -1140,39 +1201,25 @@ public class BattleController {
 
     public void updateAvailableMoves(Pokemon pokemon) {
         List<Move> moveList = pokemon.getMoveList();
-
-        setMoveInformation(firstMoveButton, moveList.get(0));
+        int size = moveList.size();
 
         String setColorNoMove = "-fx-font: 11 monospaced; -fx-border-radius: 10; -fx-background-radius: 10; -fx-border-width: 5; " +
                 "-fx-border-color: black; -fx-background-color: lightgray";
 
-        if (moveList.size() > 1) {
-            setMoveInformation(secondMoveButton, moveList.get(1));
-        }
-        else {
-            secondMoveButton.setTextFill(Color.BLACK);
-            secondMoveButton.setText("");
-            secondMoveButton.setDisable(true);
-            secondMoveButton.setStyle(setColorNoMove);
-        }
-        if (moveList.size() > 2)
-            setMoveInformation(thirdMoveButton, moveList.get(2));
-        else {
-            thirdMoveButton.setTextFill(Color.BLACK);
-            thirdMoveButton.setText("");
-            thirdMoveButton.setDisable(true);
-            thirdMoveButton.setStyle(setColorNoMove);
-        }
+        for (int i=0; i<4; i++) {
 
-        if (moveList.size() > 3)
-            setMoveInformation(fourthMoveButton, moveList.get(3));
-        else {
-            fourthMoveButton.setTextFill(Color.BLACK);
-            fourthMoveButton.setText("");
-            fourthMoveButton.setDisable(true);
-            fourthMoveButton.setStyle(setColorNoMove);
-        }
+            Button moveButton = (Button) moveGrid.getChildren().get(i);
 
+            if (i < size) {
+                setMoveInformation(moveButton, moveList.get(i));
+            }
+            else {
+                moveButton.setTextFill(Color.BLACK);
+                moveButton.setText("");
+                moveButton.setDisable(true);
+                moveButton.setStyle(setColorNoMove);
+            }
+        }
     }
 
     public void updateSelectPokemonButtons(List<Pokemon> party) {
