@@ -127,11 +127,11 @@
                         <Insets right="10.0" />
                      </VBox.margin>
                   </HBox>
-                  <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="350.0">
+                  <HBox alignment="CENTER" prefHeight="25.0" prefWidth="350.0">
                      <children>
                         <Label fx:id="allyHpLabel" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="310.0" style="-fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 1), 1, 1, 0.0, 0.0);" text="??/??" textFill="WHITE">
                            <font>
-                              <Font name="Monospaced Bold" size="20.0" />
+                              <Font name="Monospaced Bold" size="18.0" />
                            </font>
                            <opaqueInsets>
                               <Insets />
