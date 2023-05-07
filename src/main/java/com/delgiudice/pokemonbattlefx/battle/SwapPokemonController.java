@@ -2,7 +2,6 @@ package com.delgiudice.pokemonbattlefx.battle;
 
 import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
-import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -13,7 +12,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -238,7 +236,7 @@ public class SwapPokemonController {
                 allyPokemonReturnText.setDelay(Duration.seconds(0.1));
                 battleTimeLine.add(allyPokemonReturnText);
 
-                Timeline allyPokemonReturn = battleController.getPokemonFaintedAnimation(true);
+                Timeline allyPokemonReturn = battleController.getPokemonReturnAnimation(true);
                 allyPokemonReturn.setDelay(Duration.seconds(1));
                 battleTimeLine.add(allyPokemonReturn);
                 battleTimeLine.add(battleController.generatePause(1000));

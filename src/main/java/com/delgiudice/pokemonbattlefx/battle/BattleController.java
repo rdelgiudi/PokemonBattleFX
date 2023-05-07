@@ -9,6 +9,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -17,6 +18,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
@@ -146,6 +148,8 @@ public class BattleController {
         }
         else
             battleThemeLoopInputStream = null;
+
+        // Looped victory intro, requires main loop and intro in two seperate audio files
         inputStream = getClass().getClassLoader().getResourceAsStream("sound/victory_theme_loop.wav");
         if (inputStream != null) {
             victoryThemeInputStream = new BufferedInputStream(inputStream);
@@ -285,11 +289,25 @@ public class BattleController {
                 } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
                     throw new RuntimeException(ex);
                 }
+                playEffect();
             }
-            playEffect();
         });
 
         return new Timeline(kf);
+    }
+
+    private KeyFrame getPokemonFaintedClipPlayback() {
+        return new KeyFrame(Duration.millis(1), e-> {
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sound/pokemon_fainted.wav");
+            if (inputStream != null) {
+                try {
+                    prepareEffectClip(inputStream);
+                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
+                    throw new RuntimeException(ex);
+                }
+                playEffect();
+            }
+        });
     }
 
     public void startVictoryThemePlayback() {
@@ -941,6 +959,61 @@ public class BattleController {
     }
 
     public Timeline getPokemonFaintedAnimation(boolean ally) {
+        final List<KeyFrame> keyFrameList = new ArrayList<>();
+
+        keyFrameList.add(getPokemonFaintedClipPlayback());
+
+        final double height, width;
+        final double oldLayoutY;
+        final ImageView sprite;
+        final VBox info;
+
+        if (ally) {
+            sprite = allyPokemonSprite;
+            info = allyPokemonInfo;
+        }
+        else {
+            sprite = enemyPokemonSprite;
+            info = enemyPokemonInfo;
+        }
+
+        height = sprite.getImage().getHeight();
+        width = sprite.getImage().getWidth();
+        oldLayoutY = sprite.getLayoutY();
+
+        int frameNumber = (int) Math.floor(height / 5);
+        double scale = sprite.getFitHeight() / height;
+
+
+        for (int i = 1; i < frameNumber; i++) {
+            final int finalI = i;
+            final KeyFrame kf;
+            kf = new KeyFrame(Duration.millis(finalI * 2), e -> {
+                int multip = finalI * 5;
+                int scaledMultip = (int) Math.round(multip * scale);
+                Rectangle2D rectangle2D = new Rectangle2D(0, 0, width, (height - multip));
+                sprite.setViewport(rectangle2D);
+                sprite.setLayoutY(oldLayoutY + (scaledMultip));
+            });
+
+            keyFrameList.add(kf);
+        }
+
+        final KeyFrame cleanUp = new KeyFrame(Duration.millis(frameNumber * 2), e -> {
+            info.setVisible(false);
+            sprite.setVisible(false);
+            sprite.setViewport(null);
+            sprite.setLayoutY(oldLayoutY);
+        });
+
+        Timeline timeline = new Timeline();
+        timeline.getKeyFrames().addAll(keyFrameList);
+        timeline.getKeyFrames().add(cleanUp);
+
+        return timeline;
+    }
+
+    public Timeline getPokemonReturnAnimation(boolean ally) {
 
         final List<KeyFrame> keyFrameList = new ArrayList<>();
 
@@ -982,7 +1055,6 @@ public class BattleController {
         timeline.getKeyFrames().add(cleanUp);
 
         return timeline;
-
     }
 
     private String format(double val) {
