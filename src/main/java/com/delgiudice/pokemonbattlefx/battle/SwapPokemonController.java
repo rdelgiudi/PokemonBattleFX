@@ -213,7 +213,7 @@ public class SwapPokemonController {
                 return;
             }
 
-            if (pokemon.getTrapMove() != null && !allyFainted) {
+            if (party.get(currentAllyPokemon).getTrapMove() != null && !allyFainted) {
                 Timeline trappedInfo = getInfoText(String.format(
                         "%s is trapped! Can't switch!",
                         party.get(currentAllyPokemon).getName()));
@@ -253,8 +253,7 @@ public class SwapPokemonController {
             Timeline updateStatus = battleController.updateStatus(party.get(newCurrentAllyPokemon), true);
             battleTimeLine.add(updateStatus);
 
-            Timeline allyInfoAnimation = battleController.getAllyInfoAnimation(party.get(newCurrentAllyPokemon),
-                    party.get(newCurrentAllyPokemon).getHp());
+            Timeline allyInfoAnimation = battleController.getIntroAnimation(party.get(newCurrentAllyPokemon));
             battleTimeLine.add(allyInfoAnimation);
 
             Scene scene = pokemonBox.getScene();
