@@ -68,7 +68,7 @@ public class BattleController {
 
     private Timeline idleAnimation;
 
-    private final InputStream battleThemeLoopInputStream, victoryThemeInputStream;
+    private final InputStream battleThemeLoopInputStream, victoryThemeInputStream, allyLowHpInputStream;
 
     MediaPlayer introPlayer, victoryIntroPlayer;
 
@@ -161,6 +161,15 @@ public class BattleController {
         }
         else
             victoryThemeInputStream = null;
+
+        inputStream = getClass().getClassLoader().getResourceAsStream("sound/pokemon_low_hp.wav");
+
+        if (inputStream != null) {
+            allyLowHpInputStream = new BufferedInputStream(inputStream);
+            configLowHpEffect();
+        }
+        else
+            allyLowHpInputStream = null;
     }
 
     public void initialize() {
@@ -184,9 +193,9 @@ public class BattleController {
         battleTextFull.setVisible(true);
         battleText.setVisible(false);
         allyPokemonSprite.setVisible(false);
-        enemyPokemonSprite.setVisible(false);
         allyPokemonInfo.setVisible(false);
         enemyPokemonSprite.setVisible(false);
+        enemyPokemonInfo.setVisible(false);
     }
 
     //https://stackoverflow.com/questions/40514910/set-volume-of-java-clip
@@ -241,6 +250,18 @@ public class BattleController {
         setVolume(victoryThemeLoopAudioClip, 0.25f);
     }
 
+    private void configLowHpEffect()
+            throws UnsupportedAudioFileException, IOException, LineUnavailableException{
+
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(allyLowHpInputStream);
+        AudioInputStream audioStreamLoop = AudioSystem.getAudioInputStream(bufferedInputStream);
+        AudioFormat audioFormatLoop = audioStreamLoop.getFormat();
+        DataLine.Info infoLoop = new DataLine.Info(Clip.class, audioFormatLoop);
+        allyLowHpClip = (Clip) AudioSystem.getLine(infoLoop);
+        allyLowHpClip.open(audioStreamLoop);
+        setVolume(allyLowHpClip, 0.5f);
+    }
+
     private InputStream prepareHitEffect(float typeEffect) {
         InputStream inputStream;
 
@@ -286,10 +307,18 @@ public class BattleController {
         audioEffectsClip.start();
     }
 
-    private void playLowHpEffect() {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sound/pokemon_low_hp.wav");
+    private void playLowHpEffect()  {
+        if (allyLowHpClip != null) {
+            if (!allyLowHpClip.isActive()) {
+                allyLowHpClip.setFramePosition(0);
+                allyLowHpClip.loop(Clip.LOOP_CONTINUOUSLY);
+            }
+        }
+    }
 
-
+    public void stopLowHpEffect() {
+        if (allyLowHpClip != null)
+            allyLowHpClip.stop();
     }
 
     public Timeline getHitEffectClipPlayback(float typeEffect) {
@@ -995,7 +1024,7 @@ public class BattleController {
         allyPokemonSprite.setImage(pokemon.getSpecie().getBackSpriteBattle());
         //centerImage(allyPokemonSprite);
 
-        setAllyHpBar(pokemon.getHp(), pokemon.getMaxHP());
+        setAllyHpBar(pokemon.getHp(), pokemon.getMaxHP(), true);
     }
 
     public void setAllyInformation(Pokemon pokemon, int overrideHp) {
@@ -1005,10 +1034,10 @@ public class BattleController {
         allyPokemonSprite.setImage(pokemon.getSpecie().getBackSpriteBattle());
         //centerImage(allyPokemonSprite);
 
-        setAllyHpBar(overrideHp, pokemon.getMaxHP());
+        setAllyHpBar(overrideHp, pokemon.getMaxHP(), true);
     }
 
-    public void setAllyHpBar(int hp, int maxhp) {
+    public void setAllyHpBar(int hp, int maxhp, boolean applySound) {
         double currentHpPercentage = (double) hp / maxhp;
         if (currentHpPercentage < 0.03 && hp != 0)
             currentHpPercentage = 0.03;
@@ -1016,12 +1045,21 @@ public class BattleController {
         allyHpBar.setProgress(currentHpPercentage);
         allyHpLabel.setText(String.format("%3d/%-3d", hp, maxhp));
 
-        if (currentHpPercentage > 0.56)
+        if (currentHpPercentage > 0.56) {
             allyHpBar.setStyle("-fx-accent: green");
-        else if (currentHpPercentage > 0.21)
+            if (applySound) stopLowHpEffect();
+        }
+        else if (currentHpPercentage > 0.21) {
             allyHpBar.setStyle("-fx-accent: yellow");
-        else
+            if (applySound) stopLowHpEffect();
+        }
+        else if (currentHpPercentage > 0) {
             allyHpBar.setStyle("-fx-accent: red");
+            if (applySound) playLowHpEffect();
+        }
+        else if (applySound) {
+            stopLowHpEffect();
+        }
     }
 
     public Timeline getAllyHpAnimation(int from, int to, int max) {
@@ -1040,11 +1078,23 @@ public class BattleController {
             final int finalI = i;
 
             if (descending)
-                kf = new KeyFrame(Duration.millis(frameTime * i), e -> setAllyHpBar(from - finalI, max));
+                kf = new KeyFrame(Duration.millis(frameTime * i), e ->
+                        setAllyHpBar(from - finalI, max, false));
             else
-                kf = new KeyFrame(Duration.millis(frameTime * i), e -> setAllyHpBar(from + finalI, max));
+                kf = new KeyFrame(Duration.millis(frameTime * i), e ->
+                        setAllyHpBar(from + finalI, max, false));
             keyFrameList.add(kf);
         }
+
+        double currentHpPercentage = (double) to / max;
+
+        keyFrameList.add(new KeyFrame(Duration.millis(frameTime * frameCount + 1), e -> {
+            if (currentHpPercentage <= 0.21 && currentHpPercentage > 0)
+                playLowHpEffect();
+            else
+                stopLowHpEffect();
+        }));
+
 
         Timeline timeline = new Timeline();
 

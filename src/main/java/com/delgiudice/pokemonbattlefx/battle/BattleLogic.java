@@ -240,6 +240,7 @@ public class BattleLogic {
         battleWonMsg1.play();
         controller.endBattleThemePlayback();
         controller.startVictoryThemePlayback();
+        controller.stopLowHpEffect();
     }
 
     private void processToxicSpikeEffect(List<Timeline> battleTimeLine, Pokemon target) {

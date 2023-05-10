@@ -9,14 +9,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="fixed wrong Pokemon being checked for trapped status">
+    <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="sprite and animations fixes, coloring sprite, changed how resources connected to battles are loaded">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleLogic.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/SwapPokemonController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/SwapPokemonController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/pokemon/PokemonSpecie.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/pokemon/PokemonSpecie.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/teambuilder/TeamBuilderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/teambuilder/TeamBuilderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/battle-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/com/delgiudice/pokemonbattlefx/battle-view.fxml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -289,7 +285,14 @@
       <option name="project" value="LOCAL" />
       <updated>1683659371496</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="sprite and animations fixes, coloring sprite, changed how resources connected to battles are loaded">
+      <created>1683753781743</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1683753781743</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -304,7 +307,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="contact move flag added" />
     <MESSAGE value="move colors added in move select menu" />
     <MESSAGE value="ui improvements and Pokemon Summary screen" />
     <MESSAGE value="summary-view.fxml adjustments" />
@@ -329,7 +331,8 @@
     <MESSAGE value="additional sound effects: hits, victory jingle, stat changes" />
     <MESSAGE value="minor adjust to battle-view.fxml font size" />
     <MESSAGE value="fixed wrong Pokemon being checked for trapped status" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed wrong Pokemon being checked for trapped status" />
+    <MESSAGE value="sprite and animations fixes, coloring sprite, changed how resources connected to battles are loaded" />
+    <option name="LAST_COMMIT_MESSAGE" value="sprite and animations fixes, coloring sprite, changed how resources connected to battles are loaded" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
