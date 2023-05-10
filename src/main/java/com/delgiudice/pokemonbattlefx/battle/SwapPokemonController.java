@@ -117,6 +117,10 @@ public class SwapPokemonController {
                 "-fx-background-color:  linear-gradient(to left, dodgerblue, lightgray)";
 
         pokemonBox.setStyle(style);
+
+        pokemonBox.setOnMouseEntered(null);
+        pokemonBox.setOnMouseExited(null);
+        pokemonBox.setOnMouseClicked(null);
     }
 
     private void setHpBar(int hp, int maxhp, ProgressBar hpBar, Label hpLabel) {
@@ -172,6 +176,9 @@ public class SwapPokemonController {
             pokemonBox.setStyle(regularStyle);
 
         initListener(pokemonBox, pokemon, index);
+        icon.setVisible(true);
+        infoBox.setVisible(true);
+        hpBox.setVisible(true);
     }
 
     private void initListener(HBox pokemonBox, Pokemon pokemon, int index) {

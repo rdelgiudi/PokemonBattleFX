@@ -47,15 +47,24 @@ public class TeamBuilderController {
 
     Enums.TrainerTypes trainerType = Enums.TrainerTypes.YOUNGSTER;
 
-    FXMLLoader addPokemonLoader;
-    Scene addPokemonScene;
-    Pane addPokemonPane;
+    FXMLLoader addPokemonLoader, battleLoader;
+    Pane addPokemonPane, battlePane;
+
+    BattleController battleController;
+    BattleLogic logic;
 
     private int FONT_SIZE = 13, POKEMON_BUTTON_WIDTH = 125, POKEMON_BUTTON_HEIGHT = 100, POKEMON_PANE_SIZE = 450;
     private int PARTY_BUTTON_WIDTH = 100, PARTY_BUTTON_HEIGHT = 100;
 
-    public TeamBuilderController() {
+    public TeamBuilderController() throws IOException {
         Pokemon.generatePokemonExamples();
+
+        battleLoader = new FXMLLoader(BattleApplication.class.getResource("battle-view.fxml"));
+        //Pane teamBuilderPane = (Pane) startBattleButton.getScene().getRoot();
+        battlePane = battleLoader.load();
+
+        battleController = battleLoader.getController();
+        logic = new BattleLogic(battleController);
     }
 
     public void initialize() {
@@ -313,7 +322,7 @@ public class TeamBuilderController {
     }
 
     @FXML
-    public void startBattle() throws IOException {
+    public void startBattle(){
         Player player = new Player(playerName, playerParty.get(0));
         NpcTrainer enemy = new NpcTrainer(enemyName, trainerType, enemyParty.get(0));
 
@@ -322,16 +331,11 @@ public class TeamBuilderController {
         for (int i=1; i < enemyParty.size(); i++)
             enemy.addPokemon(enemyParty.get(i));
 
-        FXMLLoader fxmlLoader = new FXMLLoader(BattleApplication.class.getResource("battle-view.fxml"));
-        Pane teamBuilderPane = (Pane) startBattleButton.getScene().getRoot();
         Stage stage = (Stage) startBattleButton.getScene().getWindow();
-        Pane pane = fxmlLoader.load();
+        Pane teamBuilderPane = (Pane) startBattleButton.getScene().getRoot();
         stage.setTitle("Battle!");
-        startBattleButton.getScene().setRoot(pane);
+        startBattleButton.getScene().setRoot(battlePane);
 
-
-        BattleController controller = fxmlLoader.getController();
-        BattleLogic logic = new BattleLogic(controller, player, enemy, teamBuilderPane);
-        logic.startBattle();
+        logic.startBattle(player, enemy, teamBuilderPane);
     }
 }

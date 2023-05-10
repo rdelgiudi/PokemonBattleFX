@@ -16,9 +16,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
+import javafx.scene.effect.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
@@ -40,11 +40,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
-import static java.util.Arrays.asList;
 
 public class BattleController {
 
@@ -64,6 +61,8 @@ public class BattleController {
                     enemyStatusLabel, allyAbilityInfo, enemyAbilityInfo, moveTypeLabel, movePPLabel;
     @FXML
     private ProgressBar enemyHpBar, allyHpBar;
+    @FXML
+    private Pane mainPane;
 
     List<Button> moveButtons;
 
@@ -75,7 +74,7 @@ public class BattleController {
 
     private Clip battleThemeLoopAudioClip, victoryThemeLoopAudioClip;
 
-    private Clip audioEffectsClip;
+    private Clip audioEffectsClip, allyLowHpClip;
 
     private final static String FIGHT_BUTTON_PRESSED = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: darkred;";
     private final static String FIGHT_BUTTON_RELEASE = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: firebrick;";
@@ -175,13 +174,23 @@ public class BattleController {
         ALLY_INFO_DEFAULT_Y = allyPokemonInfo.getLayoutY();
         ALLY_SPRITE_DEFAULT_Y = allyPokemonSprite.getLayoutY();
 
-        moveButtons = Arrays.asList(firstMoveButton, secondMoveButton, thirdMoveButton, fourthMoveButton);
+        Rectangle rect = new Rectangle(SCREEN_WIDTH, SCREEN_HEIGHT);
+        mainPane.setClip(rect);
 
         setupButtons();
     }
 
+    public void resetState() {
+        battleTextFull.setVisible(true);
+        battleText.setVisible(false);
+        allyPokemonSprite.setVisible(false);
+        enemyPokemonSprite.setVisible(false);
+        allyPokemonInfo.setVisible(false);
+        enemyPokemonSprite.setVisible(false);
+    }
+
     //https://stackoverflow.com/questions/40514910/set-volume-of-java-clip
-    // Converts Clip's logarithmic audio controls to a linear scale, between 0 and 1, for ease of use
+    // Converts Clip's logarithmic audio volume controls to a linear scale, between 0 and 1, for ease of use
     public float getVolume(Clip clip) {
         FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
         return (float) Math.pow(10f, gainControl.getValue() / 20f);
@@ -201,6 +210,7 @@ public class BattleController {
         introPlayer = new MediaPlayer(media);
         introPlayer.setVolume(0.25f);
         introPlayer.setOnEndOfMedia(() -> {
+            battleThemeLoopAudioClip.setFramePosition(0);
             battleThemeLoopAudioClip.loop(Clip.LOOP_CONTINUOUSLY);
         });
 
@@ -219,6 +229,7 @@ public class BattleController {
         victoryIntroPlayer = new MediaPlayer(media);
         victoryIntroPlayer.setVolume(0.25f);
         victoryIntroPlayer.setOnEndOfMedia(() -> {
+            victoryThemeLoopAudioClip.setFramePosition(0);
             victoryThemeLoopAudioClip.loop(Clip.LOOP_CONTINUOUSLY);
         });
 
@@ -273,6 +284,12 @@ public class BattleController {
             throw new RuntimeException("Error while processing sound effects: " + ex);
         }
         audioEffectsClip.start();
+    }
+
+    private void playLowHpEffect() {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sound/pokemon_low_hp.wav");
+
+
     }
 
     public Timeline getHitEffectClipPlayback(float typeEffect) {
@@ -649,6 +666,31 @@ public class BattleController {
         return timeline;
     }
 
+    private void setColorShiftEffect(ImageView imageView, double opacity, Color color) {
+
+        ImageView copy = new ImageView(imageView.getImage());
+        copy.setFitWidth(imageView.getFitWidth());
+        copy.setFitHeight(imageView.getFitHeight());
+        imageView.setClip(copy);
+        opacity *= 1.5;
+
+        ColorAdjust monochrome = new ColorAdjust();
+        monochrome.setSaturation(-opacity);
+
+        ColorInput colorInput = new ColorInput(0, 0,
+                imageView.getImage().getWidth(), imageView.getImage().getHeight(), color);
+
+        Blend blush = new Blend(BlendMode.MULTIPLY, monochrome, colorInput);
+        blush.setOpacity(opacity);
+
+        imageView.setEffect(blush);
+    }
+
+    private void resetColorShiftEffect(ImageView imageView) {
+        imageView.setEffect(null);
+        imageView.setClip(null);
+    }
+
     public Timeline getIntroAnimation(Pokemon pokemon) {
 
         final boolean ally = pokemon.getOwner().isPlayer();
@@ -670,17 +712,18 @@ public class BattleController {
         final double bottomY = sprite.getLayoutY() + sprite.getFitHeight();
         final double centerX = sprite.getLayoutX() + (sprite.getFitWidth() / 2);
 
-        final double infoOriginalX = info.getLayoutX();
-
         final List<KeyFrame> keyFrameList = new ArrayList<>();
 
         final KeyFrame configPokemonSprite = new KeyFrame(Duration.millis(1), e -> {
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sound/pokemon_sent_out.wav");
+            if (inputStream != null) playEffect(inputStream);
 
             if (ally) setAllyInformation(pokemon, pokemon.getHp());
             else setEnemyInformation(pokemon, pokemon.getHp());
 
             sprite.setFitWidth(1);
             sprite.setFitHeight(1);
+            setColorShiftEffect(sprite, 1, Color.RED);
             sprite.setVisible(true);
 
             if (ally) info.setLayoutX(SCREEN_WIDTH);
@@ -700,13 +743,21 @@ public class BattleController {
                 sprite.setFitHeight((regularHeight * finalI) / maxI);
                 sprite.setFitWidth((regularWidth * finalI) / maxI);
 
-                double calcY = bottomY - sprite.getFitHeight();
                 double calcX = centerX - (sprite.getFitWidth() / 2);
+                double calcY = bottomY - sprite.getFitHeight();
                 sprite.setLayoutX(calcX);
                 sprite.setLayoutY(calcY);
+
+                double opacity = 1 - (finalI / maxI);
+                setColorShiftEffect(sprite, opacity, Color.RED);
             });
             keyFrameList.add(kf);
         }
+
+        final KeyFrame resetEffect = new KeyFrame(Duration.millis(maxI + 1), e -> {
+            resetColorShiftEffect(sprite);
+        });
+        keyFrameList.add(resetEffect);
 
         final Timeline timeline = new Timeline();
         timeline.getKeyFrames().addAll(keyFrameList);
@@ -721,7 +772,6 @@ public class BattleController {
         final List<KeyFrame> keyFrameList = new ArrayList<>();
 
         final KeyFrame configPokemonSprite = new KeyFrame(Duration.ZERO, e -> {
-
             setEnemyInformation(pokemon, hpStatus);
 
             enemyPokemonSprite.setFitWidth(1);
@@ -755,7 +805,7 @@ public class BattleController {
         enemyNameLabel.setText(pokemon.getName());
         enemyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
 
-        enemyPokemonSprite.setImage(pokemon.getSpecie().getFrontSprite());
+        enemyPokemonSprite.setImage(pokemon.getSpecie().getFrontSpriteBattle());
         //centerImage(enemyPokemonSprite);
 
         setEnemyHpBar(pokemon.getHp(), pokemon.getMaxHP());
@@ -765,7 +815,7 @@ public class BattleController {
         enemyNameLabel.setText(pokemon.getName());
         enemyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
 
-        enemyPokemonSprite.setImage(pokemon.getSpecie().getFrontSprite());
+        enemyPokemonSprite.setImage(pokemon.getSpecie().getFrontSpriteBattle());
         //centerImage(enemyPokemonSprite);
 
         setEnemyHpBar(overrideHp, pokemon.getMaxHP());
@@ -811,27 +861,38 @@ public class BattleController {
         return timeline;
     }
 
-    public Timeline getEnemyMoveDamageAnimation() {
-
+    public Timeline getMoveDamageAnimation(boolean ally) {
         int animationDuration = 7;
         Timeline timeline = new Timeline();
         timeline.setCycleCount(animationDuration);
 
-        double infoTopAnchorPos = enemyPokemonInfo.getLayoutY();
-        double infoTopAnchorMov = infoTopAnchorPos - 3;
+        ImageView sprite;
+        VBox info;
+
+        if (ally) {
+            sprite = allyPokemonSprite;
+            info = allyPokemonInfo;
+        }
+        else {
+            sprite = enemyPokemonSprite;
+            info = enemyPokemonInfo;
+        }
+
+        double infoPos = info.getLayoutY();
+        double infoMov = infoPos - 3;
 
         KeyFrame kf1, kf2;
 
         kf1 = new KeyFrame(Duration.millis(50), e -> {
-            enemyPokemonSprite.setVisible(false);
-            enemyPokemonInfo.setLayoutY(infoTopAnchorMov);
+            sprite.setVisible(false);
+            info.setLayoutY(infoMov);
         });
 
         timeline.getKeyFrames().add(kf1);
 
         kf2 = new KeyFrame(Duration.millis(100), e -> {
-            enemyPokemonSprite.setVisible(true);
-            enemyPokemonInfo.setLayoutY(infoTopAnchorPos);
+            sprite.setVisible(true);
+            info.setLayoutY(infoPos);
         });
 
         timeline.getKeyFrames().add(kf2);
@@ -931,7 +992,7 @@ public class BattleController {
         allyNameLabel.setText(pokemon.getName());
         allyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
 
-        allyPokemonSprite.setImage(pokemon.getSpecie().getBackSprite());
+        allyPokemonSprite.setImage(pokemon.getSpecie().getBackSpriteBattle());
         //centerImage(allyPokemonSprite);
 
         setAllyHpBar(pokemon.getHp(), pokemon.getMaxHP());
@@ -941,7 +1002,7 @@ public class BattleController {
         allyNameLabel.setText(pokemon.getName());
         allyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
 
-        allyPokemonSprite.setImage(pokemon.getSpecie().getBackSprite());
+        allyPokemonSprite.setImage(pokemon.getSpecie().getBackSpriteBattle());
         //centerImage(allyPokemonSprite);
 
         setAllyHpBar(overrideHp, pokemon.getMaxHP());
@@ -988,34 +1049,6 @@ public class BattleController {
         Timeline timeline = new Timeline();
 
         timeline.getKeyFrames().addAll(keyFrameList);
-        return timeline;
-    }
-
-    public Timeline getAllyMoveDamageAnimation() {
-
-        int animationDuration = 7;
-        Timeline timeline = new Timeline();
-        timeline.setCycleCount(animationDuration);
-
-        double infoBottomAnchorPos = allyPokemonInfo.getLayoutY();
-        double infoBottomAnchorMov = infoBottomAnchorPos - 3;
-
-        KeyFrame kf1, kf2;
-
-        kf1 = new KeyFrame(Duration.millis(50), e -> {
-            allyPokemonSprite.setVisible(false);
-            allyPokemonInfo.setLayoutY(infoBottomAnchorMov);
-        });
-
-        timeline.getKeyFrames().add(kf1);
-
-        kf2 = new KeyFrame(Duration.millis(100), e -> {
-            allyPokemonSprite.setVisible(true);
-            allyPokemonInfo.setLayoutY(infoBottomAnchorPos);
-        });
-
-        timeline.getKeyFrames().add(kf2);
-
         return timeline;
     }
 
@@ -1078,35 +1111,61 @@ public class BattleController {
 
         final List<KeyFrame> keyFrameList = new ArrayList<>();
 
-        double height;
+        final ImageView sprite;
+        final VBox info;
 
-        if (ally)
-            height = allyPokemonSprite.getFitHeight();
-        else
-            height = enemyPokemonSprite.getFitHeight();
+        if (ally) {
+            sprite = allyPokemonSprite;
+            info = allyPokemonInfo;
+        }
+        else {
+            sprite = enemyPokemonSprite;
+            info = enemyPokemonInfo;
+        }
 
+        final double regularHeight = sprite.getFitHeight();
+        final double regularWidth = sprite.getFitWidth();
+        final double regularX = sprite.getLayoutX();
+        final double regularY = sprite.getLayoutY();
 
-        for (int i = 1; i < height; i++) {
+        final double centerX = sprite.getLayoutX() + (sprite.getFitWidth() / 2);
+        final double bottomY = sprite.getLayoutY() + sprite.getFitHeight();
+
+        final KeyFrame startSound = new KeyFrame(Duration.millis(1), e -> {
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sound/pokemon_sent_out.wav");
+            playEffect(inputStream);
+        });
+
+        keyFrameList.add(startSound);
+
+        for (int i = 1; i < regularHeight; i++) {
             final int finalI = i;
             final KeyFrame kf;
-            if (ally)
-                kf = new KeyFrame(Duration.millis(finalI), e -> allyPokemonSprite.setFitHeight(height - finalI));
-            else
-                kf = new KeyFrame(Duration.millis(finalI), e -> enemyPokemonSprite.setFitHeight(height - finalI));
+
+            kf = new KeyFrame(Duration.millis(i), e -> {
+                sprite.setFitHeight(regularHeight - finalI);
+                sprite.setFitWidth(regularWidth - finalI);
+
+                double calcX = centerX - (sprite.getFitWidth() / 2);
+                double calcY = bottomY - sprite.getFitHeight();
+                sprite.setLayoutX(calcX);
+                sprite.setLayoutY(calcY);
+
+                double opacity = (finalI / regularHeight);
+                setColorShiftEffect(sprite, opacity, Color.RED);
+            });
 
             keyFrameList.add(kf);
         }
 
-        final KeyFrame cleanUp = new KeyFrame(Duration.millis(height), e -> {
-            if (ally) {
-                allyPokemonInfo.setVisible(false);
-                allyPokemonSprite.setVisible(false);
-                allyPokemonSprite.setFitHeight(height);
-            } else {
-                enemyPokemonInfo.setVisible(false);
-                enemyPokemonSprite.setVisible(false);
-                enemyPokemonSprite.setFitHeight(height);
-            }
+        final KeyFrame cleanUp = new KeyFrame(Duration.millis(regularHeight), e -> {
+            info.setVisible(false);
+            sprite.setVisible(false);
+            sprite.setFitHeight(regularHeight);
+            sprite.setFitWidth(regularWidth);
+            sprite.setLayoutX(regularX);
+            sprite.setLayoutY(regularY);
+            resetColorShiftEffect(sprite);
         });
 
         Timeline timeline = new Timeline();

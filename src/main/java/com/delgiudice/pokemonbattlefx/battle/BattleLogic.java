@@ -40,7 +40,7 @@ public class BattleLogic {
 
     private final FXMLLoader swapPokemonLoader;
     private final Pane swapPokemonPane;
-    private final Pane teamBuilderPane;
+    private Pane teamBuilderPane;
 
     private int currentAllyPokemon = 0, currentEnemyPokemon = 0;
     private boolean enemySentOut, allySentOut;
@@ -61,10 +61,8 @@ public class BattleLogic {
         this.currentAllyPokemon = currentAllyPokemon;
     }
 
-    public BattleLogic(BattleController controller, Player player, NpcTrainer enemy, Pane teamBuilderPane) {
+    public BattleLogic(BattleController controller) {
         this.controller = controller;
-        this.player = player;
-        this.enemy = enemy;
 
         swapPokemonLoader = new FXMLLoader(BattleApplication.class.getResource("swappokemon-view.fxml"));
         try {
@@ -73,10 +71,27 @@ public class BattleLogic {
             throw new RuntimeException(ex);
         }
 
-        this.teamBuilderPane = teamBuilderPane;
     }
 
-    public void startBattle() {
+    private void resetConditions() {
+        allyBattlefieldConditions.clear();
+        enemyBattlefieldConditions.clear();
+        allySpikes.clear();
+        enemySpikes.clear();
+        currentAllyPokemon = 0;
+        currentEnemyPokemon = 0;
+        controller.wipeText(false);
+    }
+
+    public void startBattle(Player player, NpcTrainer enemy, Pane teamBuilderPane) {
+        resetConditions();
+        controller.resetState();
+
+        this.player = player;
+        this.enemy = enemy;
+
+        this.teamBuilderPane = teamBuilderPane;
+
         controller.startBattleThemePlayback();
         initBattleLoop();
     }
@@ -1726,12 +1741,12 @@ public class BattleLogic {
                 Timeline damageSoundEffectTimeLine = controller.getHitEffectClipPlayback(damageInfo.typeEffect);
                 moveTimeLine.add(damageSoundEffectTimeLine);
 
+                damageDealtAnimation = controller.getMoveDamageAnimation(target.getOwner().isPlayer());
+
                 if (target.getOwner().isPlayer()) {
-                    damageDealtAnimation = controller.getAllyMoveDamageAnimation();
                     hpAnimation = controller.getAllyHpAnimation(oldHp, target.getHp(), target.getMaxHP());
                 }
                 else {
-                    damageDealtAnimation = controller.getEnemyMoveDamageAnimation();
                     hpAnimation = controller.getEnemyHpAnimation(oldHp, target.getHp(), target.getMaxHP());
                 }
 

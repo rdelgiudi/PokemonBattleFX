@@ -3,10 +3,8 @@ package com.delgiudice.pokemonbattlefx.pokemon;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.attributes.Type;
-import javafx.scene.image.Image;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
+import javafx.scene.image.*;
+import javafx.scene.paint.Color;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -53,7 +51,21 @@ public class PokemonSpecie{
         else
             image = new Image("default.png");
 
-        image = resample(image, 10);
+        image = resample(image, 5);
+        return image;
+    }
+
+    public Image getFrontSpriteBattle() {
+        Image image;
+        URL frontSpriteUrl = getClass().getResource(frontSprite);
+
+        if (frontSpriteUrl != null)
+            image = new Image(frontSprite);
+        else
+            image = new Image("default.png");
+
+        image = alignBottom(image);
+        image = resample(image, 5);
         return image;
     }
 
@@ -62,6 +74,20 @@ public class PokemonSpecie{
 
     //public Image getBackSpriteAnim() {
     //    return backSpriteAnim;}
+
+    public Image getBackSpriteBattle() {
+        Image image;
+        URL frontSpriteUrl = getClass().getResource(backSprite);
+
+        if (frontSpriteUrl != null)
+            image = new Image(backSprite);
+        else
+            image = new Image("default.png");
+
+        image = alignBottom(image);
+        image = resample(image, 5);
+        return image;
+    }
 
     public Image getBackSprite() {
         Image image;
@@ -72,7 +98,7 @@ public class PokemonSpecie{
         else
             image = new Image("default.png");
 
-        image = resample(image, 10);
+        image = resample(image, 5);
         return image;
     }
 
@@ -340,6 +366,79 @@ public class PokemonSpecie{
 
         return output;
     }
+
+    private Image alignBottom(Image input) {
+        final int W = (int) input.getWidth();
+        final int H = (int) input.getHeight();
+
+        WritableImage output = new WritableImage(W, H);
+
+        PixelReader reader = input.getPixelReader();
+        PixelWriter writer = output.getPixelWriter();
+
+        double maxY = 0;
+
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                Color color = reader.getColor(x, y);
+                double opacity = color.getOpacity();
+                if (opacity != 0) {
+                    maxY = Math.max(maxY, y);
+                }
+            }
+        }
+
+        double distance = input.getHeight() - 1 - maxY;
+        int dist = (int) distance;
+
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                final int argb = reader.getArgb(x, y);
+                final Color color = reader.getColor(x, y);
+                if (color.getOpacity() != 0)
+                    writer.setArgb(x, y + dist, argb);
+            }
+        }
+
+        return output;
+    }
+
+//    private Image alignBackSprite(Image input) {
+//        final int W = (int) input.getWidth();
+//        final int H = (int) input.getHeight();
+//
+//        WritableImage output = new WritableImage(W, H);
+//
+//        PixelReader reader = input.getPixelReader();
+//        PixelWriter writer = output.getPixelWriter();
+//
+//        double maxY = 0;
+//
+//        for (int y = 0; y < H; y++) {
+//            for (int x = 0; x < W; x++) {
+//                Color color = reader.getColor(x, y);
+//                double opacity = color.getOpacity();
+//                if (opacity != 0) {
+//                    maxY = Math.max(maxY, y);
+//                }
+//            }
+//        }
+//
+//        double distance = (2.0/3.0) * input.getWidth();
+//        int dist = (int) (maxY - distance);
+//        if (dist <= 0) return input;
+//
+//        for (int y = 0; y < H; y++) {
+//            for (int x = 0; x < W; x++) {
+//                final int argb = reader.getArgb(x, y);
+//                final Color color = reader.getColor(x, y);
+//                if (color.getOpacity() != 0)
+//                    writer.setArgb(x, y - dist, argb);
+//            }
+//        }
+//
+//        return output;
+//    }
 }
 
 
