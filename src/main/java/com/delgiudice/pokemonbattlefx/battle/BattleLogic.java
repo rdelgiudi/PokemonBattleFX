@@ -1084,12 +1084,18 @@ public class BattleLogic {
         return null;
     }
 
+    private Timeline setFaintedStatus(Pokemon pokemon) {
+        KeyFrame kf = new KeyFrame(Duration.millis(1), e -> pokemon.setStatus(Enums.Status.FAINTED));
+        return new Timeline(kf);
+    }
+
     // Processes fainting enemy
     private void processEnemyFainted(List<Timeline> battleTimeLine) {
         Timeline enemyPokemonFainted = controller.getPokemonFaintedAnimation(false);
         //enemyPokemonFainted.setDelay(Duration.seconds(2));
 
         battleTimeLine.add(enemyPokemonFainted);
+        battleTimeLine.add(setFaintedStatus(enemy.getParty(currentEnemyPokemon)));
         battleTimeLine.add(controller.generatePause(1000));
 
         Timeline enemyPokemonFaintedMessage = controller.getBattleTextAnimation(String.format(POKEMON_FAINTED_STRING,
@@ -1113,6 +1119,7 @@ public class BattleLogic {
         //allyPokemonFainted.setDelay(Duration.seconds(2));
 
         battleTimeLine.add(allyPokemonFainted);
+        battleTimeLine.add(setFaintedStatus(player.getParty(currentAllyPokemon)));
 
         Timeline allyPokemonFaintedMessage = controller.getBattleTextAnimation(String.format(POKEMON_FAINTED_STRING,
                 player.getParty(currentAllyPokemon).getBattleName()), true);

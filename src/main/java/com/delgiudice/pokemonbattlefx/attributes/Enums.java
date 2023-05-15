@@ -102,7 +102,8 @@ public class Enums {
         BADLY_POISONED("badly poisoned"),
         SLEEPING("asleep"),
         BURNED("burned"),
-        FROZEN("frozen");
+        FROZEN("frozen"),
+        FAINTED("fainted");
 
         final private String statusString;
 

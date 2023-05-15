@@ -9,8 +9,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="sprite and animations fixes, coloring sprite, changed how resources connected to battles are loaded">
+    <list default="true" id="a953b6bb-066b-4a31-a6e6-f9e4968c0bfc" name="Changes" comment="added low hp sound warning support">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/attributes/Enums.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/attributes/Enums.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/delgiudice/pokemonbattlefx/battle/BattleLogic.java" afterDir="false" />
     </list>
@@ -292,7 +293,14 @@
       <option name="project" value="LOCAL" />
       <updated>1683753781743</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="added low hp sound warning support">
+      <created>1683756805920</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1683756805920</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -307,7 +315,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="move colors added in move select menu" />
     <MESSAGE value="ui improvements and Pokemon Summary screen" />
     <MESSAGE value="summary-view.fxml adjustments" />
     <MESSAGE value="working context menu options in team builder" />
@@ -332,7 +339,8 @@
     <MESSAGE value="minor adjust to battle-view.fxml font size" />
     <MESSAGE value="fixed wrong Pokemon being checked for trapped status" />
     <MESSAGE value="sprite and animations fixes, coloring sprite, changed how resources connected to battles are loaded" />
-    <option name="LAST_COMMIT_MESSAGE" value="sprite and animations fixes, coloring sprite, changed how resources connected to battles are loaded" />
+    <MESSAGE value="added low hp sound warning support" />
+    <option name="LAST_COMMIT_MESSAGE" value="added low hp sound warning support" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

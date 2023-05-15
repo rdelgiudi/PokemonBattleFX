@@ -695,6 +695,7 @@ public class BattleController {
         return timeline;
     }
 
+    //https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
     private void setColorShiftEffect(ImageView imageView, double opacity, Color color) {
 
         ImageView copy = new ImageView(imageView.getImage());
@@ -964,13 +965,9 @@ public class BattleController {
                 statusLabel.setText("FRZ");
                 finalStyle = style + "dodgerblue";
                 break;
-        }
-
-        if (pokemon.getHp() == 0) {
-            statusLabel.setVisible(true);
-            statusLabel.setText("FNT");
-            finalStyle = style + "maroon";
-            statusLabel.setStyle(finalStyle);
+            case FAINTED:
+                statusLabel.setText("FNT");
+                finalStyle = style + "maroon";
         }
 
         if (pokemon.getStatus() != Enums.Status.NONE) {
