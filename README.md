@@ -33,11 +33,20 @@ Team Builder, adding Pokemon:
 ![Screenshot_20230423_175433](https://user-images.githubusercontent.com/83218453/233850346-f3abe02d-a831-4eb0-8c3f-1a727e5e514a.png)
 
 In battle:
-![image](https://user-images.githubusercontent.com/83218453/233850481-b9627e20-e974-4cb8-a8b9-fe1e4eee42f3.png)
-![image](https://user-images.githubusercontent.com/83218453/233850527-5bd50367-2001-4b6f-bad5-78c1929338f7.png)
+![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/9ac5eb80-6e79-4c3e-9f93-11efbcdc443a)
+
+![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/acc3fa39-da8e-4af7-977e-80e43e9ba076)
+
+![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/eab0a542-cab7-4a02-a5ab-d987490d26a1)
+
+
+Swap menu:
+![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/ab08cbe2-4341-47f4-8325-686aa4fd0ecf)
+
 
 Summary Screen:
 ![image](https://user-images.githubusercontent.com/83218453/233850552-02bffa2b-deba-4803-b287-41e339312474.png)
+
 ![image](https://user-images.githubusercontent.com/83218453/233850585-9e924e18-da98-4377-adce-c19eeaf0d2b5.png)
 
 ## License Note
