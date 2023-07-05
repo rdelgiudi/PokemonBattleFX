@@ -892,7 +892,7 @@ public class BattleController {
     }
 
     public Timeline getMoveDamageAnimation(boolean ally) {
-        int animationDuration = 7;
+        int animationDuration = 4;
         Timeline timeline = new Timeline();
         timeline.setCycleCount(animationDuration);
 

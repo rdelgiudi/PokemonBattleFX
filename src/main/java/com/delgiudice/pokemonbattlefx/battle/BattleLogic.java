@@ -73,6 +73,7 @@ public class BattleLogic {
 
     }
 
+    // resets the battlefield to default
     private void resetConditions() {
         allyBattlefieldConditions.clear();
         enemyBattlefieldConditions.clear();
