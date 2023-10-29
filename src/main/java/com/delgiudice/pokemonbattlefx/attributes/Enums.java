@@ -123,7 +123,8 @@ public class Enums {
         RECHARGE("recharge"),
         FOCUS_ENERGY("focus energy"),
         LASER_FOCUS("laser focus"),
-        ROOST("roost");
+        ROOST("roost"),
+        GASTRO_ACID("gastro acid");
 
         final private String statusString;
 

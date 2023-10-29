@@ -247,7 +247,7 @@ public class BattleLogic {
     private void processToxicSpikeEffect(List<Timeline> battleTimeLine, Pokemon target) {
         boolean toxicSpikeImmuneType = target.containsType(Enums.Types.FLYING) ||
                 target.containsType(Enums.Types.POISON) || target.containsType(Enums.Types.STEEL);
-        boolean toxicSpikeImmuneAbility = false; //TODO: Add abilities
+        boolean toxicSpikeImmuneAbility = false; //TODO: Add abilities (remember about Gastro Acid!)
 
         HashMap<Enums.Spikes, Integer> spikes = target.getOwner().isPlayer() ? allySpikes : enemySpikes;
 
@@ -278,16 +278,54 @@ public class BattleLogic {
                 processToxicSpikeEffect(battleTimeLine, enemyPokemon);
             }
 
+            if (enemyPokemon.getAbility() == Ability.INTIMIDATE) {
+                int change = -1;
+                int currentStatModifier = allyPokemon.getStatModifiers().get(Enums.StatType.ATTACK);
+                if (currentStatModifier > -6) {
+                    int statup = currentStatModifier + change;
+                    allyPokemon.getStatModifiers().put(Enums.StatType.ATTACK, statup);
+
+                    Timeline abilityMessage = controller.getEnemyAbilityInfoAnimation(enemyPokemon);
+
+                    Timeline intimidateMessage = controller.getBattleTextAnimation(String.format(
+                            "%s's Intimidate\nlowers %s Attack!", enemyPokemon.getBattleName(),
+                            allyPokemon.getBattleNameMiddle()), true);
+
+                    battleTimeLine.add(abilityMessage);
+                    battleTimeLine.add(intimidateMessage);
+                    battleTimeLine.add(controller.generatePause(1000));
+                }
+            }
+
             boolean enemyFainted = enemy.getParty(currentEnemyPokemon).getHp() == 0;
             if (enemyFainted) {
                 processEnemyFainted(battleTimeLine);
             }
         }
-        else if (allySentOut) {
+        if (allySentOut) {
             allySentOut = false;
 
             if (allySpikes.containsKey(Enums.Spikes.TOXIC_SPIKES)) {
                 processToxicSpikeEffect(battleTimeLine, allyPokemon);
+            }
+
+            if (allyPokemon.getAbility() == Ability.INTIMIDATE) {
+                int change = -1;
+                int currentStatModifier = enemyPokemon.getStatModifiers().get(Enums.StatType.ATTACK);
+                if (currentStatModifier > -6) {
+                    int statup = currentStatModifier + change;
+                    enemyPokemon.getStatModifiers().put(Enums.StatType.ATTACK, statup);
+
+                    Timeline abilityMessage = controller.getAllyAbilityInfoAnimation(allyPokemon);
+
+                    Timeline intimidateMessage = controller.getBattleTextAnimation(String.format(
+                            "%s's Intimidate\nlowers %s Attack!", allyPokemon.getBattleName(),
+                            enemyPokemon.getBattleNameMiddle()), true);
+
+                    battleTimeLine.add(abilityMessage);
+                    battleTimeLine.add(intimidateMessage);
+                    battleTimeLine.add(controller.generatePause(1000));
+                }
             }
 
             boolean allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
@@ -353,7 +391,7 @@ public class BattleLogic {
         applySentOutEffects(moveStartTimeLine);
 
 
-        if (moveStartTimeLine.size() > 0) {
+        if (!moveStartTimeLine.isEmpty()) {
             initAnimationQueue(moveStartTimeLine);
             moveStartTimeLine.get(moveStartTimeLine.size() - 1).setOnFinished(e -> done.play());
             moveStartTimeLine.get(0).play();
@@ -999,7 +1037,8 @@ public class BattleLogic {
         boolean damagingStatusEffect = pokemon.getStatus() == Enums.Status.BURNED ||
                 pokemon.getStatus() == Enums.Status.POISONED || pokemon.getStatus() == Enums.Status.BADLY_POISONED;
 
-        if (pokemon.getAbility() == Ability.SHED_SKIN && damagingStatusEffect) {
+        if (pokemon.getAbility() == Ability.SHED_SKIN && damagingStatusEffect &&
+                !pokemon.getSubStatuses().contains(Enums.SubStatus.GASTRO_ACID)) {
             SecureRandom random = new SecureRandom();
             int rand = random.nextInt(3);
 
@@ -1455,7 +1494,7 @@ public class BattleLogic {
 
     private float calculateMoveAccuracyModifier(Pokemon user, Pokemon target, Move move) {
         int statAccuracy;
-        if (user.getAbility() != Ability.KEEN_EYE)
+        if (user.getAbility() != Ability.KEEN_EYE || user.getSubStatuses().contains(Enums.SubStatus.GASTRO_ACID))
             statAccuracy = user.getStatModifiers().get(Enums.StatType.ACCURACY) -
                     target.getStatModifiers().get(Enums.StatType.EVASIVENESS);
         else
@@ -1473,7 +1512,7 @@ public class BattleLogic {
         else
             accuracyModifier = (float)(3+statAccuracy) / 3.0f;
 
-        if (user.getAbility() == Ability.COMPOUND_EYES && !move.isOneHitKOMove()) {
+        if (user.getAbility() == Ability.COMPOUND_EYES && !move.isOneHitKOMove() || !user.getSubStatuses().contains(Enums.SubStatus.GASTRO_ACID)) {
             accuracyModifier *= 1.3;
         }
 
@@ -1870,7 +1909,7 @@ public class BattleLogic {
         boolean targetFainted = target.getHp() == 0;
         boolean userFainted = user.getHp() == 0;
         boolean targetProtectedAbility = move.getSubtype() != Enums.Subtypes.STATUS &&
-                target.getAbility() == Ability.SHIELD_DUST;
+                target.getAbility() == Ability.SHIELD_DUST && !target.getSubStatuses().contains(Enums.SubStatus.GASTRO_ACID);
         boolean secondaryEffectsImmune = targetFainted || targetProtectedAbility;
 
         if (!move.getStatTypes().isEmpty()) {
@@ -1919,18 +1958,7 @@ public class BattleLogic {
         int prob = Math.round(move.getStatusProb() * 100.0f);
         int rand = generator.nextInt(100) + 1;
 
-        boolean firePokemonImmunity = move.getStatus() == Enums.Status.BURNED &&
-                (target.getType()[0].getTypeEnum() == Enums.Types.FIRE ||
-                        target.getType()[1].getTypeEnum() == Enums.Types.FIRE);
-        boolean electricPokemonImmunity = move.getStatus() == Enums.Status.PARALYZED &&
-                (target.getType()[0].getTypeEnum() == Enums.Types.ELECTRIC ||
-                        target.getType()[1].getTypeEnum() == Enums.Types.ELECTRIC);
-        boolean poisonPokemonImmunity = (move.getStatus() == Enums.Status.POISONED ||
-                move.getStatus() == Enums.Status.BADLY_POISONED) &&
-                (target.getType()[0].getTypeEnum() == Enums.Types.POISON ||
-                        target.getType()[1].getTypeEnum() == Enums.Types.POISON);
-
-        boolean statusImmunity = firePokemonImmunity || electricPokemonImmunity || poisonPokemonImmunity;
+        boolean statusImmunity = isStatusImmune(move, target);
 
         if (prob >= rand && !secondaryEffectsImmune && !statusImmunity) {
             Timeline statusChangeInfo = processStatusChange(move.getStatus(), target);
@@ -1956,6 +1984,21 @@ public class BattleLogic {
             moveTimeLine.add(effectInfo);
             moveTimeLine.add(controller.generatePause(2000));
         }
+    }
+
+    private static boolean isStatusImmune(Move move, Pokemon target) {
+        boolean firePokemonImmunity = move.getStatus() == Enums.Status.BURNED &&
+                (target.getType()[0].getTypeEnum() == Enums.Types.FIRE ||
+                        target.getType()[1].getTypeEnum() == Enums.Types.FIRE);
+        boolean electricPokemonImmunity = move.getStatus() == Enums.Status.PARALYZED &&
+                (target.getType()[0].getTypeEnum() == Enums.Types.ELECTRIC ||
+                        target.getType()[1].getTypeEnum() == Enums.Types.ELECTRIC);
+        boolean poisonPokemonImmunity = (move.getStatus() == Enums.Status.POISONED ||
+                move.getStatus() == Enums.Status.BADLY_POISONED) &&
+                (target.getType()[0].getTypeEnum() == Enums.Types.POISON ||
+                        target.getType()[1].getTypeEnum() == Enums.Types.POISON);
+
+        return firePokemonImmunity || electricPokemonImmunity || poisonPokemonImmunity;
     }
 
     private void processStatUpApplication(List<Timeline> moveTimeLine, Move move, Pokemon user, Pokemon target,
@@ -2020,6 +2063,20 @@ public class BattleLogic {
                     critChangeInfo = controller.getBattleTextAnimation("But it failed!", true);
 
                 moveTimeLine.add(critChangeInfo);
+                moveTimeLine.add(controller.generatePause(1500));
+                break;
+            case GASTRO_ACID:
+                Timeline gastroAcidMessage;
+                if (!user.getSubStatuses().contains(moveSubStatus)) {
+                    gastroAcidMessage = controller.getBattleTextAnimation(String.format("%s's Ability\nwas supressed!",
+                            target.getBattleName()), true);
+                    target.getSubStatuses().add(Enums.SubStatus.GASTRO_ACID);
+                }
+                else
+                    gastroAcidMessage = controller.getBattleTextAnimation(String.format("%s's Ability\nis already supressed!",
+                            target.getBattleName()), true);
+
+                moveTimeLine.add(gastroAcidMessage);
                 moveTimeLine.add(controller.generatePause(1500));
                 break;
             default:
@@ -2226,7 +2283,8 @@ public class BattleLogic {
         boolean statChanged = false;
 
         for (Enums.StatType statType : statTypes) {
-            if (statType == Enums.StatType.ACCURACY && target.getAbility() == Ability.KEEN_EYE && change < 0) {
+            if (statType == Enums.StatType.ACCURACY && target.getAbility() == Ability.KEEN_EYE && change < 0 &&
+                    !target.getSubStatuses().contains(Enums.SubStatus.GASTRO_ACID)) {
                 Timeline abilityAnimation;
                 if (target.getOwner().isPlayer())
                     abilityAnimation = controller.getAllyAbilityInfoAnimation(target);
@@ -2428,7 +2486,8 @@ public class BattleLogic {
         float burn = 1;
         if (move.getSubtype() == Enums.Subtypes.PHYSICAL) {
             // Some abilities block burn damage from decreasing physical damage
-            boolean userAffectedByBurn = user.getStatus() == Enums.Status.BURNED && user.getAbility() != Ability.GUTS;
+            boolean userAffectedByBurn = user.getStatus() == Enums.Status.BURNED && user.getAbility() != Ability.GUTS
+                    && !user.getSubStatuses().contains(Enums.SubStatus.GASTRO_ACID);
             // Some moves also block burn damage from decreasing physical damage
             boolean ignoresBurn = move.getName() == MoveEnum.CONFUSION_DAMAGE || move.getName() == MoveEnum.FACADE;
             if (userAffectedByBurn && !ignoresBurn)

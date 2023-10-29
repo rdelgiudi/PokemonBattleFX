@@ -864,6 +864,27 @@ public class MoveTemplate {
         newmove.setMoveDescription("This move's power is doubled if the user is poisoned, burned, or paralyzed.");
         moveMap.put(newmove.getName(), newmove);
 
+        newmove = new MoveTemplate(MoveEnum.SLUDGE_BOMB, 90, 100, 10, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.POISON), false);
+        newmove.setStatus(Enums.Status.POISONED);
+        newmove.setStatusProb(0.3f);
+        newmove.setMoveDescription("The user hurls unsanitary sludge at the target to inflict damage. This may also poison the target.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.SCREECH, NOT_APPLICABLE, 85, 40, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.POISON), false);
+        newmove.getStatTypes().add(Enums.StatType.DEFENSE);
+        newmove.setStatChange(-2);
+        newmove.setStatChangeProb(1f);
+        newmove.setMoveDescription("An earsplitting screech harshly lowers the target's Defense stat.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.GASTRO_ACID, NOT_APPLICABLE, 100, 10, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.POISON), false);
+        newmove.setSubStatus(Enums.SubStatus.GASTRO_ACID);
+        newmove.setStatusProb(1f);
+        newmove.setMoveDescription("The user hurls up its stomach acids on the target. The fluid eliminates the effect of the target's Ability.");
+        moveMap.put(newmove.getName(), newmove);
     }
 
 }

@@ -83,7 +83,10 @@ public enum MoveEnum {
     WING_ATTACK("Wing Attack"),
     DRILL_RUN("Drill Run"),
     GIGA_IMPACT("Giga Impact"),
-    FACADE("Facade");
+    FACADE("Facade"),
+    SLUDGE_BOMB("Sludge Bomb"),
+    SCREECH("Screech"),
+    GASTRO_ACID("Gastro Acid");
 
 
     private final String name;
