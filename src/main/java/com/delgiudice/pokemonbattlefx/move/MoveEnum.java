@@ -86,7 +86,11 @@ public enum MoveEnum {
     FACADE("Facade"),
     SLUDGE_BOMB("Sludge Bomb"),
     SCREECH("Screech"),
-    GASTRO_ACID("Gastro Acid");
+    GASTRO_ACID("Gastro Acid"),
+    GUNK_SHOT("Gunk Shot"),
+    BELCH("Belch"),
+    COIL("Coil"),
+    THUNDER_FANG("Thunder Fang");
 
 
     private final String name;

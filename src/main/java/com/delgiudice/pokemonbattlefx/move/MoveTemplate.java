@@ -885,6 +885,33 @@ public class MoveTemplate {
         newmove.setStatusProb(1f);
         newmove.setMoveDescription("The user hurls up its stomach acids on the target. The fluid eliminates the effect of the target's Ability.");
         moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.GUNK_SHOT, 120, 80, 5, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.POISON), false);
+        newmove.setStatus(Enums.Status.POISONED);
+        newmove.setStatusProb(0.3f);
+        newmove.setMoveDescription("The user shoots filthy garbage at the target to attack. This may also poison the target.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.THUNDER_FANG, 65, 95, 15, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.ELECTRIC), true);
+        newmove.setStatus(Enums.Status.PARALYZED);
+        newmove.setSubStatus(Enums.SubStatus.FLINCHED);
+        newmove.setStatusProb(0.1f);
+        newmove.setMoveDescription("The user bites with electrified fangs. This may also make the target flinch or leave it with paralysis.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.COIL, NOT_APPLICABLE, NOT_APPLICABLE, 20, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.POISON), false);
+        newmove.getStatTypes().add(Enums.StatType.ATTACK);
+        newmove.getStatTypes().add(Enums.StatType.DEFENSE);
+        newmove.getStatTypes().add(Enums.StatType.ACCURACY);
+        newmove.setStatChange(1);
+        newmove.setStatChangeProb(1f);
+        newmove.setSelf(true);
+        newmove.setMoveDescription("The user coils up and concentrates. This boosts its Attack and Defense stats as well as its accuracy.");
+        moveMap.put(newmove.getName(), newmove);
+
     }
 
 }

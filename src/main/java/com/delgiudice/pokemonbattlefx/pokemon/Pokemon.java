@@ -593,5 +593,10 @@ public class Pokemon {
                 new Move(MoveTemplate.getMove(MoveEnum.SLUDGE_BOMB)), new Move(MoveTemplate.getMove(MoveEnum.SCREECH)),
                 new Move(MoveTemplate.getMove(MoveEnum.BITE)), new Move(MoveTemplate.getMove(MoveEnum.GASTRO_ACID)));
         pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.ARBOK), 50, Ability.INTIMIDATE,
+                new Move(MoveTemplate.getMove(MoveEnum.GUNK_SHOT)), new Move(MoveTemplate.getMove(MoveEnum.COIL)),
+                new Move(MoveTemplate.getMove(MoveEnum.THUNDER_FANG)), new Move(MoveTemplate.getMove(MoveEnum.CRUNCH)));
+        pokemonExamples.put(example.getOriginalName(), example);
     }
 }

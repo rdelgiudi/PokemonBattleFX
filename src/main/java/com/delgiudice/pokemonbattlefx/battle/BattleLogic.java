@@ -1140,6 +1140,7 @@ public class BattleLogic {
 
         Timeline enemyPokemonFaintedMessage = controller.getBattleTextAnimation(String.format(POKEMON_FAINTED_STRING,
                 enemy.getParty(currentEnemyPokemon).getBattleName()), true);
+        System.out.println(enemy.getParty(currentEnemyPokemon).getBattleName() + " fainted!");
         //enemyPokemonFaintedMessage.setDelay(Duration.seconds(1));
 
         battleTimeLine.add(enemyPokemonFaintedMessage);
@@ -1163,6 +1164,7 @@ public class BattleLogic {
 
         Timeline allyPokemonFaintedMessage = controller.getBattleTextAnimation(String.format(POKEMON_FAINTED_STRING,
                 player.getParty(currentAllyPokemon).getBattleName()), true);
+        System.out.println(player.getParty(currentAllyPokemon).getBattleName() + " fainted!");
         //allyPokemonFaintedMessage.setDelay(Duration.seconds(1));
 
         battleTimeLine.add(allyPokemonFaintedMessage);
@@ -1802,8 +1804,10 @@ public class BattleLogic {
                 moveTimeLine.add(hpAnimation);
                 moveTimeLine.add(controller.generatePause(1500));
                 int displayHits = i+1;
-                System.out.println("Hit " + displayHits + ": " + move.getName() + " dealt " + damage + " damage to " +
-                        target.getBattleNameMiddle() + "!");
+                //System.out.println("Hit " + displayHits + ": " + move.getName() + " dealt " + damage + " damage to " +
+                //        target.getBattleNameMiddle() + "!");
+                System.out.printf("Hit %d: %s dealt %d damage to %s (%d -> %d)%n", displayHits, move.getName(), damage,
+                        target.getBattleNameMiddle(), oldHp, target.getHp());
 
                 if (damageInfo.critical) {
                     final Timeline criticalInfo = controller.getBattleTextAnimation("A critical hit!", true);
@@ -2045,6 +2049,7 @@ public class BattleLogic {
                     laserFocusMessage = controller.getBattleTextAnimation(String.format(
                             "%s concentrated intensely!", user.getBattleName()), true);
                     user.setLaserFocusActive(true);
+                    System.out.println(user.getBattleName() + " now has Laser Focus status active");
                 }
                 else
                     laserFocusMessage = controller.getBattleTextAnimation("But it failed!", true);
@@ -2058,6 +2063,7 @@ public class BattleLogic {
                             true);
                     user.setCritIncrease(user.getCritIncrease() + 2);
                     user.getSubStatuses().add(moveSubStatus);
+                    System.out.println(user.getBattleName() + " crit modifier increased by 2");
                 }
                 else
                     critChangeInfo = controller.getBattleTextAnimation("But it failed!", true);
@@ -2153,7 +2159,8 @@ public class BattleLogic {
 
         moveTimeLine.add(controller.generatePause(2000));
 
-        System.out.printf("%s drained %d HP from %s%n", user.getBattleName(), lifeStolenInteger ,target.getBattleNameMiddle());
+        System.out.printf("%s drained %d HP from %s (%d -> %d)%n", user.getBattleName(), lifeStolenInteger ,
+                target.getBattleNameMiddle(), oldUserHp, user.getHp());
     }
 
     private void processRecoil(List<Timeline> moveTimeLine, Pokemon user, int damage, Move move) {
@@ -2186,6 +2193,8 @@ public class BattleLogic {
 
         moveTimeLine.add(recoilDealtAnimation);
         moveTimeLine.add(controller.generatePause(1000));
+        System.out.printf("%s took %d recoil damage (%d -> %d)%n", user.getBattleName(), recoilDamageInt, oldHp,
+                user.getHp());
     }
 
     private Timeline applyConfusion(Pokemon target) {
@@ -2294,6 +2303,7 @@ public class BattleLogic {
 
                 Timeline abilityInfo = controller.getBattleTextAnimation(String.format(
                         "%s's Keen Eye%nprevents accuracy drops!", target.getBattleName()), true);
+                System.out.printf("Accuracy drop prevented by %s's Keen Eye%n", target.getBattleNameMiddle());
                 moveTimeLine.add(abilityInfo);
                 moveTimeLine.add(controller.generatePause(1500));
 
@@ -2358,7 +2368,9 @@ public class BattleLogic {
             }
 
             moveTimeLine.add(controller.generatePause(1500));
-            System.out.println(target.getBattleName() + " stat change to " + statType + ": " + change);
+            //System.out.println(target.getBattleName() + " stat change to " + statType + ": " + change);
+            System.out.printf("%s's stat change to %s: %d (%d -> %d)%n",
+                    target.getBattleName(), statType, change, currentStatModifier, statup);
         }
 
         if (statChangeSoundPlayback != null && statChanged) {
