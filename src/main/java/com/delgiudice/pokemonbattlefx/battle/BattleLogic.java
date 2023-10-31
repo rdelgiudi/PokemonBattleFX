@@ -86,7 +86,7 @@ public class BattleLogic {
         currentEnemyPokemon = 0;
         controller.wipeText(false);
         weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
-        controller.updateFieldWeatherEffect(weatherEffect.getKey());
+        controller.updateFieldWeatherEffect(weatherEffect.getKey()).play();
     }
 
     public void startBattle(Player player, NpcTrainer enemy, Pane teamBuilderPane) {
