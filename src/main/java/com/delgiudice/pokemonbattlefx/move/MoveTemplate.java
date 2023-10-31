@@ -912,6 +912,26 @@ public class MoveTemplate {
         newmove.setMoveDescription("The user coils up and concentrates. This boosts its Attack and Defense stats as well as its accuracy.");
         moveMap.put(newmove.getName(), newmove);
 
+        newmove = new MoveTemplate(MoveEnum.THUNDERBOLT, 90, 100, 15, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.ELECTRIC), false);
+        newmove.setStatus(Enums.Status.PARALYZED);
+        newmove.setStatusProb(0.1f);
+        newmove.setMoveDescription("The user attacks the target with a strong electric blast. This may also leave the target with paralysis.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.IRON_TAIL, 100, 75, 15, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.STEEL), true);
+        newmove.getStatTypes().add(Enums.StatType.DEFENSE);
+        newmove.setStatChange(-1);
+        newmove.setStatChangeProb(0.3f);
+        newmove.setSelf(false);
+        newmove.setMoveDescription("The target is slammed with a steel-hard tail. This may also lower the target's Defense stat.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.ELECTRO_BALL, NOT_APPLICABLE, 100, 10, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.ELECTRIC), false);
+        newmove.setMoveDescription("The user hurls an electric orb at the target. The faster the user is than the target, the greater the move's power.");
+        moveMap.put(newmove.getName(), newmove);
     }
 
 }

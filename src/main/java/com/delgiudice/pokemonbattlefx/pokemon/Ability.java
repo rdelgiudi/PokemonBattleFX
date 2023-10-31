@@ -22,7 +22,9 @@ public enum Ability {
     COMPOUND_EYES("Compound Eyes",
             "The Pokémon's accuracy goes up."),
     SWARM("Swarm",
-            "Powers up Bug-type moves when the Pokémon's HP is low.");
+            "Powers up Bug-type moves when the Pokémon's HP is low."),
+    STATIC("Static",
+            "The Pokémon is charged with static electricity and may paralyze attackers that make direct contact with it.");
 
     final private String ability;
     private String description = "No description";

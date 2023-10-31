@@ -656,31 +656,11 @@ public class BattleLogic {
                 generateEnemyMove(enemyPokemon) : null;
 
         // Speed calculation
-        double playerSpeed = allyPokemon.getStats().get(Enums.StatType.SPEED);
-        double enemySpeed = enemyPokemon.getStats().get(Enums.StatType.SPEED);
-        playerSpeed = allyPokemon.getStatus() == Enums.Status.PARALYZED ? playerSpeed / 2: playerSpeed;
-        enemySpeed = enemyPokemon.getStatus() == Enums.Status.PARALYZED ? enemySpeed / 2: enemySpeed;
-        int playerSpeedModifier = allyPokemon.getStatModifiers().get(Enums.StatType.SPEED);
-        int enemySpeedModifier = enemyPokemon.getStatModifiers().get(Enums.StatType.SPEED);
-        if (playerSpeedModifier >= 0)
-            playerSpeed = playerSpeed * (playerSpeedModifier + 2) / 2.0;
-        else {
-            playerSpeed = playerSpeed * 2 / (2.0 - playerSpeedModifier);
-        }
-        if (enemySpeedModifier >= 0)
-            enemySpeed = enemySpeed * (enemySpeedModifier + 2) / 2.0;
-        else {
-            enemySpeed = enemySpeed * 2 / (2.0 - enemySpeedModifier);
-        }
-
-        playerSpeed = Math.round(playerSpeed);
-        enemySpeed = Math.round(enemySpeed);
-
-
-        if (allyBattlefieldConditions.containsKey(Enums.BattlefieldCondition.TAILWIND))
-            playerSpeed *= 2;
-        if (enemyBattlefieldConditions.containsKey(Enums.BattlefieldCondition.TAILWIND))
-            enemySpeed *= 2;
+        double playerSpeed, enemySpeed;
+        double[] speeds;
+        speeds = calculateEffectiveSpeeds(allyPokemon, enemyPokemon);
+        playerSpeed = speeds[0];
+        enemySpeed = speeds[1];
 
         boolean faster = playerSpeed > enemySpeed;
         boolean tied = playerSpeed == enemySpeed;
@@ -717,6 +697,35 @@ public class BattleLogic {
         }
 
         battleTurnEnd(battleTimeLine);
+    }
+
+    private double[] calculateEffectiveSpeeds(Pokemon allyPokemon, Pokemon enemyPokemon) {
+        double playerSpeed = allyPokemon.getStats().get(Enums.StatType.SPEED);
+        double enemySpeed = enemyPokemon.getStats().get(Enums.StatType.SPEED);
+        playerSpeed = allyPokemon.getStatus() == Enums.Status.PARALYZED ? playerSpeed / 2: playerSpeed;
+        enemySpeed = enemyPokemon.getStatus() == Enums.Status.PARALYZED ? enemySpeed / 2: enemySpeed;
+        int playerSpeedModifier = allyPokemon.getStatModifiers().get(Enums.StatType.SPEED);
+        int enemySpeedModifier = enemyPokemon.getStatModifiers().get(Enums.StatType.SPEED);
+        if (playerSpeedModifier >= 0)
+            playerSpeed = playerSpeed * (playerSpeedModifier + 2) / 2.0;
+        else {
+            playerSpeed = playerSpeed * 2 / (2.0 - playerSpeedModifier);
+        }
+        if (enemySpeedModifier >= 0)
+            enemySpeed = enemySpeed * (enemySpeedModifier + 2) / 2.0;
+        else {
+            enemySpeed = enemySpeed * 2 / (2.0 - enemySpeedModifier);
+        }
+
+        playerSpeed = Math.round(playerSpeed);
+        enemySpeed = Math.round(enemySpeed);
+
+        if (allyBattlefieldConditions.containsKey(Enums.BattlefieldCondition.TAILWIND))
+            playerSpeed *= 2;
+        if (enemyBattlefieldConditions.containsKey(Enums.BattlefieldCondition.TAILWIND))
+            enemySpeed *= 2;
+
+        return new double[]{playerSpeed, enemySpeed};
     }
 
     // For now enemy move is randomly generated, maybe gym leader AI implementation in the future
@@ -1456,7 +1465,7 @@ public class BattleLogic {
         moveTimeLine.add(controller.generatePause(500));
 
         MoveDamageInfo confusionDamageInfo = calculateMoveDamage(new Move(
-                MoveTemplate.getMoveMap().get(MoveEnum.CONFUSION_DAMAGE)), user, user, 1, false);
+                MoveTemplate.getMoveMap().get(MoveEnum.CONFUSION_DAMAGE)), user, user, 1, false, -1);
 
         int confusionDamage = confusionDamageInfo.damage;
         if (confusionDamage > user.getHp())
@@ -1764,11 +1773,16 @@ public class BattleLogic {
                 break;
 
             // Check move type and calculate damage
+
+            // Non-standard damage move: non-status moves with no power stat
+            // handled individually
             if (moveType != Enums.Subtypes.STATUS && move.getPower() == MoveTemplate.NOT_APPLICABLE) {
                 damageInfo = processNonStandardDamagingMove(move, user, target);
             }
+            // Standard damage moves: non-status moves with defined power stat
             else if (moveType != Enums.Subtypes.STATUS)
-                damageInfo = calculateMoveDamage(move, user, target, twoTurnModifier, true);
+                damageInfo = calculateMoveDamage(move, user, target, twoTurnModifier, true, -1);
+            // Health restore moves
             else {
                 if (move.getHpRestore() > 0)
                     return processHealthRestore(moveTimeLine, move, user);
@@ -1824,6 +1838,11 @@ public class BattleLogic {
                 return moveTimeLine;
             }
             //***************************************************************
+
+            // Check if attacking Pokemon gets affected by enemy Static ability, this triggers every hit
+            if (move.isContactMove() && target.getAbility() == Ability.STATIC && user.getStatus() == Enums.Status.NONE) {
+                processStaticCheck(moveTimeLine, user, target);
+            }
 
         }
 
@@ -1894,20 +1913,27 @@ public class BattleLogic {
         }
         //********************************************************
 
+        // Apply spikes to battlefield
         if (move.getSpikeType() != Enums.Spikes.NONE) {
             HashMap<Enums.Spikes, Integer> spikes = user.getOwner().isPlayer() ? enemySpikes : allySpikes;
-            if (!spikes.containsKey(move.getSpikeType()))
+            if (!spikes.containsKey(move.getSpikeType())) {
                 spikes.put(move.getSpikeType(), 1);
-            else if (spikes.get(move.getSpikeType()) == 1)
+                System.out.println("Placing " + move.getSpikeType() + " tier 1");
+            }
+            else if (spikes.get(move.getSpikeType()) == 1) {
                 spikes.put(move.getSpikeType(), 2);
+                System.out.println("Placing " + move.getSpikeType() + " tier 2");
+            }
             else {
                 Timeline failureMessage = controller.getBattleTextAnimation("But it failed!", true);
                 moveTimeLine.add(failureMessage);
                 moveTimeLine.add(controller.generatePause(1500));
+                System.out.println("Placing " + move.getSpikeType() + "failed!");
                 return moveTimeLine;
             }
-            processSpikesPlaced(moveTimeLine ,user, move);
+            processSpikesPlaced(moveTimeLine, user, move);
         }
+        //********************************************************
 
         // Checks related to moves that increase or decrease stats
         boolean targetFainted = target.getHp() == 0;
@@ -1956,6 +1982,37 @@ public class BattleLogic {
         return moveTimeLine;
     }
 
+    private void processStaticCheck(List<Timeline> moveTimeLine, Pokemon user, Pokemon target) {
+
+        SecureRandom generator = new SecureRandom();
+        int staticRandom = generator.nextInt(10);
+
+        if (staticRandom <= 2) {
+            Timeline abilityInfo;
+            user.setStatus(Enums.Status.PARALYZED);
+            boolean isPlayerStaticCheck = target.getOwner().isPlayer();
+
+            if (isPlayerStaticCheck) {
+                abilityInfo = controller.getAllyAbilityInfoAnimation(target);
+            } else {
+                abilityInfo = controller.getEnemyAbilityInfoAnimation(target);
+            }
+
+            Timeline abilityMessage = controller.getBattleTextAnimation(String.format(
+                    "%s's Static makes %s%nunable to move!", target.getBattleName(),
+                    user.getBattleNameMiddle()), true);
+            Timeline updateStatus = controller.updateStatus(user, !isPlayerStaticCheck);
+
+            System.out.printf("%s affected by %s's Static, now paralyzed%n",
+                    user.getBattleName(), target.getBattleNameMiddle());
+
+            moveTimeLine.add(abilityInfo);
+            moveTimeLine.add(abilityMessage);
+            moveTimeLine.add(updateStatus);
+            moveTimeLine.add(controller.generatePause(1000));
+        }
+    }
+
     private void processStatusApplication(List<Timeline> moveTimeLine, Move move, Pokemon user, Pokemon target,
                                           boolean secondaryEffectsImmune) {
         SecureRandom generator = new SecureRandom();
@@ -1990,7 +2047,7 @@ public class BattleLogic {
         }
     }
 
-    private static boolean isStatusImmune(Move move, Pokemon target) {
+    private boolean isStatusImmune(Move move, Pokemon target) {
         boolean firePokemonImmunity = move.getStatus() == Enums.Status.BURNED &&
                 (target.getType()[0].getTypeEnum() == Enums.Types.FIRE ||
                         target.getType()[1].getTypeEnum() == Enums.Types.FIRE);
@@ -2108,6 +2165,36 @@ public class BattleLogic {
 
                 damage = target.getHp() - user.getHp();
                 return new MoveDamageInfo(damage, false, 1);
+
+            case ELECTRO_BALL:
+                double[] speeds;
+                double userSpeed, targetSpeed;
+                if (user.getOwner().isPlayer()) {
+                    speeds = calculateEffectiveSpeeds(user, target);
+                    userSpeed = speeds[0];
+                    targetSpeed = speeds[1];
+                }
+                else {
+                    speeds = calculateEffectiveSpeeds(target, user);
+                    userSpeed = speeds[1];
+                    targetSpeed = speeds[0];
+                }
+
+                double targetSpeedPercentage = targetSpeed / userSpeed;
+
+                int movePower;
+                if (targetSpeedPercentage >= 1)
+                    movePower = 40;
+                else if (targetSpeedPercentage >= 0.5001)
+                    movePower = 60;
+                else if (targetSpeedPercentage >= 0.3334)
+                    movePower = 80;
+                else if (targetSpeedPercentage >= 0.2501)
+                    movePower = 120;
+                else
+                    movePower = 150;
+
+                return calculateMoveDamage(move, user, target, 1, true, movePower);
 
             default:
                 throw new IllegalStateException("Unidentified move matched non standard damaging move criteria: " +
@@ -2379,7 +2466,7 @@ public class BattleLogic {
     }
 
     private MoveDamageInfo calculateMoveDamage(Move move, Pokemon user, Pokemon target, int twoTurnModifier,
-                                       boolean canCrit)
+                                       boolean canCrit, int overridePower)
     {
         SecureRandom generator = new SecureRandom();
         int bound;
@@ -2533,7 +2620,11 @@ public class BattleLogic {
 
         //Final damage calculations
         double modifier = critMod * rand * stab * typeEffect * burn * twoTurnModifier;
-        int power = move.getPower();
+        int power;
+        if (overridePower == -1)
+            power = move.getPower();
+        else
+            power = overridePower;
 
         // If under non immobilizing status condition and using Facade, double the power
         if (move.getName() == MoveEnum.FACADE && user.getStatus() != Enums.Status.NONE)

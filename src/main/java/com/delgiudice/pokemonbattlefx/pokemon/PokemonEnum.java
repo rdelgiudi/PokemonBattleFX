@@ -25,7 +25,8 @@ public enum PokemonEnum {
     SPEAROW("Spearow"),
     FEAROW("Fearow"),
     EKANS("Ekans"),
-    ARBOK("Arbok");
+    ARBOK("Arbok"),
+    PIKACHU("Pikachu");
 
     private final String name;
 

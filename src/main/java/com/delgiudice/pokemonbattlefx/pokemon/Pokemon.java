@@ -598,5 +598,10 @@ public class Pokemon {
                 new Move(MoveTemplate.getMove(MoveEnum.GUNK_SHOT)), new Move(MoveTemplate.getMove(MoveEnum.COIL)),
                 new Move(MoveTemplate.getMove(MoveEnum.THUNDER_FANG)), new Move(MoveTemplate.getMove(MoveEnum.CRUNCH)));
         pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.PIKACHU), 50, Ability.STATIC,
+                new Move(MoveTemplate.getMove(MoveEnum.THUNDERBOLT)), new Move(MoveTemplate.getMove(MoveEnum.IRON_TAIL)),
+                new Move(MoveTemplate.getMove(MoveEnum.ELECTRO_BALL)), new Move(MoveTemplate.getMove(MoveEnum.QUICK_ATTACK)));
+        pokemonExamples.put(example.getOriginalName(), example);
     }
 }

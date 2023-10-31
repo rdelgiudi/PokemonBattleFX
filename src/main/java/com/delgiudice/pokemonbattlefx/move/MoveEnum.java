@@ -90,7 +90,10 @@ public enum MoveEnum {
     GUNK_SHOT("Gunk Shot"),
     BELCH("Belch"),
     COIL("Coil"),
-    THUNDER_FANG("Thunder Fang");
+    THUNDER_FANG("Thunder Fang"),
+    THUNDERBOLT("Thunderbolt"),
+    IRON_TAIL("Iron Tail"),
+    ELECTRO_BALL("Electro Ball");
 
 
     private final String name;
