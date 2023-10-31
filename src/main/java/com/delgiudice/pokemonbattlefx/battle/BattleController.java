@@ -84,6 +84,9 @@ public class BattleController {
     private final static String POKEMON_BUTTON_RELEASE = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: forestgreen;";
     private final static String POKEMON_BUTTON_HOVER = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: limegreen;";
 
+    private final static String WEATHER_NONE = "-fx-background-color: linear-gradient(to bottom, lightskyblue, darkorange);";
+    private final static String WEATHER_RAIN = "-fx-background-color: linear-gradient(to bottom, lightgray, darkblue);";
+
     public final int SCREEN_WIDTH = 1280, SCREEN_HEIGHT = 720;
     private double ALLY_INFO_DEFAULT_Y, ALLY_SPRITE_DEFAULT_Y;
 
@@ -988,6 +991,27 @@ public class BattleController {
             setStatusStyle(pokemon, statusLabel);
         });
 
+        return new Timeline(kf);
+    }
+
+    public Timeline updateFieldWeatherEffect(Enums.WeatherEffect weatherEffect) {
+
+        final KeyFrame kf;
+
+        switch (weatherEffect) {
+            case NONE:
+                kf = new KeyFrame(Duration.millis(1), e-> {
+                    mainPane.setStyle(WEATHER_NONE);
+                });
+                break;
+            case RAIN:
+                kf = new KeyFrame(Duration.millis(1), e-> {
+                    mainPane.setStyle(WEATHER_RAIN);
+                });
+                break;
+            default:
+                throw new IllegalStateException("Unhandled weather effect: " + weatherEffect);
+        }
         return new Timeline(kf);
     }
 

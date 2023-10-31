@@ -80,6 +80,9 @@ public class MoveTemplate {
     // Pokemon that are sent out
     private Enums.Spikes spikeType = Enums.Spikes.NONE;
 
+    // weatherEffect - type of weather effect induced on the battlefield by the move
+    private Enums.WeatherEffect weatherEffect = Enums.WeatherEffect.NONE;
+
     public MoveEnum getName() {
         return name;
     }
@@ -204,6 +207,10 @@ public class MoveTemplate {
         return spikeType;
     }
 
+    public Enums.WeatherEffect getWeatherEffect() {
+        return weatherEffect;
+    }
+
     public boolean isRecharge() {
         return recharge;
     }
@@ -318,6 +325,10 @@ public class MoveTemplate {
 
     public void setSpikeType(Enums.Spikes spikeType) {
         this.spikeType = spikeType;
+    }
+
+    public void setWeatherEffect(Enums.WeatherEffect weatherEffect) {
+        this.weatherEffect = weatherEffect;
     }
 
     public void setSelf(boolean self) {
@@ -931,6 +942,19 @@ public class MoveTemplate {
         newmove = new MoveTemplate(MoveEnum.ELECTRO_BALL, NOT_APPLICABLE, 100, 10, Enums.Subtypes.SPECIAL,
                 Type.getTypeMap(Enums.Types.ELECTRIC), false);
         newmove.setMoveDescription("The user hurls an electric orb at the target. The faster the user is than the target, the greater the move's power.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.THUNDER, 110, 70, 10, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.ELECTRIC), false);
+        newmove.setStatus(Enums.Status.PARALYZED);
+        newmove.setStatusProb(0.3f);
+        newmove.setMoveDescription("A wicked thunderbolt is dropped on the target to inflict damage. This may also leave the target with paralysis.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.RAIN_DANCE, NOT_APPLICABLE, NOT_APPLICABLE, 5, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.WATER), false);
+        newmove.setWeatherEffect(Enums.WeatherEffect.RAIN);
+        newmove.setMoveDescription("The user summons a heavy rain that falls for five turns, powering up Water-type attacks. The rain also lowers the power of Fire-type attacks.");
         moveMap.put(newmove.getName(), newmove);
     }
 

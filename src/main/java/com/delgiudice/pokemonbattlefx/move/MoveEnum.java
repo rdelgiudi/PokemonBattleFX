@@ -93,7 +93,11 @@ public enum MoveEnum {
     THUNDER_FANG("Thunder Fang"),
     THUNDERBOLT("Thunderbolt"),
     IRON_TAIL("Iron Tail"),
-    ELECTRO_BALL("Electro Ball");
+    ELECTRO_BALL("Electro Ball"),
+    THUNDER("Thunder"),
+    RAIN_DANCE("Rain Dance"),
+    VOLT_SWITCH("Volt Switch"),
+    SUBSTITUTE("Substitute");
 
 
     private final String name;

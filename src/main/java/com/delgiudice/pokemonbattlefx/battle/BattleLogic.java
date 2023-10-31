@@ -12,6 +12,7 @@ import com.delgiudice.pokemonbattlefx.pokemon.Ability;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.trainer.NpcTrainer;
 import com.delgiudice.pokemonbattlefx.trainer.Player;
+import com.sun.java.accessibility.util.java.awt.ListTranslator;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXMLLoader;
@@ -20,6 +21,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.security.SecureRandom;
@@ -52,6 +54,7 @@ public class BattleLogic {
             new HashMap<Enums.Spikes, Integer>();
     private final HashMap<Enums.Spikes, Integer> enemySpikes =
             new HashMap<Enums.Spikes, Integer>();
+    private Pair<Enums.WeatherEffect, Integer> weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
 
     public int getCurrentAllyPokemon() {
         return currentAllyPokemon;
@@ -82,6 +85,8 @@ public class BattleLogic {
         currentAllyPokemon = 0;
         currentEnemyPokemon = 0;
         controller.wipeText(false);
+        weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
+        controller.updateFieldWeatherEffect(weatherEffect.getKey());
     }
 
     public void startBattle(Player player, NpcTrainer enemy, Pane teamBuilderPane) {
@@ -851,7 +856,8 @@ public class BattleLogic {
         if (checkBattleEnd(battleTimeLine))
             return;
 
-        finalChecks(battleTimeLine);
+        //finalChecks(battleTimeLine);
+        applyWeatherEffects(battleTimeLine);
     }
     private boolean checkBattleEnd(List<Timeline> battleTimeLine) {
         boolean allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
@@ -897,6 +903,38 @@ public class BattleLogic {
             }
         }
         return false;
+    }
+
+    // Updates weather timer as well as applies additional effects (for example Hail and Sandstorm damage)
+    private void applyWeatherEffects(List<Timeline> battleTimeLine) {
+
+        Enums.WeatherEffect currentWeatherEffect = weatherEffect.getKey();
+
+        switch (currentWeatherEffect) {
+            case NONE:
+                finalChecks(battleTimeLine);
+                break;
+            case RAIN:
+                int weatherEffectTimer = weatherEffect.getValue();
+                Timeline rainMessage;
+                if (weatherEffectTimer > 0) {
+                    weatherEffectTimer--;
+                    weatherEffect = new Pair<>(currentWeatherEffect, weatherEffectTimer);
+                    rainMessage = controller.getBattleTextAnimation("Rain continues to fall...", true);
+                }
+                else {
+                    rainMessage = controller.getBattleTextAnimation("The rain stopped.", true);
+                    weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
+                    battleTimeLine.add(controller.updateFieldWeatherEffect(weatherEffect.getKey()));
+                }
+                battleTimeLine.add(rainMessage);
+                battleTimeLine.add(controller.generatePause(1000));
+                break;
+            default:
+                throw new IllegalStateException("Unhandled weather condition: " + currentWeatherEffect);
+        }
+
+        finalChecks(battleTimeLine);
     }
 
     // Send out new ally Pokemon if available, else game over for the player, even if enemy also out of Pokemon
@@ -1374,7 +1412,12 @@ public class BattleLogic {
 
     private List<Timeline> processHealthRestore(List<Timeline> moveTimeLine, Move move, Pokemon user) {
         if (user.getHp() != user.getMaxHP()) {
-            double restoredHealth = user.getMaxHP() * move.getHpRestore();
+            double moveHpRestore = move.getHpRestore();
+
+            if (weatherEffect.getKey() == Enums.WeatherEffect.RAIN && move.getName() == MoveEnum.SYNTHESIS)             // TODO: also affects Morning Sun and Moonlight
+                moveHpRestore *= 0.5;
+
+            double restoredHealth = user.getMaxHP() * moveHpRestore;
             double healthChange = restoredHealth + user.getHp();
             if (healthChange > user.getMaxHP())
                 healthChange = user.getMaxHP();
@@ -1532,7 +1575,7 @@ public class BattleLogic {
 
     private void processBattlefieldConditionMove(List<Timeline> moveTimeline, Move move, Pokemon user) {
 
-        Timeline conditionMessage = null;
+        Timeline conditionMessage;
 
         switch (move.getCondition()) {
             case TAILWIND:
@@ -1552,10 +1595,41 @@ public class BattleLogic {
                     conditionMessage = controller.getBattleTextAnimation("But it failed!",
                             true);
                 }
+                break;
+            default:
+                throw new IllegalStateException("Unknown battlefield condition: " + move.getCondition());
         }
 
         moveTimeline.add(conditionMessage);
         moveTimeline.add(controller.generatePause(2000));
+    }
+
+    private void processWeatherConditionMove(List<Timeline> moveTimeLine, Move move, Pokemon user) {
+        Timeline weatherMessage;
+        Timeline weatherChange;
+        Enums.WeatherEffect moveWeatherEffect = move.getWeatherEffect();
+
+        if (moveWeatherEffect == weatherEffect.getKey()) {
+            weatherMessage = controller.getBattleTextAnimation("But it failed!", true);
+            moveTimeLine.add(weatherMessage);
+            moveTimeLine.add(controller.generatePause(2000));
+            return;
+        }
+
+        switch (moveWeatherEffect) {
+            case RAIN:
+                weatherMessage = controller.getBattleTextAnimation("It started to rain!", true);
+                weatherEffect = new Pair<>(moveWeatherEffect, 5);
+                weatherChange = controller.updateFieldWeatherEffect(moveWeatherEffect);
+                System.out.println("Weather effect applied: " + moveWeatherEffect);
+                break;
+            default:
+                throw new IllegalStateException("Unknown weather effect: " + move.getWeatherEffect());
+        }
+
+        moveTimeLine.add(weatherMessage);
+        moveTimeLine.add(weatherChange);
+        moveTimeLine.add(controller.generatePause(2000));
     }
 
     // Processes using a move, as well as status effects or accuracy checks that might prevent from using it
@@ -1692,11 +1766,21 @@ public class BattleLogic {
             move.setPp(move.getPp() - 1);
 
         int moveAccuracy = move.getAccuracy();
+
+        if (weatherEffect.getKey() == Enums.WeatherEffect.RAIN && move.getName() == MoveEnum.THUNDER)
+            moveAccuracy = MoveTemplate.NOT_APPLICABLE;
+
         int twoTurnModifier = checkTwoTurnMiss(move, target);
 
         // If move applies a battlefield condition, apply the effect
         if (move.getCondition() != Enums.BattlefieldCondition.NONE) {
             processBattlefieldConditionMove(moveTimeLine, move, user);
+            return moveTimeLine;
+        }
+
+        // If move applies a weather condition, apply the effect
+        if (move.getWeatherEffect() != Enums.WeatherEffect.NONE) {
+            processWeatherConditionMove(moveTimeLine, move, user);
             return moveTimeLine;
         }
 
@@ -1736,7 +1820,7 @@ public class BattleLogic {
         //****************************************************
 
         // Move hit calculations, if move misses the function ends
-        if (moveAccuracy != 0) {
+        if (moveAccuracy != MoveTemplate.NOT_APPLICABLE) {
             float accuracyModifier = calculateMoveAccuracyModifier(user, target, move);
             float hit = moveAccuracy * accuracyModifier;
             int r = generator.nextInt(100) + 1;
@@ -2618,13 +2702,19 @@ public class BattleLogic {
                 typeEffect *= 0.5f;
         }
 
-        //Final damage calculations
+        // Final damage calculations
         double modifier = critMod * rand * stab * typeEffect * burn * twoTurnModifier;
-        int power;
+        double power;
         if (overridePower == -1)
             power = move.getPower();
         else
             power = overridePower;
+
+        // Check if move effectiveness is affected by current weather conditions
+        if (weatherEffect.getKey() != Enums.WeatherEffect.NONE) {
+            double weatherMultiplier = calculateWeatherMultiplier(move);
+            power *= weatherMultiplier;
+        }
 
         // If under non immobilizing status condition and using Facade, double the power
         if (move.getName() == MoveEnum.FACADE && user.getStatus() != Enums.Status.NONE)
@@ -2658,6 +2748,19 @@ public class BattleLogic {
             System.out.println("It's not very effective...");
 
         return new MoveDamageInfo(damage, isCrit, typeEffect);
+    }
+
+    private double calculateWeatherMultiplier(Move move) {
+        switch (weatherEffect.getKey()) {
+            case RAIN:
+                if (move.getType().getTypeEnum() == Enums.Types.WATER)
+                    return 1.5;
+                if (move.getType().getTypeEnum() == Enums.Types.FIRE || move.getName() == MoveEnum.SOLAR_BEAM)
+                    return 0.5;
+                return 1;
+            default:
+                throw new IllegalStateException("Undhandled weather effect: " + weatherEffect.getKey());
+        }
     }
 
     private double processAbilityMultiplier(Move move, Pokemon user) {

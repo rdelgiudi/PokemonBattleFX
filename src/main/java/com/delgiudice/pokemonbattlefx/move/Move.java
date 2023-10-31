@@ -135,6 +135,10 @@ public class Move {
         return template.getSpikeType();
     }
 
+    public Enums.WeatherEffect getWeatherEffect() {
+        return template.getWeatherEffect();
+    }
+
     public boolean isStatUpDuringCharging() {
         return template.isStatUpDuringCharging();
     }
