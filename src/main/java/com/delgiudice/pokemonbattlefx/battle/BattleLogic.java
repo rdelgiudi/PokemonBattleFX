@@ -593,8 +593,32 @@ public class BattleLogic {
         battleTurnEnd(battleTimeLine);
     }
 
-    private void initAllyTurnWithSwap(List<Timeline> battleTimeLine ,Move move, Pokemon user, Pokemon target, Move enemyMove, boolean first ) {
-        battleTimeLine.addAll(useMove(move, user, target, true));
+    private void initAllyTurnWithSwap(List<Timeline> battleTimeLine ,Move move, Pokemon user, Pokemon target,
+                                      Move enemyMove, boolean first ) {
+        battleTimeLine.addAll(useMove(move, user, target, first));
+
+        processFainted(battleTimeLine);
+        if (checkBattleEnd(battleTimeLine))
+            return;
+
+        // If move switches out user, open switch menu when another party Pokemon is able to battle
+        if (move.isSwitchOut()) {
+            if (user.getOwner().isPlayer() && getAllyAbleToBattleNum() > 1) {
+                Button pokemonButton = controller.getPokemonButton();
+                battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+                    SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
+                    Enums.SwitchContext switchContext = first ?
+                            Enums.SwitchContext.SWITCH_FIRST_MOVE : Enums.SwitchContext.SWITCH_SECOND_MOVE;
+                    swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(),
+                            this, controller, player.getParty(), true, switchContext);
+                    pokemonButton.getScene().setRoot(swapPokemonPane);
+                });
+            }
+            else if (!user.getOwner().isPlayer() && getEnemyAbleToBattleNum() > 1) {
+
+            }
+        }
+
         initAnimationQueue(battleTimeLine);
         battleTimeLine.get(0).play();
         enemyMemory = enemyMove;
@@ -665,7 +689,7 @@ public class BattleLogic {
         return enemyMove;
     }
 
-    public void battleTurnEnd(List<Timeline> battleTimeLine) {
+    private void processFainted(List<Timeline> battleTimeLine) {
         boolean allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
         boolean enemyFainted = enemy.getParty(currentEnemyPokemon).getHp() == 0;
 
@@ -675,6 +699,10 @@ public class BattleLogic {
         if (enemyFainted) {
             processEnemyFainted(battleTimeLine);
         }
+    }
+
+    public void battleTurnEnd(List<Timeline> battleTimeLine) {
+        processFainted(battleTimeLine);
 
         if (checkBattleEnd(battleTimeLine))
             return;
@@ -790,11 +818,14 @@ public class BattleLogic {
             if (!checkIfEnemyAbleToBattle(false)) {
                 initAnimationQueue(battleTimeLine);
 
-                battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+                if (!battleTimeLine.isEmpty()) {
+                    battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+                        battleWon();
+                    });
+                    battleTimeLine.get(0).play();
+                }
+                else
                     battleWon();
-                });
-
-                battleTimeLine.get(0).play();
                 return true;
             }
         }
@@ -1129,7 +1160,6 @@ public class BattleLogic {
     private List<Timeline> processTurn(Move firstMove, Pokemon firstPokemon, Move secondMove, Pokemon secondPokemon) {
 
         List<Timeline> moveTimeLine = new ArrayList<>();
-        boolean isSwitchOut = false;
 
         //Random generator = new Random();
         if (firstMove == null && firstPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
@@ -1142,22 +1172,11 @@ public class BattleLogic {
         else if (firstMove != null) {
             moveTimeLine.addAll(useMove(firstMove, firstPokemon,
                     secondPokemon, true));
-
-            if (firstPokemon.getOwner().isPlayer() && getAllyAbleToBattleNum() > 1)
-                isSwitchOut = firstMove.isSwitchOut();
-            else if (!firstPokemon.getOwner().isPlayer() && getEnemyAbleToBattleNum() > 1)
-                isSwitchOut = firstMove.isSwitchOut();
         }
 
         if (secondPokemon.getHp() == 0 || firstPokemon.getHp() == 0) {
             return moveTimeLine;
         }
-        /*if (isSwitchOut) {
-            initAnimationQueue(moveTimeLine);
-            moveTimeLine.get(0).play();
-            moveTimeLine = new ArrayList<>();
-            moveTimeLine.add(controller.generatePause(1));
-        }*/
 
         if (secondMove == null && secondPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
             Timeline secondRechargeMessage = controller.getBattleTextAnimation(String.format(
@@ -1974,23 +1993,7 @@ public class BattleLogic {
             processMultiturnMoveCompleted(moveTimeLine, user);
         //*********************************************************************
 
-        // If move switches out user, open switch menu when another party Pokemon is able to battle
-        if (move.isSwitchOut()) {
-            if (user.getOwner().isPlayer() && getAllyAbleToBattleNum() > 1) {
-                Button pokemonButton = controller.getPokemonButton();
-                moveTimeLine.get(moveTimeLine.size() - 1).setOnFinished(e -> {
-                    SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
-                    Enums.SwitchContext switchContext = first ?
-                            Enums.SwitchContext.SWITCH_FIRST_MOVE : Enums.SwitchContext.SWITCH_SECOND_MOVE;
-                    swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(), this, controller, player.getParty(),
-                            true, switchContext);
-                    pokemonButton.getScene().setRoot(swapPokemonPane);
-                });
-            }
-            else if (!user.getOwner().isPlayer() && getEnemyAbleToBattleNum() > 1) {
 
-            }
-        }
 
         return moveTimeLine;
     }

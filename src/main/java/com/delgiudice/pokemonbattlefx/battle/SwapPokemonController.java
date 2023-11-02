@@ -225,7 +225,9 @@ public class SwapPokemonController {
                 return;
             }
 
-            if (party.get(currentAllyPokemon).getTrapMove() != null && !allyFainted) {
+            if (party.get(currentAllyPokemon).getTrapMove() != null && !allyFainted
+                    && switchContext != Enums.SwitchContext.SWITCH_FIRST_MOVE
+                    && switchContext != Enums.SwitchContext.SWITCH_SECOND_MOVE) {
                 Timeline trappedInfo = getInfoText(String.format(
                         "%s is trapped! Can't switch!",
                         party.get(currentAllyPokemon).getName()));
