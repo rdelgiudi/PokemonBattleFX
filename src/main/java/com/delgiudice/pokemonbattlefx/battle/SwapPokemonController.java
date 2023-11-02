@@ -1,6 +1,7 @@
 package com.delgiudice.pokemonbattlefx.battle;
 
 import com.delgiudice.pokemonbattlefx.BattleApplication;
+import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -36,6 +37,8 @@ public class SwapPokemonController {
 
     private List<Pokemon> party;
 
+    private Enums.SwitchContext switchContext;
+
     @FXML
     private HBox currentPokemonBox;
     @FXML
@@ -56,12 +59,14 @@ public class SwapPokemonController {
         //BattleApplication.letterbox(summaryScene, pane);
     }
 
-    public void initVariables(Pane battlePane, BattleLogic logic, BattleController controller, List<Pokemon> party) {
+    public void initVariables(Pane battlePane, BattleLogic logic, BattleController controller, List<Pokemon> party,
+                              boolean force, Enums.SwitchContext switchContext) {
         this.battlePane = battlePane;
         battleLogic = logic;
         this.party = party;
         battleController = controller;
-        initPokemonInfo();
+        initPokemonInfo(force);
+        this.switchContext = switchContext;
 
         cancelButton.setOnAction(e -> {
             Scene scene = cancelButton.getScene();
@@ -75,11 +80,11 @@ public class SwapPokemonController {
         return new Timeline(kf);
     }
 
-    private void initPokemonInfo() {
+    private void initPokemonInfo(boolean force) {
 
         int currentAllyPokemon = battleLogic.getCurrentAllyPokemon();
 
-        cancelButton.setDisable(party.get(currentAllyPokemon).getHp() == 0);
+        cancelButton.setDisable(party.get(currentAllyPokemon).getHp() == 0 || force);
 
         setPokemonInfo(currentPokemonBox, currentAllyPokemon, true);
 
@@ -266,13 +271,13 @@ public class SwapPokemonController {
             Scene scene = pokemonBox.getScene();
             scene.setRoot(battlePane);
 
-            if (!allyFainted) {
+            if (switchContext == Enums.SwitchContext.SWITCH_FIRST || switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE) {
                 battleLogic.initAnimationQueue(battleTimeLine);
                 battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> battleLogic.battleTurn(null));
                 battleTimeLine.get(0).play();
             }
-            else {
-                battleLogic.finalChecks(battleTimeLine);
+            else if (switchContext == Enums.SwitchContext.SWITCH_FAINTED || switchContext == Enums.SwitchContext.SWITCH_SECOND) {
+                battleLogic.battleTurnEnd(battleTimeLine);
             }
         });
 

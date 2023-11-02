@@ -115,6 +115,10 @@ public class Move {
         return template.isMultiturn();
     }
 
+    public boolean isSwitchOut() {
+        return template.isSwitchOut();
+    }
+
     public float getLifesteal() {
         return template.getLifesteal();
     }

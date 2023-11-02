@@ -45,6 +45,7 @@ public class BattleLogic {
     private Pane teamBuilderPane;
 
     private int currentAllyPokemon = 0, currentEnemyPokemon = 0;
+    private Move enemyMemory = null;
     private boolean enemySentOut, allySentOut;
     private final HashMap<Enums.BattlefieldCondition, Integer> allyBattlefieldConditions =
             new HashMap<Enums.BattlefieldCondition, Integer>();
@@ -151,6 +152,28 @@ public class BattleLogic {
         });
 
         battleTextIntro.play();
+    }
+
+    private int getAllyAbleToBattleNum() {
+        int num = 0;
+
+        for (Pokemon pokemon : player.getParty()) {
+            if (pokemon.getHp() > 0) {
+                num++;
+            }
+        }
+        return num;
+    }
+
+    private int getEnemyAbleToBattleNum() {
+        int num = 0;
+
+        for (Pokemon pokemon : enemy.getParty()) {
+            if (pokemon.getHp() > 0) {
+                num++;
+            }
+        }
+        return num;
     }
 
     private boolean checkIfAllyAbleToBattle(boolean set) {
@@ -423,14 +446,16 @@ public class BattleLogic {
                 });
             else
                 moveButton.setOnAction(e -> {
-                    controller.getMoveGrid().setDisable(true);
-                    Timeline outOfPPInfo = controller.getBattleTextAnimation("This move is out of PP!", false);
+                    controller.getMoveGrid().setVisible(false);
+                    controller.switchToPlayerChoice(false);
+                    Timeline outOfPPInfo = controller.getBattleTextAnimation("This move is out of PP!", true);
                     Timeline playerChoiceDialog2 = controller.getBattleText(String.format("What will%n%s do?",
                             player.getParty(currentAllyPokemon).getBattleName()), false);
                     playerChoiceDialog2.setDelay(Duration.seconds(1));
                     outOfPPInfo.setOnFinished(event -> playerChoiceDialog2.play());
                     playerChoiceDialog2.setOnFinished(event -> {
-                        controller.getMoveGrid().setDisable(false);
+                        controller.getMoveGrid().setVisible(true);
+                        controller.switchToPlayerChoice(true);
                     });
                     outOfPPInfo.play();
                 });
@@ -462,169 +487,14 @@ public class BattleLogic {
         });
 
         pokemonButton.setOnAction( e -> {
-            //controller.pokemonButtonPressed(player.getParty());
-            //setPokemonSwapListeners(false);
-
             Stage stage = (Stage) pokemonButton.getScene().getWindow();
             SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
-            swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(), this, controller, player.getParty());
+            swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(), this, controller, player.getParty(),
+                    false, Enums.SwitchContext.SWITCH_FIRST);
             pokemonButton.getScene().setRoot(swapPokemonPane);
         });
 
     }
-
-   /* private void setPokemonSwapListeners(boolean allyFainted) {
-
-        int iLimit = Math.min(player.getParty().size() - 1, 2);
-        int jLimit = player.getParty().size() > 3 ? 1: 0;
-        controller.updateSelectPokemonButtons(player.getParty());
-
-        if (allyFainted) {
-            Timeline selectNewPokemonMessage = controller.getBattleTextAnimation("Select new Pokemon...",
-                    false);
-            selectNewPokemonMessage.play();
-        }
-
-        for (int j=0; j <= jLimit; j++) {
-            for (int i = 0; i <= iLimit; i++) {
-                int partyIndex = i + (3 * j);
-
-                if (partyIndex >= player.getParty().size())
-                    break;
-
-                Button button = (Button) controller.getNodeFromGridPane(controller.getPokemonGrid(), i, j);
-                Pokemon pokemon = player.getParty(partyIndex);
-                ContextMenu contextMenu = new ContextMenu();
-                MenuItem switchOut = new MenuItem("Switch out");
-                MenuItem summary = new MenuItem("Summary");
-                MenuItem cancel = new MenuItem("Cancel");
-                button.setContextMenu(contextMenu);
-
-                switchOut.setOnAction(event -> {
-
-                    if (player.getParty(currentAllyPokemon).getTrapMove() != null && !allyFainted) {
-                        controller.getPokemonGrid().setDisable(true);
-                        Timeline trappedInfo = controller.getBattleTextAnimation(String.format(
-                                "%s is trapped!%nCan't switch!",
-                                player.getParty(currentAllyPokemon).getName()), false);
-                        Timeline resetText = controller.getBattleText(String.format("What will%n%s do?",
-                                player.getParty(currentAllyPokemon).getName()), false);
-                        resetText.setDelay(Duration.seconds(1));
-                        trappedInfo.setOnFinished(actionEvent -> resetText.play());
-                        resetText.setOnFinished(actionEvent -> {
-                            controller.getPokemonGrid().setDisable(false);
-                        });
-                        trappedInfo.play();
-                        return;
-                    }
-
-                    if (partyIndex == currentAllyPokemon) {
-                        button.setDisable(allyFainted);
-                        controller.getPokemonGrid().setDisable(true);
-                        Timeline alreadyInBattleInfo = controller.getBattleTextAnimation(String.format(
-                                "%s is already%nin battle!", pokemon.getBattleName()), false);
-                        Timeline resetText = controller.getBattleText(String.format("What will%n%s do?",
-                                pokemon.getBattleName()), false);
-                        resetText.setDelay(Duration.seconds(1));
-                        alreadyInBattleInfo.setOnFinished(actionEvent -> resetText.play());
-                        resetText.setOnFinished(actionEvent -> {
-                            controller.getPokemonGrid().setDisable(false);
-                        });
-                        alreadyInBattleInfo.play();
-                        return;
-                    }
-
-                    String currentAllyName = player.getParty(currentAllyPokemon).getBattleName();
-
-                    controller.getPokemonGrid().setVisible(false);
-                    controller.switchToPlayerChoice(false);
-
-                    List<Timeline> battleTimeLine = new ArrayList<>();
-
-                    if (!allyFainted) {
-                        Timeline allyPokemonReturnText = controller.getBattleTextAnimation(String.format(
-                                "That's enough %s,%ncome back!", currentAllyName), true);
-                        allyPokemonReturnText.setDelay(Duration.seconds(0.1));
-                        battleTimeLine.add(allyPokemonReturnText);
-
-                        Timeline allyPokemonReturn = controller.getPokemonFaintedAnimation(true);
-                        allyPokemonReturn.setDelay(Duration.seconds(1));
-                        battleTimeLine.add(allyPokemonReturn);
-                        battleTimeLine.add(controller.generatePause(1000));
-                    }
-
-                    switchPokemon(true, partyIndex);
-
-                    //controller.setAllyInformation(player.getParty(currentAllyPokemon));
-                    Timeline allyPokemonIntro = controller.getBattleTextAnimation(String.format(POKEMON_SENT_OUT_STRING,
-                            player.getParty(currentAllyPokemon).getBattleName()), true);
-                    battleTimeLine.add(allyPokemonIntro);
-
-                    Timeline updateStatus = controller.updateStatus(player.getParty(currentAllyPokemon), true);
-                    battleTimeLine.add(updateStatus);
-
-                    Timeline allyInfoAnimation = controller.getAllyInfoAnimation(player.getParty(currentAllyPokemon),
-                            player.getParty(currentAllyPokemon).getHp());
-                    battleTimeLine.add(allyInfoAnimation);
-
-                    //SecureRandom generator = new SecureRandom();
-                    //int enemyMoveIndex = generator.nextInt(enemy.getParty(currentEnemyPokemon).getMoveList().size());
-                    //Move enemyMove = enemy.getParty(currentEnemyPokemon).getMoveList(enemyMoveIndex);
-                    if (!allyFainted) {
-                        //Move enemyMove = generateEnemyMove(enemy.getParty(currentEnemyPokemon));
-                        //List<Timeline> enemyMoveList = useMove(enemyMove, enemy.getParty(currentEnemyPokemon),
-                        //        player.getParty(currentAllyPokemon), false);
-                        //battleTimeLine.addAll(enemyMoveList);
-                        //checkFainted(battleTimeLine);
-                        initAnimationQueue(battleTimeLine);
-                        battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> battleTurn(null));
-                        battleTimeLine.get(0).play();
-                    }
-                    else {
-                        finalChecks(battleTimeLine);
-                    }
-                });
-
-                summary.setOnAction(event -> {
-                    Scene scene = button.getScene();
-
-                    Stage stage = (Stage) button.getScene().getWindow();
-                    SummaryController summaryController = summaryLoader.getController();
-                    summaryController.setParty(player.getParty());
-                    summaryController.displayPokemonStat(partyIndex);
-                    summaryController.setPreviousScene(scene);
-
-                    stage.setScene(summaryScene);
-                    //stage.show();
-                });
-
-                //Button cancelButton = (Button) controller.getPokemonSubmenu().getChildren().get(2);
-
-                cancel.setOnAction(event -> contextMenu.hide());
-
-                contextMenu.getItems().addAll(switchOut, summary, cancel);
-
-                button.setOnMouseClicked(e -> {
-                    //Button switchOutButton = (Button)controller.getPokemonSubmenu().getChildren().get(0);
-                    //Button summaryButton = (Button) controller.getPokemonSubmenu().getChildren().get(1);
-                    contextMenu.show(button, e.getScreenX(), e.getScreenY());
-                    //controller.getPokemonSubmenu().setLayoutX(e.getSceneX());
-                    //controller.getPokemonSubmenu().setLayoutY(e.getSceneY() - controller.getPokemonSubmenu().getPrefHeight());
-                    //controller.getPokemonSubmenu().setVisible(true);
-                });
-            }
-        }
-
-        Button button = controller.getPokemonBackButton();
-        button.setText("Back");
-        button.setFont(MAIN_FONT);
-        button.setDisable(allyFainted);
-
-        button.setOnAction(e -> {
-            controller.getPokemonGrid().setVisible(false);
-            controller.switchToPlayerChoice(true);
-        });
-    }*/
 
     private void processBattlefieldConditionsTimer() {
         for (Map.Entry<Enums.BattlefieldCondition, Integer> condition : allyBattlefieldConditions.entrySet()) {
@@ -657,7 +527,14 @@ public class BattleLogic {
         Pokemon allyPokemon = player.getParty(currentAllyPokemon);
         Pokemon enemyPokemon = enemy.getParty(currentEnemyPokemon);
 
-        Move enemyMove = !enemyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE) ?
+        Move enemyMove;
+
+        if (enemyMemory != null) {
+            enemyMove = enemyMemory;
+            enemyMemory = null;
+        }
+        else
+            enemyMove = !enemyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE) ?
                 generateEnemyMove(enemyPokemon) : null;
 
         // Speed calculation
@@ -677,6 +554,10 @@ public class BattleLogic {
 
         // Move of higher priority is always faster
         if (allyPriority > enemyPriority) {
+            if (allyMove != null && allyMove.isSwitchOut() && getAllyAbleToBattleNum() > 1) {
+                initAllyTurnWithSwap(battleTimeLine, allyMove, allyPokemon, enemyPokemon, enemyMove, true);
+                return;
+            }
             battleTimeLine.addAll(processTurn(allyMove, allyPokemon, enemyMove, enemyPokemon));
         }
         else if (allyPriority < enemyPriority) {
@@ -684,12 +565,20 @@ public class BattleLogic {
         }
         // If both or neither parties are using priority moves, being faster depends on speed
         else if (faster) {
+            if (allyMove != null && allyMove.isSwitchOut() && getAllyAbleToBattleNum() > 1) {
+                initAllyTurnWithSwap(battleTimeLine, allyMove, allyPokemon, enemyPokemon, enemyMove, true);
+                return;
+            }
             battleTimeLine.addAll(processTurn(allyMove, allyPokemon, enemyMove, enemyPokemon));
         }
         //On speed tie, the first attacker is randomized
         else if (tied) {
             int flip = generator.nextInt(2);
             if (flip == 1) {
+                if (allyMove != null && allyMove.isSwitchOut() && getAllyAbleToBattleNum() > 1) {
+                    initAllyTurnWithSwap(battleTimeLine, allyMove, allyPokemon, enemyPokemon, enemyMove, true);
+                    return;
+                }
                 battleTimeLine.addAll(processTurn(allyMove, allyPokemon, enemyMove, enemyPokemon));
             }
             else {
@@ -702,6 +591,13 @@ public class BattleLogic {
         }
 
         battleTurnEnd(battleTimeLine);
+    }
+
+    private void initAllyTurnWithSwap(List<Timeline> battleTimeLine ,Move move, Pokemon user, Pokemon target, Move enemyMove, boolean first ) {
+        battleTimeLine.addAll(useMove(move, user, target, true));
+        initAnimationQueue(battleTimeLine);
+        battleTimeLine.get(0).play();
+        enemyMemory = enemyMove;
     }
 
     private double[] calculateEffectiveSpeeds(Pokemon allyPokemon, Pokemon enemyPokemon) {
@@ -769,7 +665,7 @@ public class BattleLogic {
         return enemyMove;
     }
 
-    private void battleTurnEnd(List<Timeline> battleTimeLine) {
+    public void battleTurnEnd(List<Timeline> battleTimeLine) {
         boolean allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
         boolean enemyFainted = enemy.getParty(currentEnemyPokemon).getHp() == 0;
 
@@ -958,7 +854,8 @@ public class BattleLogic {
 
                 Stage stage = (Stage) pokemonButton.getScene().getWindow();
                 SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
-                swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(), this, controller, player.getParty());
+                swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(), this, controller, player.getParty(),
+                        true, Enums.SwitchContext.SWITCH_FAINTED);
                 pokemonButton.getScene().setRoot(swapPokemonPane);
             });
             initAnimationQueue(battleTimeLine);
@@ -1197,6 +1094,7 @@ public class BattleLogic {
 
         player.getParty(currentAllyPokemon).setTrapMove(null);
         player.getParty(currentAllyPokemon).setTrappedTimer(0);
+        enemyMemory = null;
 
         //finalChecks(battleTimeLine, enemyFainted);
     }
@@ -1231,6 +1129,7 @@ public class BattleLogic {
     private List<Timeline> processTurn(Move firstMove, Pokemon firstPokemon, Move secondMove, Pokemon secondPokemon) {
 
         List<Timeline> moveTimeLine = new ArrayList<>();
+        boolean isSwitchOut = false;
 
         //Random generator = new Random();
         if (firstMove == null && firstPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
@@ -1240,13 +1139,25 @@ public class BattleLogic {
             moveTimeLine.add(controller.generatePause(2000));
             firstPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
         }
-        else if (firstMove != null)
+        else if (firstMove != null) {
             moveTimeLine.addAll(useMove(firstMove, firstPokemon,
-                secondPokemon, true));
+                    secondPokemon, true));
+
+            if (firstPokemon.getOwner().isPlayer() && getAllyAbleToBattleNum() > 1)
+                isSwitchOut = firstMove.isSwitchOut();
+            else if (!firstPokemon.getOwner().isPlayer() && getEnemyAbleToBattleNum() > 1)
+                isSwitchOut = firstMove.isSwitchOut();
+        }
 
         if (secondPokemon.getHp() == 0 || firstPokemon.getHp() == 0) {
             return moveTimeLine;
         }
+        /*if (isSwitchOut) {
+            initAnimationQueue(moveTimeLine);
+            moveTimeLine.get(0).play();
+            moveTimeLine = new ArrayList<>();
+            moveTimeLine.add(controller.generatePause(1));
+        }*/
 
         if (secondMove == null && secondPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
             Timeline secondRechargeMessage = controller.getBattleTextAnimation(String.format(
@@ -2062,6 +1973,24 @@ public class BattleLogic {
         move.isMultiturnConfusion() && user.getState() == Enums.States.MULTITURN)
             processMultiturnMoveCompleted(moveTimeLine, user);
         //*********************************************************************
+
+        // If move switches out user, open switch menu when another party Pokemon is able to battle
+        if (move.isSwitchOut()) {
+            if (user.getOwner().isPlayer() && getAllyAbleToBattleNum() > 1) {
+                Button pokemonButton = controller.getPokemonButton();
+                moveTimeLine.get(moveTimeLine.size() - 1).setOnFinished(e -> {
+                    SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
+                    Enums.SwitchContext switchContext = first ?
+                            Enums.SwitchContext.SWITCH_FIRST_MOVE : Enums.SwitchContext.SWITCH_SECOND_MOVE;
+                    swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(), this, controller, player.getParty(),
+                            true, switchContext);
+                    pokemonButton.getScene().setRoot(swapPokemonPane);
+                });
+            }
+            else if (!user.getOwner().isPlayer() && getEnemyAbleToBattleNum() > 1) {
+
+            }
+        }
 
         return moveTimeLine;
     }

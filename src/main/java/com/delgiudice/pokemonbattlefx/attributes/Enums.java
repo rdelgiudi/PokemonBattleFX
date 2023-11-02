@@ -182,6 +182,14 @@ public class Enums {
         }
     }
 
+    public enum SwitchContext {
+        SWITCH_FIRST,
+        SWITCH_FIRST_MOVE,
+        SWITCH_SECOND,
+        SWITCH_SECOND_MOVE,
+        SWITCH_FAINTED;
+    }
+
     public enum Nature {       //lista natur
         HARDY(0, "Hardy", 0, 0, 0, 0, 0),
         LONELY(1,"Lonely", 1, -1, 0, 0, 0),

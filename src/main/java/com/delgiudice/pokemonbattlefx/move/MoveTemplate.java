@@ -53,10 +53,11 @@ public class MoveTemplate {
     // such as static
     // multiturnConfusion - checks if the move causes confusion at the end of its execution (such as Outrage)
     // recharge - determines whether a move needs a turn to recharge after use
-    // oneHitKOMove - determines wheter a move is a one hit KO move (if move hits enemy Pokemon faints)
+    // oneHitKOMove - determines whether a move is a one hit KO move (if move hits enemy Pokemon faints)
+    // switchOut - user switches out after move is successfully executed
     private boolean twoturn = false, self = false, trap = false, charging = false, multiturn = false,
                     recoilUserHp = false, statUpDuringCharging = false, contactMove = false, multiturnConfusion = false,
-                    recharge = false, oneHitKOMove = false;
+                    recharge = false, oneHitKOMove = false, switchOut = false;
 
     // moveDescription - contains the description of the move, displayed in summary menu
     private String moveDescription = "No description";
@@ -227,6 +228,10 @@ public class MoveTemplate {
         return multiturnConfusion;
     }
 
+    public boolean isSwitchOut() {
+        return switchOut;
+    }
+
     public void setPriority(int priority) {
         this.priority = priority;
     }
@@ -305,6 +310,10 @@ public class MoveTemplate {
 
     public void setStatUpDuringCharging(boolean statUpDuringCharging) {
         this.statUpDuringCharging = statUpDuringCharging;
+    }
+
+    public void setSwitchOut(boolean switchOut) {
+        this.switchOut = switchOut;
     }
 
     public void setCondition(Enums.BattlefieldCondition condition) {
@@ -955,6 +964,12 @@ public class MoveTemplate {
                 Type.getTypeMap(Enums.Types.WATER), false);
         newmove.setWeatherEffect(Enums.WeatherEffect.RAIN);
         newmove.setMoveDescription("The user summons a heavy rain that falls for five turns, powering up Water-type attacks. The rain also lowers the power of Fire-type attacks.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.VOLT_SWITCH, 70, 100, 20, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.ELECTRIC), false);
+        newmove.setSwitchOut(true);
+        newmove.setMoveDescription("After making its attack, the user rushes back to switch places with a party Pokémon in waiting.");
         moveMap.put(newmove.getName(), newmove);
     }
 
