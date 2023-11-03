@@ -45,6 +45,7 @@ public class BattleLogic {
     private Pane teamBuilderPane;
 
     private int currentAllyPokemon = 0, currentEnemyPokemon = 0;
+    private boolean allyFaintedProcessed = false, enemyFaintedProcessed = false;
     private Move enemyMemory = null;
     private boolean enemySentOut, allySentOut;
     private final HashMap<Enums.BattlefieldCondition, Integer> allyBattlefieldConditions =
@@ -328,7 +329,7 @@ public class BattleLogic {
             }
 
             boolean enemyFainted = enemy.getParty(currentEnemyPokemon).getHp() == 0;
-            if (enemyFainted) {
+            if (enemyFainted && !enemyFaintedProcessed) {
                 processEnemyFainted(battleTimeLine);
             }
         }
@@ -359,7 +360,7 @@ public class BattleLogic {
             }
 
             boolean allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
-            if (allyFainted) {
+            if (allyFainted && !allyFaintedProcessed) {
                 processAllyFainted(battleTimeLine);
             }
         }
@@ -369,6 +370,9 @@ public class BattleLogic {
     }
 
     private void battleLoop() {
+
+        allyFaintedProcessed = false;
+        enemyFaintedProcessed = false;
 
         controller.wipeText(false);
 
@@ -710,10 +714,10 @@ public class BattleLogic {
         boolean allyFainted = player.getParty(currentAllyPokemon).getHp() == 0;
         boolean enemyFainted = enemy.getParty(currentEnemyPokemon).getHp() == 0;
 
-        if (allyFainted) {
+        if (allyFainted && !allyFaintedProcessed) {
             processAllyFainted(battleTimeLine);
         }
-        if (enemyFainted) {
+        if (enemyFainted && !enemyFaintedProcessed) {
             processEnemyFainted(battleTimeLine);
         }
     }
@@ -742,7 +746,7 @@ public class BattleLogic {
 
         if (enemyStatusEffect != null) {
             battleTimeLine.addAll(enemyStatusEffect);
-            if (enemyFainted) {
+            if (enemyFainted && !enemyFaintedProcessed) {
                 processEnemyFainted(battleTimeLine);
             }
         }
@@ -754,7 +758,7 @@ public class BattleLogic {
 
         if (allyStatusEffect != null) {
             battleTimeLine.addAll(allyStatusEffect);
-            if (allyFainted) {
+            if (allyFainted && !allyFaintedProcessed) {
                 processAllyFainted(battleTimeLine);
             }
         }
@@ -778,7 +782,7 @@ public class BattleLogic {
 
         if (allyTrappedEffect != null) {
             battleTimeLine.addAll(allyTrappedEffect);
-            if (allyFainted) {
+            if (allyFainted && !allyFaintedProcessed) {
                 processAllyFainted(battleTimeLine);
             }
         }
@@ -789,7 +793,7 @@ public class BattleLogic {
 
         if (enemyTrappedEffect != null) {
             battleTimeLine.addAll(enemyTrappedEffect);
-            if (enemyFainted) {
+            if (enemyFainted && !enemyFaintedProcessed) {
                 processEnemyFainted(battleTimeLine);
             }
         }
@@ -1145,6 +1149,8 @@ public class BattleLogic {
         player.getParty(currentAllyPokemon).setTrappedTimer(0);
         enemyMemory = null;
 
+        enemyFaintedProcessed = true;
+
         //finalChecks(battleTimeLine, enemyFainted);
     }
 
@@ -1169,6 +1175,7 @@ public class BattleLogic {
         enemy.getParty(currentEnemyPokemon).setTrapMove(null);
         enemy.getParty(currentEnemyPokemon).setTrappedTimer(0);
 
+        allyFaintedProcessed = true;
         //battleTimeLine.get(0).play();
         //finalChecks(battleTimeLine, enemyFainted);
 
