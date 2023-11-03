@@ -267,7 +267,8 @@ public class SwapPokemonController {
             Timeline updateStatus = battleController.updateStatus(party.get(newCurrentAllyPokemon), true);
             battleTimeLine.add(updateStatus);
 
-            Timeline allyInfoAnimation = battleController.getIntroAnimation(party.get(newCurrentAllyPokemon));
+            Timeline allyInfoAnimation = battleController.getIntroAnimation(party.get(newCurrentAllyPokemon),
+                    party.get(newCurrentAllyPokemon).getHp());
             battleTimeLine.add(allyInfoAnimation);
 
             Scene scene = pokemonBox.getScene();
@@ -278,7 +279,7 @@ public class SwapPokemonController {
                 battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> battleLogic.battleTurn(null));
                 battleTimeLine.get(0).play();
             }
-            else if (switchContext == Enums.SwitchContext.SWITCH_FAINTED || switchContext == Enums.SwitchContext.SWITCH_SECOND) {
+            else if (switchContext == Enums.SwitchContext.SWITCH_FAINTED || switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE) {
                 battleLogic.battleTurnEnd(battleTimeLine);
             }
         });

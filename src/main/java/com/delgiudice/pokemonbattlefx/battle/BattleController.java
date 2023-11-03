@@ -724,7 +724,7 @@ public class BattleController {
         imageView.setClip(null);
     }
 
-    public Timeline getIntroAnimation(Pokemon pokemon) {
+    public Timeline getIntroAnimation(Pokemon pokemon, int hp) {
 
         final boolean ally = pokemon.getOwner().isPlayer();
         final ImageView sprite;
@@ -751,8 +751,8 @@ public class BattleController {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sound/pokemon_sent_out.wav");
             if (inputStream != null) playEffect(inputStream);
 
-            if (ally) setAllyInformation(pokemon, pokemon.getHp());
-            else setEnemyInformation(pokemon, pokemon.getHp());
+            if (ally) setAllyInformation(pokemon, hp);
+            else setEnemyInformation(pokemon, hp);
 
             sprite.setFitWidth(1);
             sprite.setFitHeight(1);
