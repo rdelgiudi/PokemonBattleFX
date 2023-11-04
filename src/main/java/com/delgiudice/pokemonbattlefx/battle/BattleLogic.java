@@ -317,12 +317,13 @@ public class BattleLogic {
                     allyPokemon.getStatModifiers().put(Enums.StatType.ATTACK, statup);
 
                     Timeline abilityMessage = controller.getEnemyAbilityInfoAnimation(enemyPokemon);
-
+                    Timeline statLoweredSound = controller.getStatChangeClipPlayback(change);
                     Timeline intimidateMessage = controller.getBattleTextAnimation(String.format(
-                            "%s's Intimidate\nlowers %s Attack!", enemyPokemon.getBattleName(),
+                            "%s's Intimidate\nlowers %s's Attack!", enemyPokemon.getBattleName(),
                             allyPokemon.getBattleNameMiddle()), true);
 
                     battleTimeLine.add(abilityMessage);
+                    battleTimeLine.add(statLoweredSound);
                     battleTimeLine.add(intimidateMessage);
                     battleTimeLine.add(controller.generatePause(1000));
                 }
@@ -348,12 +349,13 @@ public class BattleLogic {
                     enemyPokemon.getStatModifiers().put(Enums.StatType.ATTACK, statup);
 
                     Timeline abilityMessage = controller.getAllyAbilityInfoAnimation(allyPokemon);
-
+                    Timeline statLoweredSound = controller.getStatChangeClipPlayback(change);
                     Timeline intimidateMessage = controller.getBattleTextAnimation(String.format(
                             "%s's Intimidate\nlowers %s Attack!", allyPokemon.getBattleName(),
                             enemyPokemon.getBattleNameMiddle()), true);
 
                     battleTimeLine.add(abilityMessage);
+                    battleTimeLine.add(statLoweredSound);
                     battleTimeLine.add(intimidateMessage);
                     battleTimeLine.add(controller.generatePause(1000));
                 }
@@ -496,7 +498,7 @@ public class BattleLogic {
             Stage stage = (Stage) pokemonButton.getScene().getWindow();
             SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
             swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(), this, controller, player.getParty(),
-                    false, Enums.SwitchContext.SWITCH_FIRST);
+                    false, Enums.SwitchContext.SWITCH_FIRST, null, null);
             pokemonButton.getScene().setRoot(swapPokemonPane);
         });
 
@@ -518,6 +520,7 @@ public class BattleLogic {
             pokemon.setConfusionTimer(pokemon.getConfusionTimer() - 1);
     }
 
+    // TODO: This should be executed only once per turn!
     public void battleTurn(Move allyMove) {
         List<Timeline> battleTimeLine = new ArrayList<>();
 
@@ -535,12 +538,13 @@ public class BattleLogic {
 
         Move enemyMove;
 
-        if (enemyMemory != null) {
-            enemyMove = enemyMemory;
-            enemyMemory = null;
-        }
-        else
-            enemyMove = !enemyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE) ?
+//        if (enemyMemory != null) {
+//            enemyMove = enemyMemory;
+//            enemyMemory = null;
+//        }
+//        else
+
+        enemyMove = !enemyPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE) ?
                 generateEnemyMove(enemyPokemon) : null;
 
         // Speed calculation
@@ -558,91 +562,31 @@ public class BattleLogic {
         int allyPriority = allyMove != null ? allyMove.getPriority() : 0;
         int enemyPriority = enemyMove != null ? enemyMove.getPriority() : 0;
 
-        // Move of higher priority is always faster
+        // Move of higher priority is always the fastest
         if (allyPriority > enemyPriority) {
-            if (allyMove != null && allyMove.isSwitchOut() && getAllyAbleToBattleNum() > 1) {
-                initAllyTurnWithSwap(battleTimeLine, allyMove, allyPokemon, enemyPokemon, enemyMove, true);
-                return;
-            }
-            battleTimeLine.addAll(processTurn(allyMove, allyPokemon, enemyMove, enemyPokemon));
+            processFirstMove(allyMove, allyPokemon, enemyMove, enemyPokemon);
         }
         else if (allyPriority < enemyPriority) {
-            if (allyMove != null && allyMove.isSwitchOut() && getAllyAbleToBattleNum() > 1) {
-                initAllyTurnWithSwap(battleTimeLine, allyMove, allyPokemon, enemyPokemon, enemyMove, false);
-                return;
-            }
-            battleTimeLine.addAll(processTurn(enemyMove, enemyPokemon, allyMove, allyPokemon));
+            processFirstMove(enemyMove, enemyPokemon, allyMove, allyPokemon);
         }
-        // If both or neither parties are using priority moves, being faster depends on speed
+        // If both parties are using same priority moves, being faster depends on speed
         else if (faster) {
-            if (allyMove != null && allyMove.isSwitchOut() && getAllyAbleToBattleNum() > 1) {
-                initAllyTurnWithSwap(battleTimeLine, allyMove, allyPokemon, enemyPokemon, enemyMove, true);
-                return;
-            }
-            battleTimeLine.addAll(processTurn(allyMove, allyPokemon, enemyMove, enemyPokemon));
+            processFirstMove(allyMove, allyPokemon, enemyMove, enemyPokemon);
         }
         //On speed tie, the first attacker is randomized
         else if (tied) {
             int flip = generator.nextInt(2);
             if (flip == 1) {
-                if (allyMove != null && allyMove.isSwitchOut() && getAllyAbleToBattleNum() > 1) {
-                    initAllyTurnWithSwap(battleTimeLine, allyMove, allyPokemon, enemyPokemon, enemyMove, true);
-                    return;
-                }
-                battleTimeLine.addAll(processTurn(allyMove, allyPokemon, enemyMove, enemyPokemon));
+                processFirstMove(allyMove, allyPokemon, enemyMove, enemyPokemon);
             }
             else {
-                if (allyMove != null && allyMove.isSwitchOut() && getAllyAbleToBattleNum() > 1) {
-                    initAllyTurnWithSwap(battleTimeLine, allyMove, allyPokemon, enemyPokemon, enemyMove, false);
-                    return;
-                }
-                battleTimeLine.addAll(processTurn(enemyMove, enemyPokemon, allyMove, allyPokemon));
+                processFirstMove(enemyMove, enemyPokemon, allyMove, allyPokemon);
             }
         }
         //Here is what happens if enemy Pokemon is faster
         else {
-            if (allyMove != null && allyMove.isSwitchOut() && getAllyAbleToBattleNum() > 1) {
-                initAllyTurnWithSwap(battleTimeLine, allyMove, allyPokemon, enemyPokemon, enemyMove, false);
-                return;
-            }
-            battleTimeLine.addAll(processTurn(enemyMove, enemyPokemon, allyMove, allyPokemon));
+            processFirstMove(enemyMove, enemyPokemon, allyMove, allyPokemon);
         }
-
-        battleTurnEnd(battleTimeLine);
-    }
-
-    private void initAllyTurnWithSwap(List<Timeline> battleTimeLine ,Move allyMove, Pokemon allyPokemon, Pokemon enemyPokemon,
-                                      Move enemyMove, boolean first ) {
-        if (first)
-            battleTimeLine.addAll(useMove(allyMove, allyPokemon, enemyPokemon, first));
-        else
-            battleTimeLine.addAll(processTurn(enemyMove, enemyPokemon, allyMove, allyPokemon));
-
-        processFainted(battleTimeLine);
-        if (checkBattleEnd(battleTimeLine))
-            return;
-
-        // If move switches out user, open switch menu when another party Pokemon is able to battle
-        if (allyMove.isSwitchOut() && getAllyAbleToBattleNum() > 1 && allyPokemon.getHp() > 0) {
-            Button pokemonButton = controller.getPokemonButton();
-            battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
-                SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
-                Enums.SwitchContext switchContext = first ?
-                        Enums.SwitchContext.SWITCH_FIRST_MOVE : Enums.SwitchContext.SWITCH_SECOND_MOVE;
-                swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(),
-                        this, controller, player.getParty(), true, switchContext);
-                pokemonButton.getScene().setRoot(swapPokemonPane);
-            });
-        }
-        else if (allyPokemon.getHp() == 0) {
-            battleTurnEnd(battleTimeLine);
-            return;
-        }
-
-        initAnimationQueue(battleTimeLine);
-        battleTimeLine.get(0).play();
-        if (first)
-            enemyMemory = enemyMove;
     }
 
     private double[] calculateEffectiveSpeeds(Pokemon allyPokemon, Pokemon enemyPokemon) {
@@ -708,6 +652,106 @@ public class BattleLogic {
         enemyMove = enemyPokemon.getMoveList(availableIndices.get(enemyMoveIndex));
 
         return enemyMove;
+    }
+
+    // Process turn starting with the move used by the faster Pokemon
+    private void processFirstMove(Move firstMove, Pokemon firstPokemon, Move secondMove, Pokemon secondPokemon) {
+        List<Timeline> moveTimeLine = new ArrayList<>();
+
+        // If Pokemon is in recharge state, their move is skipped
+        if (firstMove == null && firstPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
+            Timeline firstRechargeMessage = controller.getBattleTextAnimation(String.format(
+                    RECHARGE_INFO, firstPokemon.getBattleName()), true);
+            moveTimeLine.add(firstRechargeMessage);
+            moveTimeLine.add(controller.generatePause(2000));
+            firstPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
+        }
+        // Move executed
+        else if (firstMove != null) {
+            moveTimeLine.addAll(useMove(firstMove, firstPokemon,
+                    secondPokemon, true));
+        }
+        // If move switches enemy Pokemon, replace target for next move
+        if (!firstPokemon.getOwner().isPlayer() && firstMove != null && firstMove.isSwitchOut())
+            firstPokemon = enemy.getParty(currentEnemyPokemon);
+
+        // Checks if ally Pokemon can swap after executing move
+        boolean playerSwitchOutEligible = firstPokemon.getOwner().isPlayer() && firstMove != null &&
+                firstMove.isSwitchOut() && getAllyAbleToBattleNum() > 1;
+
+        // If in battle Pokemon faints, forfeit next move
+        if ((secondPokemon.getHp() == 0 && !playerSwitchOutEligible) || firstPokemon.getHp() == 0) {
+            battleTurnEnd(moveTimeLine);
+            return;
+        }
+
+        // If move switches out user, open switch menu when another party Pokemon is able to battle
+        if (playerSwitchOutEligible) {
+            // Displays faint animation before switching out Pokemon
+            processFainted(moveTimeLine);
+
+            Button pokemonButton = controller.getPokemonButton();
+            final Pokemon firstPokemonFinal = firstPokemon;
+            moveTimeLine.get(moveTimeLine.size() - 1).setOnFinished(e -> {
+                SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
+                Enums.SwitchContext switchContext = Enums.SwitchContext.SWITCH_FIRST_MOVE;
+                List<Pokemon> turnPokemon = new ArrayList<>();
+                turnPokemon.add(firstPokemonFinal);
+                turnPokemon.add(secondPokemon);
+                swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(),
+                        this, controller, player.getParty(), true, switchContext, turnPokemon, secondMove);
+                pokemonButton.getScene().setRoot(swapPokemonPane);
+            });
+            initAnimationQueue(moveTimeLine);
+            moveTimeLine.get(0).play();
+            return;
+        }
+
+        processSecondMove(moveTimeLine, firstPokemon, secondPokemon, secondMove);
+    }
+
+    // Process second Pokemon's move
+    protected void processSecondMove(List<Timeline> moveTimeLine , Pokemon firstPokemon, Pokemon secondPokemon, Move secondMove) {
+
+        // Extra check for fainted, used during swap moves
+        if (secondPokemon.getHp() == 0) {
+            battleTurnEnd(moveTimeLine);
+            return;
+        }
+
+        // If Pokemon is in recharge state, their move is skipped
+        if (secondMove == null && secondPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
+            Timeline secondRechargeMessage = controller.getBattleTextAnimation(String.format(
+                    RECHARGE_INFO, secondPokemon.getBattleName()), true);
+            moveTimeLine.add(secondRechargeMessage);
+            moveTimeLine.add(controller.generatePause(2000));
+            secondPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
+        }
+        // Move executed
+        else if (secondMove != null)
+            moveTimeLine.addAll(useMove(secondMove,
+                    secondPokemon, firstPokemon, false));
+
+        // Checks if ally Pokemon can swap after executing move
+        boolean playerSwitchOutEligible = secondPokemon.getOwner().isPlayer() && secondMove != null &&
+                secondMove.isSwitchOut() && getAllyAbleToBattleNum() > 1;
+
+        // If move switches out user, open switch menu when another party Pokemon is able to battle
+        if (playerSwitchOutEligible) {
+            Button pokemonButton = controller.getPokemonButton();
+            moveTimeLine.get(moveTimeLine.size() - 1).setOnFinished(e -> {
+                SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
+                Enums.SwitchContext switchContext = Enums.SwitchContext.SWITCH_SECOND_MOVE;
+                swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(),
+                        this, controller, player.getParty(), true, switchContext, null, null);
+                pokemonButton.getScene().setRoot(swapPokemonPane);
+            });
+            initAnimationQueue(moveTimeLine);
+            moveTimeLine.get(0).play();
+            return;
+        }
+
+        battleTurnEnd(moveTimeLine);
     }
 
     private void processFainted(List<Timeline> battleTimeLine) {
@@ -907,7 +951,7 @@ public class BattleLogic {
                 Stage stage = (Stage) pokemonButton.getScene().getWindow();
                 SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
                 swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(), this, controller, player.getParty(),
-                        true, Enums.SwitchContext.SWITCH_FAINTED);
+                        true, Enums.SwitchContext.SWITCH_FAINTED, null, null);
                 pokemonButton.getScene().setRoot(swapPokemonPane);
             });
             initAnimationQueue(battleTimeLine);
@@ -1179,45 +1223,6 @@ public class BattleLogic {
         //battleTimeLine.get(0).play();
         //finalChecks(battleTimeLine, enemyFainted);
 
-    }
-
-    // Process turn depending on which Pokemon moves first (named firstPokemon and firstMove)
-    private List<Timeline> processTurn(Move firstMove, Pokemon firstPokemon, Move secondMove, Pokemon secondPokemon) {
-
-        List<Timeline> moveTimeLine = new ArrayList<>();
-
-        //Random generator = new Random();
-        if (firstMove == null && firstPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
-            Timeline firstRechargeMessage = controller.getBattleTextAnimation(String.format(
-                    RECHARGE_INFO, firstPokemon.getBattleName()), true);
-            moveTimeLine.add(firstRechargeMessage);
-            moveTimeLine.add(controller.generatePause(2000));
-            firstPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
-        }
-        else if (firstMove != null) {
-            moveTimeLine.addAll(useMove(firstMove, firstPokemon,
-                    secondPokemon, true));
-        }
-
-        if (!firstPokemon.getOwner().isPlayer() && firstMove != null && firstMove.isSwitchOut())
-            firstPokemon = enemy.getParty(currentEnemyPokemon);
-
-        if (secondPokemon.getHp() == 0 || firstPokemon.getHp() == 0) {
-            return moveTimeLine;
-        }
-
-        if (secondMove == null && secondPokemon.getSubStatuses().contains(Enums.SubStatus.RECHARGE)) {
-            Timeline secondRechargeMessage = controller.getBattleTextAnimation(String.format(
-                    RECHARGE_INFO, secondPokemon.getBattleName()), true);
-            moveTimeLine.add(secondRechargeMessage);
-            moveTimeLine.add(controller.generatePause(2000));
-            secondPokemon.getSubStatuses().remove(Enums.SubStatus.RECHARGE);
-        }
-        else if (secondMove != null)
-            moveTimeLine.addAll(useMove(secondMove,
-                secondPokemon, firstPokemon, false));
-
-        return moveTimeLine;
     }
 
     private void itemTurn(Item item) {

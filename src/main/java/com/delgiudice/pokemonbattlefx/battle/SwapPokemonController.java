@@ -2,6 +2,9 @@ package com.delgiudice.pokemonbattlefx.battle;
 
 import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
+import com.delgiudice.pokemonbattlefx.move.Move;
+import com.delgiudice.pokemonbattlefx.move.MoveEnum;
+import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -14,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +42,8 @@ public class SwapPokemonController {
     private List<Pokemon> party;
 
     private Enums.SwitchContext switchContext;
+    private List<Pokemon> turnPokemon;
+    private Move secondMove;
 
     @FXML
     private HBox currentPokemonBox;
@@ -60,13 +66,15 @@ public class SwapPokemonController {
     }
 
     public void initVariables(Pane battlePane, BattleLogic logic, BattleController controller, List<Pokemon> party,
-                              boolean force, Enums.SwitchContext switchContext) {
+                              boolean force, Enums.SwitchContext switchContext, List<Pokemon> turnPokemon, Move secondMove) {
         this.battlePane = battlePane;
         battleLogic = logic;
         this.party = party;
         battleController = controller;
         initPokemonInfo(force);
         this.switchContext = switchContext;
+        this.turnPokemon = turnPokemon;
+        this.secondMove = secondMove;
 
         cancelButton.setOnAction(e -> {
             Scene scene = cancelButton.getScene();
@@ -245,10 +253,13 @@ public class SwapPokemonController {
             List<Timeline> battleTimeLine = new ArrayList<>();
 
             if (!allyFainted) {
-                Timeline allyPokemonReturnText = battleController.getBattleTextAnimation(String.format(
-                        "That's enough %s,%ncome back!", currentAllyName), true);
-                allyPokemonReturnText.setDelay(Duration.seconds(0.1));
-                battleTimeLine.add(allyPokemonReturnText);
+                if (switchContext != Enums.SwitchContext.SWITCH_SECOND_MOVE
+                        && switchContext != Enums.SwitchContext.SWITCH_FIRST_MOVE) {
+                    Timeline allyPokemonReturnText = battleController.getBattleTextAnimation(String.format(
+                            "That's enough %s,%ncome back!", currentAllyName), true);
+                    allyPokemonReturnText.setDelay(Duration.seconds(0.1));
+                    battleTimeLine.add(allyPokemonReturnText);
+                }
 
                 Timeline allyPokemonReturn = battleController.getPokemonReturnAnimation(true);
                 allyPokemonReturn.setDelay(Duration.seconds(1));
@@ -274,12 +285,20 @@ public class SwapPokemonController {
             Scene scene = pokemonBox.getScene();
             scene.setRoot(battlePane);
 
-            if (switchContext == Enums.SwitchContext.SWITCH_FIRST || switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE) {
+            if (switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE) {
+                if (turnPokemon == null || secondMove == null)
+                    throw new ValueException("Values of turnPokemon and secondMove expected to be not null in this context");
                 battleLogic.initAnimationQueue(battleTimeLine);
-                battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> battleLogic.battleTurn(null));
+                battleLogic.processSecondMove(battleTimeLine, party.get(newCurrentAllyPokemon), turnPokemon.get(1), secondMove);
+            }
+            else if (switchContext == Enums.SwitchContext.SWITCH_FIRST) {
+                battleLogic.initAnimationQueue(battleTimeLine);
+                battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e ->
+                        battleLogic.battleTurn(null));
                 battleTimeLine.get(0).play();
             }
-            else if (switchContext == Enums.SwitchContext.SWITCH_FAINTED || switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE) {
+            else if (switchContext == Enums.SwitchContext.SWITCH_FAINTED || switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE ||
+                    switchContext == Enums.SwitchContext.SWITCH_SECOND) {
                 battleLogic.battleTurnEnd(battleTimeLine);
             }
         });
