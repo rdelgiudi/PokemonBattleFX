@@ -202,6 +202,10 @@ public class Pokemon {
         return specie.getPokedexNumber();
     }
 
+    public int getSubstituteHp() {
+        return substituteHp;
+    }
+
     public void setLaserFocusActive(boolean laserFocusActive) {
         this.laserFocusActive = laserFocusActive;
     }
@@ -265,6 +269,10 @@ public class Pokemon {
 
     public void setConfusionTimer(int confusionTimer) {
         this.confusionTimer = confusionTimer;
+    }
+
+    public void setSubstituteHp(int substituteHp) {
+        this.substituteHp = substituteHp;
     }
 
     public Pokemon(PokemonSpecie specie, int level, Ability ability, Move move1)

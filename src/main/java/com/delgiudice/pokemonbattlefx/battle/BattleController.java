@@ -4,6 +4,7 @@ import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.attributes.Type;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
+import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -39,6 +40,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -1444,12 +1446,12 @@ public class BattleController {
         Timeline pokemonSpriteFadeTimeline = new Timeline();
 
         ImageView pokemonSprite = isPlayer ? allyPokemonSprite : enemyPokemonSprite;
-        final double spriteX = pokemonSprite.getX();
-        final double spriteY = pokemonSprite.getY();
+        final double spriteX = pokemonSprite.getLayoutX();
+        final double spriteY = pokemonSprite.getLayoutY();
         final double spriteHeight = pokemonSprite.getFitHeight();
         final double spriteWidth = pokemonSprite.getFitWidth();
 
-        KeyFrame setupSprite = new KeyFrame(Duration.millis(1), e -> {
+        KeyFrame setupSprite = new KeyFrame(Duration.millis(0.1), e -> {
             pokemonSprite.setPreserveRatio(false);
         });
 
@@ -1457,17 +1459,16 @@ public class BattleController {
 
         for (int i=1; i < spriteWidth; i++) {
             int finalI = i;
-            final KeyFrame kf = new KeyFrame(Duration.millis(5*i), e -> {
+            final KeyFrame kf = new KeyFrame(Duration.millis(i * 0.5), e -> {
                 pokemonSprite.setFitWidth(spriteWidth - finalI);
-                pokemonSprite.setX(spriteX + (finalI / 2.0));
+                pokemonSprite.setLayoutX(spriteX + (finalI / 2.0));
             });
             pokemonSpriteFadeTimeline.getKeyFrames().add(kf);
         }
 
-        KeyFrame makeSpriteInvisible = new KeyFrame(Duration.millis(spriteWidth*5), e -> {
+        KeyFrame makeSpriteInvisible = new KeyFrame(Duration.millis(spriteWidth / 2), e -> {
             pokemonSprite.setVisible(false);
-            //pokemonSprite.setX(spriteX);
-            //pokemonSprite.setY(spriteY);
+            pokemonSprite.setLayoutX(spriteX);
             pokemonSprite.setFitWidth(spriteWidth);
             pokemonSprite.setFitHeight(spriteHeight);
         });
@@ -1476,14 +1477,116 @@ public class BattleController {
 
         Timeline substituteAppearTimeline = new Timeline();
 
-        double distance = (-spriteHeight) - spriteY;
+        double distance = Math.abs(spriteHeight - spriteY);
 
-        KeyFrame setSubstituteSprite = new KeyFrame(Duration.millis(1), e -> {
-            pokemonSprite.setY(distance);
+        Image substituteImage;
+        String spritePath = isPlayer ? "/substitute_back.png" : "/substitute_front.png";
+        URL frontSpriteUrl = getClass().getResource(spritePath);
+
+        if (frontSpriteUrl != null)
+            substituteImage = new Image(spritePath);
+        else
+            substituteImage = new Image("default.png");
+
+
+        substituteImage = PokemonSpecie.alignBottom(substituteImage);
+        substituteImage = PokemonSpecie.resample(substituteImage, 5);
+
+        final Image processedSubstituteImage = substituteImage;
+
+        KeyFrame setSubstituteSprite = new KeyFrame(Duration.millis(0.1), e -> {
+            pokemonSprite.setLayoutY(-distance);
+            pokemonSprite.setImage(processedSubstituteImage);
+            pokemonSprite.setVisible(true);
         });
+
+        substituteAppearTimeline.getKeyFrames().add(setSubstituteSprite);
+
+        for (int i=1; i < distance; i++) {
+            int finalI = i;
+            final KeyFrame kf = new KeyFrame(Duration.millis(0.5 * i), e -> {
+                pokemonSprite.setLayoutY(-distance + finalI);
+            });
+
+            substituteAppearTimeline.getKeyFrames().add(kf);
+        }
+
+        final KeyFrame cleanup = new KeyFrame(Duration.millis(distance * 0.5), e -> {
+            pokemonSprite.setLayoutY(spriteY);
+        });
+
+        substituteAppearTimeline.getKeyFrames().add(cleanup);
 
 
         substituteTimeline.add(pokemonSpriteFadeTimeline);
+        substituteTimeline.add(generatePause(500));
+        substituteTimeline.add(substituteAppearTimeline);
+        return substituteTimeline;
+    }
+
+    public List<Timeline> generateSubstituteFadeAnimation(Pokemon pokemon) {
+        final boolean isPlayer = pokemon.getOwner().isPlayer();
+
+        List<Timeline> substituteTimeline = new ArrayList<>();
+
+        Timeline substituteFadeTimeline = new Timeline();
+
+        ImageView pokemonSprite = isPlayer ? allyPokemonSprite : enemyPokemonSprite;
+        final double spriteX = pokemonSprite.getLayoutX();
+        final double spriteY = pokemonSprite.getLayoutY();
+        final double spriteHeight = pokemonSprite.getFitHeight();
+        final double spriteWidth = pokemonSprite.getFitWidth();
+
+        for (int i=1; i < 100; i++) {
+            int finalI = i;
+            final KeyFrame kf = new KeyFrame(Duration.millis(i*2), e -> {
+                pokemonSprite.setOpacity((100 - finalI) / 100.0);
+            });
+            substituteFadeTimeline.getKeyFrames().add(kf);
+        }
+
+        final double hideX = isPlayer ? (-spriteWidth) : (mainPane.getWidth() + spriteWidth);
+        System.out.println(hideX);
+
+        KeyFrame hideSprite = new KeyFrame(Duration.millis(100 * 2), e -> {
+            pokemonSprite.setVisible(false);
+            pokemonSprite.setOpacity(1);
+            pokemonSprite.setLayoutX(hideX);
+            pokemonSprite.setImage(isPlayer ? pokemon.getSpecie().getBackSpriteBattle()
+                    : pokemon.getSpecie().getFrontSpriteBattle());
+            pokemonSprite.setVisible(true);
+        });
+
+        substituteFadeTimeline.getKeyFrames().add(hideSprite);
+
+        Timeline showSpriteBack = new Timeline();
+
+        final double distance;
+        if (isPlayer)
+            distance = Math.abs(spriteX - hideX);
+        else
+            distance = Math.abs(hideX - spriteX);
+
+        for (int i=0; i < distance; i++) {
+            int finalI = i;
+            final KeyFrame kf = new KeyFrame(Duration.millis(i), e -> {
+               if (isPlayer)
+                   pokemonSprite.setLayoutX(hideX + finalI);
+               else
+                   pokemonSprite.setLayoutX(hideX - finalI);
+            });
+            showSpriteBack.getKeyFrames().add(kf);
+        }
+
+        final KeyFrame cleanup = new KeyFrame(Duration.millis(distance), e -> {
+            pokemonSprite.setLayoutX(spriteX);
+        });
+
+        showSpriteBack.getKeyFrames().add(cleanup);
+
+        substituteTimeline.add(substituteFadeTimeline);
+        substituteTimeline.add(generatePause(500));
+        substituteTimeline.add(showSpriteBack);
         return substituteTimeline;
     }
 

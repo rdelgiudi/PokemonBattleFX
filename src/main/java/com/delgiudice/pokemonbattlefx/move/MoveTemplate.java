@@ -983,6 +983,7 @@ public class MoveTemplate {
         newmove.setStatusProb(1f);
         newmove.setSelf(true);
         newmove.setMoveDescription("The user creates a substitute for itself using some of its own HP. The substitute serves as the user's decoy.");
+        moveMap.put(newmove.getName(), newmove);
     }
 
 }

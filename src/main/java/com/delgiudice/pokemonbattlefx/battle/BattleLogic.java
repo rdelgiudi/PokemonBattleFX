@@ -2221,8 +2221,36 @@ public class BattleLogic {
                 break;
             case SUBSTITUTE:
                 if (!user.getSubStatuses().contains(moveSubStatus) && user.getHp() > Math.floor(user.getMaxHP() / 4.0)) {
+                    moveTimeLine.addAll(controller.generateSubstituteAppearAnimation(user));
 
+                    int damage = (int) Math.floor(user.getMaxHP() / 4.0);
+                    int oldHp = user.getHp();
+
+                    user.setHp(oldHp - damage);
+
+                    Timeline substituteHpAnimation;
+                    if (user.getOwner().isPlayer())
+                        substituteHpAnimation = controller.getAllyHpAnimation(oldHp, user.getHp(), user.getMaxHP());
+                    else
+                        substituteHpAnimation = controller.getEnemyHpAnimation(oldHp, user.getHp(), user.getMaxHP());
+
+                    moveTimeLine.add(substituteHpAnimation);
+
+                    Timeline substituteMessage = controller.getBattleTextAnimation(String.format(
+                            "%s made%na substitute!", user.getBattleName()), true);
+
+                    moveTimeLine.add(substituteMessage);
+
+                    user.getSubStatuses().add(Enums.SubStatus.SUBSTITUTE);
+                    user.setSubstituteHp(damage);
+
+                    moveTimeLine.add(controller.generatePause(1000));
+                    //temp
+                    moveTimeLine.addAll(controller.generateSubstituteFadeAnimation(user));
+                    moveTimeLine.add(controller.generatePause(1000));
+                    //temp
                 }
+                break;
             default:
                 throw new IllegalStateException("Unexpected sub status applied: " + moveSubStatus);
         }
@@ -2832,5 +2860,6 @@ public class BattleLogic {
         pokemon.setTrapped(false);
         pokemon.setTrappedTimer(0);
         pokemon.setLaserFocusActive(false);
+        pokemon.setSubstituteHp(0);
     }
 }

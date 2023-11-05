@@ -360,7 +360,7 @@ public class PokemonSpecie{
     }
 
     //https://stackoverflow.com/questions/16089304/javafx-imageview-without-any-smoothing
-    private Image resample(Image input, int scaleFactor) {
+    public static Image resample(Image input, int scaleFactor) {
 
         final int W = (int) input.getWidth();
         final int H = (int) input.getHeight();
@@ -387,7 +387,7 @@ public class PokemonSpecie{
         return output;
     }
 
-    private Image alignBottom(Image input) {
+    public static Image alignBottom(Image input) {
         final int W = (int) input.getWidth();
         final int H = (int) input.getHeight();
 
