@@ -1840,30 +1840,50 @@ public class BattleLogic {
             if (damageInfo.damage > 0) {
 
                 damage = damageInfo.damage;
+                int oldHp;
 
-                if (damage > target.getHp())
-                    damage = target.getHp();
+                // If target uses substitute, reduce its hp first
+                if (target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE)) {
 
-                int oldHp = target.getHp();
-                target.setHp(target.getHp() - damage);
+                    oldHp = target.getSubstituteHp();
+                    if (damage > oldHp)
+                        damage = target.getSubstituteHp();
 
-                final Timeline damageDealtAnimation, hpAnimation;
+                    target.setSubstituteHp(oldHp - damage);
 
-                Timeline damageSoundEffectTimeLine = controller.getHitEffectClipPlayback(damageInfo.typeEffect);
-                moveTimeLine.add(damageSoundEffectTimeLine);
+                    final Timeline damageDealtAnimation;
+                    Timeline damageSoundEffectTimeLine = controller.getHitEffectClipPlayback(damageInfo.typeEffect);
+                    moveTimeLine.add(damageSoundEffectTimeLine);
 
-                damageDealtAnimation = controller.getMoveDamageAnimation(target.getOwner().isPlayer());
-
-                if (target.getOwner().isPlayer()) {
-                    hpAnimation = controller.getAllyHpAnimation(oldHp, target.getHp(), target.getMaxHP());
+                    damageDealtAnimation = controller.getMoveDamageAnimation(target.getOwner().isPlayer());
+                    moveTimeLine.add(damageDealtAnimation);
                 }
                 else {
-                    hpAnimation = controller.getEnemyHpAnimation(oldHp, target.getHp(), target.getMaxHP());
+                    if (damage > target.getHp())
+                        damage = target.getHp();
+
+                    oldHp = target.getHp();
+                    target.setHp(target.getHp() - damage);
+
+                    final Timeline damageDealtAnimation, hpAnimation;
+
+                    Timeline damageSoundEffectTimeLine = controller.getHitEffectClipPlayback(damageInfo.typeEffect);
+                    moveTimeLine.add(damageSoundEffectTimeLine);
+
+                    damageDealtAnimation = controller.getMoveDamageAnimation(target.getOwner().isPlayer());
+
+                    if (target.getOwner().isPlayer()) {
+                        hpAnimation = controller.getAllyHpAnimation(oldHp, target.getHp(), target.getMaxHP());
+                    } else {
+                        hpAnimation = controller.getEnemyHpAnimation(oldHp, target.getHp(), target.getMaxHP());
+                    }
+
+                    moveTimeLine.add(damageDealtAnimation);
+                    moveTimeLine.add(hpAnimation);
                 }
 
-                moveTimeLine.add(damageDealtAnimation);
-                moveTimeLine.add(hpAnimation);
                 moveTimeLine.add(controller.generatePause(1500));
+
                 int displayHits = i+1;
                 //System.out.println("Hit " + displayHits + ": " + move.getName() + " dealt " + damage + " damage to " +
                 //        target.getBattleNameMiddle() + "!");
@@ -1877,6 +1897,18 @@ public class BattleLogic {
                     moveTimeLine.add(controller.wipeText(true));
                 }
 
+                if (target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE)) {
+                    moveTimeLine.add(controller.getBattleTextAnimation(String.format(
+                            "The substitute took damage%nfor %s!", target.getBattleNameMiddle()), true));
+                    moveTimeLine.add(controller.generatePause(1000));
+                    if (target.getSubstituteHp() == 0) {
+                        moveTimeLine.add(controller.getBattleTextAnimation(String.format(
+                                "%s's substitute%nhas faded!", target.getBattleName()), true));
+                        moveTimeLine.addAll(controller.generateSubstituteFadeAnimation(target));
+
+                        target.getSubStatuses().remove(Enums.SubStatus.SUBSTITUTE);
+                    }
+                }
             }
             else if (moveType != Enums.Subtypes.STATUS) {
                 Timeline moveFailedMessage = controller.getBattleTextAnimation("But it failed!", true);
@@ -2245,10 +2277,6 @@ public class BattleLogic {
                     user.setSubstituteHp(damage);
 
                     moveTimeLine.add(controller.generatePause(1000));
-                    //temp
-                    moveTimeLine.addAll(controller.generateSubstituteFadeAnimation(user));
-                    moveTimeLine.add(controller.generatePause(1000));
-                    //temp
                 }
                 break;
             default:

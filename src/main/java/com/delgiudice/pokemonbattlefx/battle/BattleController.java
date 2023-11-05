@@ -1468,16 +1468,17 @@ public class BattleController {
 
         KeyFrame makeSpriteInvisible = new KeyFrame(Duration.millis(spriteWidth / 2), e -> {
             pokemonSprite.setVisible(false);
-            pokemonSprite.setLayoutX(spriteX);
+            pokemonSprite.setLayoutX(spriteX);;
             pokemonSprite.setFitWidth(spriteWidth);
             pokemonSprite.setFitHeight(spriteHeight);
+            pokemonSprite.setPreserveRatio(true);
         });
 
         pokemonSpriteFadeTimeline.getKeyFrames().add(makeSpriteInvisible);
 
         Timeline substituteAppearTimeline = new Timeline();
 
-        double distance = Math.abs(spriteHeight - spriteY);
+        double distance = Math.abs(-spriteHeight - spriteY);
 
         Image substituteImage;
         String spritePath = isPlayer ? "/substitute_back.png" : "/substitute_front.png";
@@ -1495,23 +1496,28 @@ public class BattleController {
         final Image processedSubstituteImage = substituteImage;
 
         KeyFrame setSubstituteSprite = new KeyFrame(Duration.millis(0.1), e -> {
-            pokemonSprite.setLayoutY(-distance);
+            pokemonSprite.setLayoutY(-spriteWidth);
             pokemonSprite.setImage(processedSubstituteImage);
             pokemonSprite.setVisible(true);
         });
 
         substituteAppearTimeline.getKeyFrames().add(setSubstituteSprite);
 
-        for (int i=1; i < distance; i++) {
+        for (int i=1; i < distance + 600; i++) {
             int finalI = i;
             final KeyFrame kf = new KeyFrame(Duration.millis(0.5 * i), e -> {
-                pokemonSprite.setLayoutY(-distance + finalI);
+                if (finalI <= distance)
+                    pokemonSprite.setLayoutY(-spriteWidth + finalI);
+                else
+                    // Jump animation calculation, jumps for 150 pixels, then falls back down to original position
+                    // sine function allows to observe a sense of momentum
+                    pokemonSprite.setLayoutY(spriteY - (150 * Math.sin((finalI - distance) * Math.PI / 600)));
             });
 
             substituteAppearTimeline.getKeyFrames().add(kf);
         }
 
-        final KeyFrame cleanup = new KeyFrame(Duration.millis(distance * 0.5), e -> {
+        final KeyFrame cleanup = new KeyFrame(Duration.millis((distance + 600) * 0.5), e -> {
             pokemonSprite.setLayoutY(spriteY);
         });
 
@@ -1546,7 +1552,6 @@ public class BattleController {
         }
 
         final double hideX = isPlayer ? (-spriteWidth) : (mainPane.getWidth() + spriteWidth);
-        System.out.println(hideX);
 
         KeyFrame hideSprite = new KeyFrame(Duration.millis(100 * 2), e -> {
             pokemonSprite.setVisible(false);
@@ -1559,7 +1564,7 @@ public class BattleController {
 
         substituteFadeTimeline.getKeyFrames().add(hideSprite);
 
-        Timeline showSpriteBack = new Timeline();
+        Timeline showSpriteBack;
 
         final double distance;
         if (isPlayer)
@@ -1567,18 +1572,22 @@ public class BattleController {
         else
             distance = Math.abs(hideX - spriteX);
 
-        for (int i=0; i < distance; i++) {
-            int finalI = i;
-            final KeyFrame kf = new KeyFrame(Duration.millis(i), e -> {
-               if (isPlayer)
-                   pokemonSprite.setLayoutX(hideX + finalI);
-               else
-                   pokemonSprite.setLayoutX(hideX - finalI);
-            });
-            showSpriteBack.getKeyFrames().add(kf);
-        }
+//        for (int i=0; i < distance; i++) {
+//            int finalI = i;
+//            final KeyFrame kf = new KeyFrame(Duration.millis(i), e -> {
+//               if (isPlayer)
+//                   pokemonSprite.setLayoutX(hideX + finalI);
+//               else
+//                   pokemonSprite.setLayoutX(hideX - finalI);
+//            });
+//            showSpriteBack.getKeyFrames().add(kf);
+//        }
+        if (isPlayer)
+            showSpriteBack = moveRight(pokemonSprite, distance, 1);
+        else
+            showSpriteBack = moveRight(pokemonSprite, -distance, 1);
 
-        final KeyFrame cleanup = new KeyFrame(Duration.millis(distance), e -> {
+        final KeyFrame cleanup = new KeyFrame(Duration.millis(distance+1), e -> {
             pokemonSprite.setLayoutX(spriteX);
         });
 
@@ -1588,6 +1597,43 @@ public class BattleController {
         substituteTimeline.add(generatePause(500));
         substituteTimeline.add(showSpriteBack);
         return substituteTimeline;
+    }
+
+    private Timeline moveDown(Node node, double distance, double frameTime) {
+
+        Timeline output = new Timeline();
+
+        final double[] currentPosition = new double[1];
+
+        for (int i=1; i <= Math.abs(distance); i++) {
+            int finalI = distance > 0 ? i : -i;
+            final KeyFrame kf = new KeyFrame(Duration.millis(i*frameTime), e -> {
+                if (finalI == 1 || finalI == -1)
+                    currentPosition[0] = node.getLayoutY();
+                node.setLayoutY(currentPosition[0] + finalI);
+            });
+            output.getKeyFrames().add(kf);
+        }
+
+        return output;
+    }
+
+    private Timeline moveRight(Node node, double distance, double frameTime) {
+
+        Timeline output = new Timeline();
+        final double[] currentPosition = new double[1];
+
+        for (int i=1; i <= Math.abs(distance); i++) {
+            int finalI = distance > 0 ? i : -i;
+            final KeyFrame kf = new KeyFrame(Duration.millis(i*frameTime), e -> {
+                if (finalI == 1 || finalI == -1)
+                    currentPosition[0] = node.getLayoutX();
+                node.setLayoutX(currentPosition[0] + finalI);
+            });
+            output.getKeyFrames().add(kf);
+        }
+
+        return output;
     }
 
     public Timeline generatePause(double millis) {
