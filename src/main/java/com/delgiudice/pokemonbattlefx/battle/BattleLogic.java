@@ -1055,10 +1055,10 @@ public class BattleLogic {
             return timelineList;
         }
         else if (pokemon.getTrappedTimer() == 0 && pokemon.getTrapMove() != null) {
-            pokemon.setTrapMove(null);
 
             Timeline pokemonFreed = controller.getBattleTextAnimation
-                    (String.format("%s was freed from the vortex!", pokemon.getBattleName()), true);
+                    (String.format("%s was freed from %s!", pokemon.getBattleName(), pokemon.getTrapMove().getName()), true);
+            pokemon.setTrapMove(null);
             //pokemonFreed.setDelay(Duration.seconds(2));
             timelineList.add(pokemonFreed);
             timelineList.add(controller.generatePause(1000));
@@ -2219,6 +2219,10 @@ public class BattleLogic {
                 moveTimeLine.add(gastroAcidMessage);
                 moveTimeLine.add(controller.generatePause(1500));
                 break;
+            case SUBSTITUTE:
+                if (!user.getSubStatuses().contains(moveSubStatus) && user.getHp() > Math.floor(user.getMaxHP() / 4.0)) {
+
+                }
             default:
                 throw new IllegalStateException("Unexpected sub status applied: " + moveSubStatus);
         }

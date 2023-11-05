@@ -976,6 +976,13 @@ public class MoveTemplate {
         newmove.setSwitchOut(true);
         newmove.setMoveDescription("After making its attack, the user rushes back to switch places with a party Pokémon in waiting.");
         moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.SUBSTITUTE, NOT_APPLICABLE, NOT_APPLICABLE, 10, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.NORMAL), false);
+        newmove.setSubStatus(Enums.SubStatus.SUBSTITUTE);
+        newmove.setStatusProb(1f);
+        newmove.setSelf(true);
+        newmove.setMoveDescription("The user creates a substitute for itself using some of its own HP. The substitute serves as the user's decoy.");
     }
 
 }

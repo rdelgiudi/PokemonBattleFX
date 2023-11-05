@@ -1436,6 +1436,57 @@ public class BattleController {
         }
     }
 
+    public List<Timeline> generateSubstituteAppearAnimation(Pokemon pokemon) {
+        final boolean isPlayer = pokemon.getOwner().isPlayer();
+
+        List<Timeline> substituteTimeline = new ArrayList<>();
+
+        Timeline pokemonSpriteFadeTimeline = new Timeline();
+
+        ImageView pokemonSprite = isPlayer ? allyPokemonSprite : enemyPokemonSprite;
+        final double spriteX = pokemonSprite.getX();
+        final double spriteY = pokemonSprite.getY();
+        final double spriteHeight = pokemonSprite.getFitHeight();
+        final double spriteWidth = pokemonSprite.getFitWidth();
+
+        KeyFrame setupSprite = new KeyFrame(Duration.millis(1), e -> {
+            pokemonSprite.setPreserveRatio(false);
+        });
+
+        pokemonSpriteFadeTimeline.getKeyFrames().add(setupSprite);
+
+        for (int i=1; i < spriteWidth; i++) {
+            int finalI = i;
+            final KeyFrame kf = new KeyFrame(Duration.millis(5*i), e -> {
+                pokemonSprite.setFitWidth(spriteWidth - finalI);
+                pokemonSprite.setX(spriteX + (finalI / 2.0));
+            });
+            pokemonSpriteFadeTimeline.getKeyFrames().add(kf);
+        }
+
+        KeyFrame makeSpriteInvisible = new KeyFrame(Duration.millis(spriteWidth*5), e -> {
+            pokemonSprite.setVisible(false);
+            //pokemonSprite.setX(spriteX);
+            //pokemonSprite.setY(spriteY);
+            pokemonSprite.setFitWidth(spriteWidth);
+            pokemonSprite.setFitHeight(spriteHeight);
+        });
+
+        pokemonSpriteFadeTimeline.getKeyFrames().add(makeSpriteInvisible);
+
+        Timeline substituteAppearTimeline = new Timeline();
+
+        double distance = (-spriteHeight) - spriteY;
+
+        KeyFrame setSubstituteSprite = new KeyFrame(Duration.millis(1), e -> {
+            pokemonSprite.setY(distance);
+        });
+
+
+        substituteTimeline.add(pokemonSpriteFadeTimeline);
+        return substituteTimeline;
+    }
+
     public Timeline generatePause(double millis) {
         return new Timeline(new KeyFrame(Duration.millis(millis)));
     }

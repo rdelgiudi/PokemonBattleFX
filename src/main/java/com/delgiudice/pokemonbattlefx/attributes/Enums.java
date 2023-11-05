@@ -124,7 +124,8 @@ public class Enums {
         FOCUS_ENERGY("focus energy"),
         LASER_FOCUS("laser focus"),
         ROOST("roost"),
-        GASTRO_ACID("gastro acid");
+        GASTRO_ACID("gastro acid"),
+        SUBSTITUTE("substitute");
 
         final private String statusString;
 
@@ -190,7 +191,7 @@ public class Enums {
         SWITCH_FAINTED;
     }
 
-    public enum Nature {       //lista natur
+    public enum Nature {       //nature list
         HARDY(0, "Hardy", 0, 0, 0, 0, 0),
         LONELY(1,"Lonely", 1, -1, 0, 0, 0),
         BRAVE(2,"Brave", 1, 0, 0, 0, -1),

@@ -56,6 +56,9 @@ public class Pokemon {
     // laserFocusActive - check whether Laser Focus condition should be active
     private boolean trapped = false, laserFocusActive = false;
 
+    // substituteHp - tracks the amount of hp that the Pokemon's substitute has
+    private int substituteHp = 0;
+
     public String getBattleName() {
         if (owner.isPlayer())
             return name;
