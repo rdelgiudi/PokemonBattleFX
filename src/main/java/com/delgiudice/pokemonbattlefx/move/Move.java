@@ -143,6 +143,10 @@ public class Move {
         return template.getWeatherEffect();
     }
 
+    public Enums.MoveCategory getMoveCategory() {
+        return template.getMoveCategory();
+    }
+
     public boolean isStatUpDuringCharging() {
         return template.isStatUpDuringCharging();
     }

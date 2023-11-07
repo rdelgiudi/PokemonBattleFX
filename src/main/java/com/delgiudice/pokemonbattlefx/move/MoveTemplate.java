@@ -80,9 +80,10 @@ public class MoveTemplate {
     // spikeType - type of spike that the move represents, spikes scatter on enemy field and apply various effects on
     // Pokemon that are sent out
     private Enums.Spikes spikeType = Enums.Spikes.NONE;
-
     // weatherEffect - type of weather effect induced on the battlefield by the move
     private Enums.WeatherEffect weatherEffect = Enums.WeatherEffect.NONE;
+    // moveCategory - additional move category that allow to modify its effects with other moves or abilities
+    private Enums.MoveCategory moveCategory = Enums.MoveCategory.NONE;
 
     public MoveEnum getName() {
         return name;
@@ -210,6 +211,10 @@ public class MoveTemplate {
 
     public Enums.WeatherEffect getWeatherEffect() {
         return weatherEffect;
+    }
+
+    public Enums.MoveCategory getMoveCategory() {
+        return moveCategory;
     }
 
     public boolean isRecharge() {
@@ -340,6 +345,10 @@ public class MoveTemplate {
         this.weatherEffect = weatherEffect;
     }
 
+    public void setMoveCategory(Enums.MoveCategory moveCategory) {
+        this.moveCategory = moveCategory;
+    }
+
     public void setSelf(boolean self) {
         this.self = self;
     }
@@ -405,6 +414,7 @@ public class MoveTemplate {
         newmove = new MoveTemplate(MoveEnum.GROWL, NOT_APPLICABLE, 100, 40, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.NORMAL), false, Enums.StatType.ATTACK, -1,
                 false, 1);
+        newmove.setMoveCategory(Enums.MoveCategory.SOUND_BASED);
         newmove.setMoveDescription("The user growls in an endearing way, making opposing Pokémon less wary. This lowers their Attack stats.");
         moveMap.put(newmove.getName(), newmove);
 
@@ -504,11 +514,13 @@ public class MoveTemplate {
         newmove.setMoveDescription("The user scatters a cloud of soporific dust that puts the target to sleep.");
         newmove.setStatus(Enums.Status.SLEEPING);
         newmove.setStatusProb(1.0f);
+        newmove.setMoveCategory(Enums.MoveCategory.POWDER_SPORE);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.SEED_BOMB, 80, 100, 15, Enums.Subtypes.PHYSICAL,
                 Type.getTypeMap().get(Enums.Types.GRASS), false);
         newmove.setMoveDescription("The user attacks by slamming a barrage of hard-shelled seeds down on the target from above.");
+        newmove.setMoveCategory(Enums.MoveCategory.BALL_BOMB);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.SYNTHESIS, NOT_APPLICABLE, NOT_APPLICABLE, 5, Enums.Subtypes.STATUS,
@@ -536,11 +548,13 @@ public class MoveTemplate {
         newmove.setMoveDescription("The user attacks the target by scattering petals, then becomes fixated on using this move.");
         newmove.setMultiturn(true);
         newmove.setMultiturnConfusion(true);
+        newmove.setMoveCategory(Enums.MoveCategory.DANCE);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.PETAL_BLIZZARD, 90, 100, 15, Enums.Subtypes.PHYSICAL,
                 Type.getTypeMap().get(Enums.Types.GRASS), false);
         newmove.setMoveDescription("The user stirs up a violent petal blizzard and damages everything around it.");
+        newmove.setMoveCategory(Enums.MoveCategory.WIND);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.CONFUSE_RAY, NOT_APPLICABLE, 100, 10, Enums.Subtypes.STATUS,
@@ -574,6 +588,7 @@ public class MoveTemplate {
         newmove.setMoveDescription("The user bites with flame-cloaked fangs. This may also make the target flinch or leave it with a burn.");
         newmove.setStatus(Enums.Status.BURNED);
         newmove.setStatChangeProb(0.1f);
+        newmove.setMoveCategory(Enums.MoveCategory.BITING);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.DRAGON_CLAW, 80, 100, 15, Enums.Subtypes.PHYSICAL,
@@ -593,12 +608,14 @@ public class MoveTemplate {
         newmove.setMoveDescription("The user attacks by exhaling hot breath on opposing Pokémon. This may also leave them with a burn.");
         newmove.setStatus(Enums.Status.BURNED);
         newmove.setStatChangeProb(0.1f);
+        newmove.setMoveCategory(Enums.MoveCategory.WIND);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.DRAGON_DANCE, NOT_APPLICABLE, NOT_APPLICABLE, 20, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.DRAGON), false, Enums.StatType.ATTACK, 1, true, 1.0f);
         newmove.setMoveDescription("The user vigorously performs a mystic, powerful dance that raises its Attack and Speed stats.");
         newmove.getStatTypes().add(Enums.StatType.SPEED);
+        newmove.setMoveCategory(Enums.MoveCategory.DANCE);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.EARTHQUAKE, 100, 100, 10, Enums.Subtypes.PHYSICAL,
@@ -708,6 +725,7 @@ public class MoveTemplate {
         newmove.setMoveDescription("The user whips up a turbulent whirlwind that boosts the Speed stats of itself and its allies for four turns.");
         newmove.setCondition(Enums.BattlefieldCondition.TAILWIND);
         newmove.setSelf(true);
+        newmove.setMoveCategory(Enums.MoveCategory.WIND);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.BUG_BUZZ, 90, 100, 10, Enums.Subtypes.SPECIAL,
@@ -783,6 +801,7 @@ public class MoveTemplate {
         newmove.setMoveDescription("The user attacks by wrapping its opponent in a fierce wind. This may also confuse the target.");
         newmove.setSubStatus(Enums.SubStatus.CONFUSED);
         newmove.setStatusProb(0.3f);
+        newmove.setMoveCategory(Enums.MoveCategory.WIND);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.ROOST, NOT_APPLICABLE, NOT_APPLICABLE, 5, Enums.Subtypes.STATUS,
@@ -803,6 +822,7 @@ public class MoveTemplate {
         newmove = new MoveTemplate(MoveEnum.FEATHER_DANCE, NOT_APPLICABLE, NOT_APPLICABLE, 15, Enums.Subtypes.STATUS,
                 Type.getTypeMap(Enums.Types.FLYING), false, Enums.StatType.ATTACK, -2, false,
                 1f);
+        newmove.setMoveCategory(Enums.MoveCategory.DANCE);
         newmove.setMoveDescription("The user covers the target's body with a mass of down that harshly lowers its Attack stat.");
         moveMap.put(newmove.getName(), newmove);
 
@@ -835,6 +855,7 @@ public class MoveTemplate {
         newmove.setMoveDescription("The target is bitten with viciously sharp fangs. This may also make the target flinch.");
         newmove.setSubStatus(Enums.SubStatus.FLINCHED);
         newmove.setStatusProb(0.3f);
+        newmove.setMoveCategory(Enums.MoveCategory.BITING);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.TAKE_DOWN, 90, 85, 20, Enums.Subtypes.PHYSICAL,
@@ -893,6 +914,7 @@ public class MoveTemplate {
                 Type.getTypeMap(Enums.Types.POISON), false);
         newmove.setStatus(Enums.Status.POISONED);
         newmove.setStatusProb(0.3f);
+        newmove.setMoveCategory(Enums.MoveCategory.BALL_BOMB);
         newmove.setMoveDescription("The user hurls unsanitary sludge at the target to inflict damage. This may also poison the target.");
         moveMap.put(newmove.getName(), newmove);
 
@@ -901,6 +923,7 @@ public class MoveTemplate {
         newmove.getStatTypes().add(Enums.StatType.DEFENSE);
         newmove.setStatChange(-2);
         newmove.setStatChangeProb(1f);
+        newmove.setMoveCategory(Enums.MoveCategory.SOUND_BASED);
         newmove.setMoveDescription("An earsplitting screech harshly lowers the target's Defense stat.");
         moveMap.put(newmove.getName(), newmove);
 
@@ -923,6 +946,7 @@ public class MoveTemplate {
         newmove.setStatus(Enums.Status.PARALYZED);
         newmove.setSubStatus(Enums.SubStatus.FLINCHED);
         newmove.setStatusProb(0.1f);
+        newmove.setMoveCategory(Enums.MoveCategory.BITING);
         newmove.setMoveDescription("The user bites with electrified fangs. This may also make the target flinch or leave it with paralysis.");
         moveMap.put(newmove.getName(), newmove);
 
@@ -956,6 +980,7 @@ public class MoveTemplate {
         newmove = new MoveTemplate(MoveEnum.ELECTRO_BALL, NOT_APPLICABLE, 100, 10, Enums.Subtypes.SPECIAL,
                 Type.getTypeMap(Enums.Types.ELECTRIC), false);
         newmove.setMoveDescription("The user hurls an electric orb at the target. The faster the user is than the target, the greater the move's power.");
+        newmove.setMoveCategory(Enums.MoveCategory.BALL_BOMB);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.THUNDER, 110, 70, 10, Enums.Subtypes.SPECIAL,

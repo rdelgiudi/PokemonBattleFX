@@ -309,7 +309,8 @@ public class BattleLogic {
                 processToxicSpikeEffect(battleTimeLine, enemyPokemon);
             }
 
-            if (enemyPokemon.getAbility() == Ability.INTIMIDATE) {
+            if (enemyPokemon.getAbility() == Ability.INTIMIDATE &&
+                    !allyPokemon.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE)) {
                 int change = -1;
                 int currentStatModifier = allyPokemon.getStatModifiers().get(Enums.StatType.ATTACK);
                 if (currentStatModifier > -6) {
@@ -341,7 +342,8 @@ public class BattleLogic {
                 processToxicSpikeEffect(battleTimeLine, allyPokemon);
             }
 
-            if (allyPokemon.getAbility() == Ability.INTIMIDATE) {
+            if (allyPokemon.getAbility() == Ability.INTIMIDATE &&
+                    !enemyPokemon.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE)) {
                 int change = -1;
                 int currentStatModifier = enemyPokemon.getStatModifiers().get(Enums.StatType.ATTACK);
                 if (currentStatModifier > -6) {
@@ -1887,8 +1889,12 @@ public class BattleLogic {
                 int displayHits = i+1;
                 //System.out.println("Hit " + displayHits + ": " + move.getName() + " dealt " + damage + " damage to " +
                 //        target.getBattleNameMiddle() + "!");
+                if (!target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE))
                 System.out.printf("Hit %d: %s dealt %d damage to %s (%d -> %d)%n", displayHits, move.getName(), damage,
                         target.getBattleNameMiddle(), oldHp, target.getHp());
+                else
+                    System.out.printf("Hit %d: %s dealt %d damage to %s's substitute (%d -> %d)%n", displayHits, move.getName(), damage,
+                            target.getBattleNameMiddle(), oldHp, target.getSubstituteHp());
 
                 if (damageInfo.critical) {
                     final Timeline criticalInfo = controller.getBattleTextAnimation("A critical hit!", true);
@@ -2145,8 +2151,7 @@ public class BattleLogic {
             moveTimeLine.add(controller.generatePause(1000));
         }
         else if (move.getSubtype() == Enums.Subtypes.STATUS && statusImmunity) {
-            final Timeline effectInfo = controller.getBattleTextAnimation(String.format(MOVE_NO_EFFECT_STRING,
-                    target.getBattleNameMiddle()), true);
+            final Timeline effectInfo = controller.getBattleTextAnimation("But it failed!", true);
             //effectInfo.setDelay(Duration.seconds(2));
 
             System.out.println("No effect on " + target.getBattleNameMiddle());
@@ -2167,8 +2172,10 @@ public class BattleLogic {
                 move.getStatus() == Enums.Status.BADLY_POISONED) &&
                 (target.getType()[0].getTypeEnum() == Enums.Types.POISON ||
                         target.getType()[1].getTypeEnum() == Enums.Types.POISON);
+        boolean substituteImmunity = target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE) &&
+                move.getMoveCategory() != Enums.MoveCategory.SOUND_BASED; //TODO: immunity changes based on generation, every move should be checked manually
 
-        return firePokemonImmunity || electricPokemonImmunity || poisonPokemonImmunity;
+        return firePokemonImmunity || electricPokemonImmunity || poisonPokemonImmunity || substituteImmunity;
     }
 
     private void processStatUpApplication(List<Timeline> moveTimeLine, Move move, Pokemon user, Pokemon target,
@@ -2176,16 +2183,22 @@ public class BattleLogic {
         SecureRandom generator = new SecureRandom();
         float prob = move.getStatChangeProb() * 100.0f;
         int rand = generator.nextInt(100) + 1;
+        boolean substituteProtected = target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE) &&
+                move.getStatChange() < 0 && !move.isSelf();
 
         if (move.isSelf() && prob >= rand && !userFainted) {
             processStatChange(moveTimeLine, move, user, true);
             if (!move.getSecondaryStatTypes().isEmpty())
                 processStatChange(moveTimeLine, move, user, false);
         }
-        else if (prob >= rand && !secondaryEffectsImmune) {
+        else if (prob >= rand && !secondaryEffectsImmune && !substituteProtected) {
             processStatChange(moveTimeLine, move, target, true);
             if (!move.getSecondaryStatTypes().isEmpty())
                 processStatChange(moveTimeLine, move, target, false);
+        }
+        else if (substituteProtected && move.getSubtype() == Enums.Subtypes.STATUS) {
+            moveTimeLine.add(controller.getBattleTextAnimation("But it failed!", true));
+            moveTimeLine.add(controller.generatePause(1000));
         }
     }
 
@@ -2195,16 +2208,24 @@ public class BattleLogic {
         float prob = move.getStatChangeProb() * 100.0f;
         int rand = generator.nextInt(100) + 1;
         Enums.SubStatus moveSubStatus = move.getSubStatus();
+        boolean substituteProtected = target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE) &&
+                move.getMoveCategory() != Enums.MoveCategory.SOUND_BASED;
 
         switch (moveSubStatus) {
             case CONFUSED:
-                if (prob >= rand && !secondaryEffectsImmune && !target.getSubStatuses().contains(moveSubStatus)) {
+                if (prob >= rand && !secondaryEffectsImmune && !target.getSubStatuses().contains(moveSubStatus) &&
+                        !substituteProtected) {
                     moveTimeLine.add(applyConfusion(target));
+                    moveTimeLine.add(controller.generatePause(1000));
+                }
+                else if (substituteProtected && move.getSubtype() == Enums.Subtypes.STATUS) {
+                    moveTimeLine.add(controller.getBattleTextAnimation("But it failed!", true));
                     moveTimeLine.add(controller.generatePause(1000));
                 }
                 break;
             case FLINCHED:
-                if (prob >= rand && !secondaryEffectsImmune && !target.getSubStatuses().contains(moveSubStatus) && first) {
+                if (prob >= rand && !secondaryEffectsImmune && !target.getSubStatuses().contains(moveSubStatus) && first &&
+                        !substituteProtected) {
                     target.getSubStatuses().add(Enums.SubStatus.FLINCHED);
                 }
                 break;
@@ -2239,10 +2260,13 @@ public class BattleLogic {
                 break;
             case GASTRO_ACID:
                 Timeline gastroAcidMessage;
-                if (!user.getSubStatuses().contains(moveSubStatus)) {
+                if (!user.getSubStatuses().contains(moveSubStatus) && !substituteProtected) {
                     gastroAcidMessage = controller.getBattleTextAnimation(String.format("%s's Ability\nwas supressed!",
                             target.getBattleName()), true);
                     target.getSubStatuses().add(Enums.SubStatus.GASTRO_ACID);
+                }
+                else if (substituteProtected) {
+                    gastroAcidMessage = controller.getBattleTextAnimation("But it failed!", true);
                 }
                 else
                     gastroAcidMessage = controller.getBattleTextAnimation(String.format("%s's Ability\nis already supressed!",
@@ -2276,6 +2300,11 @@ public class BattleLogic {
                     user.getSubStatuses().add(Enums.SubStatus.SUBSTITUTE);
                     user.setSubstituteHp(damage);
 
+                    moveTimeLine.add(controller.generatePause(1000));
+                }
+                else {
+                    Timeline failedMessage = controller.getBattleTextAnimation("But it failed!", true);
+                    moveTimeLine.add(failedMessage);
                     moveTimeLine.add(controller.generatePause(1000));
                 }
                 break;

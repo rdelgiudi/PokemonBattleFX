@@ -1462,13 +1462,16 @@ public class BattleController {
             final KeyFrame kf = new KeyFrame(Duration.millis(i * 0.5), e -> {
                 pokemonSprite.setFitWidth(spriteWidth - finalI);
                 pokemonSprite.setLayoutX(spriteX + (finalI / 2.0));
+                pokemonSprite.setFitHeight(spriteHeight + (finalI / 2.5));
+                pokemonSprite.setLayoutY(spriteY - (finalI / 2.5));
             });
             pokemonSpriteFadeTimeline.getKeyFrames().add(kf);
         }
 
         KeyFrame makeSpriteInvisible = new KeyFrame(Duration.millis(spriteWidth / 2), e -> {
             pokemonSprite.setVisible(false);
-            pokemonSprite.setLayoutX(spriteX);;
+            pokemonSprite.setLayoutX(spriteX);
+            pokemonSprite.setLayoutY(spriteY);
             pokemonSprite.setFitWidth(spriteWidth);
             pokemonSprite.setFitHeight(spriteHeight);
             pokemonSprite.setPreserveRatio(true);
@@ -1509,8 +1512,8 @@ public class BattleController {
                 if (finalI <= distance)
                     pokemonSprite.setLayoutY(-spriteWidth + finalI);
                 else
-                    // Jump animation calculation, jumps for 150 pixels, then falls back down to original position
-                    // sine function allows to observe a sense of momentum
+                    // Bounce animation calculation, jumps for 150 pixels, then falls back down to original position
+                    // sine function allows to observe a sense of momentum when rising and falling back down
                     pokemonSprite.setLayoutY(spriteY - (150 * Math.sin((finalI - distance) * Math.PI / 600)));
             });
 

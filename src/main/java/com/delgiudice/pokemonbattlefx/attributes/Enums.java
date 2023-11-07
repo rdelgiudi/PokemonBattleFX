@@ -138,6 +138,30 @@ public class Enums {
         }
     }
 
+    public enum MoveCategory {
+        NONE("None"),
+        AURA_PULSE("Aura and pulse"),
+        BALL_BOMB("Ball and bomb"),
+        BITING("Biting"),
+        DANCE("Dance"),
+        EXPLOSIVE("Explosive"),
+        POWDER_SPORE("Powder and Spore"),
+        PUNCHING("Punching"),
+        SLICING("Slicing"),
+        SOUND_BASED("Sound-based"),
+        WIND("Wind");
+
+        final private String name;
+
+        public String toString() {
+            return name;
+        }
+
+        MoveCategory(String name) {
+            this.name = name;
+        }
+    }
+
     public enum BattlefieldCondition {
         NONE("No condition"),
         TAILWIND("Tailwind");
