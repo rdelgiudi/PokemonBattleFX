@@ -90,29 +90,24 @@ public class SwapPokemonController {
 
     private void initPokemonInfo(boolean force) {
 
-        int currentAllyPokemon = battleLogic.getCurrentAllyPokemon();
+        int currentAllyPokemon = 0;
 
         cancelButton.setDisable(party.get(currentAllyPokemon).getHp() == 0 || force);
 
         setPokemonInfo(currentPokemonBox, currentAllyPokemon, true);
 
-        int index = 0;
         int partySize = party.size();
 
-        for (int i = 0; i < 6; i++) {
-            if (i == currentAllyPokemon)
-                continue;
+        for (int i = 1; i < 6; i++) {
 
-            HBox box = (HBox) pokemonBox.getChildren().get(index);
+            HBox box = (HBox) pokemonBox.getChildren().get(i-1);
 
             if (i >= partySize) {
                 disableBox(box);
-                index++;
                 continue;
             }
 
             setPokemonInfo(box, i, false);
-            index++;
         }
     }
 
@@ -196,7 +191,7 @@ public class SwapPokemonController {
 
     private void initListener(HBox pokemonBox, Pokemon pokemon, int index) {
 
-        int currentAllyPokemon = battleLogic.getCurrentAllyPokemon();
+        int currentAllyPokemon = 0;
         boolean allyFainted = party.get(currentAllyPokemon).getHp() == 0;
 
         ContextMenu contextMenu = new ContextMenu();
@@ -268,7 +263,7 @@ public class SwapPokemonController {
             }
 
             battleLogic.switchPokemon(true, index);
-            int newCurrentAllyPokemon = battleLogic.getCurrentAllyPokemon();
+            int newCurrentAllyPokemon = 0;
 
             //controller.setAllyInformation(player.getParty(currentAllyPokemon));
             Timeline allyPokemonIntro = battleController.getBattleTextAnimation(String.format(BattleLogic.POKEMON_SENT_OUT_STRING,
@@ -288,13 +283,15 @@ public class SwapPokemonController {
             if (switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE) {
                 if (turnPokemon == null || secondMove == null)
                     throw new ValueException("Values of turnPokemon and secondMove expected to be not null in this context");
-                battleLogic.initAnimationQueue(battleTimeLine);
+                battleLogic.applySentOutEffects(battleTimeLine);
                 battleLogic.processSecondMove(battleTimeLine, party.get(newCurrentAllyPokemon), turnPokemon.get(1), secondMove);
             }
             else if (switchContext == Enums.SwitchContext.SWITCH_FIRST) {
+                battleLogic.applySentOutEffects(battleTimeLine);
                 battleLogic.initAnimationQueue(battleTimeLine);
-                battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e ->
-                        battleLogic.battleTurn(null));
+                battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+                        battleLogic.battleTurn(null);
+                });
                 battleTimeLine.get(0).play();
             }
             else if (switchContext == Enums.SwitchContext.SWITCH_FAINTED || switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE ||
