@@ -614,5 +614,10 @@ public class Pokemon {
                 new Move(MoveTemplate.getMove(MoveEnum.THUNDERBOLT)), new Move(MoveTemplate.getMove(MoveEnum.IRON_TAIL)),
                 new Move(MoveTemplate.getMove(MoveEnum.ELECTRO_BALL)), new Move(MoveTemplate.getMove(MoveEnum.QUICK_ATTACK)));
         pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.RAICHU), 50, Ability.STATIC,
+                new Move(MoveTemplate.getMove(MoveEnum.THUNDER)), new Move(MoveTemplate.getMove(MoveEnum.RAIN_DANCE)),
+                new Move(MoveTemplate.getMove(MoveEnum.SUBSTITUTE)), new Move(MoveTemplate.getMove(MoveEnum.VOLT_SWITCH)));
+        pokemonExamples.put(example.getOriginalName(), example);
     }
 }

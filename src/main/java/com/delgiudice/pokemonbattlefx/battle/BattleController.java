@@ -531,9 +531,9 @@ public class BattleController {
             int finalI = i;
             final KeyFrame kf;
             if (full)
-                kf = new KeyFrame(Duration.millis(25 * i), e -> battleTextFull.setText(text.substring(0, finalI)));
+                kf = new KeyFrame(Duration.millis(20 * i), e -> battleTextFull.setText(text.substring(0, finalI)));
             else
-                kf = new KeyFrame(Duration.millis(25 * i), e -> battleText.setText(text.substring(0, finalI)));
+                kf = new KeyFrame(Duration.millis(20 * i), e -> battleText.setText(text.substring(0, finalI)));
             characterList.add(kf);
         }
 
@@ -542,9 +542,9 @@ public class BattleController {
 
         final KeyFrame kf;
         if (full)
-            kf = new KeyFrame(Duration.millis(25 * text.length() + 25), e -> battleTextFull.setText(text));
+            kf = new KeyFrame(Duration.millis(20 * text.length() + 25), e -> battleTextFull.setText(text));
         else
-            kf = new KeyFrame(Duration.millis(25 * text.length() + 25), e -> battleText.setText(text));
+            kf = new KeyFrame(Duration.millis(20 * text.length() + 25), e -> battleText.setText(text));
 
         timeline.getKeyFrames().add(kf);
 

@@ -1784,6 +1784,21 @@ public class BattleLogic {
         }
         //****************************************************
 
+        // Checks related to pure status moves and substitute
+        // due to the nature of substitute interactions, the best approach may be to create a list of move names that
+        // don't affect substitutes
+        if (target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE) && !move.isSelf()
+                && move.getSubtype() == Enums.Subtypes.STATUS) {
+            boolean substituteProtected = move.getMoveCategory() != Enums.MoveCategory.SOUND_BASED; // TODO: more exceptions here
+            if (substituteProtected) {
+                Timeline moveFailedMessage = controller.getBattleTextAnimation("But it failed!", true);
+                System.out.printf("Status move blocked by %s's substitute%n", target.getBattleNameMiddle());
+                moveTimeLine.add(moveFailedMessage);
+                moveTimeLine.add(controller.generatePause(1000));
+                return moveTimeLine;
+            }
+        }
+
         // Move hit calculations, if move misses the function ends
         if (moveAccuracy != MoveTemplate.NOT_APPLICABLE) {
             float accuracyModifier = calculateMoveAccuracyModifier(user, target, move);
@@ -2151,7 +2166,8 @@ public class BattleLogic {
             moveTimeLine.add(controller.generatePause(1000));
         }
         else if (move.getSubtype() == Enums.Subtypes.STATUS && statusImmunity) {
-            final Timeline effectInfo = controller.getBattleTextAnimation("But it failed!", true);
+            final Timeline effectInfo = controller.getBattleTextAnimation(String.format(
+                    MOVE_NO_EFFECT_STRING, target.getBattleNameMiddle()), true);
             //effectInfo.setDelay(Duration.seconds(2));
 
             System.out.println("No effect on " + target.getBattleNameMiddle());
@@ -2172,10 +2188,10 @@ public class BattleLogic {
                 move.getStatus() == Enums.Status.BADLY_POISONED) &&
                 (target.getType()[0].getTypeEnum() == Enums.Types.POISON ||
                         target.getType()[1].getTypeEnum() == Enums.Types.POISON);
-        boolean substituteImmunity = target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE) &&
-                move.getMoveCategory() != Enums.MoveCategory.SOUND_BASED; //TODO: immunity changes based on generation, every move should be checked manually
+//        boolean substituteImmunity = target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE) &&
+//                move.getMoveCategory() != Enums.MoveCategory.SOUND_BASED;
 
-        return firePokemonImmunity || electricPokemonImmunity || poisonPokemonImmunity || substituteImmunity;
+        return firePokemonImmunity || electricPokemonImmunity || poisonPokemonImmunity;
     }
 
     private void processStatUpApplication(List<Timeline> moveTimeLine, Move move, Pokemon user, Pokemon target,
@@ -2184,7 +2200,7 @@ public class BattleLogic {
         float prob = move.getStatChangeProb() * 100.0f;
         int rand = generator.nextInt(100) + 1;
         boolean substituteProtected = target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE) &&
-                move.getStatChange() < 0 && !move.isSelf();
+                move.getStatChange() < 0 && !move.isSelf() && move.getMoveCategory() != Enums.MoveCategory.SOUND_BASED;
 
         if (move.isSelf() && prob >= rand && !userFainted) {
             processStatChange(moveTimeLine, move, user, true);
@@ -2196,10 +2212,10 @@ public class BattleLogic {
             if (!move.getSecondaryStatTypes().isEmpty())
                 processStatChange(moveTimeLine, move, target, false);
         }
-        else if (substituteProtected && move.getSubtype() == Enums.Subtypes.STATUS) {
-            moveTimeLine.add(controller.getBattleTextAnimation("But it failed!", true));
-            moveTimeLine.add(controller.generatePause(1000));
-        }
+//        else if (substituteProtected && move.getSubtype() == Enums.Subtypes.STATUS) {
+//            moveTimeLine.add(controller.getBattleTextAnimation("But it failed!", true));
+//            moveTimeLine.add(controller.generatePause(1000));
+//        }
     }
 
     private void processSubStatusApplication(List<Timeline> moveTimeLine ,Move move, Pokemon user, Pokemon target,
@@ -2208,7 +2224,7 @@ public class BattleLogic {
         float prob = move.getStatChangeProb() * 100.0f;
         int rand = generator.nextInt(100) + 1;
         Enums.SubStatus moveSubStatus = move.getSubStatus();
-        boolean substituteProtected = target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE) &&
+        boolean substituteProtected = target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE) && !move.isSelf() &&
                 move.getMoveCategory() != Enums.MoveCategory.SOUND_BASED;
 
         switch (moveSubStatus) {
@@ -2218,10 +2234,10 @@ public class BattleLogic {
                     moveTimeLine.add(applyConfusion(target));
                     moveTimeLine.add(controller.generatePause(1000));
                 }
-                else if (substituteProtected && move.getSubtype() == Enums.Subtypes.STATUS) {
-                    moveTimeLine.add(controller.getBattleTextAnimation("But it failed!", true));
-                    moveTimeLine.add(controller.generatePause(1000));
-                }
+//                else if (substituteProtected && move.getSubtype() == Enums.Subtypes.STATUS) {
+//                    moveTimeLine.add(controller.getBattleTextAnimation("But it failed!", true));
+//                    moveTimeLine.add(controller.generatePause(1000));
+//                }
                 break;
             case FLINCHED:
                 if (prob >= rand && !secondaryEffectsImmune && !target.getSubStatuses().contains(moveSubStatus) && first &&
@@ -2841,7 +2857,7 @@ public class BattleLogic {
                     return 0.5;
                 return 1;
             default:
-                throw new IllegalStateException("Undhandled weather effect: " + weatherEffect.getKey());
+                throw new IllegalStateException("Unhandled weather effect: " + weatherEffect.getKey());
         }
     }
 
