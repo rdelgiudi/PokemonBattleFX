@@ -3,8 +3,6 @@ package com.delgiudice.pokemonbattlefx.battle;
 import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.move.Move;
-import com.delgiudice.pokemonbattlefx.move.MoveEnum;
-import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -16,6 +14,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 
@@ -31,6 +32,10 @@ public class SwapPokemonController {
             "-fx-background-color: linear-gradient(to left, lightskyblue, azure)";
     private static final String hoverStyle = "-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15; " +
             "-fx-background-color: azure";
+
+    private static final String optionsRegularStyle = "-fx-background-color: skyblue; -fx-border-color: black; -fx-border-width: 5";
+    private static final String optionsHoverStyle = "-fx-background-color: lightblue; -fx-border-color: black; -fx-border-width: 5";
+    private static final String optionsPressedStyle = "-fx-background-color: lightskyblue; -fx-border-color: black; -fx-border-width: 5";
 
     private Pane battlePane;
     private BattleLogic battleLogic;
@@ -48,11 +53,11 @@ public class SwapPokemonController {
     @FXML
     private HBox currentPokemonBox;
     @FXML
-    private VBox pokemonBox;
+    private VBox pokemonBox, switchOptionsBox;
     @FXML
-    private Label infoLabel;
+    private Label infoLabel, selectedPokemonLabel;
     @FXML
-    private Button cancelButton;
+    private Button cancelButton, switchOutButton, summaryButton, closeButton;
 
     public SwapPokemonController() {
         summaryLoader = new FXMLLoader(BattleApplication.class.getResource("summary-view.fxml"));
@@ -63,6 +68,10 @@ public class SwapPokemonController {
         }
 
         //BattleApplication.letterbox(summaryScene, pane);
+    }
+
+    public void initialize() {
+        initListeners();
     }
 
     public void initVariables(Pane battlePane, BattleLogic logic, BattleController controller, List<Pokemon> party,
@@ -93,6 +102,7 @@ public class SwapPokemonController {
         int currentAllyPokemon = 0;
 
         cancelButton.setDisable(party.get(currentAllyPokemon).getHp() == 0 || force);
+        switchOptionsBox.setVisible(false);
 
         setPokemonInfo(currentPokemonBox, currentAllyPokemon, true);
 
@@ -183,24 +193,105 @@ public class SwapPokemonController {
         else
             pokemonBox.setStyle(regularStyle);
 
-        initListener(pokemonBox, pokemon, index);
+        initBoxElementListener(pokemonBox, pokemon, index);
         icon.setVisible(true);
         infoBox.setVisible(true);
         hpBox.setVisible(true);
     }
 
-    private void initListener(HBox pokemonBox, Pokemon pokemon, int index) {
+    private void initListeners() {
+        switchOutButton.setOnMouseEntered(e -> {
+            switchOutButton.setStyle(optionsHoverStyle);
+        });
+        switchOutButton.setOnMouseExited(e -> {
+            switchOutButton.setStyle(optionsRegularStyle);
+        });
+        switchOutButton.setOnMousePressed(e -> {
+            switchOutButton.setStyle(optionsPressedStyle);
+        });
+        switchOutButton.setOnMouseReleased(e -> {
+            switchOutButton.setStyle(optionsRegularStyle);
+        });
+
+        summaryButton.setOnMouseEntered(e -> {
+            summaryButton.setStyle(optionsHoverStyle);
+        });
+        summaryButton.setOnMouseExited(e -> {
+            summaryButton.setStyle(optionsRegularStyle);
+        });
+        summaryButton.setOnMousePressed(e -> {
+            summaryButton.setStyle(optionsPressedStyle);
+        });
+        summaryButton.setOnMouseReleased(e -> {
+            summaryButton.setStyle(optionsRegularStyle);
+        });
+
+        closeButton.setOnMouseEntered(e -> {
+            closeButton.setStyle(optionsHoverStyle);
+        });
+        closeButton.setOnMouseExited(e -> {
+            closeButton.setStyle(optionsRegularStyle);
+        });
+        closeButton.setOnMousePressed(e -> {
+            closeButton.setStyle(optionsPressedStyle);
+        });
+        closeButton.setOnMouseReleased(e -> {
+            closeButton.setStyle(optionsRegularStyle);
+        });
+
+        cancelButton.setOnMouseEntered(e -> {
+            cancelButton.setStyle(optionsHoverStyle);
+        });
+        cancelButton.setOnMouseExited(e -> {
+            cancelButton.setStyle(optionsRegularStyle);
+        });
+        cancelButton.setOnMousePressed(e -> {
+            cancelButton.setStyle(optionsPressedStyle);
+        });
+        cancelButton.setOnMouseReleased(e -> {
+            cancelButton.setStyle(optionsRegularStyle);
+        });
+    }
+
+    private void initBoxElementListener(HBox pokemonBox, Pokemon pokemon, int index) {
+        pokemonBox.setOnMouseClicked(e -> {
+            initSwapMenuListener(pokemonBox ,pokemon, index);
+        });
+
+        pokemonBox.setOnMouseEntered(e -> pokemonBox.setStyle(hoverStyle));
+        pokemonBox.setOnMouseExited(e -> {
+            if (pokemon.getHp() == 0)
+                pokemonBox.setStyle(faintedStyle);
+            else
+                pokemonBox.setStyle(regularStyle);
+        });
+    }
+
+    private void initSwapMenuListener(HBox pokemonBox, Pokemon pokemon, int index) {
 
         int currentAllyPokemon = 0;
         boolean allyFainted = party.get(currentAllyPokemon).getHp() == 0;
 
-        ContextMenu contextMenu = new ContextMenu();
-        MenuItem switchOut = new MenuItem("Switch out");
-        MenuItem summary = new MenuItem("Summary");
-        MenuItem cancel = new MenuItem("Cancel");
+        selectedPokemonLabel.setText(String.format("%d: %-12s", index+1, pokemon.getName()));
 
-        switchOut.setOnAction(event -> {
+        String setColorIntro = "-fx-border-radius: 10; -fx-background-radius: 15; -fx-border-width: 5; " +
+                "-fx-border-color: ";
+        String halfAndHalf = "linear-gradient(from 0%% 50%% to 100%% 50%%, %s, %s)";
+        Color[] buttonBorderColor = new Color[2];
+        buttonBorderColor[0] = pokemon.getType()[0].getTypeEnum().getTypeColor();
+        if (pokemon.getType()[1].getTypeEnum() == Enums.Types.NO_TYPE) {
+            buttonBorderColor[1] = buttonBorderColor[0];
+        }
+        else {
+            buttonBorderColor[1] = pokemon.getType()[1].getTypeEnum().getTypeColor();
+        }
+        String[] colorHex = new String[2];
+        colorHex[0] = BattleController.toHexString(buttonBorderColor[0]);
+        colorHex[1] = BattleController.toHexString(buttonBorderColor[1]);
+        String colorHexComplete = String.format(halfAndHalf, colorHex[0], colorHex[1]);
+        selectedPokemonLabel.setStyle(setColorIntro + colorHexComplete);
 
+        switchOutButton.setOnAction(event -> {
             if (index == currentAllyPokemon) {
                 Timeline alreadyInBattleInfo;
                 if (!allyFainted)
@@ -300,7 +391,7 @@ public class SwapPokemonController {
             }
         });
 
-        summary.setOnAction(event -> {
+        summaryButton.setOnAction(event -> {
             Scene scene = pokemonBox.getScene();
 
             SummaryController summaryController = summaryLoader.getController();
@@ -309,21 +400,11 @@ public class SwapPokemonController {
             summaryController.setPreviousPane((Pane) scene.getRoot());
 
             scene.setRoot(summaryPane);
+            switchOptionsBox.setVisible(false);
         });
 
-        cancel.setOnAction(event -> contextMenu.hide());
-        contextMenu.getItems().addAll(switchOut, summary, cancel);
+        closeButton.setOnAction(event -> switchOptionsBox.setVisible(false));
 
-        pokemonBox.setOnMouseClicked(e -> {
-            contextMenu.show(pokemonBox, e.getScreenX(), e.getScreenY());
-        });
-
-        pokemonBox.setOnMouseEntered(e -> pokemonBox.setStyle(hoverStyle));
-        pokemonBox.setOnMouseExited(e -> {
-            if (pokemon.getHp() == 0)
-                pokemonBox.setStyle(faintedStyle);
-            else
-                pokemonBox.setStyle(regularStyle);
-        });
+        switchOptionsBox.setVisible(true);
     }
 }

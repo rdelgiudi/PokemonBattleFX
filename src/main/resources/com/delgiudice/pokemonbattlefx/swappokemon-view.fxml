@@ -10,12 +10,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
 <VBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: black;" xmlns="http://javafx.com/javafx/8.0.362" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.delgiudice.pokemonbattlefx.battle.SwapPokemonController">
    <children>
       <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" style="-fx-background-color: linear-gradient(to top left, lightblue, darkblue);">
          <children>
-            <Button fx:id="cancelButton" layoutX="1136.0" layoutY="647.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="130.0" text="Cancel">
+            <Button fx:id="cancelButton" layoutX="1136.0" layoutY="647.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="130.0" style="-fx-background-color: skyblue; -fx-border-color: black; -fx-border-width: 5;" text="Cancel">
                <font>
                   <Font name="Monospaced Regular" size="12.0" />
                </font>
@@ -386,6 +385,39 @@
                   <Font name="Monospaced Regular" size="30.0" />
                </font>
             </Label>
+            <VBox fx:id="switchOptionsBox" layoutX="56.0" layoutY="330.0" prefHeight="300.0" prefWidth="375.0" spacing="5.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
+               <children>
+                  <Label fx:id="selectedPokemonLabel" alignment="CENTER" prefHeight="67.0" prefWidth="1120.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 15; -fx-border-radius: 10; -fx-background-color: white;" text="Selected POKÉMON">
+                     <padding>
+                        <Insets left="15.0" />
+                     </padding>
+                     <font>
+                        <Font name="Monospaced Regular" size="20.0" />
+                     </font>
+                  </Label>
+                  <Button fx:id="switchOutButton" mnemonicParsing="false" prefHeight="125.0" prefWidth="381.0" style="-fx-background-color: skyblue; -fx-border-color: black; -fx-border-width: 5;" text="Switch Out">
+                     <font>
+                        <Font name="Monospaced Regular" size="22.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="summaryButton" mnemonicParsing="false" prefHeight="125.0" prefWidth="381.0" style="-fx-background-color: skyblue; -fx-border-color: black; -fx-border-width: 5;" text="Summary">
+                     <font>
+                        <Font name="Monospaced Regular" size="22.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="closeButton" mnemonicParsing="false" prefHeight="125.0" prefWidth="381.0" style="-fx-background-color: skyblue; -fx-border-color: black; -fx-border-width: 5;" text="Close">
+                     <font>
+                        <Font name="Monospaced Regular" size="22.0" />
+                     </font>
+                  </Button>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
          </children>
       </Pane>
    </children>

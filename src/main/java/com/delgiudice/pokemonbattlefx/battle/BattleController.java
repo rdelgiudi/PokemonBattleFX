@@ -1250,12 +1250,12 @@ public class BattleController {
         return timeline;
     }
 
-    private String format(double val) {
+    private static String format(double val) {
         String in = Integer.toHexString((int) Math.round(val * 255));
         return in.length() == 1 ? "0" + in : in;
     }
 
-    public String toHexString(Color value) {
+    public static String toHexString(Color value) {
         return "#" + (format(value.getRed()) + format(value.getGreen()) + format(value.getBlue()) + format(value.getOpacity()))
                 .toUpperCase();
     }
