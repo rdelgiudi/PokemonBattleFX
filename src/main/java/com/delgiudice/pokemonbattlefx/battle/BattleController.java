@@ -1343,6 +1343,7 @@ public class BattleController {
             Button moveButton = (Button) moveGrid.getChildren().get(i);
 
             if (i < size) {
+                moveButton.setDisable(false);
                 setMoveInformation(moveButton, moveList.get(i));
             }
             else {

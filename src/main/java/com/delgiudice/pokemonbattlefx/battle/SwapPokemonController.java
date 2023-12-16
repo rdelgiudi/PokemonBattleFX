@@ -255,6 +255,21 @@ public class SwapPokemonController {
 
     private void initBoxElementListener(HBox pokemonBox, Pokemon pokemon, int index) {
         pokemonBox.setOnMouseClicked(e -> {
+            double mouseX = e.getSceneX();
+            double mouseY = e.getSceneY();
+            double boxWidth = switchOptionsBox.getWidth();
+            double boxHeight = switchOptionsBox.getHeight();
+
+            if (mouseX + boxWidth > pokemonBox.getScene().getWidth())
+                switchOptionsBox.setLayoutX(mouseX - boxWidth);
+            else
+                switchOptionsBox.setLayoutX(mouseX);
+
+            if (mouseY + boxHeight > pokemonBox.getScene().getHeight())
+                switchOptionsBox.setLayoutY(mouseY - boxHeight);
+            else
+                switchOptionsBox.setLayoutY(mouseY);
+
             initSwapMenuListener(pokemonBox ,pokemon, index);
         });
 

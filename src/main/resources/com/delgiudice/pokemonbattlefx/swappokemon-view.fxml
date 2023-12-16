@@ -385,7 +385,7 @@
                   <Font name="Monospaced Regular" size="30.0" />
                </font>
             </Label>
-            <VBox fx:id="switchOptionsBox" layoutX="56.0" layoutY="330.0" prefHeight="300.0" prefWidth="375.0" spacing="5.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
+            <VBox fx:id="switchOptionsBox" layoutX="93.0" layoutY="360.0" prefHeight="230.0" prefWidth="300.0" spacing="5.0" style="-fx-background-color: white; -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                <children>
                   <Label fx:id="selectedPokemonLabel" alignment="CENTER" prefHeight="67.0" prefWidth="1120.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 15; -fx-border-radius: 10; -fx-background-color: white;" text="Selected POKÉMON">
                      <padding>
