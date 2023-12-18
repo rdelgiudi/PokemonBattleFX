@@ -17,6 +17,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
+import javafx.scene.transform.Scale;
 import javafx.util.Duration;
 import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 
@@ -50,6 +51,8 @@ public class SwapPokemonController {
     private List<Pokemon> turnPokemon;
     private Move secondMove;
 
+    @FXML
+    private Pane mainPane;
     @FXML
     private HBox currentPokemonBox;
     @FXML
@@ -255,20 +258,27 @@ public class SwapPokemonController {
 
     private void initBoxElementListener(HBox pokemonBox, Pokemon pokemon, int index) {
         pokemonBox.setOnMouseClicked(e -> {
-            double mouseX = e.getSceneX();
-            double mouseY = e.getSceneY();
+
+            // Adding parent layout location applies a correction for the elements in a VBox, since without correction
+            // it doesn't account for the offset of it
+            double correctionX = pokemonBox.getParent().getClass() == VBox.class ? pokemonBox.getParent().getLayoutX() : 0;
+            double correctionY = pokemonBox.getParent().getClass() == VBox.class ? pokemonBox.getParent().getLayoutY() : 0;
+
+            double mouseLayoutX = e.getX() + pokemonBox.getLayoutX() + correctionX;
+            double mouseLayoutY = e.getY() + pokemonBox.getLayoutY() + correctionY;
+
             double boxWidth = switchOptionsBox.getWidth();
             double boxHeight = switchOptionsBox.getHeight();
 
-            if (mouseX + boxWidth > pokemonBox.getScene().getWidth())
-                switchOptionsBox.setLayoutX(mouseX - boxWidth);
+            if (mouseLayoutX + boxWidth > mainPane.getWidth())
+                switchOptionsBox.setLayoutX(mouseLayoutX - boxWidth);
             else
-                switchOptionsBox.setLayoutX(mouseX);
+                switchOptionsBox.setLayoutX(mouseLayoutX);
 
-            if (mouseY + boxHeight > pokemonBox.getScene().getHeight())
-                switchOptionsBox.setLayoutY(mouseY - boxHeight);
+            if (mouseLayoutY + boxHeight > mainPane.getHeight())
+                switchOptionsBox.setLayoutY(mouseLayoutY - boxHeight);
             else
-                switchOptionsBox.setLayoutY(mouseY);
+                switchOptionsBox.setLayoutY(mouseLayoutY);
 
             initSwapMenuListener(pokemonBox ,pokemon, index);
         });
