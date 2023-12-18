@@ -23,6 +23,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
@@ -1308,8 +1309,10 @@ public class BattleController {
         button.setStyle(setColorIntro + colorHex + setColorEnd + colorHexEnd);
         button.setOnMouseExited(e -> {
             button.setStyle(setColorIntro + colorHex + setColorEnd + colorHexEnd);
-            moveTypeBox.getChildren().get(0).setVisible(false);
-            moveTypeBox.getChildren().get(1).setVisible(false);
+            HBox typeBox = (HBox) moveTypeBox.getChildren().get(0);
+            HBox ppBox = (HBox) moveTypeBox.getChildren().get(1);
+            typeBox.getChildren().get(1).setVisible(false);
+            ppBox.getChildren().get(1).setVisible(false);
         });
         button.setOnMouseReleased(e -> button.setStyle(setColorIntro + colorHex + setColorEnd + colorHexEnd));
 
@@ -1326,8 +1329,10 @@ public class BattleController {
         button.setOnMouseEntered(e -> {
             button.setStyle(setColorIntro + colorHexHover + setColorEnd + colorHexHoverEnd);
             setMoveTypeBox(move);
-            moveTypeBox.getChildren().get(0).setVisible(true);
-            moveTypeBox.getChildren().get(1).setVisible(true);
+            HBox typeBox = (HBox) moveTypeBox.getChildren().get(0);
+            HBox ppBox = (HBox) moveTypeBox.getChildren().get(1);
+            typeBox.getChildren().get(1).setVisible(true);
+            ppBox.getChildren().get(1).setVisible(true);
         });
     }
 
