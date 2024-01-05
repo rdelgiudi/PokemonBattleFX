@@ -22,10 +22,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
@@ -43,6 +40,7 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -57,6 +55,8 @@ public class BattleController {
             fourthMoveButton, backMoveButton, pokemonBackButton;
     @FXML
     private VBox allyPokemonInfo, enemyPokemonInfo, moveTypeBox;
+    @FXML
+    private HBox allyPokemonStatusBox, enemyPokemonStatusBox;
     @FXML
     private ImageView allyPokemonSprite, enemyPokemonSprite, textArrowView;
     @FXML
@@ -1360,6 +1360,142 @@ public class BattleController {
         }
     }
 
+    public void updatePokemonStatusBox(List<Pokemon> allyPokemon, List<Pokemon> enemyPokemon) {
+        updateAllyStatusBox(allyPokemon);
+        updateEnemyStatusBox(enemyPokemon, new boolean[]{false, false, false, false, false, false});
+    }
+
+    private void updateAllyStatusBox(List<Pokemon> allyPokemon) {
+        int allySize = allyPokemon.size();
+        ArrayList<ImageView> allImageViews = new ArrayList<>();
+        addAllImageViewFromBox(allyPokemonStatusBox, allImageViews);
+
+        for (int i=0; i < 6; i++) {
+            List<ImageView> subList = allImageViews.subList(i*2, 2+i*2);
+            ImageView allyPokemonStatusBackground = subList.get(0);
+            ImageView allyPokemonStatusForeground = subList.get(1);
+            if (allySize > i) {
+                allyPokemonStatusForeground.setImage(allyPokemon.get(i).getSpecie().getFrontSprite());
+                allyPokemonStatusBackground.setImage(new Image("sprites/indicator_normal.png"));
+                if (allyPokemon.get(i).getStatus() == Enums.Status.FAINTED) {
+                    setColorShiftEffect(allyPokemonStatusForeground, 1, Color.GRAY);
+                    setColorShiftEffect(allyPokemonStatusBackground, 1, Color.GRAY);
+                }
+                else {
+                    resetColorShiftEffect(allyPokemonStatusForeground);
+                    resetColorShiftEffect(allyPokemonStatusBackground);
+                }
+            }
+            else {
+                allyPokemonStatusForeground.setImage(null);
+                allyPokemonStatusBackground.setImage(new Image("sprites/indicator_empty.png"));
+            }
+        }
+    }
+
+    private void updateEnemyStatusBox(List<Pokemon> enemyPokemon, boolean[] seenArray) {
+        int enemySize = enemyPokemon.size();
+        ArrayList<ImageView> allImageViews = new ArrayList<>();
+        addAllImageViewFromBox(enemyPokemonStatusBox, allImageViews);
+
+        for (int i=0; i < 6; i++) {
+            List<ImageView> subList = allImageViews.subList((5-i)*2, 2+(5-i)*2);
+            ImageView enemyPokemonStatusBackground = subList.get(0);
+            ImageView enemyPokemonStatusForeground = subList.get(1);
+
+            if (enemySize > i) {
+                if (seenArray[i])
+                    enemyPokemonStatusForeground.setImage(enemyPokemon.get(i).getSpecie().getFrontSprite());
+                else
+                    enemyPokemonStatusForeground.setImage(null);
+
+                enemyPokemonStatusBackground.setImage(new Image("sprites/indicator_normal.png"));
+
+                if (enemyPokemon.get(i).getStatus() == Enums.Status.FAINTED) {
+                    setColorShiftEffect(enemyPokemonStatusBackground, 1, Color.GRAY);
+                    if (enemyPokemonStatusForeground.getImage() != null)
+                        setColorShiftEffect(enemyPokemonStatusForeground, 1, Color.GRAY);
+                }
+                else {
+                    resetColorShiftEffect(enemyPokemonStatusBackground);
+                    resetColorShiftEffect(enemyPokemonStatusForeground);
+                }
+            }
+            else {
+                enemyPokemonStatusForeground.setImage(null);
+                enemyPokemonStatusBackground.setImage(new Image("sprites/indicator_empty.png"));
+            }
+        }
+    }
+
+    public Timeline getPokemonStatusBoxAnimation() {
+        ArrayList<ImageView> allyStatusPanes = new ArrayList<>();
+        addAllImageViewFromBox(allyPokemonStatusBox, allyStatusPanes);
+
+        ArrayList<ImageView> enemyStatusPanes = new ArrayList<>();
+        addAllImageViewFromBox(enemyPokemonStatusBox, enemyStatusPanes);
+
+        KeyFrame setup = new KeyFrame(Duration.millis(1), e -> {
+            for (ImageView node : allyStatusPanes) {
+                node.setOpacity(0);
+                node.setFitWidth(1);
+                node.setFitHeight(1);
+            }
+            for (ImageView node : enemyStatusPanes) {
+                node.setOpacity(0);
+                node.setFitWidth(1);
+                node.setFitHeight(1);
+            }
+        });
+
+        Timeline timeline = new Timeline(setup);
+
+        for (int j=0; j<6; j++) {
+
+            List<ImageView> allyNodes = allyStatusPanes.subList(2*(5-j), 2+2*(5-j));
+            List<ImageView> enemyNodes = enemyStatusPanes.subList(2*(5-j), 2+2*(5-j));
+
+            for (int i=1; i<=100; i++) {
+                final double newSize = 60 * i / 100.0;
+                final double newSizePokemon = 50 * i / 100.0;
+                final double newOpacity = i / 100.0;
+                final ImageView allyIconBackground = allyNodes.get(0);
+                final ImageView allyIconForeground = allyNodes.get(1);
+                final ImageView enemyIconBackground = enemyNodes.get(0);
+                final ImageView enemyIconForeground = enemyNodes.get(1);
+
+                final KeyFrame kf = new KeyFrame(Duration.millis(i * 3 + j * 300), e -> {
+                    modifySizeAndOpacity(allyIconForeground, allyIconBackground, newSize, newSizePokemon, newOpacity);
+                    modifySizeAndOpacity(enemyIconForeground, enemyIconBackground, newSize, newSizePokemon, newOpacity);
+                });
+                timeline.getKeyFrames().add(kf);
+            }
+        }
+
+        return timeline;
+    }
+
+    private static void modifySizeAndOpacity(ImageView iconForeground, ImageView iconBackground, double newSize,
+                                             double newSizePokemon, double newOpacity) {
+        iconBackground.setOpacity(newOpacity);
+        iconForeground.setOpacity(newOpacity);
+
+        iconBackground.setFitWidth(newSize);
+        iconBackground.setFitHeight(newSize);
+
+        iconForeground.setFitWidth(newSizePokemon);
+        iconForeground.setFitHeight(newSizePokemon);
+    }
+
+    private static void addAllImageViewFromBox(Parent parent, ArrayList<ImageView> nodes) {
+        for (Node node : parent.getChildrenUnmodifiable()) {
+            if (node instanceof ImageView)
+                nodes.add((ImageView) node);
+            else if (node instanceof Parent)
+                addAllImageViewFromBox((Parent)node, nodes);
+        }
+    }
+
     public void updateSelectPokemonButtons(List<Pokemon> party) {
 
         int partySize = party.size();
@@ -1490,13 +1626,13 @@ public class BattleController {
         double distance = Math.abs(-spriteHeight - spriteY);
 
         Image substituteImage;
-        String spritePath = isPlayer ? "/substitute_back.png" : "/substitute_front.png";
+        String spritePath = isPlayer ? "/sprites/substitute_back.png" : "/sprites/substitute_front.png";
         URL frontSpriteUrl = getClass().getResource(spritePath);
 
         if (frontSpriteUrl != null)
             substituteImage = new Image(spritePath);
         else
-            substituteImage = new Image("default.png");
+            substituteImage = new Image("sprites/default.png");
 
 
         substituteImage = PokemonSpecie.alignBottom(substituteImage);

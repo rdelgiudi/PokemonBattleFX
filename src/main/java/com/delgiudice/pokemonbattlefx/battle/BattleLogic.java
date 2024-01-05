@@ -105,6 +105,8 @@ public class BattleLogic {
     // function that initiates a battle, adding looping checks here should be avoided
     private void initBattleLoop() {
 
+        controller.updatePokemonStatusBox(player.getParty(), enemy.getParty());
+
         boolean allyPokemonSelected = checkIfAllyAbleToBattle(true);
         boolean enemyPokemonSelected = checkIfEnemyAbleToBattle(true);
 
@@ -122,8 +124,11 @@ public class BattleLogic {
         controller.updateStatus(playerParty.get(0), true).play();
         controller.updateStatus(enemyParty.get(0), false).play();
 
+        Timeline statusBoxAnimation = controller.getPokemonStatusBoxAnimation();
+
         Timeline battleTextIntro = controller.getBattleTextAnimation(String.format("%s %s%nwants to battle!",
                 enemy.getTrainerType().toString(), enemy.getName()), true);
+        statusBoxAnimation.setOnFinished(e -> battleTextIntro.play());
 
         battleTextIntro.setDelay(Duration.seconds(1));
 
@@ -152,7 +157,7 @@ public class BattleLogic {
             battleLoop();
         });
 
-        battleTextIntro.play();
+        statusBoxAnimation.play();
     }
 
     private int getAllyAbleToBattleNum() {
@@ -372,6 +377,8 @@ public class BattleLogic {
     }
 
     private void battleLoop() {
+
+        controller.updatePokemonStatusBox(player.getParty(), enemy.getParty());
 
         allyFaintedProcessed = false;
         enemyFaintedProcessed = false;

@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -21,12 +22,12 @@
          <children>
             <ImageView fitHeight="375.0" fitWidth="500.0" layoutX="789.0" layoutY="51.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../../../pokemon_platform.png" />
+                  <Image url="@../../../sprites/pokemon_platform.png" />
                </image>
             </ImageView>
             <ImageView fitHeight="600.0" fitWidth="800.0" layoutX="-24.0" layoutY="260.0" pickOnBounds="true" preserveRatio="true">
                <image>
-                  <Image url="@../../../pokemon_platform.png" />
+                  <Image url="@../../../sprites/pokemon_platform.png" />
                </image>
             </ImageView>
             <ImageView fx:id="allyPokemonSprite" fitHeight="350.0" fitWidth="350.0" layoutX="201.0" layoutY="223.0" pickOnBounds="true" preserveRatio="true" smooth="false" />
@@ -46,7 +47,7 @@
             </TextArea>
             <ImageView fx:id="textArrowView" fitHeight="30.0" fitWidth="30.0" layoutX="1237.0" layoutY="690.0" pickOnBounds="true" preserveRatio="true" visible="false">
                <image>
-                  <Image url="@../../../text_arrow.png" />
+                  <Image url="@../../../sprites/text_arrow.png" />
                </image>
             </ImageView>
             <GridPane fx:id="optionGrid" alignment="CENTER" hgap="5.0" layoutX="730.0" layoutY="560.0" prefHeight="160.0" prefWidth="550.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: lightgray;" vgap="5.0" visible="false">
@@ -86,7 +87,7 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </padding>
             </GridPane>
-            <VBox fx:id="allyPokemonInfo" alignment="TOP_RIGHT" layoutX="855.0" layoutY="385.0" prefHeight="100.0" prefWidth="400.0" style="-fx-background-image: url('pokemon_hp_background.png'); -fx-background-repeat: stretch; -fx-background-position: center center; -fx-background-size: 400 100;" visible="false">
+            <VBox fx:id="allyPokemonInfo" alignment="TOP_RIGHT" layoutX="855.0" layoutY="385.0" prefHeight="100.0" prefWidth="400.0" style="-fx-background-image: url('sprites/pokemon_hp_background.png'); -fx-background-repeat: stretch; -fx-background-position: center center; -fx-background-size: 400 100;" visible="false">
                <children>
                   <HBox prefHeight="43.0" prefWidth="390.0">
                      <children>
@@ -150,7 +151,7 @@
                   <Insets right="10.0" />
                </padding>
             </VBox>
-            <VBox fx:id="enemyPokemonInfo" alignment="TOP_RIGHT" layoutX="14.0" layoutY="91.0" prefHeight="75.0" prefWidth="400.0" style="-fx-background-image: url('pokemon_hp_background_mini.png'); -fx-background-repeat: stretch; -fx-background-position: center center; -fx-background-size: 400 75;" visible="false">
+            <VBox fx:id="enemyPokemonInfo" alignment="TOP_RIGHT" layoutX="14.0" layoutY="91.0" prefHeight="75.0" prefWidth="400.0" style="-fx-background-image: url('sprites/pokemon_hp_background_mini.png'); -fx-background-repeat: stretch; -fx-background-position: center center; -fx-background-size: 400 75;" visible="false">
                <children>
                   <HBox prefHeight="43.0" prefWidth="312.0">
                      <children>
@@ -303,6 +304,86 @@
                   <Font name="Monospaced Regular" size="26.0" />
                </font>
             </Label>
+            <HBox fx:id="allyPokemonStatusBox" alignment="CENTER_RIGHT" layoutX="862.0" layoutY="485.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="60.0" prefWidth="60.0" spacing="5.0">
+               <children>
+                  <StackPane alignment="CENTER_RIGHT" maxHeight="40.0" maxWidth="40.0" prefHeight="7.0" prefWidth="0.0">
+                     <children>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </StackPane>
+                  <StackPane prefHeight="60.0" prefWidth="60.0">
+                     <children>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </StackPane>
+                  <StackPane prefHeight="60.0" prefWidth="60.0">
+                     <children>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </StackPane>
+                  <StackPane prefHeight="60.0" prefWidth="60.0">
+                     <children>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </StackPane>
+                  <StackPane prefHeight="60.0" prefWidth="60.0">
+                     <children>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </StackPane>
+                  <StackPane prefHeight="60.0" prefWidth="60.0">
+                     <children>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </StackPane>
+               </children>
+            </HBox>
+            <HBox fx:id="enemyPokemonStatusBox" alignment="CENTER_LEFT" layoutX="46.0" layoutY="193.0" prefHeight="60.0" prefWidth="60.0" spacing="5.0">
+               <children>
+                  <StackPane maxHeight="40.0" maxWidth="40.0" prefHeight="7.0" prefWidth="0.0">
+                     <children>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </StackPane>
+                  <StackPane prefHeight="60.0" prefWidth="60.0">
+                     <children>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </StackPane>
+                  <StackPane prefHeight="60.0" prefWidth="60.0">
+                     <children>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </StackPane>
+                  <StackPane prefHeight="60.0" prefWidth="60.0">
+                     <children>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </StackPane>
+                  <StackPane prefHeight="60.0" prefWidth="60.0">
+                     <children>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </StackPane>
+                  <StackPane prefHeight="60.0" prefWidth="60.0">
+                     <children>
+                        <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
+                        <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </StackPane>
+               </children>
+            </HBox>
          </children>
       </Pane>
    </children>
