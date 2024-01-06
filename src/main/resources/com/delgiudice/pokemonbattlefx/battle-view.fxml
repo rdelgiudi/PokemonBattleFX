@@ -306,7 +306,7 @@
             </Label>
             <HBox fx:id="allyPokemonStatusBox" alignment="CENTER_RIGHT" layoutX="862.0" layoutY="485.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="60.0" prefWidth="60.0" spacing="5.0">
                <children>
-                  <StackPane alignment="CENTER_RIGHT" maxHeight="40.0" maxWidth="40.0" prefHeight="7.0" prefWidth="0.0">
+                  <StackPane maxHeight="40.0" maxWidth="40.0" prefHeight="7.0" prefWidth="0.0">
                      <children>
                         <ImageView fitHeight="60.0" fitWidth="60.0" pickOnBounds="true" preserveRatio="true" />
                         <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" />
