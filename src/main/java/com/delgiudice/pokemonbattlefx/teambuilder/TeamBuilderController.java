@@ -4,6 +4,7 @@ import com.delgiudice.pokemonbattlefx.*;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.battle.BattleController;
 import com.delgiudice.pokemonbattlefx.battle.BattleLogic;
+import com.delgiudice.pokemonbattlefx.item.Item;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.pokemon.PokemonEnum;
 import com.delgiudice.pokemonbattlefx.trainer.NpcTrainer;
@@ -62,6 +63,8 @@ public class TeamBuilderController {
         battleLoader = new FXMLLoader(BattleApplication.class.getResource("battle-view.fxml"));
         //Pane teamBuilderPane = (Pane) startBattleButton.getScene().getRoot();
         battlePane = battleLoader.load();
+
+        Item.setItemMap();
 
         battleController = battleLoader.getController();
         logic = new BattleLogic(battleController);

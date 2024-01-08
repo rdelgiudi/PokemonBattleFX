@@ -104,7 +104,7 @@ public class BattleLogic {
 
         this.teamBuilderPane = teamBuilderPane;
 
-        player.getItems().put(new Item("Potion", Enums.ItemType.HP_RESTORE, 20), 5);
+        player.getItems().put(Item.getItemMap().get("Potion"), 5);
 
         controller.startBattleThemePlayback();
         initBattleLoop();

@@ -9,12 +9,17 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 
 import java.util.HashMap;
 import java.util.List;
@@ -91,32 +96,62 @@ public class BagController {
         int i = 0, j = 0;
 
         for (Map.Entry<Item, Integer> item : itemList.entrySet()) {
-            Button itemButton = new Button();
-            itemButton.setText(String.format("%s%nx%d", item.getKey().getName(), item.getValue()));
-            itemButton.setFont(Font.font("Monospaced", FONT_SIZE));
-            itemButton.setAlignment(Pos.CENTER);
-            itemButton.setTextFill(Color.WHITE);
-            itemButton.setStyle("-fx-background-color:  linear-gradient(to top right, #2d388a, #00aeef)");
-            itemGrid.add(itemButton, i, j);
 
-            itemButton.setPrefHeight(ITEM_BUTTON_HEIGHT);
-            itemButton.setPrefWidth(ITEM_BUTTON_WIDTH);
+            if (item.getKey().getType() == currentType) {
+                Button itemButton = new Button();
 
-            itemButton.setOnMouseEntered(e -> descriptionField.setText(item.getKey().getDescription()));
-            itemButton.setOnMouseExited(e -> descriptionField.setText(""));
+                itemButton.setText(String.format("%s%nx%d", item.getKey().getName(), item.getValue()));
+                itemButton.setFont(Font.font("Monospaced", FONT_SIZE));
+                itemButton.textAlignmentProperty().set(TextAlignment.CENTER);
+                itemButton.setTextFill(Color.WHITE);
+                itemButton.setStyle("-fx-background-color: #2d388a");
 
-            i++;
-            if (i > 8) {
-                i = 0;
-                j++;
+
+                Image sprite = item.getKey().getSprite();
+                ImageView graphic = new ImageView(sprite);
+                graphic.preserveRatioProperty().set(true);
+                graphic.setFitWidth(60);
+                graphic.setFitHeight(60);
+                itemButton.setGraphic(graphic);
+
+                itemButton.setContentDisplay(ContentDisplay.TOP);
+                itemButton.setAlignment(Pos.CENTER);
+
+                itemButton.setPrefHeight(ITEM_BUTTON_HEIGHT);
+                itemButton.setPrefWidth(ITEM_BUTTON_WIDTH);
+
+                itemButton.setOnMouseEntered(e -> {
+                    descriptionField.setText(item.getKey().getDescription());
+                    itemButton.setStyle("-fx-background-color: #3a48b5");
+                });
+                itemButton.setOnMouseExited(e -> {
+                    descriptionField.setText("");
+                    itemButton.setStyle("-fx-background-color: #2d388a");
+                });
+
+                itemButton.setOnMousePressed(e -> {
+                    itemButton.setStyle("-fx-background-color: #1e265c");
+                });
+
+                itemButton.setOnMouseReleased(e -> {
+                    itemButton.setStyle("-fx-background-color: #2d388a");
+                });
+
+                i++;
+                if (i > 8) {
+                    i = 0;
+                    j++;
+                }
+
+                itemButton.setOnAction(e -> {
+                    swapPokemonController.initVariablesBag(battlePane, (Pane) itemButton.getScene().getRoot(), battleLogic,
+                            battleController, playerParty, player, item.getKey());
+                    Scene scene = itemButton.getScene();
+                    scene.setRoot(swapPokemonPane);
+                });
+
+                itemGrid.add(itemButton, i, j);
             }
-
-            itemButton.setOnAction(e -> {
-                swapPokemonController.initVariablesBag(battlePane, (Pane) itemButton.getScene().getRoot(), battleLogic,
-                        battleController, playerParty, player, item.getKey());
-                Scene scene = itemButton.getScene();
-                scene.setRoot(swapPokemonPane);
-            });
         }
     }
 
@@ -127,6 +162,11 @@ public class BagController {
             button.setOnMouseExited(e -> button.setStyle(CATEGORY_BUTTON_STYLE_RELEASED));
             button.setOnMouseReleased(e -> button.setStyle(CATEGORY_BUTTON_STYLE_RELEASED));
         }
+
+        backButton.setOnMouseEntered(e -> backButton.setStyle(CATEGORY_BUTTON_STYLE_HOVER));
+        backButton.setOnMousePressed(e -> backButton.setStyle(CATEGORY_BUTTON_STYLE_PRESSED));
+        backButton.setOnMouseExited(e -> backButton.setStyle(CATEGORY_BUTTON_STYLE_RELEASED));
+        backButton.setOnMouseReleased(e -> backButton.setStyle(CATEGORY_BUTTON_STYLE_RELEASED));
     }
 
     @FXML

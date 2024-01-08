@@ -87,6 +87,10 @@ public class BattleController {
     private final static String POKEMON_BUTTON_RELEASE = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: forestgreen;";
     private final static String POKEMON_BUTTON_HOVER = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: limegreen;";
 
+    private final static String BAG_BUTTON_PRESSED = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: #cc7722;";
+    private final static String BAG_BUTTON_RELEASE = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: goldenrod;";
+    private final static String BAG_BUTTON_HOVER = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: #f4c430;";
+
     private final static String WEATHER_NONE = "-fx-background-color: linear-gradient(to bottom, lightskyblue, darkorange);";
     private final static String WEATHER_RAIN = "-fx-background-color: linear-gradient(to bottom, lightgray, darkblue);";
 
@@ -386,6 +390,7 @@ public class BattleController {
     private void setupButtons() {
         setFightButton();
         setPokemonButton();
+        setBagButton();
     }
 
     private void setFightButton() {
@@ -425,6 +430,26 @@ public class BattleController {
         pokemonButton.setOnMouseExited(e -> {
             pokemonButton.setText(" " + pokemonButton.getText().substring(1));
             pokemonButton.setStyle(POKEMON_BUTTON_RELEASE);
+        });
+    }
+
+    private void setBagButton() {
+        bagButton.setOnMousePressed(e -> {
+            bagButton.setStyle(BAG_BUTTON_PRESSED);
+        });
+
+        bagButton.setOnMouseReleased(e -> {
+            bagButton.setStyle(BAG_BUTTON_RELEASE);
+        });
+
+        bagButton.setOnMouseEntered(e -> {
+            bagButton.setText(">" + bagButton.getText().substring(1));
+            bagButton.setStyle(BAG_BUTTON_HOVER);
+        });
+
+        bagButton.setOnMouseExited(e -> {
+            bagButton.setText(" " + bagButton.getText().substring(1));
+            bagButton.setStyle(BAG_BUTTON_RELEASE);
         });
     }
 
