@@ -12,7 +12,6 @@ import com.delgiudice.pokemonbattlefx.pokemon.Ability;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.trainer.NpcTrainer;
 import com.delgiudice.pokemonbattlefx.trainer.Player;
-import com.sun.java.accessibility.util.java.awt.ListTranslator;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXMLLoader;
@@ -45,8 +44,8 @@ public class BattleLogic {
     private final List<Pokemon> playerParty = new ArrayList<>();
     private final List<Pokemon> enemyParty = new ArrayList<>();
 
-    private final FXMLLoader swapPokemonLoader;
-    private final Pane swapPokemonPane;
+    private final FXMLLoader swapPokemonLoader, bagLoader;
+    private final Pane swapPokemonPane, bagPane;
     private Pane teamBuilderPane;
 
     private boolean allyFaintedProcessed = false, enemyFaintedProcessed = false;
@@ -68,6 +67,13 @@ public class BattleLogic {
         swapPokemonLoader = new FXMLLoader(BattleApplication.class.getResource("swappokemon-view.fxml"));
         try {
             swapPokemonPane = swapPokemonLoader.load();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        bagLoader = new FXMLLoader(BattleApplication.class.getResource("bag-view.fxml"));
+        try {
+            bagPane = bagLoader.load();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -97,6 +103,8 @@ public class BattleLogic {
         enemyParty.addAll(this.enemy.getParty());
 
         this.teamBuilderPane = teamBuilderPane;
+
+        player.getItems().put(new Item("Potion", Enums.ItemType.HP_RESTORE, 20), 5);
 
         controller.startBattleThemePlayback();
         initBattleLoop();
@@ -504,11 +512,18 @@ public class BattleLogic {
         pokemonButton.setOnAction( e -> {
             Stage stage = (Stage) pokemonButton.getScene().getWindow();
             SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
-            swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(), this, controller, playerParty,
+            swapPokemonController.initVariablesSwitch((Pane) pokemonButton.getScene().getRoot(), this, controller, playerParty,
                     false, Enums.SwitchContext.SWITCH_FIRST, null, null);
             pokemonButton.getScene().setRoot(swapPokemonPane);
         });
 
+        bagButton.setOnAction( e -> {
+            BagController bagController = bagLoader.getController();
+            SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
+            bagController.initMenu(player, swapPokemonPane, swapPokemonController,
+                    (Pane) bagButton.getScene().getRoot(), this, controller, playerParty);
+            bagButton.getScene().setRoot(bagPane);
+        });
     }
 
     private void processBattlefieldConditionsTimer() {
@@ -705,7 +720,7 @@ public class BattleLogic {
                 List<Pokemon> turnPokemon = new ArrayList<>();
                 turnPokemon.add(firstPokemonFinal);
                 turnPokemon.add(secondPokemon);
-                swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(),
+                swapPokemonController.initVariablesSwitch((Pane) pokemonButton.getScene().getRoot(),
                         this, controller, playerParty, true, switchContext, turnPokemon, secondMove);
                 pokemonButton.getScene().setRoot(swapPokemonPane);
             });
@@ -749,7 +764,7 @@ public class BattleLogic {
             moveTimeLine.get(moveTimeLine.size() - 1).setOnFinished(e -> {
                 SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
                 Enums.SwitchContext switchContext = Enums.SwitchContext.SWITCH_SECOND_MOVE;
-                swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(),
+                swapPokemonController.initVariablesSwitch((Pane) pokemonButton.getScene().getRoot(),
                         this, controller, playerParty, true, switchContext, null, null);
                 pokemonButton.getScene().setRoot(swapPokemonPane);
             });
@@ -957,7 +972,7 @@ public class BattleLogic {
 
                 Stage stage = (Stage) pokemonButton.getScene().getWindow();
                 SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
-                swapPokemonController.initVariables((Pane) pokemonButton.getScene().getRoot(), this, controller, playerParty,
+                swapPokemonController.initVariablesSwitch((Pane) pokemonButton.getScene().getRoot(), this, controller, playerParty,
                         true, Enums.SwitchContext.SWITCH_FAINTED, null, null);
                 pokemonButton.getScene().setRoot(swapPokemonPane);
             });

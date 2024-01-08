@@ -2,8 +2,12 @@ package com.delgiudice.pokemonbattlefx.battle;
 
 import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
+import com.delgiudice.pokemonbattlefx.item.Item;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
+import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
+import com.delgiudice.pokemonbattlefx.trainer.Player;
+import com.sun.istack.internal.NotNull;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -15,9 +19,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
-import javafx.scene.transform.Scale;
 import javafx.util.Duration;
 import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 
@@ -46,7 +47,10 @@ public class SwapPokemonController {
     private final Pane summaryPane;
 
     private List<Pokemon> party;
+    private Player player;
 
+    private boolean useItem;
+    private Item item;
     private Enums.SwitchContext switchContext;
     private List<Pokemon> turnPokemon;
     private Move secondMove;
@@ -77,8 +81,29 @@ public class SwapPokemonController {
         initListeners();
     }
 
-    public void initVariables(Pane battlePane, BattleLogic logic, BattleController controller, List<Pokemon> party,
-                              boolean force, Enums.SwitchContext switchContext, List<Pokemon> turnPokemon, Move secondMove) {
+    public void initVariablesBag(Pane battlePane, Pane bagPane, BattleLogic logic, BattleController controller,
+                                 List<Pokemon> party, Player player, Item item) {
+        useItem = true;
+        this.item = item;
+        this.battlePane = battlePane;
+        battleLogic = logic;
+        battleController = controller;
+        this.party = party;
+        this.player = player;
+
+        infoLabel.setText("Choose a POKÉMON.");
+
+        cancelButton.setOnAction(e -> {
+            Scene scene = cancelButton.getScene();
+            scene.setRoot(bagPane);
+        });
+        initPokemonInfo(false);
+    }
+
+    public void initVariablesSwitch(Pane battlePane, BattleLogic logic, BattleController controller, List<Pokemon> party,
+                                    boolean force, Enums.SwitchContext switchContext, List<Pokemon> turnPokemon, Move secondMove) {
+        useItem = false;
+        item = null;
         this.battlePane = battlePane;
         battleLogic = logic;
         this.party = party;
@@ -87,6 +112,8 @@ public class SwapPokemonController {
         this.switchContext = switchContext;
         this.turnPokemon = turnPokemon;
         this.secondMove = secondMove;
+
+        infoLabel.setText("Choose a POKÉMON.");
 
         cancelButton.setOnAction(e -> {
             Scene scene = cancelButton.getScene();
@@ -159,6 +186,36 @@ public class SwapPokemonController {
         else
             hpBar.setStyle("-fx-accent: red");
     }
+    @NotNull
+    private Timeline getHpAnimation(int from, int to, int max, ProgressBar hpBar, Label hpLabel) {
+        final List<KeyFrame> keyFrameList = new ArrayList<>();
+
+        if (from == to || max < to || max < from)
+            return null;
+
+        boolean descending = from > to;
+
+        double frameTime = 1000.0 / max;
+        int frameCount = Math.abs(from - to);
+
+        for (int i = 1; i <= frameCount; i++) {
+            final KeyFrame kf;
+            final int finalI = i;
+
+            if (descending)
+                kf = new KeyFrame(Duration.millis(frameTime * i), e ->
+                        setHpBar(from - finalI, max, hpBar, hpLabel));
+            else
+                kf = new KeyFrame(Duration.millis(frameTime * i), e ->
+                        setHpBar(from + finalI, max, hpBar, hpLabel));
+            keyFrameList.add(kf);
+        }
+
+        Timeline timeline = new Timeline();
+
+        timeline.getKeyFrames().addAll(keyFrameList);
+        return timeline;
+    }
 
     private void setPokemonInfo(HBox pokemonBox, int index, boolean current) {
 
@@ -196,7 +253,7 @@ public class SwapPokemonController {
         else
             pokemonBox.setStyle(regularStyle);
 
-        initBoxElementListener(pokemonBox, pokemon, index);
+        initBoxElementListener(pokemonBox, pokemon, index, hpBar, hpLabel);
         icon.setVisible(true);
         infoBox.setVisible(true);
         hpBox.setVisible(true);
@@ -256,32 +313,52 @@ public class SwapPokemonController {
         });
     }
 
-    private void initBoxElementListener(HBox pokemonBox, Pokemon pokemon, int index) {
-        pokemonBox.setOnMouseClicked(e -> {
+    private void initBoxElementListener(HBox pokemonBox, Pokemon pokemon, int index, ProgressBar hpBar, Label hpLabel) {
+        if (!useItem) {
+            pokemonBox.setOnMouseClicked(e -> {
 
-            // Adding parent layout location applies a correction for the elements in a VBox, since without correction
-            // it doesn't account for the offset of it
-            double correctionX = pokemonBox.getParent().getClass() == VBox.class ? pokemonBox.getParent().getLayoutX() : 0;
-            double correctionY = pokemonBox.getParent().getClass() == VBox.class ? pokemonBox.getParent().getLayoutY() : 0;
+                // Adding parent layout location applies a correction for the elements in a VBox, since without correction
+                // it doesn't account for the offset of it
+                double correctionX = pokemonBox.getParent().getClass() == VBox.class ? pokemonBox.getParent().getLayoutX() : 0;
+                double correctionY = pokemonBox.getParent().getClass() == VBox.class ? pokemonBox.getParent().getLayoutY() : 0;
 
-            double mouseLayoutX = e.getX() + pokemonBox.getLayoutX() + correctionX;
-            double mouseLayoutY = e.getY() + pokemonBox.getLayoutY() + correctionY;
+                double mouseLayoutX = e.getX() + pokemonBox.getLayoutX() + correctionX;
+                double mouseLayoutY = e.getY() + pokemonBox.getLayoutY() + correctionY;
 
-            double boxWidth = switchOptionsBox.getWidth();
-            double boxHeight = switchOptionsBox.getHeight();
+                double boxWidth = switchOptionsBox.getWidth();
+                double boxHeight = switchOptionsBox.getHeight();
 
-            if (mouseLayoutX + boxWidth > mainPane.getWidth())
-                switchOptionsBox.setLayoutX(mouseLayoutX - boxWidth);
-            else
-                switchOptionsBox.setLayoutX(mouseLayoutX);
+                if (mouseLayoutX + boxWidth > mainPane.getWidth())
+                    switchOptionsBox.setLayoutX(mouseLayoutX - boxWidth);
+                else
+                    switchOptionsBox.setLayoutX(mouseLayoutX);
 
-            if (mouseLayoutY + boxHeight > mainPane.getHeight())
-                switchOptionsBox.setLayoutY(mouseLayoutY - boxHeight);
-            else
-                switchOptionsBox.setLayoutY(mouseLayoutY);
+                if (mouseLayoutY + boxHeight > mainPane.getHeight())
+                    switchOptionsBox.setLayoutY(mouseLayoutY - boxHeight);
+                else
+                    switchOptionsBox.setLayoutY(mouseLayoutY);
 
-            initSwapMenuListener(pokemonBox ,pokemon, index);
-        });
+                initSwapMenuListener(pokemonBox, pokemon, index);
+            });
+        }
+        else {
+            pokemonBox.setOnMouseClicked(e -> {
+                switch (item.getType()) {
+                    case HP_RESTORE:
+                        currentPokemonBox.setDisable(true);
+                        this.pokemonBox.setDisable(true);
+                        cancelButton.setDisable(true);
+                        useHealingItem(pokemon, index, hpBar, hpLabel);
+                        break;
+                    case PP_RESTORE:
+                        break;
+                    case STATUS_HEALING:
+                        break;
+                    case X_ITEMS:
+                        break;
+                }
+            });
+        }
 
         pokemonBox.setOnMouseEntered(e -> pokemonBox.setStyle(hoverStyle));
         pokemonBox.setOnMouseExited(e -> {
@@ -290,6 +367,58 @@ public class SwapPokemonController {
             else
                 pokemonBox.setStyle(regularStyle);
         });
+    }
+
+    private void useHealingItem(Pokemon target, int index, ProgressBar hpBar, Label hpLabel) {
+        if (target.getHp() == target.getMaxHP()) {
+            Timeline fullHpInfo = getInfoText(String.format(
+                    "%s is already healthy!", target.getBattleName()));
+            Timeline resetText = getInfoText("Choose a POKÉMON.");
+            resetText.setDelay(Duration.seconds(1));
+            fullHpInfo.setOnFinished(actionEvent -> {
+                resetText.play();
+            });
+            resetText.setOnFinished(e -> {
+                this.pokemonBox.setDisable(false);
+                currentPokemonBox.setDisable(false);
+                cancelButton.setDisable(false);
+            });
+            fullHpInfo.play();
+            return;
+        }
+        int healValue;
+        int hpToMax = target.getMaxHP() - target.getHp();
+        healValue = Math.min(hpToMax, item.getValue());
+
+        Timeline healAnimation = getHpAnimation(target.getHp(), target.getHp() + healValue, target.getMaxHP(),
+                hpBar, hpLabel);
+        Timeline healInfo = getInfoText(String.format(
+                "%s restored %d HP.", target.getBattleName(), healValue));
+        Timeline pause = battleController.generatePause(1000);
+
+        healAnimation.setOnFinished(e -> healInfo.play());
+        healInfo.setOnFinished(e -> pause.play());
+
+        pause.setOnFinished(e -> {
+            target.setHp(target.getHp() + healValue);
+            if (index == 0)
+                battleController.setAllyHpBar(target.getHp(), target.getMaxHP(), false);
+            int itemRemaining = player.getItems().get(item);
+            if (itemRemaining == 1)
+                player.getItems().remove(item);
+            else {
+                itemRemaining--;
+                player.getItems().put(item, itemRemaining);
+            }
+            Scene scene = cancelButton.getScene();
+            scene.setRoot(battlePane);
+            this.pokemonBox.setDisable(false);
+            currentPokemonBox.setDisable(false);
+            cancelButton.setDisable(false);
+            battleLogic.battleTurn(null);
+        });
+
+        healAnimation.play();
     }
 
     private void initSwapMenuListener(HBox pokemonBox, Pokemon pokemon, int index) {

@@ -4,12 +4,14 @@ import com.delgiudice.pokemonbattlefx.item.Item;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public abstract class Trainer {
     private String name;
     private List<Pokemon> party = new ArrayList<>();
-    private List<Item> items = new ArrayList<>();
+    private HashMap<Item, Integer> items = new LinkedHashMap<>();
     protected boolean player = false;
 
     public String getName() {
@@ -24,7 +26,7 @@ public abstract class Trainer {
         return party.get(i);
     }
 
-    public List<Item> getItems() {
+    public HashMap<Item, Integer> getItems() {
         return items;
     }
 

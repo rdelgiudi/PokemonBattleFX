@@ -301,7 +301,9 @@ public class Enums {
         }
     }
     public enum ItemType{
-        HEALING,
-        PP_RESTORE;
+        HP_RESTORE,
+        PP_RESTORE,
+        STATUS_HEALING,
+        X_ITEMS;
     }
 }
