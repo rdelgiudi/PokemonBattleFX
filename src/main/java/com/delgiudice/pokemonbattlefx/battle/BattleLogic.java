@@ -104,7 +104,8 @@ public class BattleLogic {
 
         this.teamBuilderPane = teamBuilderPane;
 
-        player.getItems().put(Item.getItemMap().get("Potion"), 5);
+        for (Item item : Item.getItemMap().values())
+            player.getItems().put(item, 5);
 
         controller.startBattleThemePlayback();
         initBattleLoop();
@@ -440,7 +441,6 @@ public class BattleLogic {
 
         deleteEndedConditions(moveStartTimeLine);
         applySentOutEffects(moveStartTimeLine);
-
 
         if (!moveStartTimeLine.isEmpty()) {
             initAnimationQueue(moveStartTimeLine);
@@ -1188,7 +1188,10 @@ public class BattleLogic {
     }
 
     private Timeline setFaintedStatus(Pokemon pokemon) {
-        KeyFrame kf = new KeyFrame(Duration.millis(1), e -> pokemon.setStatus(Enums.Status.FAINTED));
+        KeyFrame kf = new KeyFrame(Duration.millis(1), e -> {
+            pokemon.setStatus(Enums.Status.FAINTED);
+            controller.updatePokemonStatusBox(player.getParty(), enemy.getParty());
+        });
         return new Timeline(kf);
     }
 

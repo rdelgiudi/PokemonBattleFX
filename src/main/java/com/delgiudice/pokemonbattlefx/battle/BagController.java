@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class BagController {
 
-    private static final int FONT_SIZE = 15, ITEM_BUTTON_WIDTH = 125, ITEM_BUTTON_HEIGHT = 100;
+    private static final int FONT_SIZE = 15, ITEM_BUTTON_WIDTH = 145, ITEM_BUTTON_HEIGHT = 120;
 
     private static final String CATEGORY_BUTTON_STYLE_RELEASED = "-fx-background-color: linear-gradient(to top right, #C5283D, #2E2C2A)";
     private static final String CATEGORY_BUTTON_STYLE_PRESSED = "-fx-background-color: linear-gradient(to top right, #991f2f, #2E2C2A)";
@@ -137,12 +137,6 @@ public class BagController {
                     itemButton.setStyle("-fx-background-color: #2d388a");
                 });
 
-                i++;
-                if (i > 8) {
-                    i = 0;
-                    j++;
-                }
-
                 itemButton.setOnAction(e -> {
                     swapPokemonController.initVariablesBag(battlePane, (Pane) itemButton.getScene().getRoot(), battleLogic,
                             battleController, playerParty, player, item.getKey());
@@ -151,6 +145,12 @@ public class BagController {
                 });
 
                 itemGrid.add(itemButton, i, j);
+
+                i++;
+                if (i > 7) {
+                    i = 0;
+                    j++;
+                }
             }
         }
     }

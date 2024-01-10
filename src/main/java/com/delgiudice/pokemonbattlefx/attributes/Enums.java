@@ -103,7 +103,8 @@ public class Enums {
         SLEEPING("asleep"),
         BURNED("burned"),
         FROZEN("frozen"),
-        FAINTED("fainted");
+        FAINTED("fainted"),
+        ANY("any");
 
         final private String statusString;
 

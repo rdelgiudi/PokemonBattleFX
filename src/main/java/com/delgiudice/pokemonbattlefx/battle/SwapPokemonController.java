@@ -134,7 +134,7 @@ public class SwapPokemonController {
         cancelButton.setDisable(party.get(currentAllyPokemon).getHp() == 0 || force);
         switchOptionsBox.setVisible(false);
 
-        setPokemonInfo(currentPokemonBox, currentAllyPokemon, true);
+        setPokemonInfo(currentPokemonBox, currentAllyPokemon);
 
         int partySize = party.size();
 
@@ -147,7 +147,7 @@ public class SwapPokemonController {
                 continue;
             }
 
-            setPokemonInfo(box, i, false);
+            setPokemonInfo(box, i);
         }
     }
 
@@ -191,7 +191,7 @@ public class SwapPokemonController {
         final List<KeyFrame> keyFrameList = new ArrayList<>();
 
         if (from == to || max < to || max < from)
-            return null;
+            throw new ValueException("The values of from and to can't be equal!");
 
         boolean descending = from > to;
 
@@ -212,12 +212,11 @@ public class SwapPokemonController {
         }
 
         Timeline timeline = new Timeline();
-
         timeline.getKeyFrames().addAll(keyFrameList);
         return timeline;
     }
 
-    private void setPokemonInfo(HBox pokemonBox, int index, boolean current) {
+    private void setPokemonInfo(HBox pokemonBox, int index) {
 
         Pokemon pokemon = party.get(index);
 
@@ -234,7 +233,7 @@ public class SwapPokemonController {
 
         VBox hpBox;
 
-        if (current)
+        if (index == 0)
             hpBox = (VBox) infoBox.getChildren().get(2);
         else
             hpBox = (VBox) pokemonBox.getChildren().get(2);
@@ -343,16 +342,17 @@ public class SwapPokemonController {
         }
         else {
             pokemonBox.setOnMouseClicked(e -> {
+                currentPokemonBox.setDisable(true);
+                this.pokemonBox.setDisable(true);
+                cancelButton.setDisable(true);
                 switch (item.getType()) {
                     case HP_RESTORE:
-                        currentPokemonBox.setDisable(true);
-                        this.pokemonBox.setDisable(true);
-                        cancelButton.setDisable(true);
                         useHealingItem(pokemon, index, hpBar, hpLabel);
                         break;
                     case PP_RESTORE:
                         break;
                     case STATUS_HEALING:
+                        useStatusHealingItem(pokemon, pokemonBox, index, hpBar, hpLabel);
                         break;
                     case X_ITEMS:
                         break;
@@ -370,25 +370,14 @@ public class SwapPokemonController {
     }
 
     private void useHealingItem(Pokemon target, int index, ProgressBar hpBar, Label hpLabel) {
-        if (target.getHp() == target.getMaxHP()) {
-            Timeline fullHpInfo = getInfoText(String.format(
-                    "%s is already healthy!", target.getBattleName()));
-            Timeline resetText = getInfoText("Choose a POKÉMON.");
-            resetText.setDelay(Duration.seconds(1));
-            fullHpInfo.setOnFinished(actionEvent -> {
-                resetText.play();
-            });
-            resetText.setOnFinished(e -> {
-                this.pokemonBox.setDisable(false);
-                currentPokemonBox.setDisable(false);
-                cancelButton.setDisable(false);
-            });
-            fullHpInfo.play();
+        if (target.getHp() == target.getMaxHP() || target.getStatus() == Enums.Status.FAINTED) {
+            playIncompatibleItemMessage(target);
             return;
         }
         int healValue;
         int hpToMax = target.getMaxHP() - target.getHp();
-        healValue = Math.min(hpToMax, item.getValue());
+        int itemValue = item.getValue() == -1 ? hpToMax : item.getValue();
+        healValue = Math.min(hpToMax, itemValue);
 
         Timeline healAnimation = getHpAnimation(target.getHp(), target.getHp() + healValue, target.getMaxHP(),
                 hpBar, hpLabel);
@@ -400,25 +389,90 @@ public class SwapPokemonController {
         healInfo.setOnFinished(e -> pause.play());
 
         pause.setOnFinished(e -> {
-            target.setHp(target.getHp() + healValue);
-            if (index == 0)
-                battleController.setAllyHpBar(target.getHp(), target.getMaxHP(), false);
-            int itemRemaining = player.getItems().get(item);
-            if (itemRemaining == 1)
-                player.getItems().remove(item);
-            else {
-                itemRemaining--;
-                player.getItems().put(item, itemRemaining);
-            }
-            Scene scene = cancelButton.getScene();
-            scene.setRoot(battlePane);
+            returnToBattle();
+        });
+
+        target.setHp(target.getHp() + healValue);
+        if (index == 0)
+            battleController.setAllyHpBar(target.getHp(), target.getMaxHP(), false);
+        reduceItemAmount();
+
+        healAnimation.play();
+    }
+
+    private void useStatusHealingItem(Pokemon target, HBox pokemonBox, int index, ProgressBar hpBar, Label hpLabel) {
+
+        boolean fullHealPokemonAbnormalNonFaintStatus = item.getStatusHeal().equals(Enums.Status.ANY) &&
+                (!target.getStatus().equals(Enums.Status.NONE) || target.getSubStatuses().contains(Enums.SubStatus.CONFUSED))
+                        && !target.getStatus().equals(Enums.Status.FAINTED);
+
+        if (!target.getStatus().equals(item.getStatusHeal()) && !fullHealPokemonAbnormalNonFaintStatus){
+            playIncompatibleItemMessage(target);
+            return;
+        }
+
+        target.setStatus(Enums.Status.NONE);
+        target.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
+        target.setConfusionTimer(0);
+        setPokemonInfo(pokemonBox, index);
+
+        Timeline healAnimation = battleController.generatePause(1);
+
+        if (item.getStatusHeal().equals(Enums.Status.FAINTED) && target.getHp() == 0) {
+            int healValue = item.getValue() == Item.MAX_HP ? target.getMaxHP() : (int) Math.floor(target.getMaxHP() / 2.0);
+            healAnimation = getHpAnimation(0, healValue, target.getMaxHP(), hpBar, hpLabel);
+            target.setHp(healValue);
+        }
+
+        if (index == 0)
+            battleController.updateStatus(target, true).play();
+
+        reduceItemAmount();
+
+        Timeline healInfo = getInfoText(String.format(
+                "%s's status was cleared.", target.getBattleName()));
+        Timeline pause = battleController.generatePause(1000);
+
+        healAnimation.setOnFinished(e -> healInfo.play());
+        healInfo.setOnFinished(e -> pause.play());
+        pause.setOnFinished(e -> returnToBattle());
+
+        healAnimation.play();
+    }
+
+    private void playIncompatibleItemMessage(Pokemon target) {
+        Timeline noUseItemMessage = getInfoText(String.format(
+                "%s can't use this item!", target.getBattleName()));
+        Timeline resetText = getInfoText("Choose a POKÉMON.");
+        resetText.setDelay(Duration.seconds(1));
+        noUseItemMessage.setOnFinished(actionEvent -> {
+            resetText.play();
+        });
+        resetText.setOnFinished(e -> {
             this.pokemonBox.setDisable(false);
             currentPokemonBox.setDisable(false);
             cancelButton.setDisable(false);
-            battleLogic.battleTurn(null);
         });
+        noUseItemMessage.play();
+    }
 
-        healAnimation.play();
+    private void reduceItemAmount() {
+        int itemRemaining = player.getItems().get(item);
+        if (itemRemaining == 1)
+            player.getItems().remove(item);
+        else {
+            itemRemaining--;
+            player.getItems().put(item, itemRemaining);
+        }
+    }
+
+    private void returnToBattle() {
+        Scene scene = cancelButton.getScene();
+        scene.setRoot(battlePane);
+        this.pokemonBox.setDisable(false);
+        currentPokemonBox.setDisable(false);
+        cancelButton.setDisable(false);
+        battleLogic.battleTurn(null);
     }
 
     private void initSwapMenuListener(HBox pokemonBox, Pokemon pokemon, int index) {
