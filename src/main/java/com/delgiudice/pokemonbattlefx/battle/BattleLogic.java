@@ -703,7 +703,8 @@ public class BattleLogic {
 
         // If in battle Pokemon faints, forfeit next move
         if ((secondPokemon.getHp() == 0 && !playerSwitchOutEligible) || firstPokemon.getHp() == 0) {
-            battleTurnEnd(moveTimeLine);
+            processFainted(moveTimeLine);
+            finalChecks(moveTimeLine);
             return;
         }
 
@@ -998,6 +999,8 @@ public class BattleLogic {
             Timeline pokemonIntroAnimation = controller.getIntroAnimation(enemyParty.get(0),
                     enemyParty.get(0).getHp());
             battleTimeLine.add(pokemonIntroAnimation);
+            battleTurnEnd(battleTimeLine);
+            return;
         }
 
         initAnimationQueue(battleTimeLine);
