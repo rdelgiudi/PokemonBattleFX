@@ -294,16 +294,6 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </padding>
             </GridPane>
-            <Label fx:id="allyAbilityInfo" alignment="CENTER" layoutY="235.0" prefHeight="118.0" prefWidth="241.0" style="-fx-background-color: lightgray;" text="Ability Info" visible="false">
-               <font>
-                  <Font name="Monospaced Regular" size="26.0" />
-               </font>
-            </Label>
-            <Label fx:id="enemyAbilityInfo" alignment="CENTER" layoutX="1039.0" layoutY="120.0" prefHeight="118.0" prefWidth="241.0" style="-fx-background-color: lightgray;" text="Ability Info" visible="false">
-               <font>
-                  <Font name="Monospaced Regular" size="26.0" />
-               </font>
-            </Label>
             <HBox fx:id="allyPokemonStatusBox" alignment="CENTER_RIGHT" layoutX="862.0" layoutY="485.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="60.0" prefWidth="60.0" spacing="5.0">
                <children>
                   <StackPane maxHeight="40.0" maxWidth="40.0" prefHeight="7.0" prefWidth="0.0">
@@ -384,6 +374,16 @@
                   </StackPane>
                </children>
             </HBox>
+            <Label fx:id="allyAbilityInfo" alignment="CENTER" layoutY="235.0" prefHeight="118.0" prefWidth="241.0" style="-fx-background-color: lightgray;" text="Ability Info" visible="false">
+               <font>
+                  <Font name="Monospaced Regular" size="26.0" />
+               </font>
+            </Label>
+            <Label fx:id="enemyAbilityInfo" alignment="CENTER" layoutX="1039.0" layoutY="120.0" prefHeight="118.0" prefWidth="241.0" style="-fx-background-color: lightgray;" text="Ability Info" visible="false">
+               <font>
+                  <Font name="Monospaced Regular" size="26.0" />
+               </font>
+            </Label>
          </children>
       </Pane>
    </children>
