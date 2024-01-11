@@ -20,7 +20,7 @@ import java.util.Objects;
 
 public class AddPokemonController {
     @FXML
-    private Label pokemonNameLabel, itemLabel, abilityLabel, abilityDescriptionLabel;
+    private Label pokemonNameLabel, itemLabel, abilityLabel, abilityDescriptionLabel, firstTypeLabel, secondTypeLabel;
     @FXML
     private Button backButton, addPlayerButton, addEnemyButton, closeMoveInfoButton;
     @FXML
@@ -146,21 +146,22 @@ public class AddPokemonController {
 
     private void setPokemonTypes() {
         String styleString = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: ";
-        Label firstType = (Label) typeBox.getChildren().get(0);
-        firstType.setText(currentPokemon.getType()[0].getTypeEnum().toString());
+        firstTypeLabel.setText(currentPokemon.getType()[0].getTypeEnum().toString());
         Color firstTypeColor = currentPokemon.getType()[0].getTypeEnum().getTypeColor();
         String colorHex = toHexString(firstTypeColor);
-        firstType.setStyle(styleString + colorHex);
-        Label secondType = (Label) typeBox.getChildren().get(1);
+        firstTypeLabel.setStyle(styleString + colorHex);
         if (currentPokemon.getType()[1].getTypeEnum() != Enums.Types.NO_TYPE) {
-            secondType.setText(currentPokemon.getType()[1].getTypeEnum().toString());
+            if (!typeBox.getChildren().contains(secondTypeLabel))
+                typeBox.getChildren().add(secondTypeLabel);
+            secondTypeLabel.setText(currentPokemon.getType()[1].getTypeEnum().toString());
             Color secondTypeColor = currentPokemon.getType()[1].getTypeEnum().getTypeColor();
             String secondColorHex = toHexString(secondTypeColor);
-            secondType.setStyle(styleString + secondColorHex);
-            secondType.setVisible(true);
+            secondTypeLabel.setStyle(styleString + secondColorHex);
+            secondTypeLabel.setVisible(true);
         }
         else {
-            secondType.setVisible(false);
+            secondTypeLabel.setVisible(false);
+            typeBox.getChildren().remove(secondTypeLabel);
         }
     }
 
