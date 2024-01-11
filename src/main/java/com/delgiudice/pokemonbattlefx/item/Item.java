@@ -13,7 +13,7 @@ public class Item {
     private static final HashMap<String, Item> itemMap = new HashMap<>();
     private String name;
     Enums.ItemType type;
-    Enums.Status statusHeal;
+    Enums.Status statusHeal = Enums.Status.NONE;
     int value;
     String description = "No description";
     String sprite = "sprites/default.png";
@@ -118,6 +118,27 @@ public class Item {
         newItem = new Item("Full Heal", Enums.Status.ANY, 0, "/sprites/full_heal.png");
         newItem.description = "A spray-type medicine that is broadly effective." +
                 "It can be used to cure any status condition a Pokémon may have.";
+        itemMap.put(newItem.name, newItem);
+
+        newItem = new Item("Full Restore", Enums.ItemType.HP_RESTORE, MAX_HP, "/sprites/full_restore.png");
+        newItem.statusHeal = Enums.Status.ANY;
+        newItem.description = " A medicine that can be used to fully restore the max HP of a Pokémon " +
+                "and cure any status conditions it may have.";
+        itemMap.put(newItem.name, newItem);
+
+        newItem = new Item("Ice Heal", Enums.Status.FROZEN, 0, "/sprites/ice_heal.png");
+        newItem.description = "A spray-type medicine for treating freezing. " +
+                "It can be used to thaw out a Pokémon that has been frozen solid.";
+        itemMap.put(newItem.name, newItem);
+
+        newItem = new Item("Max Revive", Enums.Status.FAINTED, MAX_HP, "/sprites/max_revive.png");
+        newItem.description = "A medicine that can be used to revive a Pokémon that has fainted. " +
+                "It also fully restores the Pokémon’s max HP.";
+        itemMap.put(newItem.name, newItem);
+
+        newItem = new Item("Paralyze Heal", Enums.Status.PARALYZED, 0, "/sprites/paralyze_heal.png");
+        newItem.description = "A spray-type medicine for treating paralysis. " +
+                "It can be used to free a Pokémon that has been paralyzed.";
         itemMap.put(newItem.name, newItem);
     }
 }

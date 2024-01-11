@@ -6,7 +6,10 @@ import com.delgiudice.pokemonbattlefx.attributes.Type;
 import javafx.scene.image.*;
 import javafx.scene.paint.Color;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -47,12 +50,23 @@ public class PokemonSpecie{
         URL frontSpriteUrl = getClass().getResource(frontSprite);
 
         if (frontSpriteUrl != null)
+            //image = new Image(frontSprite, 200, 200, true, false);
             image = new Image(frontSprite);
         else
             image = new Image("sprites/default.png");
 
         image = resample(image, 5);
         return image;
+    }
+
+    // Loading images from the Web: https://itecnote.com/tecnote/javafx-play-gif-image-in-imageview/
+    private Image createImage(String url) throws IOException {
+        URLConnection conn = new URL(url).openConnection();
+        conn.setRequestProperty("User-Agent", "Wget/1.13.4 (linux-gnu)");
+
+        try (InputStream stream = conn.getInputStream()) {
+            return new Image(stream, 400, 400, false, false);
+        }
     }
 
     public Image getFrontSpriteBattle() {
@@ -123,10 +137,6 @@ public class PokemonSpecie{
         baseStats.put(Enums.StatType.SPEED, speed);
         frontSprite = "sprites/default.png";
         backSprite = "sprites/default.png";
-        //this.frontSprite = resample(this.frontSprite, 10);
-        //this.backSprite = resample(this.backSprite, 10);
-        //this.frontSpriteAnim = null;
-        //this.backSpriteAnim = null;
         this.pokedexNumber = pokedexNumber;
     }
 
@@ -141,22 +151,6 @@ public class PokemonSpecie{
         baseStats.put(Enums.StatType.SPECIAL_ATTACK, spAttack);
         baseStats.put(Enums.StatType.SPECIAL_DEFENSE, spDefense);
         baseStats.put(Enums.StatType.SPEED, speed);
-        /*URL frontSpriteUrl = getClass().getResource(frontSprite);
-        URL backSrpiteUrl = getClass().getResource(backSprite);
-        if (frontSpriteUrl != null)
-            this.frontSprite = new Image(frontSprite);
-        else
-            this.frontSprite = new Image("sprites/default.png");
-
-        if (backSrpiteUrl != null)
-            this.backSprite = new Image(backSprite);
-        else
-            this.backSprite = new Image("sprites/default.png");
-
-
-        this.frontSprite = resample(this.frontSprite, 10);
-        this.backSprite = resample(this.backSprite, 10);*/
-
         this.frontSprite = frontSprite;
         this.backSprite = backSprite;
         this.pokedexNumber = pokedexNumber;
@@ -173,10 +167,6 @@ public class PokemonSpecie{
         baseStats.put(Enums.StatType.SPEED, speed);
         frontSprite = "sprites/default.png";
         backSprite = "sprites/default.png";
-
-        //this.frontSprite = resample(this.frontSprite, 10);
-        //this.backSprite = resample(this.backSprite, 10);
-
         this.pokedexNumber = pokedexNumber;
     }
 
@@ -190,25 +180,8 @@ public class PokemonSpecie{
         baseStats.put(Enums.StatType.SPECIAL_ATTACK, spAttack);
         baseStats.put(Enums.StatType.SPECIAL_DEFENSE, spDefense);
         baseStats.put(Enums.StatType.SPEED, speed);
-        /*URL frontSpriteUrl = getClass().getResource(frontSprite);
-        URL backSrpiteUrl = getClass().getResource(backSprite);
-        if (frontSpriteUrl != null)
-            this.frontSprite = new Image(frontSprite);
-        else
-            this.frontSprite = new Image("sprites/default.png");
-
-        if (backSrpiteUrl != null)
-            this.backSprite = new Image(backSprite);
-        else
-            this.backSprite = new Image("sprites/default.png");
-
-
-        this.frontSprite = resample(this.frontSprite, 10);
-        this.backSprite = resample(this.backSprite, 10);*/
-
         this.frontSprite = frontSprite;
         this.backSprite = backSprite;
-
         this.pokedexNumber = pokedexNumber;
     }
 

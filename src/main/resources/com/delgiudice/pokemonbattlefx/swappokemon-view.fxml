@@ -80,7 +80,7 @@
                   </VBox>
                </children>
             </HBox>
-            <VBox fx:id="pokemonBox" layoutX="501.0" layoutY="30.0" prefHeight="600.0" prefWidth="700.0" spacing="10.0">
+            <VBox fx:id="pokemonBox" layoutX="501.0" layoutY="30.0" prefHeight="600.0" prefWidth="700.0" spacing="10.0" style="-fx-opacity: 1;">
                <children>
                   <HBox alignment="CENTER" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                      <children>

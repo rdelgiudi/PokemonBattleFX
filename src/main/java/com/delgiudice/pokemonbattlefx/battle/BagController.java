@@ -18,6 +18,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
@@ -33,6 +34,8 @@ public class BagController {
     private static final String CATEGORY_BUTTON_STYLE_PRESSED = "-fx-background-color: linear-gradient(to top right, #991f2f, #2E2C2A)";
     private static final String CATEGORY_BUTTON_STYLE_HOVER = "-fx-background-color: linear-gradient(to top right, #e62e46, #2E2C2A)";
 
+    @FXML
+    private Pane mainPane;
     @FXML
     private GridPane itemGrid;
     @FXML
@@ -57,6 +60,9 @@ public class BagController {
 
     public void initialize() {
         initButtonListeners();
+
+        Rectangle rect = new Rectangle(BattleController.SCREEN_WIDTH, BattleController.SCREEN_HEIGHT);
+        mainPane.setClip(rect);
     }
 
     public void initMenu(Player player, Pane swapPokemonPane, SwapPokemonController swapPokemonController,

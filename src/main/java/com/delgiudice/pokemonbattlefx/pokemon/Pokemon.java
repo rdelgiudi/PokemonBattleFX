@@ -87,6 +87,8 @@ public class Pokemon {
 
     public void setHp(int hp) {
         this.hp = hp;
+        if (this.hp <= 0)
+            status = Enums.Status.FAINTED;
     }
 
     public int getLevel() {

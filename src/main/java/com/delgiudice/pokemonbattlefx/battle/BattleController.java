@@ -94,7 +94,7 @@ public class BattleController {
     private final static String WEATHER_NONE = "-fx-background-color: linear-gradient(to bottom, lightskyblue, darkorange);";
     private final static String WEATHER_RAIN = "-fx-background-color: linear-gradient(to bottom, lightgray, darkblue);";
 
-    public final int SCREEN_WIDTH = 1280, SCREEN_HEIGHT = 720;
+    public final static int SCREEN_WIDTH = 1280, SCREEN_HEIGHT = 720;
     private double ALLY_INFO_DEFAULT_Y, ALLY_SPRITE_DEFAULT_Y;
 
     public ImageView getAllyPokemonSprite() {
@@ -698,7 +698,8 @@ public class BattleController {
     public Timeline getEnemyAbilityInfoAnimation(Pokemon pokemon) {
         final List<KeyFrame> keyFrameList = new ArrayList<>();
         double width = enemyAbilityInfo.getPrefWidth();
-        double screenWidth = enemyAbilityInfo.getScene().getWidth();
+        //double screenWidth = enemyAbilityInfo.getScene().getWidth();
+        double screenWidth = mainPane.getWidth();
 
         final KeyFrame configAbilityLabel = new KeyFrame(Duration.ZERO, e -> {
             enemyAbilityInfo.setVisible(false);

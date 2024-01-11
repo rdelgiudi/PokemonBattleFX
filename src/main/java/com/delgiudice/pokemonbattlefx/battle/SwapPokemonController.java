@@ -5,7 +5,6 @@ import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.item.Item;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
-import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
 import com.delgiudice.pokemonbattlefx.trainer.Player;
 import com.sun.istack.internal.NotNull;
 import javafx.animation.KeyFrame;
@@ -19,6 +18,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 
@@ -28,16 +28,16 @@ import java.util.List;
 
 public class SwapPokemonController {
 
-    private static final String faintedStyle = "-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15; " +
+    private static final String FAINTED_STYLE = "-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15; " +
             "-fx-background-color: linear-gradient(to left, lightcoral, azure)";
-    private static final String regularStyle = "-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15; " +
+    private static final String REGULAR_STYLE = "-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15; " +
             "-fx-background-color: linear-gradient(to left, lightskyblue, azure)";
-    private static final String hoverStyle = "-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15; " +
+    private static final String HOVER_STYLE = "-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15; " +
             "-fx-background-color: azure";
 
-    private static final String optionsRegularStyle = "-fx-background-color: skyblue; -fx-border-color: black; -fx-border-width: 5";
-    private static final String optionsHoverStyle = "-fx-background-color: lightblue; -fx-border-color: black; -fx-border-width: 5";
-    private static final String optionsPressedStyle = "-fx-background-color: lightskyblue; -fx-border-color: black; -fx-border-width: 5";
+    private static final String OPTIONS_REGULAR_STYLE = "-fx-background-color: skyblue; -fx-border-color: black; -fx-border-width: 5";
+    private static final String OPTIONS_HOVER_STYLE = "-fx-background-color: lightblue; -fx-border-color: black; -fx-border-width: 5";
+    private static final String OPTIONS_PRESSED_STYLE = "-fx-background-color: lightskyblue; -fx-border-color: black; -fx-border-width: 5";
 
     private Pane battlePane;
     private BattleLogic battleLogic;
@@ -79,6 +79,9 @@ public class SwapPokemonController {
 
     public void initialize() {
         initListeners();
+
+        Rectangle rect = new Rectangle(BattleController.SCREEN_WIDTH, BattleController.SCREEN_HEIGHT);
+        mainPane.setClip(rect);
     }
 
     public void initVariablesBag(Pane battlePane, Pane bagPane, BattleLogic logic, BattleController controller,
@@ -248,9 +251,9 @@ public class SwapPokemonController {
         BattleController.setStatusStyle(pokemon, statusLabel);
 
         if (pokemon.getHp() == 0)
-            pokemonBox.setStyle(faintedStyle);
+            pokemonBox.setStyle(FAINTED_STYLE);
         else
-            pokemonBox.setStyle(regularStyle);
+            pokemonBox.setStyle(REGULAR_STYLE);
 
         initBoxElementListener(pokemonBox, pokemon, index, hpBar, hpLabel);
         icon.setVisible(true);
@@ -260,55 +263,55 @@ public class SwapPokemonController {
 
     private void initListeners() {
         switchOutButton.setOnMouseEntered(e -> {
-            switchOutButton.setStyle(optionsHoverStyle);
+            switchOutButton.setStyle(OPTIONS_HOVER_STYLE);
         });
         switchOutButton.setOnMouseExited(e -> {
-            switchOutButton.setStyle(optionsRegularStyle);
+            switchOutButton.setStyle(OPTIONS_REGULAR_STYLE);
         });
         switchOutButton.setOnMousePressed(e -> {
-            switchOutButton.setStyle(optionsPressedStyle);
+            switchOutButton.setStyle(OPTIONS_PRESSED_STYLE);
         });
         switchOutButton.setOnMouseReleased(e -> {
-            switchOutButton.setStyle(optionsRegularStyle);
+            switchOutButton.setStyle(OPTIONS_REGULAR_STYLE);
         });
 
         summaryButton.setOnMouseEntered(e -> {
-            summaryButton.setStyle(optionsHoverStyle);
+            summaryButton.setStyle(OPTIONS_HOVER_STYLE);
         });
         summaryButton.setOnMouseExited(e -> {
-            summaryButton.setStyle(optionsRegularStyle);
+            summaryButton.setStyle(OPTIONS_REGULAR_STYLE);
         });
         summaryButton.setOnMousePressed(e -> {
-            summaryButton.setStyle(optionsPressedStyle);
+            summaryButton.setStyle(OPTIONS_PRESSED_STYLE);
         });
         summaryButton.setOnMouseReleased(e -> {
-            summaryButton.setStyle(optionsRegularStyle);
+            summaryButton.setStyle(OPTIONS_REGULAR_STYLE);
         });
 
         closeButton.setOnMouseEntered(e -> {
-            closeButton.setStyle(optionsHoverStyle);
+            closeButton.setStyle(OPTIONS_HOVER_STYLE);
         });
         closeButton.setOnMouseExited(e -> {
-            closeButton.setStyle(optionsRegularStyle);
+            closeButton.setStyle(OPTIONS_REGULAR_STYLE);
         });
         closeButton.setOnMousePressed(e -> {
-            closeButton.setStyle(optionsPressedStyle);
+            closeButton.setStyle(OPTIONS_PRESSED_STYLE);
         });
         closeButton.setOnMouseReleased(e -> {
-            closeButton.setStyle(optionsRegularStyle);
+            closeButton.setStyle(OPTIONS_REGULAR_STYLE);
         });
 
         cancelButton.setOnMouseEntered(e -> {
-            cancelButton.setStyle(optionsHoverStyle);
+            cancelButton.setStyle(OPTIONS_HOVER_STYLE);
         });
         cancelButton.setOnMouseExited(e -> {
-            cancelButton.setStyle(optionsRegularStyle);
+            cancelButton.setStyle(OPTIONS_REGULAR_STYLE);
         });
         cancelButton.setOnMousePressed(e -> {
-            cancelButton.setStyle(optionsPressedStyle);
+            cancelButton.setStyle(OPTIONS_PRESSED_STYLE);
         });
         cancelButton.setOnMouseReleased(e -> {
-            cancelButton.setStyle(optionsRegularStyle);
+            cancelButton.setStyle(OPTIONS_REGULAR_STYLE);
         });
     }
 
@@ -347,7 +350,7 @@ public class SwapPokemonController {
                 cancelButton.setDisable(true);
                 switch (item.getType()) {
                     case HP_RESTORE:
-                        useHealingItem(pokemon, index, hpBar, hpLabel);
+                        useHealingItem(pokemon, pokemonBox, index, hpBar, hpLabel);
                         break;
                     case PP_RESTORE:
                         break;
@@ -360,17 +363,23 @@ public class SwapPokemonController {
             });
         }
 
-        pokemonBox.setOnMouseEntered(e -> pokemonBox.setStyle(hoverStyle));
+        pokemonBox.setOnMouseEntered(e -> pokemonBox.setStyle(HOVER_STYLE));
         pokemonBox.setOnMouseExited(e -> {
             if (pokemon.getHp() == 0)
-                pokemonBox.setStyle(faintedStyle);
+                pokemonBox.setStyle(FAINTED_STYLE);
             else
-                pokemonBox.setStyle(regularStyle);
+                pokemonBox.setStyle(REGULAR_STYLE);
         });
     }
 
-    private void useHealingItem(Pokemon target, int index, ProgressBar hpBar, Label hpLabel) {
-        if (target.getHp() == target.getMaxHP() || target.getStatus() == Enums.Status.FAINTED) {
+    private void useHealingItem(Pokemon target, HBox pokemonBox, int index, ProgressBar hpBar, Label hpLabel) {
+
+        boolean fullHealPokemonAbnormalNonFaintStatus = item.getStatusHeal().equals(Enums.Status.ANY) &&
+                (!target.getStatus().equals(Enums.Status.NONE) || target.getSubStatuses().contains(Enums.SubStatus.CONFUSED))
+                && !target.getStatus().equals(Enums.Status.FAINTED);
+
+        if ((target.getHp() == target.getMaxHP() || target.getStatus() == Enums.Status.FAINTED) &&
+            !fullHealPokemonAbnormalNonFaintStatus) {
             playIncompatibleItemMessage(target);
             return;
         }
@@ -378,9 +387,12 @@ public class SwapPokemonController {
         int hpToMax = target.getMaxHP() - target.getHp();
         int itemValue = item.getValue() == -1 ? hpToMax : item.getValue();
         healValue = Math.min(hpToMax, itemValue);
-
-        Timeline healAnimation = getHpAnimation(target.getHp(), target.getHp() + healValue, target.getMaxHP(),
+        Timeline healAnimation;
+        if (healValue > 0)
+            healAnimation = getHpAnimation(target.getHp(), target.getHp() + healValue, target.getMaxHP(),
                 hpBar, hpLabel);
+        else
+            healAnimation = battleController.generatePause(1);
         Timeline healInfo = getInfoText(String.format(
                 "%s restored %d HP.", target.getBattleName(), healValue));
         Timeline pause = battleController.generatePause(1000);
@@ -393,8 +405,19 @@ public class SwapPokemonController {
         });
 
         target.setHp(target.getHp() + healValue);
-        if (index == 0)
-            battleController.setAllyHpBar(target.getHp(), target.getMaxHP(), false);
+
+        if (item.getStatusHeal().equals(Enums.Status.ANY)) {
+            target.setStatus(Enums.Status.NONE);
+            target.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
+            target.setConfusionTimer(0);
+            setPokemonInfo(pokemonBox, index);
+        }
+
+        if (index == 0) {
+            battleController.setAllyHpBar(target.getHp(), target.getMaxHP(), true);
+            battleController.updateStatus(target, true).play();
+        }
+
         reduceItemAmount();
 
         healAnimation.play();
