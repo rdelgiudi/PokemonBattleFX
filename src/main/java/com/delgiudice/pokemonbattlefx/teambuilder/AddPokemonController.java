@@ -1,5 +1,6 @@
 package com.delgiudice.pokemonbattlefx.teambuilder;
 
+import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.move.MoveEnum;
@@ -43,6 +44,15 @@ public class AddPokemonController {
 
     public void initialize() {
         setStatisticsListeners();
+
+        if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
+            double maxFitWidth = pokemonPortrait.getFitWidth();
+            double maxFitHeight = pokemonPortrait.getFitHeight();
+            pokemonPortrait.imageProperty().addListener(e -> {
+                pokemonPortrait.setFitWidth(pokemonPortrait.getImage().getWidth() / 4 / 110 * maxFitWidth);
+                pokemonPortrait.setFitHeight(pokemonPortrait.getImage().getWidth() / 4 / 110 * maxFitHeight);
+            });
+        }
     }
 
     public void setAddData(Pokemon pokemon, List<Pokemon> playerParty, List<Pokemon> enemyParty,

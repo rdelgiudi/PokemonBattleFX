@@ -199,7 +199,7 @@ public class BattleController {
 
         setupButtons();
 
-        if (BattleApplication.isUseInternetSprites()) {
+        if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
             final double middleXAlly = allyPokemonSprite.getLayoutX() + allyPokemonSprite.getFitWidth() / 2.0;
             final double middleYAlly = allyPokemonSprite.getLayoutY() + allyPokemonSprite.getFitHeight();
             final double middleXEnemy = enemyPokemonSprite.getLayoutX() + enemyPokemonSprite.getFitWidth() / 2.0;
@@ -492,12 +492,12 @@ public class BattleController {
         double spriteLayoutYMov = spriteLayoutYPos - 3;
 
         final KeyFrame kf1 = new KeyFrame(Duration.ZERO, e -> {
-            if (!BattleApplication.isUseInternetSprites())
+            if (!BattleApplication.isUseInternetSprites() && !BattleApplication.isUseLocalAnimSprites())
                 allyPokemonSprite.setLayoutY(spriteLayoutYPos);
             allyPokemonInfo.setLayoutY(infoLayoutYPos);
         });
         final KeyFrame kf2 = new KeyFrame(Duration.seconds(0.3), e -> {
-            if (!BattleApplication.isUseInternetSprites())
+            if (!BattleApplication.isUseInternetSprites() && !BattleApplication.isUseLocalAnimSprites())
                 allyPokemonSprite.setLayoutY(spriteLayoutYMov);
             allyPokemonInfo.setLayoutY(infoLayoutYMov);
         });
@@ -507,7 +507,7 @@ public class BattleController {
         timeline.setCycleCount(Animation.INDEFINITE);
 
         timeline.setOnFinished(e -> {
-            if (!BattleApplication.isUseInternetSprites())
+            if (!BattleApplication.isUseInternetSprites() && !BattleApplication.isUseLocalAnimSprites())
                 allyPokemonSprite.setLayoutY(spriteLayoutYPos);
             allyPokemonInfo.setLayoutY(infoLayoutYPos);
         });
@@ -553,7 +553,7 @@ public class BattleController {
         }
         else {
             idleAnimation.stop();
-            if (!BattleApplication.isUseInternetSprites())
+            if (!BattleApplication.isUseInternetSprites() && !BattleApplication.isUseLocalAnimSprites())
                 allyPokemonSprite.setLayoutY(ALLY_SPRITE_DEFAULT_Y);
             allyPokemonInfo.setLayoutY(ALLY_INFO_DEFAULT_Y);
             //AnchorPane.setBottomAnchor(allyPokemonSprite, 63.0);
@@ -817,7 +817,7 @@ public class BattleController {
             if (ally) setAllyInformation(pokemon, hp);
             else setEnemyInformation(pokemon, hp);
 
-            if (!BattleApplication.isUseInternetSprites()) {
+            if (!BattleApplication.isUseInternetSprites() && !BattleApplication.isUseLocalAnimSprites()) {
                 regularWidth[0] = sprite.getFitWidth();
                 regularHeight[0] = sprite.getFitHeight();
                 bottomY[0] = sprite.getLayoutY() + sprite.getFitHeight();
@@ -1225,7 +1225,7 @@ public class BattleController {
 
         int frameNumber = (int) Math.floor(height / 5);
         double scale;
-        if (!BattleApplication.isUseInternetSprites())
+        if (!BattleApplication.isUseInternetSprites() && !BattleApplication.isUseLocalAnimSprites())
             scale = sprite.getFitHeight() / height;
         else
             scale = sprite.getImage().getHeight() / height;
@@ -1453,7 +1453,7 @@ public class BattleController {
             ImageView allyPokemonStatusBackground = subList.get(0);
             ImageView allyPokemonStatusForeground = subList.get(1);
             if (allySize > i) {
-                allyPokemonStatusForeground.setImage(allyPokemon.get(i).getSpecie().getFrontSprite());
+                allyPokemonStatusForeground.setImage(allyPokemon.get(i).getSpecie().getFrontSpriteThumbnail());
                 allyPokemonStatusBackground.setImage(new Image("sprites/indicator_normal.png"));
                 if (allyPokemon.get(i).getStatus() == Enums.Status.FAINTED) {
                     setColorShiftEffect(allyPokemonStatusForeground, 1, Color.GRAY);
@@ -1483,7 +1483,7 @@ public class BattleController {
 
             if (enemySize > i) {
                 if (seenArray[i])
-                    enemyPokemonStatusForeground.setImage(enemyPokemon.get(i).getSpecie().getFrontSprite());
+                    enemyPokemonStatusForeground.setImage(enemyPokemon.get(i).getSpecie().getFrontSpriteThumbnail());
                 else
                     enemyPokemonStatusForeground.setImage(null);
 
@@ -1534,13 +1534,18 @@ public class BattleController {
             List<ImageView> enemyNodes = enemyStatusPanes.subList(2*(5-j), 2+2*(5-j));
 
             for (int i=1; i<=100; i++) {
-                final double newSize = 60 * i / 100.0;
-                final double newSizePokemon = 50 * i / 100.0;
-                final double newOpacity = i / 100.0;
                 final ImageView allyIconBackground = allyNodes.get(0);
                 final ImageView allyIconForeground = allyNodes.get(1);
                 final ImageView enemyIconBackground = enemyNodes.get(0);
                 final ImageView enemyIconForeground = enemyNodes.get(1);
+
+                double backgroundWidth = allyIconBackground.getFitWidth();
+                double pokemonWidth = allyIconForeground.getFitWidth();
+
+
+                final double newSize = backgroundWidth * i / 100.0;
+                final double newSizePokemon = pokemonWidth * i / 100.0;
+                final double newOpacity = i / 100.0;
 
                 final KeyFrame kf = new KeyFrame(Duration.millis(i * 3 + j * 300), e -> {
                     modifySizeAndOpacity(allyIconForeground, allyIconBackground, newSize, newSizePokemon, newOpacity);

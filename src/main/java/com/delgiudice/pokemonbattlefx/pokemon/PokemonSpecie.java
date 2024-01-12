@@ -56,11 +56,13 @@ public class PokemonSpecie{
     // Loading images from the Web: https://itecnote.com/tecnote/javafx-play-gif-image-in-imageview/
     // The image is loaded twice to first probe the width and height of the image
     // Resizing an animated image once loaded is not supported by the implemented methods
-    private Image createImageUrl(String url, boolean front) throws IOException {
+    private Image createImageUrl(String url, boolean front, boolean thumbnail) throws IOException {
         URLConnection conn = new URL(url).openConnection();
         conn.setRequestProperty("User-Agent", "Wget/1.13.4 (linux-gnu)");
         Image image;
         try (InputStream stream = conn.getInputStream()) {
+            if (thumbnail)
+                return new Image(stream, 50, 50, true, false);
             image = new Image(stream);
         }
         conn = new URL(url).openConnection();
@@ -70,7 +72,7 @@ public class PokemonSpecie{
         }
     }
 
-    private Image createImage(String sprite, boolean align) {
+    private Image createImage(String sprite, boolean align, int scaleFactor) {
         Image image;
         URL frontSpriteUrl = getClass().getResource(sprite);
 
@@ -82,45 +84,72 @@ public class PokemonSpecie{
 
         if (align)
             image = alignBottom(image);
-        image = resample(image, 5);
+        image = resample(image, scaleFactor);
 
         return image;
     }
 
-    private Image loadSpriteImage(boolean front, boolean align) {
+    private Image createAnimImage(String sprite, boolean front, boolean align, boolean thumbnail) {
+        Image image;
+        String spriteAnim = sprite.split("\\.")[0] + ".gif";
+        URL frontSpriteUrl = getClass().getResource(spriteAnim);
+
+        if (frontSpriteUrl != null) {
+            if (!thumbnail) {
+                image = new Image(spriteAnim);
+                image = new Image(spriteAnim, image.getWidth() * (front ? 4 : 6), image.getHeight() * (front ? 4 : 6), true, false);
+            }
+            else
+                image = new Image(spriteAnim, 50, 50, true, false);
+        }
+        else {
+            image = createImage(sprite, align, thumbnail ? 2 : 5);
+        }
+
+        return image;
+    }
+
+    private Image loadSpriteImage(boolean front, boolean align, boolean thumbnail) {
 
         Image image;
         String sprite = front ? frontSprite : backSprite;
         String spriteAnim = front ? frontSpriteAnim : backSpriteAnim;
 
-        if (BattleApplication.isUseInternetSprites()) {
+        if (BattleApplication.isUseLocalAnimSprites()) {
+            image = createAnimImage(sprite, front, align, thumbnail);
+        }
+        else if (BattleApplication.isUseInternetSprites()) {
             try {
-                image = createImageUrl(spriteAnim, front);
+                image = createImageUrl(spriteAnim, front, thumbnail);
             } catch (IOException e) {
-                image = createImage(sprite, align);
+                image = createImage(sprite, align, thumbnail ? 2 : 5);
             }
 
         }
         else {
-            image = createImage(sprite, align);
+            image = createImage(sprite, align, thumbnail ? 2 : 5);
         }
         return image;
     }
 
     public Image getFrontSprite() {
-        return loadSpriteImage(true, false);
+        return loadSpriteImage(true, false, false);
     }
 
     public Image getFrontSpriteBattle() {
-        return loadSpriteImage(true, true);
+        return loadSpriteImage(true, true, false);
+    }
+
+    public Image getFrontSpriteThumbnail() {
+        return loadSpriteImage(true, false, true);
     }
 
     public Image getBackSpriteBattle() {
-        return loadSpriteImage(false, true);
+        return loadSpriteImage(false, true, false);
     }
 
     public Image getBackSprite() {
-        return loadSpriteImage(false, false);
+        return loadSpriteImage(false, false, false);
     }
 
     public void setPokedexNumber(int pokedexNumber) {

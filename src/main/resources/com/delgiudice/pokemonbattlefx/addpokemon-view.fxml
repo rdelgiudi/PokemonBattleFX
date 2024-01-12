@@ -39,7 +39,11 @@
                         <Spinner fx:id="pokemonLevel" editable="true" prefHeight="34.0" prefWidth="200.0" />
                      </children>
                   </HBox>
-                  <ImageView fx:id="pokemonPortrait" fitHeight="250.0" fitWidth="250.0" pickOnBounds="true" preserveRatio="true" smooth="false" />
+                  <VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="250.0">
+                     <children>
+                        <ImageView fx:id="pokemonPortrait" fitHeight="250.0" fitWidth="250.0" pickOnBounds="true" preserveRatio="true" smooth="false" />
+                     </children>
+                  </VBox>
                   <Label prefHeight="36.0" prefWidth="250.0" style="-fx-border-color: black; -fx-background-color: linear-gradient(to left, darkmagenta, indigo);" text="Item" textFill="WHITE">
                      <opaqueInsets>
                         <Insets />

@@ -1,5 +1,6 @@
 package com.delgiudice.pokemonbattlefx.battle;
 
+import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
@@ -36,6 +37,15 @@ public class SummaryController {
 
     public void initialize() {
         setListeners();
+
+        if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
+            double maxFitWidth = pokemonPortrait.getFitWidth();
+            double maxFitHeight = pokemonPortrait.getFitHeight();
+            pokemonPortrait.imageProperty().addListener(e -> {
+                pokemonPortrait.setFitWidth(pokemonPortrait.getImage().getWidth() / 4 / 110 * maxFitWidth);
+                pokemonPortrait.setFitHeight(pokemonPortrait.getImage().getWidth() / 4 / 110 * maxFitHeight);
+            });
+        }
     }
 
     public void setParty(List<Pokemon> party) {
