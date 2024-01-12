@@ -1,11 +1,19 @@
 package com.delgiudice.pokemonbattlefx.pokemon;
 
+import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.attributes.Type;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.*;
 import javafx.scene.paint.Color;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
+import javax.swing.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -45,75 +53,74 @@ public class PokemonSpecie{
         return type;
     }
 
-    public Image getFrontSprite() {
-        Image image;
-        URL frontSpriteUrl = getClass().getResource(frontSprite);
-
-        if (frontSpriteUrl != null)
-            //image = new Image(frontSprite, 200, 200, true, false);
-            image = new Image(frontSprite);
-        else
-            image = new Image("sprites/default.png");
-
-        image = resample(image, 5);
-        return image;
-    }
-
     // Loading images from the Web: https://itecnote.com/tecnote/javafx-play-gif-image-in-imageview/
-    private Image createImage(String url) throws IOException {
+    // The image is loaded twice to first probe the width and height of the image
+    // Resizing an animated image once loaded is not supported by the implemented methods
+    private Image createImageUrl(String url, boolean front) throws IOException {
         URLConnection conn = new URL(url).openConnection();
         conn.setRequestProperty("User-Agent", "Wget/1.13.4 (linux-gnu)");
-
+        Image image;
         try (InputStream stream = conn.getInputStream()) {
-            return new Image(stream, 400, 400, false, false);
+            image = new Image(stream);
+        }
+        conn = new URL(url).openConnection();
+        conn.setRequestProperty("User-Agent", "Wget/1.13.4 (linux-gnu)");
+        try (InputStream stream = conn.getInputStream()) {
+            return new Image(stream, image.getWidth() * (front ? 4 : 6), image.getHeight() * (front ? 4 : 6), true, false);
         }
     }
 
-    public Image getFrontSpriteBattle() {
+    private Image createImage(String sprite, boolean align) {
         Image image;
-        URL frontSpriteUrl = getClass().getResource(frontSprite);
+        URL frontSpriteUrl = getClass().getResource(sprite);
 
         if (frontSpriteUrl != null)
-            image = new Image(frontSprite);
+            //image = new Image(frontSprite, 200, 200, true, false);
+            image = new Image(sprite);
         else
             image = new Image("sprites/default.png");
 
-        image = alignBottom(image);
+        if (align)
+            image = alignBottom(image);
         image = resample(image, 5);
+
         return image;
     }
 
-    //public Image getFrontSpriteAnim() {
-    //    return frontSpriteAnim;}
+    private Image loadSpriteImage(boolean front, boolean align) {
 
-    //public Image getBackSpriteAnim() {
-    //    return backSpriteAnim;}
+        Image image;
+        String sprite = front ? frontSprite : backSprite;
+        String spriteAnim = front ? frontSpriteAnim : backSpriteAnim;
+
+        if (BattleApplication.isUseInternetSprites()) {
+            try {
+                image = createImageUrl(spriteAnim, front);
+            } catch (IOException e) {
+                image = createImage(sprite, align);
+            }
+
+        }
+        else {
+            image = createImage(sprite, align);
+        }
+        return image;
+    }
+
+    public Image getFrontSprite() {
+        return loadSpriteImage(true, false);
+    }
+
+    public Image getFrontSpriteBattle() {
+        return loadSpriteImage(true, true);
+    }
 
     public Image getBackSpriteBattle() {
-        Image image;
-        URL frontSpriteUrl = getClass().getResource(backSprite);
-
-        if (frontSpriteUrl != null)
-            image = new Image(backSprite);
-        else
-            image = new Image("sprites/default.png");
-
-        image = alignBottom(image);
-        image = resample(image, 5);
-        return image;
+        return loadSpriteImage(false, true);
     }
 
     public Image getBackSprite() {
-        Image image;
-        URL frontSpriteUrl = getClass().getResource(backSprite);
-
-        if (frontSpriteUrl != null)
-            image = new Image(backSprite);
-        else
-            image = new Image("sprites/default.png");
-
-        image = resample(image, 5);
-        return image;
+        return loadSpriteImage(false, false);
     }
 
     public void setPokedexNumber(int pokedexNumber) {

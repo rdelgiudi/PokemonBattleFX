@@ -21,6 +21,14 @@ import java.io.IOException;
 import java.time.Instant;
 
 public class BattleApplication extends Application {
+
+    // Experimental - to be completed after completing initial goals
+    private static boolean USE_INTERNET_SPRITES = false;
+
+    public static boolean isUseInternetSprites() {
+        return USE_INTERNET_SPRITES;
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(BattleApplication.class.getResource("teambuilder-view.fxml"));

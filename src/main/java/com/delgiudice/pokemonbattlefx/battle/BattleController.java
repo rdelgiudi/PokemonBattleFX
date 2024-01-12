@@ -1,5 +1,6 @@
 package com.delgiudice.pokemonbattlefx.battle;
 
+import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.attributes.Type;
 import com.delgiudice.pokemonbattlefx.move.Move;
@@ -197,6 +198,35 @@ public class BattleController {
         mainPane.setClip(rect);
 
         setupButtons();
+
+        if (BattleApplication.isUseInternetSprites()) {
+            final double middleXAlly = allyPokemonSprite.getLayoutX() + allyPokemonSprite.getFitWidth() / 2.0;
+            final double middleYAlly = allyPokemonSprite.getLayoutY() + allyPokemonSprite.getFitHeight();
+            final double middleXEnemy = enemyPokemonSprite.getLayoutX() + enemyPokemonSprite.getFitWidth() / 2.0;
+            final double middleYEnemy = enemyPokemonSprite.getLayoutY() + enemyPokemonSprite.getFitHeight();
+            allyPokemonSprite.setFitWidth(0);
+            allyPokemonSprite.setFitHeight(0);
+            //enemyPokemonSprite.setFitWidth(0);
+            //enemyPokemonSprite.setFitWidth(0);
+
+            allyPokemonSprite.imageProperty().addListener(e -> {
+                allyPokemonSprite.setFitWidth(0);
+                allyPokemonSprite.setFitHeight(0);
+                double newX = middleXAlly - allyPokemonSprite.getImage().getWidth() / 2.0;
+                double newY = middleYAlly - allyPokemonSprite.getImage().getHeight();
+                allyPokemonSprite.setLayoutX(newX);
+                allyPokemonSprite.setLayoutY(newY);
+            });
+
+            enemyPokemonSprite.imageProperty().addListener(e -> {
+                enemyPokemonSprite.setFitWidth(0);
+                enemyPokemonSprite.setFitHeight(0);
+                double newX = middleXEnemy - enemyPokemonSprite.getImage().getWidth() / 2.0;
+                double newY = middleYEnemy - enemyPokemonSprite.getImage().getHeight();
+                enemyPokemonSprite.setLayoutX(newX);
+                enemyPokemonSprite.setLayoutY(newY);
+            });
+        }
     }
 
     public void resetState() {
@@ -462,11 +492,13 @@ public class BattleController {
         double spriteLayoutYMov = spriteLayoutYPos - 3;
 
         final KeyFrame kf1 = new KeyFrame(Duration.ZERO, e -> {
-            allyPokemonSprite.setLayoutY(spriteLayoutYPos);
+            if (!BattleApplication.isUseInternetSprites())
+                allyPokemonSprite.setLayoutY(spriteLayoutYPos);
             allyPokemonInfo.setLayoutY(infoLayoutYPos);
         });
         final KeyFrame kf2 = new KeyFrame(Duration.seconds(0.3), e -> {
-            allyPokemonSprite.setLayoutY(spriteLayoutYMov);
+            if (!BattleApplication.isUseInternetSprites())
+                allyPokemonSprite.setLayoutY(spriteLayoutYMov);
             allyPokemonInfo.setLayoutY(infoLayoutYMov);
         });
 
@@ -475,7 +507,8 @@ public class BattleController {
         timeline.setCycleCount(Animation.INDEFINITE);
 
         timeline.setOnFinished(e -> {
-            allyPokemonSprite.setLayoutY(spriteLayoutYPos);
+            if (!BattleApplication.isUseInternetSprites())
+                allyPokemonSprite.setLayoutY(spriteLayoutYPos);
             allyPokemonInfo.setLayoutY(infoLayoutYPos);
         });
 
@@ -520,7 +553,8 @@ public class BattleController {
         }
         else {
             idleAnimation.stop();
-            allyPokemonSprite.setLayoutY(ALLY_SPRITE_DEFAULT_Y);
+            if (!BattleApplication.isUseInternetSprites())
+                allyPokemonSprite.setLayoutY(ALLY_SPRITE_DEFAULT_Y);
             allyPokemonInfo.setLayoutY(ALLY_INFO_DEFAULT_Y);
             //AnchorPane.setBottomAnchor(allyPokemonSprite, 63.0);
             //AnchorPane.setBottomAnchor(allyPokemonInfo, 220.0);
@@ -768,11 +802,11 @@ public class BattleController {
             info = enemyPokemonInfo;
         }
 
-        final double regularWidth = sprite.getFitWidth();
-        final double regularHeight = sprite.getFitHeight();
+        final double[] regularWidth = new double[1];
+        final double[] regularHeight = new double[1];
+        final double[] bottomY = new double[1];
+        final double[] centerX = new double[1];
 
-        final double bottomY = sprite.getLayoutY() + sprite.getFitHeight();
-        final double centerX = sprite.getLayoutX() + (sprite.getFitWidth() / 2);
 
         final List<KeyFrame> keyFrameList = new ArrayList<>();
 
@@ -782,6 +816,19 @@ public class BattleController {
 
             if (ally) setAllyInformation(pokemon, hp);
             else setEnemyInformation(pokemon, hp);
+
+            if (!BattleApplication.isUseInternetSprites()) {
+                regularWidth[0] = sprite.getFitWidth();
+                regularHeight[0] = sprite.getFitHeight();
+                bottomY[0] = sprite.getLayoutY() + sprite.getFitHeight();
+                centerX[0] = sprite.getLayoutX() + sprite.getFitWidth() / 2;
+            }
+            else {
+                regularWidth[0] = sprite.getImage().getWidth();
+                regularHeight[0] = sprite.getImage().getHeight();
+                bottomY[0] = sprite.getLayoutY() + sprite.getImage().getHeight();
+                centerX[0] = sprite.getLayoutX() + sprite.getImage().getWidth() / 2;
+            }
 
             sprite.setFitWidth(1);
             sprite.setFitHeight(1);
@@ -800,13 +847,14 @@ public class BattleController {
         for (int i = 1; i <= maxI; i++) {
             int finalI = i;
             final KeyFrame kf = new KeyFrame(Duration.millis(i), e -> {
+
                 if (ally) info.setLayoutX(SCREEN_WIDTH - finalI);
                 else info.setLayoutX(-info.getPrefWidth() + finalI);
-                sprite.setFitHeight((regularHeight * finalI) / maxI);
-                sprite.setFitWidth((regularWidth * finalI) / maxI);
 
-                double calcX = centerX - (sprite.getFitWidth() / 2);
-                double calcY = bottomY - sprite.getFitHeight();
+                sprite.setFitHeight((regularHeight[0] * finalI) / maxI);
+                sprite.setFitWidth((regularWidth[0] * finalI) / maxI);
+                double calcX = centerX[0] - (sprite.getFitWidth() / 2);
+                double calcY = bottomY[0] - sprite.getFitHeight();
                 sprite.setLayoutX(calcX);
                 sprite.setLayoutY(calcY);
 
@@ -1176,7 +1224,11 @@ public class BattleController {
         oldLayoutY = sprite.getLayoutY();
 
         int frameNumber = (int) Math.floor(height / 5);
-        double scale = sprite.getFitHeight() / height;
+        double scale;
+        if (!BattleApplication.isUseInternetSprites())
+            scale = sprite.getFitHeight() / height;
+        else
+            scale = sprite.getImage().getHeight() / height;
 
 
         for (int i = 1; i < frameNumber; i++) {
@@ -1386,9 +1438,9 @@ public class BattleController {
         }
     }
 
-    public void updatePokemonStatusBox(List<Pokemon> allyPokemon, List<Pokemon> enemyPokemon) {
+    public void updatePokemonStatusBox(List<Pokemon> allyPokemon, List<Pokemon> enemyPokemon, boolean[] enemySeen) {
         updateAllyStatusBox(allyPokemon);
-        updateEnemyStatusBox(enemyPokemon, new boolean[]{false, false, false, false, false, false});
+        updateEnemyStatusBox(enemyPokemon, enemySeen);
     }
 
     private void updateAllyStatusBox(List<Pokemon> allyPokemon) {

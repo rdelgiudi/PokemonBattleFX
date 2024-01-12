@@ -61,6 +61,8 @@ public class BattleLogic {
             new HashMap<Enums.Spikes, Integer>();
     private Pair<Enums.WeatherEffect, Integer> weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
 
+    private boolean[] enemySeen;
+
     public BattleLogic(BattleController controller) {
         this.controller = controller;
 
@@ -89,6 +91,7 @@ public class BattleLogic {
         controller.wipeText(false);
         weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
         controller.updateFieldWeatherEffect(weatherEffect.getKey()).play();
+        enemySeen = new boolean[]{false, false, false, false, false, false};
     }
 
     public void startBattle(Player player, NpcTrainer enemy, Pane teamBuilderPane) {
@@ -114,7 +117,7 @@ public class BattleLogic {
     // function that initiates a battle, adding looping checks here should be avoided
     private void initBattleLoop() {
 
-        controller.updatePokemonStatusBox(player.getParty(), enemy.getParty());
+        controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
 
         boolean allyPokemonSelected = checkIfAllyAbleToBattle(true);
         boolean enemyPokemonSelected = checkIfEnemyAbleToBattle(true);
@@ -151,7 +154,12 @@ public class BattleLogic {
         //controller.setEnemyInformation(enemyParty.get(0));
         Timeline enemyInfoAnimation = controller.getIntroAnimation(enemyParty.get(0),
                 enemyParty.get(0).getHp());
-        enemyPokemonIntro.setOnFinished(e -> enemyInfoAnimation.play());
+        enemyPokemonIntro.setOnFinished(e -> {
+            enemyInfoAnimation.play();
+            int index = enemy.getParty().indexOf(enemyParty.get(0));
+            enemySeen[index] = true;
+            controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
+        });
 
         Timeline allyPokemonIntro = controller.getBattleTextAnimation(String.format(POKEMON_SENT_OUT_STRING,
                 playerParty.get(0).getBattleName()), true);
@@ -387,7 +395,7 @@ public class BattleLogic {
 
     private void battleLoop() {
 
-        controller.updatePokemonStatusBox(player.getParty(), enemy.getParty());
+        controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
 
         allyFaintedProcessed = false;
         enemyFaintedProcessed = false;
@@ -992,6 +1000,12 @@ public class BattleLogic {
             //enemyNewPokemonInfo.setDelay(Duration.seconds(2));
             battleTimeLine.add(enemyNewPokemonInfo);
 
+            battleTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e -> {
+                int index = enemy.getParty().indexOf(enemyParty.get(0));
+                enemySeen[index] = true;
+                controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
+            })));
+
             Timeline updateStatus = controller.updateStatus(enemyParty.get(0), false);
             battleTimeLine.add(updateStatus);
             battleTimeLine.add(controller.generatePause(1000));
@@ -1193,7 +1207,7 @@ public class BattleLogic {
     private Timeline setFaintedStatus(Pokemon pokemon) {
         KeyFrame kf = new KeyFrame(Duration.millis(1), e -> {
             pokemon.setStatus(Enums.Status.FAINTED);
-            controller.updatePokemonStatusBox(player.getParty(), enemy.getParty());
+            controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
         });
         return new Timeline(kf);
     }
@@ -2125,6 +2139,12 @@ public class BattleLogic {
                     true);
             //enemyNewPokemonInfo.setDelay(Duration.seconds(2));
             moveTimeLine.add(enemyNewPokemonInfo);
+
+            moveTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e -> {
+                int index = enemy.getParty().indexOf(enemyParty.get(0));
+                enemySeen[index] = true;
+                controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
+            })));
 
             Timeline updateStatus = controller.updateStatus(enemyParty.get(0), false);
             moveTimeLine.add(updateStatus);
