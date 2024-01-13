@@ -248,7 +248,7 @@ public class SwapPokemonController {
 
         Label statusLabel = (Label) hpBox.getChildren().get(2);
 
-        BattleController.setStatusStyle(pokemon, statusLabel);
+        BattleController.setStatusStyle(pokemon, statusLabel, pokemon.getStatus());
 
         if (pokemon.getHp() == 0)
             pokemonBox.setStyle(FAINTED_STYLE);
@@ -415,7 +415,7 @@ public class SwapPokemonController {
 
         if (index == 0) {
             battleController.setAllyHpBar(target.getHp(), target.getMaxHP(), true);
-            battleController.updateStatus(target, true).play();
+            battleController.updateStatus(target, true, target.getStatus()).play();
         }
 
         reduceItemAmount();
@@ -448,7 +448,7 @@ public class SwapPokemonController {
         }
 
         if (index == 0)
-            battleController.updateStatus(target, true).play();
+            battleController.updateStatus(target, true, target.getStatus()).play();
 
         reduceItemAmount();
 
@@ -592,7 +592,8 @@ public class SwapPokemonController {
                     party.get(newCurrentAllyPokemon).getBattleName()), true);
             battleTimeLine.add(allyPokemonIntro);
 
-            Timeline updateStatus = battleController.updateStatus(party.get(newCurrentAllyPokemon), true);
+            Timeline updateStatus = battleController.updateStatus(party.get(newCurrentAllyPokemon), true,
+                    party.get(newCurrentAllyPokemon).getStatus());
             battleTimeLine.add(updateStatus);
 
             Timeline allyInfoAnimation = battleController.getIntroAnimation(party.get(newCurrentAllyPokemon),

@@ -1010,13 +1010,13 @@ public class BattleController {
         return timeline;
     }
 
-    public static void setStatusStyle(Pokemon pokemon, Label statusLabel) {
+    public static void setStatusStyle(Pokemon pokemon, Label statusLabel, Enums.Status status) {
         statusLabel.setTextFill(Color.WHITE);
 
         final String style = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: ";
         String finalStyle = "";
 
-        switch (pokemon.getStatus()) {
+        switch (status) {
             case NONE:
                 statusLabel.setVisible(false);
                 break;
@@ -1056,7 +1056,7 @@ public class BattleController {
         }
     }
 
-    public Timeline updateStatus(Pokemon pokemon, boolean ally) {
+    public Timeline updateStatus(Pokemon pokemon, boolean ally, Enums.Status status) {
 
         final Label statusLabel;
         if (ally)
@@ -1065,7 +1065,7 @@ public class BattleController {
             statusLabel = enemyStatusLabel;
 
         final KeyFrame kf = new KeyFrame(Duration.millis(1), e-> {
-            setStatusStyle(pokemon, statusLabel);
+            setStatusStyle(pokemon, statusLabel, status);
         });
 
         return new Timeline(kf);
@@ -1673,8 +1673,17 @@ public class BattleController {
         ImageView pokemonSprite = isPlayer ? allyPokemonSprite : enemyPokemonSprite;
         final double spriteX = pokemonSprite.getLayoutX();
         final double spriteY = pokemonSprite.getLayoutY();
-        final double spriteHeight = pokemonSprite.getFitHeight();
-        final double spriteWidth = pokemonSprite.getFitWidth();
+        final double spriteHeight;
+        final double spriteWidth;
+
+        if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
+            spriteHeight = pokemonSprite.getImage().getHeight();
+            spriteWidth = pokemonSprite.getImage().getWidth();
+        }
+        else {
+            spriteHeight = pokemonSprite.getFitHeight();
+            spriteWidth = pokemonSprite.getFitWidth();
+        }
 
         KeyFrame setupSprite = new KeyFrame(Duration.millis(0.1), e -> {
             pokemonSprite.setPreserveRatio(false);
@@ -1724,8 +1733,8 @@ public class BattleController {
         final Image processedSubstituteImage = substituteImage;
 
         KeyFrame setSubstituteSprite = new KeyFrame(Duration.millis(0.1), e -> {
-            pokemonSprite.setLayoutY(-spriteWidth);
             pokemonSprite.setImage(processedSubstituteImage);
+            pokemonSprite.setLayoutY(-spriteWidth);
             pokemonSprite.setVisible(true);
         });
 
@@ -1767,9 +1776,16 @@ public class BattleController {
 
         ImageView pokemonSprite = isPlayer ? allyPokemonSprite : enemyPokemonSprite;
         final double spriteX = pokemonSprite.getLayoutX();
-        final double spriteY = pokemonSprite.getLayoutY();
-        final double spriteHeight = pokemonSprite.getFitHeight();
-        final double spriteWidth = pokemonSprite.getFitWidth();
+        //final double spriteY = pokemonSprite.getLayoutY();
+        //final double spriteHeight = pokemonSprite.getFitHeight();
+        final double spriteWidth;
+
+        if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
+            spriteWidth = pokemonSprite.getImage().getWidth();
+        }
+        else {
+            spriteWidth = pokemonSprite.getFitWidth();
+        }
 
         for (int i=1; i < 100; i++) {
             int finalI = i;
@@ -1784,9 +1800,9 @@ public class BattleController {
         KeyFrame hideSprite = new KeyFrame(Duration.millis(100 * 2), e -> {
             pokemonSprite.setVisible(false);
             pokemonSprite.setOpacity(1);
-            pokemonSprite.setLayoutX(hideX);
             pokemonSprite.setImage(isPlayer ? pokemon.getSpecie().getBackSpriteBattle()
                     : pokemon.getSpecie().getFrontSpriteBattle());
+            pokemonSprite.setLayoutX(hideX);
             pokemonSprite.setVisible(true);
         });
 
