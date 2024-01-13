@@ -616,9 +616,11 @@ public class SwapPokemonController {
                 });
                 battleTimeLine.get(0).play();
             }
-            else if (switchContext == Enums.SwitchContext.SWITCH_FAINTED || switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE ||
-                    switchContext == Enums.SwitchContext.SWITCH_SECOND) {
+            else if (switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE || switchContext == Enums.SwitchContext.SWITCH_SECOND) {
                 battleLogic.battleTurnEnd(battleTimeLine);
+                }
+            else if (switchContext == Enums.SwitchContext.SWITCH_FAINTED) {
+                battleLogic.finalChecks(battleTimeLine);
             }
         });
 

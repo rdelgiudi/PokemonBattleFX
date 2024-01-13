@@ -110,6 +110,16 @@ public class BattleLogic {
         for (Item item : Item.getItemMap().values())
             player.getItems().put(item, 5);
 
+        if (BattleApplication.isUseInternetSprites()) {
+            for (Pokemon pokemon : player.getParty()) {
+                pokemon.getSpecie().loadNetImage(false);
+            }
+
+            for (Pokemon pokemon : enemy.getParty()) {
+                pokemon.getSpecie().loadNetImage(true);
+            }
+        }
+
         controller.startBattleThemePlayback();
         initBattleLoop();
     }
@@ -711,8 +721,7 @@ public class BattleLogic {
 
         // If in battle Pokemon faints, forfeit next move
         if ((secondPokemon.getHp() == 0 && !playerSwitchOutEligible) || firstPokemon.getHp() == 0) {
-            processFainted(moveTimeLine);
-            finalChecks(moveTimeLine);
+            battleTurnEnd(moveTimeLine);
             return;
         }
 
@@ -1013,7 +1022,7 @@ public class BattleLogic {
             Timeline pokemonIntroAnimation = controller.getIntroAnimation(enemyParty.get(0),
                     enemyParty.get(0).getHp());
             battleTimeLine.add(pokemonIntroAnimation);
-            battleTurnEnd(battleTimeLine);
+            finalChecks(battleTimeLine);
             return;
         }
 

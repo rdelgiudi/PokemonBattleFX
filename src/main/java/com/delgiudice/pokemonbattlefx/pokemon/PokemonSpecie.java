@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PokemonSpecie{
 
-    //List of all animated sprites parsed from site
+    // List of all animated sprites parsed from site
     private static final List<String> frontSpritesAnim = new ArrayList<>(), backSpritesAnim = new ArrayList<>();
 
     // pokemonMap - a map of all available Pokemon species
@@ -36,6 +36,8 @@ public class PokemonSpecie{
     // frontSprite - path to image of the Pokemon front sprite (enemy)
     // backSprite - path to image of the Pokemon back sprite (ally)
     private String frontSprite, backSprite, frontSpriteAnim, backSpriteAnim;
+    // Internet sprites loaded into memory
+    private Image frontSpriteLoaded = null, backSpriteLoaded = null;
     public int getPokedexNumber() {
         return pokedexNumber;
     }
@@ -141,6 +143,10 @@ public class PokemonSpecie{
     }
 
     private Image loadSpriteImage(boolean front, boolean align, boolean thumbnail) {
+        if (front && frontSpriteLoaded != null)
+            return frontSpriteLoaded;
+        else if (!front && backSpriteLoaded != null)
+            return backSpriteLoaded;
 
         Image image;
         String sprite = front ? frontSprite : backSprite;
@@ -161,6 +167,12 @@ public class PokemonSpecie{
             image = createImage(sprite, align, thumbnail ? 2 : 5);
         }
         return image;
+    }
+
+    public void loadNetImage(boolean onlyFront) {
+        frontSpriteLoaded = loadSpriteImage(true, false, false);
+        if (!onlyFront)
+            backSpriteLoaded = loadSpriteImage(false, false, false);
     }
 
     public Image getFrontSprite() {
