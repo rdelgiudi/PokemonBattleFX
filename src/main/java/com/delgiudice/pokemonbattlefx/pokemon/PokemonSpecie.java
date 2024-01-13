@@ -4,25 +4,24 @@ import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.attributes.Type;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.*;
 import javafx.scene.paint.Color;
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.w3c.tidy.Tidy;
 
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
-import javax.swing.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 public class PokemonSpecie{
+
+    //List of all animated sprites parsed from site
+    private static final List<String> frontSpritesAnim = new ArrayList<>(), backSpritesAnim = new ArrayList<>();
 
     // pokemonMap - a map of all available Pokemon species
     private static final HashMap<PokemonEnum, PokemonSpecie> pokemonMap = new HashMap<>();
@@ -51,6 +50,38 @@ public class PokemonSpecie{
 
     public Type[] getType() {
         return type;
+    }
+
+
+    private static void initSprites(String url, List<String> urlList) {
+        NodeList imgs;
+        List<String> srcs = new ArrayList<String>();
+        try {
+            URLConnection conn = new URL(url).openConnection();
+            conn.setRequestProperty("User-Agent", "Wget/1.13.4 (linux-gnu)");
+            InputStream input = conn.getInputStream();
+            Document document = new Tidy().parseDOM(input, null);
+            imgs = document.getElementsByTagName("img");
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        for (int i = 0; i < imgs.getLength(); i++) {
+            srcs.add(imgs.item(i).getAttributes().getNamedItem("src").getNodeValue());
+        }
+
+        for (String src: srcs) {
+            if (src.contains(".gif") && src.contains("sprites"))
+                    urlList.add(src);
+
+        }
+    }
+
+    private static void initSpriteDatabase() {
+       initSprites("", backSpritesAnim);
+       initSprites("", frontSpritesAnim);
     }
 
     // Loading images from the Web: https://itecnote.com/tecnote/javafx-play-gif-image-in-imageview/
@@ -190,6 +221,10 @@ public class PokemonSpecie{
         this.frontSprite = frontSprite;
         this.backSprite = backSprite;
         this.pokedexNumber = pokedexNumber;
+
+        if (BattleApplication.isUseInternetSprites()) {
+            searchForAnimSprite();
+        }
     }
 
     public PokemonSpecie(int pokedexNumber, PokemonEnum name, Type type1, int maxHp, int attack, int defense, int spAttack, int spDefense, int speed){
@@ -219,6 +254,10 @@ public class PokemonSpecie{
         this.frontSprite = frontSprite;
         this.backSprite = backSprite;
         this.pokedexNumber = pokedexNumber;
+
+        if (BattleApplication.isUseInternetSprites()) {
+            searchForAnimSprite();
+        }
     }
 
     public PokemonSpecie(PokemonSpecie original) {
@@ -230,8 +269,33 @@ public class PokemonSpecie{
         this.pokedexNumber = original.pokedexNumber;
     }
 
+    private void searchForAnimSprite() {
+        String spriteUrl = "https://www.pokencyclopedia.info";
+        String pokedexNumFormat = String.format("%03d", pokedexNumber);
+        String pokedexNumFormatGender = pokedexNumFormat + "_m";
+        Optional<String> frontSpriteLoc = frontSpritesAnim.stream().filter(string -> string.contains(pokedexNumFormatGender)).findFirst();
+        if (!frontSpriteLoc.isPresent())
+            frontSpriteLoc = frontSpritesAnim.stream().filter(string -> string.contains(pokedexNumFormat)).findFirst();
+
+        if (frontSpriteLoc.isPresent()) {
+            String frontSpriteAnimTemp = frontSpriteLoc.get().substring(2);
+            frontSpriteAnim = spriteUrl + frontSpriteAnimTemp;
+        }
+
+        Optional<String> backSpriteLoc = backSpritesAnim.stream().filter(string -> string.contains(pokedexNumFormatGender)).findFirst();
+        if (!backSpriteLoc.isPresent())
+            backSpriteLoc = backSpritesAnim.stream().filter(string -> string.contains(pokedexNumFormat)).findFirst();
+
+        if (backSpriteLoc.isPresent()) {
+            String backSpriteAnimTemp = backSpriteLoc.get().substring(2);
+            backSpriteAnim = spriteUrl + backSpriteAnimTemp;
+        }
+    }
+
     public static void setPokemonMap(){        //fills pokemon list, maybe some alternatives on how to execute this?
         MoveTemplate.setMoveMap(); //first we initialize movelist
+        if (BattleApplication.isUseInternetSprites())
+            initSpriteDatabase();
 
         PokemonSpecie newpkmn = new PokemonSpecie(1,PokemonEnum.BULBASAUR, Type.getTypeMap().get(Enums.Types.GRASS),
                 Type.getTypeMap().get(Enums.Types.POISON), 45, 49, 49, 65, 65, 45,
@@ -261,6 +325,8 @@ public class PokemonSpecie{
         newpkmn = new PokemonSpecie(6, PokemonEnum.CHARIZARD, Type.getTypeMap().get(Enums.Types.FIRE),
                 Type.getTypeMap().get(Enums.Types.FLYING), 78, 84, 78, 109, 85, 100,
                 "/sprites/charizard_front.png", "/sprites/charizard_back.png");
+        newpkmn.backSpriteAnim = "https://www.pokencyclopedia.info/sprites/gen5/ani-b_black-white/a-b_bw_006.gif";
+        newpkmn.frontSpriteAnim = "https://www.pokencyclopedia.info/sprites/gen5/ani_black-white/ani_bw_006.gif";
         pokemonMap.put(newpkmn.getName(), newpkmn);
 
         newpkmn = new PokemonSpecie(19,PokemonEnum.RATTATA, Type.getTypeMap().get(Enums.Types.NORMAL),
