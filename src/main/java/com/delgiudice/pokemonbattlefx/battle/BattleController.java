@@ -59,7 +59,7 @@ public class BattleController {
     @FXML
     private HBox allyPokemonStatusBox, enemyPokemonStatusBox;
     @FXML
-    private ImageView allyPokemonSprite, enemyPokemonSprite, textArrowView;
+    private ImageView allyPokemonSprite, enemyPokemonSprite, allyBattlePlatform, enemyBattlePlatform, textArrowView;
     @FXML
     private Label enemyNameLabel, enemyLvLabel, allyNameLabel, allyHpLabel, allyLvLabel, allyStatusLabel,
                     enemyStatusLabel, allyAbilityInfo, enemyAbilityInfo, moveTypeLabel, movePPLabel;
@@ -200,6 +200,11 @@ public class BattleController {
         setupButtons();
 
         if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
+
+            allyPokemonSprite.setLayoutY(allyPokemonSprite.getLayoutY() + 50);
+            enemyPokemonSprite.setLayoutY(enemyPokemonSprite.getLayoutY() + 50);
+            enemyBattlePlatform.setLayoutY(enemyBattlePlatform.getLayoutY() + 50);
+
             final double middleXAlly = allyPokemonSprite.getLayoutX() + allyPokemonSprite.getFitWidth() / 2.0;
             final double middleYAlly = allyPokemonSprite.getLayoutY() + allyPokemonSprite.getFitHeight();
             final double middleXEnemy = enemyPokemonSprite.getLayoutX() + enemyPokemonSprite.getFitWidth() / 2.0;
@@ -1706,9 +1711,9 @@ public class BattleController {
             pokemonSprite.setVisible(false);
             pokemonSprite.setLayoutX(spriteX);
             pokemonSprite.setLayoutY(spriteY);
+            pokemonSprite.setPreserveRatio(true);
             pokemonSprite.setFitWidth(spriteWidth);
             pokemonSprite.setFitHeight(spriteHeight);
-            pokemonSprite.setPreserveRatio(true);
         });
 
         pokemonSpriteFadeTimeline.getKeyFrames().add(makeSpriteInvisible);
@@ -1734,7 +1739,12 @@ public class BattleController {
 
         KeyFrame setSubstituteSprite = new KeyFrame(Duration.millis(0.1), e -> {
             pokemonSprite.setImage(processedSubstituteImage);
-            pokemonSprite.setLayoutY(-spriteWidth);
+            if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
+                pokemonSprite.setFitWidth(spriteWidth);
+                pokemonSprite.setFitHeight(spriteHeight);
+                pokemonSprite.setLayoutX(spriteX);
+                pokemonSprite.setLayoutY(-spriteHeight);
+            }
             pokemonSprite.setVisible(true);
         });
 
@@ -1744,7 +1754,7 @@ public class BattleController {
             int finalI = i;
             final KeyFrame kf = new KeyFrame(Duration.millis(0.5 * i), e -> {
                 if (finalI <= distance)
-                    pokemonSprite.setLayoutY(-spriteWidth + finalI);
+                    pokemonSprite.setLayoutY(-spriteHeight + finalI);
                 else
                     // Bounce animation calculation, jumps for 150 pixels, then falls back down to original position
                     // sine function allows to observe a sense of momentum when rising and falling back down

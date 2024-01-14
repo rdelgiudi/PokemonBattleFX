@@ -20,6 +20,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class PokemonSpecie{
 
+    private static double ANIMATED_ALLY_SCALE = 6, ANIMATED_ENEMY_SCALE = 3.5;
+
     // List of all animated sprites parsed from site
     private static final List<String> frontSpritesAnim = new ArrayList<>(), backSpritesAnim = new ArrayList<>();
 
@@ -101,7 +103,9 @@ public class PokemonSpecie{
         conn = new URL(url).openConnection();
         conn.setRequestProperty("User-Agent", "Wget/1.13.4 (linux-gnu)");
         try (InputStream stream = conn.getInputStream()) {
-            return new Image(stream, image.getWidth() * (front ? 4 : 6), image.getHeight() * (front ? 4 : 6), true, false);
+            return new Image(stream, image.getWidth() * (front ? ANIMATED_ENEMY_SCALE : ANIMATED_ALLY_SCALE),
+                    image.getHeight() * (front ? ANIMATED_ENEMY_SCALE : ANIMATED_ALLY_SCALE),
+                    true, false);
         }
     }
 
@@ -130,7 +134,9 @@ public class PokemonSpecie{
         if (frontSpriteUrl != null) {
             if (!thumbnail) {
                 image = new Image(spriteAnim);
-                image = new Image(spriteAnim, image.getWidth() * (front ? 4 : 6), image.getHeight() * (front ? 4 : 6), true, false);
+                image = new Image(spriteAnim, image.getWidth() * (front ? ANIMATED_ENEMY_SCALE : ANIMATED_ALLY_SCALE),
+                        image.getHeight() * (front ? ANIMATED_ENEMY_SCALE : ANIMATED_ALLY_SCALE),
+                        true, false);
             }
             else
                 image = new Image(spriteAnim, 50, 50, true, false);
