@@ -1010,6 +1010,7 @@ public class BattleLogic {
             int damage = (int) Math.round(pokemon.getMaxHP() / 8.0);
             damage = Math.min(damage, pokemon.getHp());
             pokemon.setHp(pokemon.getHp() - damage);
+            System.out.printf("%s was hit by sandstorm damage (%d -> %d)%n", pokemon.getBattleName(), oldHp, pokemon.getHp());
             if (pokemon.getOwner().isPlayer())
                 pokemonHpDamage = controller.getAllyHpAnimation(oldHp, pokemon.getHp(), pokemon.getMaxHP());
             else
@@ -2155,6 +2156,26 @@ public class BattleLogic {
         }
         //********************************************************
 
+        // If move allows to break away from negative status effects inflicted by enemy
+        if (!move.getSubstatusNegation().isEmpty()) {
+            processSubStatusMoveRemoval(user, move);
+        }
+
+        // If move removes trap effects
+        if (user.getTrapMove() != null && move.getTrappingMoveNegation().contains(user.getTrapMove().getName()) ) {
+            processTrapMoveRemoval(moveTimeLine, user, target);
+        }
+
+        // If move removes spikes
+        HashMap< Enums.Spikes, Integer> spikes = user.getOwner().isPlayer() ? allySpikes : enemySpikes;
+        if (move.isRemovesSpikes() && !spikes.isEmpty()) {
+            spikes.clear();
+            System.out.printf("%s cleared all spikes!%n", user.getBattleName());
+            moveTimeLine.add(controller.getBattleTextAnimation("All hazards on the ground\nwere swept away!", true));
+            moveTimeLine.add(controller.generatePause(1000));
+        }
+        //******************************************************************
+
         // Checks related to moves that increase or decrease stats
         boolean targetFainted = target.getHp() == 0;
         boolean userFainted = user.getHp() == 0;
@@ -2198,24 +2219,6 @@ public class BattleLogic {
         move.isMultiturnConfusion() && user.getState() == Enums.States.MULTITURN)
             processMultiturnMoveCompleted(moveTimeLine, user);
         //*********************************************************************
-
-        // If move allows to break away from negative status effects inflicted by enemy
-        if (!move.getSubstatusNegation().isEmpty()) {
-            processSubStatusMoveRemoval(user, move);
-        }
-
-        // If move removes trap effects
-        if (user.getTrapMove() != null && move.getTrappingMoveNegation().contains(user.getTrapMove().getName()) ) {
-            processTrapMoveRemoval(moveTimeLine, user, target);
-        }
-
-        // If move removes spikes
-        HashMap< Enums.Spikes, Integer> spikes = user.getOwner().isPlayer() ? allySpikes : enemySpikes;
-        if (move.isRemovesSpikes() && !spikes.isEmpty()) {
-            spikes.clear();
-            moveTimeLine.add(controller.getBattleText("All hazards on the ground\nwere swept away!", true));
-        }
-        //******************************************************************
 
         // If enemy move swaps Pokemon out
         if (!user.getOwner().isPlayer() && move.isSwitchOut() && getEnemyAbleToBattleNum() > 1) {
@@ -2266,7 +2269,7 @@ public class BattleLogic {
     private void processSubStatusMoveRemoval(Pokemon user, Move move) {
         for (Enums.SubStatus subStatus : move.getSubstatusNegation()) {
             if (user.getSubStatuses().remove(subStatus)) {
-                System.out.printf("%s's status removed: %s", user.getBattleName(), subStatus);
+                System.out.printf("%s's status removed: %s%n", user.getBattleName(), subStatus);
                 user.setLeechSeedTimer(subStatus == Enums.SubStatus.LEECH_SEED ? 0 : user.getLeechSeedTimer());
             }
         }
