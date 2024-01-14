@@ -7,47 +7,68 @@ This project was written with Java 8 in mind. It requires JDK 1.8 or higher and 
 ## Overview
 This is a work in progress. The engine aims to imitate mechanics from more recent generations but with graphics more akin to generation 3. So far, the project contains:
 - Working (but somewhat incomplete) battle system with proper turn order.
-- 15+ Pokémon species with 30+ unique moves.
+- 25+ Pokémon species with 90+ unique moves.
 - Fully implemented non-volatile status effects: Poison (and badly Poisoned), Paralysis, Sleep, Burn and Freeze.
 - Some secondary status effects, such as confusion and flinching.
 - Battlefield effects (such as Tailwind).
 - Pokémon abilities.
 - Team builder, that allows to customize your team, as well as the opponent's.
 - Fully working interactive summary screen acessible during battle.
+- Working bag menu, with some items already implemented.
+- Weather effects (only rain so far).
 
 Plans for future updates:
 - Adding all 151 Kanto Pokémon and their main abilities.
 - Adding most (if not all) moves known by Kanto Pokémon.
-- Implementing an item system, including held items.
+- Implementing held items and missing usable items.
 - Trainer customization, including names and AI difficulty (so far, the AI trainers select moves at random).
-- Adding weather effects.
+- Adding missing weather effects.
 - Adding Battlefield types (used for some moves, like Nature Power).
 - Adding missing secondary status effects (like Attract).
 
 ## Screenshots
 
 Team Builder:
-![image](https://user-images.githubusercontent.com/83218453/233850438-7837c5e1-34de-4aeb-8387-269033fd96d2.png)
+
+![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/bfd095fd-0a0d-49f9-bb0e-836efb5b5ae9)
+
 
 Team Builder, adding Pokemon:
-![Screenshot_20230423_175433](https://user-images.githubusercontent.com/83218453/233850346-f3abe02d-a831-4eb0-8c3f-1a727e5e514a.png)
+
+![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/527e5025-7204-4809-a718-0568d98453b8)
+
 
 In battle:
-![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/9ac5eb80-6e79-4c3e-9f93-11efbcdc443a)
 
-![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/acc3fa39-da8e-4af7-977e-80e43e9ba076)
+![ezgif-4-b557510718](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/eb050901-909d-4399-a35e-e35445cee006)
+![ezgif-4-e374ebefb1](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/78d0dd46-9e34-4b04-b017-c815331aba10)
 
-![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/eab0a542-cab7-4a02-a5ab-d987490d26a1)
+
 
 
 Swap menu:
-![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/ab08cbe2-4341-47f4-8325-686aa4fd0ecf)
+
+![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/dbd5bba3-89ca-44e3-8c9d-f14c94c4df29)
+
 
 
 Summary Screen:
-![image](https://user-images.githubusercontent.com/83218453/233850552-02bffa2b-deba-4803-b287-41e339312474.png)
 
-![image](https://user-images.githubusercontent.com/83218453/233850585-9e924e18-da98-4377-adce-c19eeaf0d2b5.png)
+![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/875e4343-954d-4812-8512-66b8c1aff980)
+
+
+![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/da289ee7-78ae-42d8-88c0-d76825086301)
+
+
+Bag menu:
+
+![image](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/5002a563-90a8-4fd3-95f5-2527ee4357e6)
+
+Animated Sprites support:
+
+![ezgif-4-8f5d55a6b3](https://github.com/rdelgiudi/PokemonBattleFX/assets/83218453/5eea728d-1734-4c58-8466-01849d0ee0c5)
+
+
 
 ## License Note
 The source code itself is licensed under GNU General Public Licence v3. Pokémon is owned by Nintendo, GameFreak and the Pokémon Company. All artwork that is not mine is not included.
