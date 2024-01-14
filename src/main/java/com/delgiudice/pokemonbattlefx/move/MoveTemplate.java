@@ -1062,7 +1062,7 @@ public class MoveTemplate {
         newmove.setStatChange(1);
         newmove.setStatChangeProb(1f);
         newmove.setSelf(true);
-        newmove.setMoveDescription(" \tThe user performs a spin attack that can also eliminate the effects of such moves as Bind, Wrap, and Leech Seed. This also boosts the user's Speed stat.");
+        newmove.setMoveDescription("The user performs a spin attack that can also eliminate the effects of such moves as Bind, Wrap, and Leech Seed. This also boosts the user's Speed stat.");
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.SANDSTORM, NOT_APPLICABLE, NOT_APPLICABLE, 10, Enums.Subtypes.STATUS,

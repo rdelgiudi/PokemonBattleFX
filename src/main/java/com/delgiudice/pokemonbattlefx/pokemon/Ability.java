@@ -27,7 +27,7 @@ public enum Ability {
             "The Pokémon is charged with static electricity and may paralyze attackers that make direct contact with it."),
     SAND_FORCE("Sand Force", "not implemented"),
     SAND_RUSH("Sand Rush", "not implemented"),
-    SAND_VEIL("Sand Veil", "not implemented");
+    SAND_VEIL("Sand Veil", "Boosts the Pokémon's evasiveness in a sandstorm.");
 
     final private String ability;
     private String description = "No description";

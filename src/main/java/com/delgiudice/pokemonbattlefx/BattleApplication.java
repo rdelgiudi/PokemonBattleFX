@@ -23,7 +23,7 @@ import java.time.Instant;
 public class BattleApplication extends Application {
 
     // Experimental - to be completed after completing initial goals
-    private static boolean USE_INTERNET_SPRITES = false;
+    private static boolean USE_INTERNET_SPRITES = true;
     private static boolean USE_LOCAL_ANIM_SPRITES = false;
 
     public static boolean isUseInternetSprites() {

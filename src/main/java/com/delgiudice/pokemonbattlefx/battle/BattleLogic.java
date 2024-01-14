@@ -974,15 +974,21 @@ public class BattleLogic {
                     weatherEffectTimer--;
                     weatherEffect = new Pair<>(currentWeatherEffect, weatherEffectTimer);
                     sandstormMessage = controller.getBattleTextAnimation("The sandstorm rages.", true);
+                    battleTimeLine.add(sandstormMessage);
+                    battleTimeLine.add(controller.generatePause(1000));
 
+                    if (playerParty.get(0).getHp() > 0)
+                        executeSandstormDamageCheck(battleTimeLine, playerParty.get(0));
+                    if (enemyParty.get(0).getHp() > 0)
+                        executeSandstormDamageCheck(battleTimeLine, enemyParty.get(0));
                 }
                 else {
                     sandstormMessage = controller.getBattleTextAnimation("The sandstorm subsided.", true);
                     weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
                     battleTimeLine.add(controller.updateFieldWeatherEffect(weatherEffect.getKey()));
+                    battleTimeLine.add(sandstormMessage);
+                    battleTimeLine.add(controller.generatePause(1000));
                 }
-                battleTimeLine.add(sandstormMessage);
-                battleTimeLine.add(controller.generatePause(1000));
                 break;
             default:
                 throw new IllegalStateException("Unhandled weather condition: " + currentWeatherEffect);
@@ -997,7 +1003,27 @@ public class BattleLogic {
         boolean pokemonImmuneAbility = pokemon.getAbility() == Ability.SAND_FORCE || pokemon.getAbility() == Ability.SAND_RUSH
                 || pokemon.getAbility() == Ability.SAND_VEIL;
         if (!pokemonImmuneType && !pokemonImmuneAbility) {
+            Timeline sandstormDamageText = controller.getBattleTextAnimation(String.format("%s was buffeted by sandstorm!",
+                    pokemon.getBattleName()), true);
+            Timeline pokemonHpDamage;
+            int oldHp = pokemon.getHp();
+            int damage = (int) Math.round(pokemon.getMaxHP() / 8.0);
+            damage = Math.min(damage, pokemon.getHp());
+            pokemon.setHp(pokemon.getHp() - damage);
+            if (pokemon.getOwner().isPlayer())
+                pokemonHpDamage = controller.getAllyHpAnimation(oldHp, pokemon.getHp(), pokemon.getMaxHP());
+            else
+                pokemonHpDamage = controller.getEnemyHpAnimation(oldHp, pokemon.getHp(), pokemon.getMaxHP());
 
+            battleTimeLine.add(sandstormDamageText);
+            battleTimeLine.add(controller.generatePause(500));
+            battleTimeLine.add(controller.getHitEffectClipPlayback(1));
+            battleTimeLine.add(controller.getMoveDamageAnimation(pokemon.getOwner().isPlayer()));
+            battleTimeLine.add(pokemonHpDamage);
+            battleTimeLine.add(controller.generatePause(1000));
+
+            if (pokemon.getHp() == 0)
+                processFainted(battleTimeLine);
         }
     }
 
@@ -1459,9 +1485,17 @@ public class BattleLogic {
     private List<Timeline> processHealthRestore(List<Timeline> moveTimeLine, Move move, Pokemon user) {
         if (user.getHp() != user.getMaxHP()) {
             double moveHpRestore = move.getHpRestore();
+            boolean weatherAffectedRestoreMove = move.getName() == MoveEnum.SYNTHESIS ||
+                    move.getName() == MoveEnum.MOONLIGHT || move.getName() == MoveEnum.MORNING_SUN;
+            boolean weatherEffectRainReduction = weatherEffect.getKey() == Enums.WeatherEffect.RAIN && weatherAffectedRestoreMove;
+            boolean weatherEffectSandstormReduction = weatherEffect.getKey() == Enums.WeatherEffect.SANDSTORM && weatherAffectedRestoreMove;
 
-            if (weatherEffect.getKey() == Enums.WeatherEffect.RAIN && move.getName() == MoveEnum.SYNTHESIS)             // TODO: also affects Morning Sun and Moonlight
+            if (weatherEffectRainReduction || weatherEffectSandstormReduction)
                 moveHpRestore *= 0.5;
+
+            boolean weatherEffectSandstormIncrease = weatherEffect.getKey() == Enums.WeatherEffect.SANDSTORM && move.getName() == MoveEnum.SHORE_UP;
+            if (weatherEffectSandstormIncrease)
+                moveHpRestore = 2/3.0;
 
             double restoredHealth = user.getMaxHP() * moveHpRestore;
             double healthChange = restoredHealth + user.getHp();
@@ -1613,7 +1647,7 @@ public class BattleLogic {
             accuracyModifier = (float)(3+statAccuracy) / 3.0f;
 
         if (user.getAbility() == Ability.COMPOUND_EYES && !move.isOneHitKOMove() && !user.getSubStatuses().contains(Enums.SubStatus.GASTRO_ACID)) {
-            accuracyModifier *= 1.3;
+            accuracyModifier *= 1.3f;
         }
 
         return accuracyModifier;
@@ -1814,10 +1848,12 @@ public class BattleLogic {
         if(user.getState() != Enums.States.MULTITURN)
             move.setPp(move.getPp() - 1);
 
-        int moveAccuracy = move.getAccuracy();
+        double moveAccuracy = move.getAccuracy();
 
         if (weatherEffect.getKey() == Enums.WeatherEffect.RAIN && move.getName() == MoveEnum.THUNDER)
             moveAccuracy = MoveTemplate.NOT_APPLICABLE;
+        if (weatherEffect.getKey() == Enums.WeatherEffect.SANDSTORM && target.getAbility() == Ability.SAND_VEIL)
+            moveAccuracy *= 4 / 5.0;
 
         int twoTurnModifier = checkTwoTurnMiss(move, target);
 
@@ -1886,7 +1922,7 @@ public class BattleLogic {
         // Move hit calculations, if move misses the function ends
         if (moveAccuracy != MoveTemplate.NOT_APPLICABLE) {
             float accuracyModifier = calculateMoveAccuracyModifier(user, target, move);
-            float hit = moveAccuracy * accuracyModifier;
+            double hit = moveAccuracy * accuracyModifier;
             int r = generator.nextInt(100) + 1;
             if (r > hit || twoTurnModifier == 0) {
                 processMoveMissed(user, moveTimeLine);
@@ -2875,6 +2911,11 @@ public class BattleLogic {
         double abilityMultiplier = processAbilityMultiplier(move, user);
         attack = attack * abilityMultiplier;
 
+        // Sandstorm increases special defense by 50%
+        if (move.getSubtype() == Enums.Subtypes.SPECIAL && weatherEffect.getKey() == Enums.WeatherEffect.SANDSTORM &&
+                target.containsType(Enums.Types.ROCK))
+            defense *= 1.5;
+
         // Miscellaneous stats calculation (stab, random factor, burn debuff)
         double part1 = ((2.0 * user.getLevel())/5.0) + 2;
         float rand = (generator.nextInt(16) + 85)/100.0f;
@@ -2977,10 +3018,13 @@ public class BattleLogic {
             case RAIN:
                 if (move.getType().getTypeEnum() == Enums.Types.WATER)
                     return 1.5;
-                if (move.getType().getTypeEnum() == Enums.Types.FIRE || move.getName() == MoveEnum.SOLAR_BEAM)
+                if (move.getType().getTypeEnum() == Enums.Types.FIRE || move.getName() == MoveEnum.SOLAR_BEAM ||
+                    move.getName() == MoveEnum.SOLAR_BLADE)
                     return 0.5;
                 return 1;
             case SANDSTORM:
+                if (move.getName() == MoveEnum.SOLAR_BEAM || move.getName() == MoveEnum.SOLAR_BLADE)
+                    return 0.5;
                 return 1;
             default:
                 throw new IllegalStateException("Unhandled weather effect: " + weatherEffect.getKey());

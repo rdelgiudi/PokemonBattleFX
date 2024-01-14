@@ -629,5 +629,10 @@ public class Pokemon {
                 new Move(MoveTemplate.getMove(MoveEnum.THUNDER)), new Move(MoveTemplate.getMove(MoveEnum.RAIN_DANCE)),
                 new Move(MoveTemplate.getMove(MoveEnum.SUBSTITUTE)), new Move(MoveTemplate.getMove(MoveEnum.VOLT_SWITCH)));
         pokemonExamples.put(example.getOriginalName(), example);
+
+        example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.SANDSHREW), 50, Ability.SAND_VEIL,
+                new Move(MoveTemplate.getMove(MoveEnum.BULLDOZE)), new Move(MoveTemplate.getMove(MoveEnum.SWIFT)),
+                new Move(MoveTemplate.getMove(MoveEnum.RAPID_SPIN)), new Move(MoveTemplate.getMove(MoveEnum.SANDSTORM)));
+        pokemonExamples.put(example.getOriginalName(), example);
     }
 }

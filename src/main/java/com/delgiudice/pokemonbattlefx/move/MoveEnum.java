@@ -113,7 +113,11 @@ public enum MoveEnum {
     SPIKES("Spikes"),
     STEALTH_ROCK("Stealth Rock"),
     STICKY_WEB("Sticky Web"),
-    WRAP("Wrap");
+    WRAP("Wrap"),
+    SHORE_UP("Shore Up"),
+    SOLAR_BLADE("Solar Blade"),
+    MOONLIGHT("Moonlight"),
+    MORNING_SUN("Morning Sun");
 
 
     private final String name;
