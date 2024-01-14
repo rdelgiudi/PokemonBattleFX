@@ -96,6 +96,7 @@ public class BattleController {
 
     private final static String WEATHER_NONE = "-fx-background-color: linear-gradient(to bottom, lightskyblue, darkorange);";
     private final static String WEATHER_RAIN = "-fx-background-color: linear-gradient(to bottom, lightgray, darkblue);";
+    private final static String WEATHER_SANDSTORM = "-fx-background-color: linear-gradient(to bottom, lightbrown, darkbrown);";
 
     public final static int SCREEN_WIDTH = 1280, SCREEN_HEIGHT = 720;
     private double ALLY_INFO_DEFAULT_Y, ALLY_SPRITE_DEFAULT_Y;
@@ -1094,6 +1095,11 @@ public class BattleController {
             case RAIN:
                 kf = new KeyFrame(Duration.millis(1), e-> {
                     mainPane.setStyle(WEATHER_RAIN);
+                });
+                break;
+            case SANDSTORM:
+                kf = new KeyFrame(Duration.millis(1), e-> {
+                    mainPane.setStyle(WEATHER_SANDSTORM);
                 });
                 break;
             default:

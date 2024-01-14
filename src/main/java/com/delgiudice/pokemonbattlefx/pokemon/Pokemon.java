@@ -39,7 +39,7 @@ public class Pokemon {
     private Move stateMove = null, trapMove = null;
     // stateCounter - counter that is used to keep track of moves left or the amount of moves during state
     // trappedTimer - counter that tracks how many more turns the Pokemon should be affected by trapping moves
-    private int stateCounter = 0, confusionTimer = 0, trappedTimer = 0;
+    private int stateCounter = 0, confusionTimer = 0, trappedTimer = 0, leechSeedTimer = 0;
     // ivs - Individual Values - random values between 0-31 that increase stats
     private int[] ivs = {0, 0, 0, 0, 0, 0};
     // nature - the nature of the Pokemon, that sometimes impact some of its stats
@@ -138,6 +138,10 @@ public class Pokemon {
 
     public int getSleepCounter() {
         return sleepCounter;
+    }
+
+    public int getLeechSeedTimer() {
+        return leechSeedTimer;
     }
 
     public Enums.States getState() {
@@ -239,6 +243,10 @@ public class Pokemon {
 
     public void setSleepCounter(int sleepCounter) {
         this.sleepCounter = sleepCounter;
+    }
+
+    public void setLeechSeedTimer(int leechSeedTimer) {
+        this.leechSeedTimer = leechSeedTimer;
     }
 
     public void setTrapped(boolean trapped) {

@@ -24,7 +24,10 @@ public enum Ability {
     SWARM("Swarm",
             "Powers up Bug-type moves when the Pokémon's HP is low."),
     STATIC("Static",
-            "The Pokémon is charged with static electricity and may paralyze attackers that make direct contact with it.");
+            "The Pokémon is charged with static electricity and may paralyze attackers that make direct contact with it."),
+    SAND_FORCE("Sand Force", "not implemented"),
+    SAND_RUSH("Sand Rush", "not implemented"),
+    SAND_VEIL("Sand Veil", "not implemented");
 
     final private String ability;
     private String description = "No description";

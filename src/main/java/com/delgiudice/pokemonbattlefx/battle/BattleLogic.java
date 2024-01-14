@@ -945,18 +945,19 @@ public class BattleLogic {
     private void applyWeatherEffects(List<Timeline> battleTimeLine) {
 
         Enums.WeatherEffect currentWeatherEffect = weatherEffect.getKey();
+        int weatherEffectTimer;
 
         switch (currentWeatherEffect) {
             case NONE:
                 finalChecks(battleTimeLine);
                 break;
             case RAIN:
-                int weatherEffectTimer = weatherEffect.getValue();
+                weatherEffectTimer = weatherEffect.getValue();
                 Timeline rainMessage;
                 if (weatherEffectTimer > 0) {
                     weatherEffectTimer--;
                     weatherEffect = new Pair<>(currentWeatherEffect, weatherEffectTimer);
-                    rainMessage = controller.getBattleTextAnimation("Rain continues to fall...", true);
+                    rainMessage = controller.getBattleTextAnimation("Rain continues to fall.", true);
                 }
                 else {
                     rainMessage = controller.getBattleTextAnimation("The rain stopped.", true);
@@ -966,11 +967,38 @@ public class BattleLogic {
                 battleTimeLine.add(rainMessage);
                 battleTimeLine.add(controller.generatePause(1000));
                 break;
+            case SANDSTORM:
+                weatherEffectTimer = weatherEffect.getValue();
+                Timeline sandstormMessage;
+                if (weatherEffectTimer > 0) {
+                    weatherEffectTimer--;
+                    weatherEffect = new Pair<>(currentWeatherEffect, weatherEffectTimer);
+                    sandstormMessage = controller.getBattleTextAnimation("The sandstorm rages.", true);
+
+                }
+                else {
+                    sandstormMessage = controller.getBattleTextAnimation("The sandstorm subsided.", true);
+                    weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
+                    battleTimeLine.add(controller.updateFieldWeatherEffect(weatherEffect.getKey()));
+                }
+                battleTimeLine.add(sandstormMessage);
+                battleTimeLine.add(controller.generatePause(1000));
+                break;
             default:
                 throw new IllegalStateException("Unhandled weather condition: " + currentWeatherEffect);
         }
 
         finalChecks(battleTimeLine);
+    }
+
+    private void executeSandstormDamageCheck(List<Timeline> battleTimeLine, Pokemon pokemon) {
+        boolean pokemonImmuneType = pokemon.containsType(Enums.Types.ROCK) || pokemon.containsType(Enums.Types.STEEL)
+                || pokemon.containsType(Enums.Types.GROUND);
+        boolean pokemonImmuneAbility = pokemon.getAbility() == Ability.SAND_FORCE || pokemon.getAbility() == Ability.SAND_RUSH
+                || pokemon.getAbility() == Ability.SAND_VEIL;
+        if (!pokemonImmuneType && !pokemonImmuneAbility) {
+
+        }
     }
 
     // Send out new ally Pokemon if available, else game over for the player, even if enemy also out of Pokemon
@@ -1637,14 +1665,17 @@ public class BattleLogic {
         switch (moveWeatherEffect) {
             case RAIN:
                 weatherMessage = controller.getBattleTextAnimation("It started to rain!", true);
-                weatherEffect = new Pair<>(moveWeatherEffect, 5);
-                weatherChange = controller.updateFieldWeatherEffect(moveWeatherEffect);
-                System.out.println("Weather effect applied: " + moveWeatherEffect);
+                break;
+            case SANDSTORM:
+                weatherMessage = controller.getBattleTextAnimation("A sandstorm brewed!", true);
                 break;
             default:
                 throw new IllegalStateException("Unknown weather effect: " + move.getWeatherEffect());
         }
 
+        weatherEffect = new Pair<>(moveWeatherEffect, 5);
+        weatherChange = controller.updateFieldWeatherEffect(moveWeatherEffect);
+        System.out.println("Weather effect applied: " + moveWeatherEffect);
         moveTimeLine.add(weatherMessage);
         moveTimeLine.add(weatherChange);
         moveTimeLine.add(controller.generatePause(2000));
@@ -2132,6 +2163,24 @@ public class BattleLogic {
             processMultiturnMoveCompleted(moveTimeLine, user);
         //*********************************************************************
 
+        // If move allows to break away from negative status effects inflicted by enemy
+        if (!move.getSubstatusNegation().isEmpty()) {
+            processSubStatusMoveRemoval(user, move);
+        }
+
+        // If move removes trap effects
+        if (user.getTrapMove() != null && move.getTrappingMoveNegation().contains(user.getTrapMove().getName()) ) {
+            processTrapMoveRemoval(moveTimeLine, user, target);
+        }
+
+        // If move removes spikes
+        HashMap< Enums.Spikes, Integer> spikes = user.getOwner().isPlayer() ? allySpikes : enemySpikes;
+        if (move.isRemovesSpikes() && !spikes.isEmpty()) {
+            spikes.clear();
+            moveTimeLine.add(controller.getBattleText("All hazards on the ground\nwere swept away!", true));
+        }
+        //******************************************************************
+
         // If enemy move swaps Pokemon out
         if (!user.getOwner().isPlayer() && move.isSwitchOut() && getEnemyAbleToBattleNum() > 1) {
             int newPokemonIndex = -1;
@@ -2169,6 +2218,22 @@ public class BattleLogic {
         }
 
         return moveTimeLine;
+    }
+
+    private void processTrapMoveRemoval(List<Timeline> moveTimeLine, Pokemon user, Pokemon target) {
+        moveTimeLine.add(controller.getBattleText(String.format("%s was released%nby %s", user.getBattleName(),
+                target.getBattleNameMiddle()), true));
+        user.setTrapMove(null);
+        user.setTrappedTimer(0);
+    }
+
+    private void processSubStatusMoveRemoval(Pokemon user, Move move) {
+        for (Enums.SubStatus subStatus : move.getSubstatusNegation()) {
+            if (user.getSubStatuses().remove(subStatus)) {
+                System.out.printf("%s's status removed: %s", user.getBattleName(), subStatus);
+                user.setLeechSeedTimer(subStatus == Enums.SubStatus.LEECH_SEED ? 0 : user.getLeechSeedTimer());
+            }
+        }
     }
 
     private void processStaticCheck(List<Timeline> moveTimeLine, Pokemon user, Pokemon target) {
@@ -2914,6 +2979,8 @@ public class BattleLogic {
                     return 1.5;
                 if (move.getType().getTypeEnum() == Enums.Types.FIRE || move.getName() == MoveEnum.SOLAR_BEAM)
                     return 0.5;
+                return 1;
+            case SANDSTORM:
                 return 1;
             default:
                 throw new IllegalStateException("Unhandled weather effect: " + weatherEffect.getKey());

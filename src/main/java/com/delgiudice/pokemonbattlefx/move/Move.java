@@ -119,6 +119,10 @@ public class Move {
         return template.isSwitchOut();
     }
 
+    public boolean isRemovesSpikes() {
+        return template.isRemovesSpikes();
+    }
+
     public float getLifesteal() {
         return template.getLifesteal();
     }
@@ -145,6 +149,14 @@ public class Move {
 
     public Enums.MoveCategory getMoveCategory() {
         return template.getMoveCategory();
+    }
+
+    public List<MoveEnum> getTrappingMoveNegation() {
+        return template.getTrappingMoveNegation();
+    }
+
+    public List<Enums.SubStatus> getSubstatusNegation() {
+        return template.getSubStatusNegation();
     }
 
     public boolean isStatUpDuringCharging() {

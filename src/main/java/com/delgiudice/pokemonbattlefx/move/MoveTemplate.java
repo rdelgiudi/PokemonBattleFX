@@ -55,9 +55,10 @@ public class MoveTemplate {
     // recharge - determines whether a move needs a turn to recharge after use
     // oneHitKOMove - determines whether a move is a one hit KO move (if move hits enemy Pokemon faints)
     // switchOut - user switches out after move is successfully executed
+    // removesSpikes - determines whether a move erases opponent's entry hazards (spikes)
     private boolean twoturn = false, self = false, trap = false, charging = false, multiturn = false,
                     recoilUserHp = false, statUpDuringCharging = false, contactMove = false, multiturnConfusion = false,
-                    recharge = false, oneHitKOMove = false, switchOut = false;
+                    recharge = false, oneHitKOMove = false, switchOut = false, removesSpikes = false;
 
     // moveDescription - contains the description of the move, displayed in summary menu
     private String moveDescription = "No description";
@@ -84,6 +85,10 @@ public class MoveTemplate {
     private Enums.WeatherEffect weatherEffect = Enums.WeatherEffect.NONE;
     // moveCategory - additional move category that allow to modify its effects with other moves or abilities
     private Enums.MoveCategory moveCategory = Enums.MoveCategory.NONE;
+    // trappingMoveCounter - list of trapping moves that are countered by this move
+    private List<MoveEnum> trappingMoveNegation = new ArrayList<>();
+    // subStatusNegation - list of substatuses negated by this move
+    private List<Enums.SubStatus> subStatusNegation = new ArrayList<>();
 
     public MoveEnum getName() {
         return name;
@@ -217,6 +222,14 @@ public class MoveTemplate {
         return moveCategory;
     }
 
+    public List<MoveEnum> getTrappingMoveNegation() {
+        return trappingMoveNegation;
+    }
+
+    public List<Enums.SubStatus> getSubStatusNegation() {
+        return subStatusNegation;
+    }
+
     public boolean isRecharge() {
         return recharge;
     }
@@ -235,6 +248,10 @@ public class MoveTemplate {
 
     public boolean isSwitchOut() {
         return switchOut;
+    }
+
+    public boolean isRemovesSpikes() {
+        return removesSpikes;
     }
 
     public void setPriority(int priority) {
@@ -319,6 +336,10 @@ public class MoveTemplate {
 
     public void setSwitchOut(boolean switchOut) {
         this.switchOut = switchOut;
+    }
+
+    public void setRemovesSpikes(boolean removesSpikes) {
+        this.removesSpikes = removesSpikes;
     }
 
     public void setCondition(Enums.BattlefieldCondition condition) {
@@ -1009,6 +1030,47 @@ public class MoveTemplate {
         newmove.setSelf(true);
         newmove.setMoveDescription("The user creates a substitute for itself using some of its own HP. The substitute serves as the user's decoy.");
         moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.BULLDOZE, 60, 100, 20, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.GROUND), false);
+        newmove.getStatTypes().add(Enums.StatType.SPEED);
+        newmove.setStatChange(-1);
+        newmove.setStatChangeProb(1f);
+        newmove.setSelf(false);
+        newmove.setMoveDescription("The user strikes everything around it by stomping down on the ground. This lowers the Speed stats of those hit.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.SWIFT, 60, NOT_APPLICABLE, 20, Enums.Subtypes.SPECIAL,
+                Type.getTypeMap(Enums.Types.NORMAL), false);
+        newmove.setMoveDescription("Star-shaped rays are shot at opposing Pokémon. This attack never misses.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.RAPID_SPIN, 50, 100, 40, Enums.Subtypes.PHYSICAL,
+                Type.getTypeMap(Enums.Types.NORMAL), true);
+        newmove.getTrappingMoveNegation().add(MoveEnum.BIND);
+        newmove.getTrappingMoveNegation().add(MoveEnum.CLAMP);
+        newmove.getTrappingMoveNegation().add(MoveEnum.INFESTATION);
+        newmove.getTrappingMoveNegation().add(MoveEnum.FIRE_SPIN);
+        newmove.getTrappingMoveNegation().add(MoveEnum.MAGMA_STORM);
+        newmove.getTrappingMoveNegation().add(MoveEnum.SAND_TOMB);
+        newmove.getTrappingMoveNegation().add(MoveEnum.SNAP_TRAP);
+        newmove.getTrappingMoveNegation().add(MoveEnum.WHIRLPOOL);
+        newmove.getTrappingMoveNegation().add(MoveEnum.WRAP);
+        newmove.getSubStatusNegation().add(Enums.SubStatus.LEECH_SEED);
+        newmove.setRemovesSpikes(true);
+        newmove.getStatTypes().add(Enums.StatType.SPEED);
+        newmove.setStatChange(1);
+        newmove.setStatChangeProb(1f);
+        newmove.setSelf(true);
+        newmove.setMoveDescription(" \tThe user performs a spin attack that can also eliminate the effects of such moves as Bind, Wrap, and Leech Seed. This also boosts the user's Speed stat.");
+        moveMap.put(newmove.getName(), newmove);
+
+        newmove = new MoveTemplate(MoveEnum.SANDSTORM, NOT_APPLICABLE, NOT_APPLICABLE, 10, Enums.Subtypes.STATUS,
+                Type.getTypeMap(Enums.Types.ROCK), false);
+        newmove.setWeatherEffect(Enums.WeatherEffect.SANDSTORM);
+        newmove.setMoveDescription("A five-turn sandstorm is summoned to damage all Pokémon except Rock, Ground, and Steel types. The sandstorm also boosts the Sp. Def stats of Rock types.");
+        moveMap.put(newmove.getName(), newmove);
+
     }
 
 }

@@ -98,7 +98,22 @@ public enum MoveEnum {
     THUNDER("Thunder"),
     RAIN_DANCE("Rain Dance"),
     VOLT_SWITCH("Volt Switch"),
-    SUBSTITUTE("Substitute");
+    SUBSTITUTE("Substitute"),
+    BULLDOZE("Bulldoze"),
+    RAPID_SPIN("Rapid Spin"),
+    SWIFT("Swift"),
+    SANDSTORM("Sandstorm"),
+    BIND("Bind"),
+    CLAMP("Clamp"),
+    INFESTATION("Infestation"),
+    LEECH_SEED("Leech Seed"),
+    MAGMA_STORM("Magma Storm"),
+    SAND_TOMB("Sand Tomb"),
+    SNAP_TRAP("Snap Trap"),
+    SPIKES("Spikes"),
+    STEALTH_ROCK("Stealth Rock"),
+    STICKY_WEB("Sticky Web"),
+    WRAP("Wrap");
 
 
     private final String name;

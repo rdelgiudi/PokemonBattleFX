@@ -126,7 +126,8 @@ public class Enums {
         LASER_FOCUS("laser focus"),
         ROOST("roost"),
         GASTRO_ACID("gastro acid"),
-        SUBSTITUTE("substitute");
+        SUBSTITUTE("substitute"),
+        LEECH_SEED("leech seed");
 
         final private String statusString;
 
@@ -195,7 +196,8 @@ public class Enums {
 
     public enum WeatherEffect {
         NONE("Regular weather"),
-        RAIN("rain");
+        RAIN("rain"),
+        SANDSTORM("sandstorm");
 
         final private String name;
 
