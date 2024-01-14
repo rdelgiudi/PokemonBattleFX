@@ -80,6 +80,8 @@ public class BattleController {
 
     private Clip audioEffectsClip, allyLowHpClip;
 
+    private final Image pokemonIndicatorEmpty, pokemonIndicatorNormal;
+
     private final static String FIGHT_BUTTON_PRESSED = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: darkred;";
     private final static String FIGHT_BUTTON_RELEASE = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: firebrick;";
     private final static String FIGHT_BUTTON_HOVER = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: crimson;";
@@ -181,6 +183,9 @@ public class BattleController {
         }
         else
             allyLowHpInputStream = null;
+
+        pokemonIndicatorEmpty = new Image("/sprites/indicator_empty.png");
+        pokemonIndicatorNormal = new Image("/sprites/indicator_normal.png");
     }
 
     public void initialize() {
@@ -1459,7 +1464,7 @@ public class BattleController {
             ImageView allyPokemonStatusForeground = subList.get(1);
             if (allySize > i) {
                 allyPokemonStatusForeground.setImage(allyPokemon.get(i).getSpecie().getFrontSpriteThumbnail());
-                allyPokemonStatusBackground.setImage(new Image("sprites/indicator_normal.png"));
+                allyPokemonStatusBackground.setImage(pokemonIndicatorNormal);
                 if (allyPokemon.get(i).getStatus() == Enums.Status.FAINTED) {
                     setColorShiftEffect(allyPokemonStatusForeground, 1, Color.GRAY);
                     setColorShiftEffect(allyPokemonStatusBackground, 1, Color.GRAY);
@@ -1471,7 +1476,8 @@ public class BattleController {
             }
             else {
                 allyPokemonStatusForeground.setImage(null);
-                allyPokemonStatusBackground.setImage(new Image("sprites/indicator_empty.png"));
+                allyPokemonStatusBackground.setImage(pokemonIndicatorEmpty);
+                resetColorShiftEffect(allyPokemonStatusBackground);
             }
         }
     }
@@ -1492,7 +1498,7 @@ public class BattleController {
                 else
                     enemyPokemonStatusForeground.setImage(null);
 
-                enemyPokemonStatusBackground.setImage(new Image("sprites/indicator_normal.png"));
+                enemyPokemonStatusBackground.setImage(pokemonIndicatorNormal);
 
                 if (enemyPokemon.get(i).getStatus() == Enums.Status.FAINTED) {
                     setColorShiftEffect(enemyPokemonStatusBackground, 1, Color.GRAY);
@@ -1506,7 +1512,8 @@ public class BattleController {
             }
             else {
                 enemyPokemonStatusForeground.setImage(null);
-                enemyPokemonStatusBackground.setImage(new Image("sprites/indicator_empty.png"));
+                enemyPokemonStatusBackground.setImage(pokemonIndicatorEmpty);
+                resetColorShiftEffect(enemyPokemonStatusBackground);
             }
         }
     }

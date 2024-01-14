@@ -10,6 +10,7 @@ import com.delgiudice.pokemonbattlefx.move.MoveEnum;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.pokemon.Ability;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
+import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
 import com.delgiudice.pokemonbattlefx.trainer.NpcTrainer;
 import com.delgiudice.pokemonbattlefx.trainer.Player;
 import javafx.animation.KeyFrame;
@@ -92,6 +93,9 @@ public class BattleLogic {
         weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
         controller.updateFieldWeatherEffect(weatherEffect.getKey()).play();
         enemySeen = new boolean[]{false, false, false, false, false, false};
+
+        if (BattleApplication.isUseInternetSprites())
+            PokemonSpecie.unloadNetImages();
     }
 
     public void startBattle(Player player, NpcTrainer enemy, Pane teamBuilderPane) {

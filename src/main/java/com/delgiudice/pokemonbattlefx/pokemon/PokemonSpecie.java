@@ -181,6 +181,14 @@ public class PokemonSpecie{
             backSpriteLoaded = loadSpriteImage(false, false, false);
     }
 
+    public static void unloadNetImages() {
+        for (PokemonSpecie pokemonSpecie : pokemonMap.values()) {
+            pokemonSpecie.frontSpriteLoaded = null;
+            pokemonSpecie.backSpriteLoaded = null;
+        }
+        System.gc();
+    }
+
     public Image getFrontSprite() {
         return loadSpriteImage(true, false, false);
     }
