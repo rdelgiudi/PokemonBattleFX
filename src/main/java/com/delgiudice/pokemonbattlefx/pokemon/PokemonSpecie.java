@@ -351,8 +351,6 @@ public class PokemonSpecie{
         newpkmn = new PokemonSpecie(6, PokemonEnum.CHARIZARD, Type.getTypeMap().get(Enums.Types.FIRE),
                 Type.getTypeMap().get(Enums.Types.FLYING), 78, 84, 78, 109, 85, 100,
                 "/sprites/charizard_front.png", "/sprites/charizard_back.png");
-        newpkmn.backSpriteAnim = "https://www.pokencyclopedia.info/sprites/gen5/ani-b_black-white/a-b_bw_006.gif";
-        newpkmn.frontSpriteAnim = "https://www.pokencyclopedia.info/sprites/gen5/ani_black-white/ani_bw_006.gif";
         pokemonMap.put(newpkmn.getName(), newpkmn);
 
         newpkmn = new PokemonSpecie(19,PokemonEnum.RATTATA, Type.getTypeMap().get(Enums.Types.NORMAL),
@@ -460,8 +458,8 @@ public class PokemonSpecie{
         pokemonMap.put(newpkmn.getName(), newpkmn);
 
         newpkmn = new PokemonSpecie(27, PokemonEnum.SANDSHREW, Type.getTypeMap(Enums.Types.GROUND), 50,
-                75, 85, 20, 30, 40, "sprites/sandshrew_front.png",
-                "sprites/sandshrew_back.png");
+                75, 85, 20, 30, 40, "/sprites/sandshrew_front.png",
+                "/sprites/sandshrew_back.png");
         pokemonMap.put(newpkmn.getName(), newpkmn);
     }
 
