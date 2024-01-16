@@ -5,6 +5,13 @@ import javafx.scene.paint.Color;
 import java.util.HashMap;
 
 public class Enums {
+
+    public enum GameMode {
+        OFFLINE,
+        SERVER,
+        CLIENT;
+    }
+
     //All types
     public enum Types {        //lista typów
         NORMAL("NORMAL", Color.valueOf("#A8A878")),       //0

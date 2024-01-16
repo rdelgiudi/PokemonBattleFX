@@ -5,20 +5,20 @@ import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.battle.BattleController;
 import com.delgiudice.pokemonbattlefx.battle.BattleLogic;
 import com.delgiudice.pokemonbattlefx.item.Item;
+import com.delgiudice.pokemonbattlefx.network.ClientThread;
+import com.delgiudice.pokemonbattlefx.network.ServerThread;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.pokemon.PokemonEnum;
 import com.delgiudice.pokemonbattlefx.trainer.NpcTrainer;
 import com.delgiudice.pokemonbattlefx.trainer.Player;
+import com.sun.security.ntlm.Server;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -26,7 +26,12 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.*;
 
 public class TeamBuilderController {
@@ -36,9 +41,11 @@ public class TeamBuilderController {
     @FXML
     private GridPane pokemonGrid;
     @FXML
-    private Button playerSettingsButton, enemySettingsButton, startBattleButton;
+    private Button playerSettingsButton, enemySettingsButton, startBattleButton, multiplayerOptionsButton;
     @FXML
     private ScrollPane scrollPane;
+    @FXML
+    private TextField ipAddressField;
 
     List<Pokemon> playerParty = new ArrayList<>(), enemyParty = new ArrayList<>();
 
@@ -56,6 +63,8 @@ public class TeamBuilderController {
 
     private int FONT_SIZE = 13, POKEMON_BUTTON_WIDTH = 125, POKEMON_BUTTON_HEIGHT = 100, POKEMON_PANE_SIZE = 450;
     private int PARTY_BUTTON_WIDTH = 100, PARTY_BUTTON_HEIGHT = 100;
+
+    private Enums.GameMode gameMode = Enums.GameMode.OFFLINE;
 
     public TeamBuilderController() throws IOException {
         Pokemon.generatePokemonExamples();
@@ -120,6 +129,34 @@ public class TeamBuilderController {
             PARTY_BUTTON_HEIGHT = (int)Math.round(scene.getHeight() / 7.2);
             refreshUi();
         });
+    }
+
+    @FXML
+    private void changeGameMode() {
+
+        int gameModeValue = gameMode.ordinal();
+        if (gameModeValue < 2)
+            gameModeValue++;
+        else
+            gameModeValue = 0;
+
+        gameMode = Enums.GameMode.values()[gameModeValue];
+        refreshParties();
+
+        ipAddressField.setVisible(gameMode == Enums.GameMode.CLIENT);
+        enemyPartyBox.setVisible(gameMode == Enums.GameMode.OFFLINE);
+
+        switch (gameMode) {
+            case OFFLINE:
+                multiplayerOptionsButton.setText("Offline");
+                break;
+            case SERVER:
+                multiplayerOptionsButton.setText("Server");
+                break;
+            case CLIENT:
+                multiplayerOptionsButton.setText("Client");
+                break;
+        }
     }
 
     private void refreshUi() {
@@ -305,7 +342,10 @@ public class TeamBuilderController {
                 enemyPokemonButton.setDisable(true);
             }
         }
-        startBattleButton.setDisable(playerParty.size() < 1 || enemyParty.size() < 1);
+        if (gameMode == Enums.GameMode.OFFLINE)
+            startBattleButton.setDisable(playerParty.isEmpty() || enemyParty.isEmpty());
+        else
+            startBattleButton.setDisable(playerParty.isEmpty());
     }
 
     public void setButtonEffect(Button button) {
@@ -325,7 +365,21 @@ public class TeamBuilderController {
     }
 
     @FXML
-    public void startBattle(){
+    private void startBattle(){
+        switch (gameMode) {
+            case OFFLINE:
+                startOfflineBattle();
+                break;
+            case SERVER:
+                startOnlineBattleServer();
+                break;
+            case CLIENT:
+                startOnlineBattleClient();
+                break;
+        }
+    }
+
+    private void startOfflineBattle() {
         Player player = new Player(playerName, playerParty.get(0));
         NpcTrainer enemy = new NpcTrainer(enemyName, trainerType, enemyParty.get(0));
 
@@ -340,5 +394,32 @@ public class TeamBuilderController {
         startBattleButton.getScene().setRoot(battlePane);
 
         logic.startBattle(player, enemy, teamBuilderPane);
+    }
+
+    private void startOnlineBattleServer() {
+        ServerSocket serverSocket;
+        try {
+            serverSocket = new ServerSocket(1234);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        ServerThread thread = new ServerThread(serverSocket, this);
+        thread.start();
+    }
+
+    private void startOnlineBattleClient() {
+        ClientThread thread = new ClientThread(ipAddressField.getText(), this);
+        thread.start();
+    }
+
+    public void sendBattleInfo(DataInputStream inputStream, DataOutputStream outputStream) throws IOException {
+        outputStream.writeUTF("Hello world");
+    }
+
+    public void readBattleInfo(DataInputStream inputStream, DataOutputStream outputStream) throws IOException {
+        System.out.println("Client response: " + inputStream.readUTF());
     }
 }

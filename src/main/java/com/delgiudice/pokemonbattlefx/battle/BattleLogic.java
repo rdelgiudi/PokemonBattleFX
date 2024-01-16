@@ -909,6 +909,11 @@ public class BattleLogic {
             // Displays faint animation before switching out Pokemon
             processFainted(moveTimeLine);
 
+            // If battle ends, skip switching out
+            if (checkBattleEnd(moveTimeLine)) {
+                return;
+            }
+
             Button pokemonButton = controller.getPokemonButton();
             final Pokemon firstPokemonFinal = firstPokemon;
             moveTimeLine.get(moveTimeLine.size() - 1).setOnFinished(e -> {
@@ -938,6 +943,11 @@ public class BattleLogic {
         if (enemySwitchOutEligible) {
             // Displays faint animation before switching out Pokemon
             processFainted(moveTimeLine);
+
+            // If battle ends, skip switching out
+            if (checkBattleEnd(moveTimeLine)) {
+                return;
+            }
 
             Enums.SwitchContext switchContext = Enums.SwitchContext.SWITCH_FIRST_MOVE;
             moveTimeLine.get(moveTimeLine.size() - 1).setOnFinished(e -> {
@@ -989,6 +999,14 @@ public class BattleLogic {
 
         // If move switches out user, open switch menu when another party Pokemon is able to battle
         if (playerSwitchOutEligible) {
+            // Displays faint animation before switching out Pokemon
+            processFainted(moveTimeLine);
+
+            // If battle ends, skip switching out
+            if (checkBattleEnd(moveTimeLine)) {
+                return;
+            }
+
             Button pokemonButton = controller.getPokemonButton();
             moveTimeLine.get(moveTimeLine.size() - 1).setOnFinished(e -> {
                 SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
@@ -1014,6 +1032,11 @@ public class BattleLogic {
         if (enemySwitchOutEligible) {
             // Displays faint animation before switching out Pokemon
             processFainted(moveTimeLine);
+
+            // If battle ends, skip switching out
+            if (checkBattleEnd(moveTimeLine)) {
+                return;
+            }
 
             Enums.SwitchContext switchContext = Enums.SwitchContext.SWITCH_SECOND_MOVE;
             moveTimeLine.get(moveTimeLine.size() - 1).setOnFinished(e -> {
@@ -1207,9 +1230,9 @@ public class BattleLogic {
                     battleTimeLine.add(controller.generatePause(1000));
 
                     if (playerParty.get(0).getHp() > 0)
-                        executeSandstormDamageCheck(battleTimeLine, playerParty.get(0));
+                        processDamageSandstorm(battleTimeLine, playerParty.get(0));
                     if (enemyParty.get(0).getHp() > 0)
-                        executeSandstormDamageCheck(battleTimeLine, enemyParty.get(0));
+                        processDamageSandstorm(battleTimeLine, enemyParty.get(0));
                 }
                 else {
                     sandstormMessage = controller.getBattleTextAnimation("The sandstorm subsided.", true);
@@ -1226,7 +1249,7 @@ public class BattleLogic {
         finalChecks(battleTimeLine);
     }
 
-    private void executeSandstormDamageCheck(List<Timeline> battleTimeLine, Pokemon pokemon) {
+    private void processDamageSandstorm(List<Timeline> battleTimeLine, Pokemon pokemon) {
         boolean pokemonImmuneType = pokemon.containsType(Enums.Types.ROCK) || pokemon.containsType(Enums.Types.STEEL)
                 || pokemon.containsType(Enums.Types.GROUND);
         boolean pokemonImmuneAbility = pokemon.getAbility() == Ability.SAND_FORCE || pokemon.getAbility() == Ability.SAND_RUSH
