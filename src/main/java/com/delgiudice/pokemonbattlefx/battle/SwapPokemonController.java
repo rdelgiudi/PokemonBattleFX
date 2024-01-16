@@ -395,6 +395,8 @@ public class SwapPokemonController {
             return;
         }
 
+        List<Timeline> battleTimeLine = new ArrayList<>();
+
         int healValue = calculateHealingItemEffect(item, target);
         Timeline healAnimation;
         if (healValue > 0)
@@ -410,7 +412,6 @@ public class SwapPokemonController {
         healInfo.setOnFinished(e -> pause.play());
 
         TrainerAction itemAction = new TrainerAction(Enums.ActionTypes.USE_BAG_ITEM, item.getName(), index);
-        pause.setOnFinished(e -> returnToBattle(itemAction));
 
         target.setHp(target.getHp() + healValue);
 
@@ -425,9 +426,13 @@ public class SwapPokemonController {
             battleController.setAllyHpBar(target.getHp(), target.getMaxHP(), true);
             battleController.updateStatus(target, true, target.getStatus()).play();
         }
-
         reduceItemAmount();
-        healAnimation.play();
+
+        battleTimeLine.add(healAnimation);
+        battleTimeLine.add(healInfo);
+        battleTimeLine.add(pause);
+        //healAnimation.play();
+        returnToBattle(itemAction, battleTimeLine);
     }
 
     public static boolean checkStatusHealingItemViable(Item item, Pokemon target) {
@@ -457,6 +462,8 @@ public class SwapPokemonController {
             return;
         }
 
+        List<Timeline> battleTimeLine = new ArrayList<>();
+
         int healValue = processStatusHealingEffect(item, target);
         setPokemonInfo(pokemonBox, index);
         Timeline healAnimation = battleController.generatePause(1);
@@ -469,19 +476,17 @@ public class SwapPokemonController {
         if (index == 0)
             battleController.updateStatus(target, true, target.getStatus()).play();
 
-        reduceItemAmount();
-
         Timeline healInfo = getInfoText(String.format(
                 "%s's status was cleared.", target.getBattleName()));
         Timeline pause = battleController.generatePause(1000);
 
-        healAnimation.setOnFinished(e -> healInfo.play());
-        healInfo.setOnFinished(e -> pause.play());
-
         TrainerAction itemAction = new TrainerAction(Enums.ActionTypes.USE_BAG_ITEM, item.getName(), index);
-        pause.setOnFinished(e -> returnToBattle(itemAction));
 
-        healAnimation.play();
+        reduceItemAmount();
+        battleTimeLine.add(healAnimation);
+        battleTimeLine.add(healInfo);
+        battleTimeLine.add(pause);
+        returnToBattle(itemAction, battleTimeLine);
     }
 
     private void playIncompatibleItemMessage(Pokemon target) {
@@ -510,13 +515,16 @@ public class SwapPokemonController {
         }
     }
 
-    private void returnToBattle(TrainerAction itemAction) {
-        Scene scene = cancelButton.getScene();
-        scene.setRoot(battlePane);
-        this.pokemonBox.setDisable(false);
-        currentPokemonBox.setDisable(false);
-        cancelButton.setDisable(false);
-        battleLogic.waitEnemyAction(itemAction);
+    private void returnToBattle(TrainerAction itemAction, List<Timeline> battleTimeLine) {
+        battleTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e -> {
+            Scene scene = cancelButton.getScene();
+            scene.setRoot(battlePane);
+            this.pokemonBox.setDisable(false);
+            currentPokemonBox.setDisable(false);
+            cancelButton.setDisable(false);
+        })));
+
+        battleLogic.waitEnemyAction(itemAction, battleTimeLine);
     }
 
     private void initSwapMenuListener(HBox pokemonBox, Pokemon pokemon, int index) {
@@ -605,20 +613,19 @@ public class SwapPokemonController {
                 battleTimeLine.add(battleController.generatePause(1000));
             }
 
-            battleLogic.switchPokemon(true, index);
-            int newCurrentAllyPokemon = 0;
+            //int newCurrentAllyPokemon = 0;
 
             //controller.setAllyInformation(player.getParty(currentAllyPokemon));
             Timeline allyPokemonIntro = battleController.getBattleTextAnimation(String.format(BattleLogic.POKEMON_SENT_OUT_STRING,
-                    party.get(newCurrentAllyPokemon).getBattleName()), true);
+                    party.get(index).getBattleName()), true);
             battleTimeLine.add(allyPokemonIntro);
 
-            Timeline updateStatus = battleController.updateStatus(party.get(newCurrentAllyPokemon), true,
-                    party.get(newCurrentAllyPokemon).getStatus());
+            Timeline updateStatus = battleController.updateStatus(party.get(index), true,
+                    party.get(index).getStatus());
             battleTimeLine.add(updateStatus);
 
-            Timeline allyInfoAnimation = battleController.getIntroAnimation(party.get(newCurrentAllyPokemon),
-                    party.get(newCurrentAllyPokemon).getHp());
+            Timeline allyInfoAnimation = battleController.getIntroAnimation(party.get(index),
+                    party.get(index).getHp());
             battleTimeLine.add(allyInfoAnimation);
 
             Scene scene = pokemonBox.getScene();
@@ -627,22 +634,26 @@ public class SwapPokemonController {
             if (switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE) {
                 if (turnPokemon == null || secondMove == null)
                     throw new ValueException("Values of turnPokemon and secondMove expected to be not null in this context");
+                battleLogic.switchPokemon(true, index);
                 battleLogic.applySentOutEffects(battleTimeLine);
-                battleLogic.processSecondMove(battleTimeLine, party.get(newCurrentAllyPokemon), turnPokemon.get(1), secondMove);
+                battleLogic.processSecondMove(battleTimeLine, party.get(0), turnPokemon.get(1), secondMove);
             }
             else if (switchContext == Enums.SwitchContext.SWITCH_FIRST) {
-                battleLogic.applySentOutEffects(battleTimeLine);
-                battleLogic.initAnimationQueue(battleTimeLine);
-                battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
-                        TrainerAction playerAction = new TrainerAction(Enums.ActionTypes.SWITCH_POKEMON, String.valueOf(index));
-                        battleLogic.waitEnemyAction(playerAction);
-                });
-                battleTimeLine.get(0).play();
+                //battleLogic.initAnimationQueue(battleTimeLine);
+                //battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+                //});
+                //battleTimeLine.get(0).play();
+                TrainerAction playerAction = new TrainerAction(Enums.ActionTypes.SWITCH_POKEMON, String.valueOf(index));
+                battleLogic.waitEnemyAction(playerAction, battleTimeLine);
             }
             else if (switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE || switchContext == Enums.SwitchContext.SWITCH_SECOND) {
+                battleLogic.switchPokemon(true, index);
+                battleLogic.applySentOutEffects(battleTimeLine);
                 battleLogic.battleTurnEnd(battleTimeLine);
                 }
             else if (switchContext == Enums.SwitchContext.SWITCH_FAINTED) {
+                battleLogic.switchPokemon(true, index);
+                battleLogic.applySentOutEffects(battleTimeLine);
                 battleLogic.finalChecks(battleTimeLine);
             }
         });

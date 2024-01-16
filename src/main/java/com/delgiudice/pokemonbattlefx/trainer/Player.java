@@ -3,6 +3,8 @@ package com.delgiudice.pokemonbattlefx.trainer;
 import com.delgiudice.pokemonbattlefx.battle.TrainerAction;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 
+import java.util.List;
+
 public class Player extends Trainer {
 
     public Player(String name, Pokemon pokemon)
@@ -16,4 +18,10 @@ public class Player extends Trainer {
     public TrainerAction getEnemyAction(Pokemon enemyPokemon) {
         return null;
     }
+
+    @Override
+    public TrainerAction getEnemySwitchOut(List<Pokemon> enemyParty) {
+        return null;
+    }
+
 }

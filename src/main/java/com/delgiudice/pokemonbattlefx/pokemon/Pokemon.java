@@ -54,7 +54,8 @@ public class Pokemon {
     private Ability ability = Ability.NONE;
     // trapped - determines whether the Pokemon is currently under effects of a trapping move
     // laserFocusActive - check whether Laser Focus condition should be active
-    private boolean trapped = false, laserFocusActive = false;
+    // swap - pokemon passed all checks necessary to swap in the current turn
+    private boolean trapped = false, laserFocusActive = false, swap = false;
 
     // substituteHp - tracks the amount of hp that the Pokemon's substitute has
     private int substituteHp = 0;
@@ -160,6 +161,10 @@ public class Pokemon {
         return trapped;
     }
 
+    public boolean isSwap() {
+        return swap;
+    }
+
     public int[] getIvs() {
         return ivs;
     }
@@ -251,6 +256,10 @@ public class Pokemon {
 
     public void setTrapped(boolean trapped) {
         this.trapped = trapped;
+    }
+
+    public void setSwap(boolean swap) {
+        this.swap = swap;
     }
 
     public void setAbility(Ability ability) {

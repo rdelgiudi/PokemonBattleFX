@@ -63,4 +63,6 @@ public abstract class Trainer {
     }
 
     abstract public TrainerAction getEnemyAction(Pokemon enemyPokemon);
+
+    abstract public TrainerAction getEnemySwitchOut(List<Pokemon> enemyParty);
 }

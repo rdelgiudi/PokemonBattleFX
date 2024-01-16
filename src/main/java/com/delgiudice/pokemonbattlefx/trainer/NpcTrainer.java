@@ -4,6 +4,9 @@ import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.battle.TrainerAction;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -76,5 +79,19 @@ public class NpcTrainer extends Trainer {
 
         return new TrainerAction(Enums.ActionTypes.USE_MOVE,
                 String.valueOf(enemyPokemon.getMoveList().indexOf(enemyMove)));
+    }
+
+    @Override
+    public TrainerAction getEnemySwitchOut(List<Pokemon> enemyParty) {
+
+        int newPokemonIndex = -1;
+        for (int i=1; i<enemyParty.size(); i++) {
+            if (enemyParty.get(i).getHp() > 0) {
+                newPokemonIndex = i;
+                break;
+            }
+        }
+        //switchPokemon(false, newPokemonIndex);
+        return new TrainerAction(Enums.ActionTypes.SWITCH_POKEMON, String.valueOf(newPokemonIndex));
     }
 }

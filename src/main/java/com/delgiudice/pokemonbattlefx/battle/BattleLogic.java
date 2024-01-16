@@ -431,6 +431,12 @@ public class BattleLogic {
         else
             enemyPokemon.getSubStatuses().remove(Enums.SubStatus.LASER_FOCUS);
 
+        // Checks swap flag, deletes if present
+        if (allyPokemon.isSwap())
+            allyPokemon.setSwap(false);
+        if (enemyPokemon.isSwap())
+            enemyPokemon.setSwap(false);
+
         // Deletes substatuses that last only during the turn they are caused
         allyPokemon.getSubStatuses().remove(Enums.SubStatus.FLINCHED);
         enemyPokemon.getSubStatuses().remove(Enums.SubStatus.FLINCHED);
@@ -574,7 +580,7 @@ public class BattleLogic {
             case USE_MOVE:
             case OUT_OF_MOVES:
             case RECHARGE_PHASE:
-                waitEnemyAction(playerAction);
+                waitEnemyAction(playerAction, null);
                 break;
             case USE_BAG_ITEM:
                 BagController bagController = bagLoader.getController();
@@ -593,9 +599,9 @@ public class BattleLogic {
         }
     }
 
-    public void waitEnemyAction(TrainerAction playerAction) {
+    public void waitEnemyAction(TrainerAction playerAction, List<Timeline> battleTimeLine) {
         TrainerAction enemyAction = enemy.getEnemyAction(enemyParty.get(0));
-        battleTurn(playerAction, enemyAction);
+        battleTurn(playerAction, enemyAction, battleTimeLine);
     }
 
     private Move getMove(TrainerAction action, boolean player) {
@@ -662,10 +668,21 @@ public class BattleLogic {
     }
 
     // TODO: This should be executed only once per turn!
-    public void battleTurn(@NotNull TrainerAction playerAction, @NotNull TrainerAction enemyAction) {
+    public void battleTurn(@NotNull TrainerAction playerAction, @NotNull TrainerAction enemyAction,
+                           List<Timeline> battleTimeLine) {
         controller.getMoveGrid().setVisible(false);
         controller.switchToPlayerChoice(false);
-        List<Timeline> battleTimeLine = new ArrayList<>();
+
+        //TODO: Include Pursuit checks here
+        if (playerAction.actionType == Enums.ActionTypes.SWITCH_POKEMON) {
+            switchPokemon(true, Integer.parseInt(playerAction.actionName));
+        }
+        if (enemyAction.actionType == Enums.ActionTypes.SWITCH_POKEMON) {
+            switchPokemon(false, Integer.parseInt(enemyAction.actionName));
+        }
+
+        if (battleTimeLine == null)
+            battleTimeLine = new ArrayList<>();
 
         final Move allyMove;
         final Move enemyMove;
@@ -677,19 +694,30 @@ public class BattleLogic {
             processEnemyNonMoveAction(battleTimeLine, enemyAction);
         }
 
-        if(allyMove == null && enemyMove == null) {
+        if (allyMove == null && enemyMove == null) {
             battleTurnEnd(battleTimeLine);
             return;
         }
 
         // sets timers to timer-1, then a check is made at the end of the turn that erases conditions that should be disabled
         processBattlefieldConditionsTimer();
-
         applySentOutEffects(battleTimeLine);
 
         Pokemon allyPokemon = playerParty.get(0);
         Pokemon enemyPokemon = enemyParty.get(0);
 
+        int allyPriority = allyMove != null ? allyMove.getPriority() : -1;
+        int enemyPriority = enemyMove != null ? enemyMove.getPriority() : -1;
+
+        // Move of higher priority is always the fastest
+        if (allyPriority > enemyPriority) {
+            processFirstMove(battleTimeLine, allyMove, allyPokemon, enemyMove, enemyPokemon);
+            return;
+        }
+        else if (allyPriority < enemyPriority) {
+            processFirstMove(battleTimeLine, enemyMove, enemyPokemon, allyMove, allyPokemon);
+            return;
+        }
 
         // Speed calculation
         double playerSpeed, enemySpeed;
@@ -702,35 +730,24 @@ public class BattleLogic {
         boolean tied = playerSpeed == enemySpeed;
         //******************************************
 
-
-        int allyPriority = allyMove != null ? allyMove.getPriority() : 0;
-        int enemyPriority = enemyMove != null ? enemyMove.getPriority() : 0;
-
-        // Move of higher priority is always the fastest
-        if (allyPriority > enemyPriority) {
-            processFirstMove(allyMove, allyPokemon, enemyMove, enemyPokemon);
-        }
-        else if (allyPriority < enemyPriority) {
-            processFirstMove(enemyMove, enemyPokemon, allyMove, allyPokemon);
-        }
         // If both parties are using same priority moves, being faster depends on speed
-        else if (faster) {
-            processFirstMove(allyMove, allyPokemon, enemyMove, enemyPokemon);
+        if (faster) {
+            processFirstMove(battleTimeLine, allyMove, allyPokemon, enemyMove, enemyPokemon);
         }
         //On speed tie, the first attacker is randomized
         else if (tied) {
             SecureRandom generator = new SecureRandom();
             int flip = generator.nextInt(2);
             if (flip == 1) {
-                processFirstMove(allyMove, allyPokemon, enemyMove, enemyPokemon);
+                processFirstMove(battleTimeLine, allyMove, allyPokemon, enemyMove, enemyPokemon);
             }
             else {
-                processFirstMove(enemyMove, enemyPokemon, allyMove, allyPokemon);
+                processFirstMove(battleTimeLine, enemyMove, enemyPokemon, allyMove, allyPokemon);
             }
         }
         //Here is what happens if enemy Pokemon is faster
         else {
-            processFirstMove(enemyMove, enemyPokemon, allyMove, allyPokemon);
+            processFirstMove(battleTimeLine, enemyMove, enemyPokemon, allyMove, allyPokemon);
         }
     }
 
@@ -800,9 +817,68 @@ public class BattleLogic {
         return enemyMove;
     }
 
-    // Process turn starting with the move used by the faster Pokemon
-    private void processFirstMove(Move firstMove, Pokemon firstPokemon, Move secondMove, Pokemon secondPokemon) {
+    private void waitForEnemyPokemonSwapChoice(Pokemon firstPokemon, Pokemon secondPokemon, Move secondMove,
+                                               Enums.SwitchContext switchContext) {
+
         List<Timeline> moveTimeLine = new ArrayList<>();
+        TrainerAction trainerAction = null;
+
+        trainerAction = enemy.getEnemySwitchOut(enemyParty);
+
+        switchPokemon(false, Integer.parseInt(trainerAction.actionName));
+
+        if (switchContext != Enums.SwitchContext.SWITCH_FAINTED) {
+            Timeline enemyPokemonReturn = controller.getPokemonReturnAnimation(false);
+            moveTimeLine.add(enemyPokemonReturn);
+            moveTimeLine.add(controller.generatePause(1000));
+        }
+
+        System.out.printf("%s %s sends out %s!%n", enemy.getTrainerType().toString(), enemy.getName(),
+                enemyParty.get(0).getName());
+
+        Timeline enemyNewPokemonInfo = controller.getBattleTextAnimation(String.format("%s %s sends out%n%s!",
+                        enemy.getTrainerType().toString(), enemy.getName(), enemyParty.get(0).getName()),
+                true);
+        //enemyNewPokemonInfo.setDelay(Duration.seconds(2));
+        moveTimeLine.add(enemyNewPokemonInfo);
+
+        moveTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e -> {
+            int index = enemy.getParty().indexOf(enemyParty.get(0));
+            enemySeen[index] = true;
+            controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
+        })));
+
+        Timeline updateStatus = controller.updateStatus(enemyParty.get(0), false, enemyParty.get(0).getStatus());
+        moveTimeLine.add(updateStatus);
+        moveTimeLine.add(controller.generatePause(1000));
+
+        Timeline pokemonIntroAnimation = controller.getIntroAnimation(enemyParty.get(0),
+                enemyParty.get(0).getHp());
+        moveTimeLine.add(pokemonIntroAnimation);
+
+        if (switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE)
+            firstPokemon = enemyParty.get(0);
+
+        applySentOutEffects(moveTimeLine);
+
+        if (switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE || switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE) {
+            if (secondMove != null)
+                processSecondMove(moveTimeLine, firstPokemon, secondPokemon, secondMove);
+            else
+                battleTurnEnd(moveTimeLine);
+        }
+
+        if (switchContext == Enums.SwitchContext.SWITCH_FAINTED) {
+            applySentOutEffects(moveTimeLine);
+            finalChecks(moveTimeLine);
+        }
+    }
+
+    // Process turn starting with the move used by the faster Pokemon
+    private void processFirstMove(List<Timeline> moveTimeLine, Move firstMove, Pokemon firstPokemon, Move secondMove,
+                                  Pokemon secondPokemon) {
+
+        //List<Timeline> moveTimeLine = new ArrayList<>();
 
         // If Pokemon is in recharge state, their move is skipped
         if (firstMove.getTemplate().getName() == MoveEnum.RECHARGE &&
@@ -818,12 +894,8 @@ public class BattleLogic {
             moveTimeLine.addAll(useMove(firstMove, firstPokemon,
                     secondPokemon, true));
         }
-        // If move switches enemy Pokemon, replace target for next move
-        if (!firstPokemon.getOwner().isPlayer() && firstMove.isSwitchOut())
-            firstPokemon = enemyParty.get(0);
 
-        // Checks if ally Pokemon can swap after executing move
-        boolean playerSwitchOutEligible = firstPokemon.getOwner().isPlayer() && firstMove.isSwitchOut() &&
+        boolean playerSwitchOutEligible = firstPokemon.isSwap() && firstPokemon.getOwner().isPlayer() && firstMove.isSwitchOut() &&
                 getAllyAbleToBattleNum() > 1;
 
         // If in battle Pokemon faints, forfeit next move
@@ -853,6 +925,29 @@ public class BattleLogic {
             moveTimeLine.get(0).play();
             return;
         }
+
+        boolean enemySwitchOutEligible = firstPokemon.isSwap() && !firstPokemon.getOwner().isPlayer() && firstMove.isSwitchOut() &&
+                getEnemyAbleToBattleNum() > 1;
+
+        // If in battle Pokemon faints, forfeit next move
+        if ((secondPokemon.getHp() == 0 && !enemySwitchOutEligible) || firstPokemon.getHp() == 0) {
+            battleTurnEnd(moveTimeLine);
+            return;
+        }
+
+        if (enemySwitchOutEligible) {
+            // Displays faint animation before switching out Pokemon
+            processFainted(moveTimeLine);
+
+            Enums.SwitchContext switchContext = Enums.SwitchContext.SWITCH_FIRST_MOVE;
+            moveTimeLine.get(moveTimeLine.size() - 1).setOnFinished(e -> {
+                waitForEnemyPokemonSwapChoice(firstPokemon, secondPokemon, secondMove, switchContext);
+            });
+            initAnimationQueue(moveTimeLine);
+            moveTimeLine.get(0).play();
+            return;
+        }
+
         if (secondMove != null)
             processSecondMove(moveTimeLine, firstPokemon, secondPokemon, secondMove);
         else
@@ -883,8 +978,14 @@ public class BattleLogic {
                     secondPokemon, firstPokemon, false));
 
         // Checks if ally Pokemon can swap after executing move
-        boolean playerSwitchOutEligible = secondPokemon.getOwner().isPlayer() &&
+        boolean playerSwitchOutEligible = secondPokemon.isSwap() && secondPokemon.getOwner().isPlayer() &&
                 secondMove.isSwitchOut() && getAllyAbleToBattleNum() > 1;
+
+        // If in battle Pokemon faints, forfeit next move
+        if ((firstPokemon.getHp() == 0 && !playerSwitchOutEligible) || secondPokemon.getHp() == 0) {
+            battleTurnEnd(moveTimeLine);
+            return;
+        }
 
         // If move switches out user, open switch menu when another party Pokemon is able to battle
         if (playerSwitchOutEligible) {
@@ -895,6 +996,28 @@ public class BattleLogic {
                 swapPokemonController.initVariablesSwitch((Pane) pokemonButton.getScene().getRoot(),
                         this, controller, playerParty, true, switchContext, null, null);
                 pokemonButton.getScene().setRoot(swapPokemonPane);
+            });
+            initAnimationQueue(moveTimeLine);
+            moveTimeLine.get(0).play();
+            return;
+        }
+
+        boolean enemySwitchOutEligible = secondPokemon.isSwap() && !secondPokemon.getOwner().isPlayer() && secondMove.isSwitchOut() &&
+                getEnemyAbleToBattleNum() > 1;
+
+        // If in battle Pokemon faints, forfeit next move
+        if ((firstPokemon.getHp() == 0 && !enemySwitchOutEligible) || secondPokemon.getHp() == 0) {
+            battleTurnEnd(moveTimeLine);
+            return;
+        }
+
+        if (enemySwitchOutEligible) {
+            // Displays faint animation before switching out Pokemon
+            processFainted(moveTimeLine);
+
+            Enums.SwitchContext switchContext = Enums.SwitchContext.SWITCH_SECOND_MOVE;
+            moveTimeLine.get(moveTimeLine.size() - 1).setOnFinished(e -> {
+                waitForEnemyPokemonSwapChoice(firstPokemon, secondPokemon, secondMove, switchContext);
             });
             initAnimationQueue(moveTimeLine);
             moveTimeLine.get(0).play();
@@ -1165,29 +1288,12 @@ public class BattleLogic {
         }
 
         if (enemyFainted) {
-
-            checkIfEnemyAbleToBattle(true);
-
-            Timeline enemyNewPokemonInfo = controller.getBattleTextAnimation(String.format("%s %s sends out%n%s!",
-                            enemy.getTrainerType().toString(), enemy.getName(), enemyParty.get(0).getName()),
-                    true);
-            //enemyNewPokemonInfo.setDelay(Duration.seconds(2));
-            battleTimeLine.add(enemyNewPokemonInfo);
-
-            battleTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e -> {
-                int index = enemy.getParty().indexOf(enemyParty.get(0));
-                enemySeen[index] = true;
-                controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
-            })));
-
-            Timeline updateStatus = controller.updateStatus(enemyParty.get(0), false, enemyParty.get(0).getStatus());
-            battleTimeLine.add(updateStatus);
-            battleTimeLine.add(controller.generatePause(1000));
-
-            Timeline pokemonIntroAnimation = controller.getIntroAnimation(enemyParty.get(0),
-                    enemyParty.get(0).getHp());
-            battleTimeLine.add(pokemonIntroAnimation);
-            finalChecks(battleTimeLine);
+            battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+                waitForEnemyPokemonSwapChoice(null, null, null,
+                        Enums.SwitchContext.SWITCH_FAINTED);
+                    });
+            initAnimationQueue(battleTimeLine);
+            battleTimeLine.get(0).play();
             return;
         }
 
@@ -1438,14 +1544,6 @@ public class BattleLogic {
         allyFaintedProcessed = true;
         //battleTimeLine.get(0).play();
         //finalChecks(battleTimeLine, enemyFainted);
-
-    }
-
-    private void itemTurn(Item item) {
-
-    }
-
-    private void runTurn() {
 
     }
 
@@ -2285,6 +2383,11 @@ public class BattleLogic {
         }
         //******************************************************************
 
+        // If move allows to switch out and was successfully executed, mark Pokemon for swap
+        if (move.isSwitchOut())
+            user.setSwap(true);
+        //******************************************************************
+
         // Checks related to moves that increase or decrease stats
         boolean targetFainted = target.getHp() == 0;
         boolean userFainted = user.getHp() == 0;
@@ -2296,7 +2399,6 @@ public class BattleLogic {
             processStatUpApplication(moveTimeLine, move, user, target, userFainted, secondaryEffectsImmune);
             return moveTimeLine;
         }
-
         //*******************************************************
 
         // Apply applicable substatus TODO: Unify all substatus applying moves under this method
@@ -2328,42 +2430,6 @@ public class BattleLogic {
         move.isMultiturnConfusion() && user.getState() == Enums.States.MULTITURN)
             processMultiturnMoveCompleted(moveTimeLine, user);
         //*********************************************************************
-
-        // If enemy move swaps Pokemon out
-        if (!user.getOwner().isPlayer() && move.isSwitchOut() && getEnemyAbleToBattleNum() > 1) {
-            int newPokemonIndex = -1;
-            for (i=1; i<enemyParty.size(); i++) {
-                if (enemyParty.get(i).getHp() > 0) {
-                    newPokemonIndex = i;
-                    break;
-                }
-            }
-            switchPokemon(false, newPokemonIndex);
-
-            Timeline enemyPokemonReturn = controller.getPokemonReturnAnimation(false);
-            moveTimeLine.add(enemyPokemonReturn);
-            moveTimeLine.add(controller.generatePause(1000));
-
-            Timeline enemyNewPokemonInfo = controller.getBattleTextAnimation(String.format("%s %s sends out%n%s!",
-                            enemy.getTrainerType().toString(), enemy.getName(), enemyParty.get(0).getName()),
-                    true);
-            //enemyNewPokemonInfo.setDelay(Duration.seconds(2));
-            moveTimeLine.add(enemyNewPokemonInfo);
-
-            moveTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e -> {
-                int index = enemy.getParty().indexOf(enemyParty.get(0));
-                enemySeen[index] = true;
-                controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
-            })));
-
-            Timeline updateStatus = controller.updateStatus(enemyParty.get(0), false, enemyParty.get(0).getStatus());
-            moveTimeLine.add(updateStatus);
-            moveTimeLine.add(controller.generatePause(1000));
-
-            Timeline pokemonIntroAnimation = controller.getIntroAnimation(enemyParty.get(0),
-                    enemyParty.get(0).getHp());
-            moveTimeLine.add(pokemonIntroAnimation);
-        }
 
         return moveTimeLine;
     }
@@ -3067,15 +3133,7 @@ public class BattleLogic {
 
         // Calculation of type effect: since a lot of Pokemon are dual type, moves can deal from 0.25x to 4x of its
         // original damage
-        float typeEffect = 1;
-        for (Enums.Types type : move.getType().getStrongAgainst()){
-            if(type.equals(firstTargetType.getTypeEnum()) || type.equals(secondTargetType.getTypeEnum()))
-                typeEffect *= 2;
-        }
-        for (Enums.Types type : move.getType().getWeakAgainst()){
-            if(type.equals(firstTargetType.getTypeEnum()) || type.equals(secondTargetType.getTypeEnum()))
-                typeEffect *= 0.5f;
-        }
+        float typeEffect = calculateTypeEffect(move, firstTargetType, secondTargetType);
 
         // Final damage calculations
         double modifier = critMod * rand * stab * typeEffect * burn * twoTurnModifier;
@@ -3123,6 +3181,26 @@ public class BattleLogic {
             System.out.println("It's not very effective...");
 
         return new MoveDamageInfo(damage, isCrit, typeEffect);
+    }
+
+    private float calculateTypeEffect(Move move, Type firstTargetType, Type secondTargetType) {
+        float typeEffect = 1;
+        Enums.Types noEffecttype = move.getType().getNoEffectAgainst();
+
+        if (noEffecttype.equals(firstTargetType.getTypeEnum()) || noEffecttype.equals(secondTargetType.getTypeEnum())) {
+                typeEffect *= 0f;
+                return typeEffect;
+        }
+        for (Enums.Types type : move.getType().getStrongAgainst()){
+            if(type.equals(firstTargetType.getTypeEnum()) || type.equals(secondTargetType.getTypeEnum()))
+                typeEffect *= 2;
+        }
+        for (Enums.Types type : move.getType().getWeakAgainst()){
+            if(type.equals(firstTargetType.getTypeEnum()) || type.equals(secondTargetType.getTypeEnum()))
+                typeEffect *= 0.5f;
+        }
+
+        return typeEffect;
     }
 
     private double calculateWeatherMultiplier(Move move) {
@@ -3216,5 +3294,6 @@ public class BattleLogic {
         pokemon.setTrappedTimer(0);
         pokemon.setLaserFocusActive(false);
         pokemon.setSubstituteHp(0);
+        pokemon.setSwap(false);
     }
 }
