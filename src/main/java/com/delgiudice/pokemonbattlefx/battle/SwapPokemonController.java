@@ -372,21 +372,30 @@ public class SwapPokemonController {
         });
     }
 
-    private void useHealingItem(Pokemon target, HBox pokemonBox, int index, ProgressBar hpBar, Label hpLabel) {
-
+    public static boolean checkHealingItemViable(Item item, Pokemon target) {
         boolean fullHealPokemonAbnormalNonFaintStatus = item.getStatusHeal().equals(Enums.Status.ANY) &&
                 (!target.getStatus().equals(Enums.Status.NONE) || target.getSubStatuses().contains(Enums.SubStatus.CONFUSED))
                 && !target.getStatus().equals(Enums.Status.FAINTED);
 
-        if ((target.getHp() == target.getMaxHP() || target.getStatus() == Enums.Status.FAINTED) &&
-            !fullHealPokemonAbnormalNonFaintStatus) {
-            playIncompatibleItemMessage(target);
-            return;
-        }
+        return (target.getHp() != target.getMaxHP() && target.getStatus() != Enums.Status.FAINTED) ||
+                fullHealPokemonAbnormalNonFaintStatus;
+    }
+
+    public static int calculateHealingItemEffect(Item item, Pokemon target) {
         int healValue;
         int hpToMax = target.getMaxHP() - target.getHp();
         int itemValue = item.getValue() == -1 ? hpToMax : item.getValue();
         healValue = Math.min(hpToMax, itemValue);
+        return healValue;
+    }
+
+    private void useHealingItem(Pokemon target, HBox pokemonBox, int index, ProgressBar hpBar, Label hpLabel) {
+        if (!checkHealingItemViable(item, target)) {
+            playIncompatibleItemMessage(target);
+            return;
+        }
+
+        int healValue = calculateHealingItemEffect(item, target);
         Timeline healAnimation;
         if (healValue > 0)
             healAnimation = getHpAnimation(target.getHp(), target.getHp() + healValue, target.getMaxHP(),
@@ -400,9 +409,8 @@ public class SwapPokemonController {
         healAnimation.setOnFinished(e -> healInfo.play());
         healInfo.setOnFinished(e -> pause.play());
 
-        pause.setOnFinished(e -> {
-            returnToBattle();
-        });
+        TrainerAction itemAction = new TrainerAction(Enums.ActionTypes.USE_BAG_ITEM, item.getName(), index);
+        pause.setOnFinished(e -> returnToBattle(itemAction));
 
         target.setHp(target.getHp() + healValue);
 
@@ -419,30 +427,41 @@ public class SwapPokemonController {
         }
 
         reduceItemAmount();
-
         healAnimation.play();
     }
 
-    private void useStatusHealingItem(Pokemon target, HBox pokemonBox, int index, ProgressBar hpBar, Label hpLabel) {
-
+    public static boolean checkStatusHealingItemViable(Item item, Pokemon target) {
         boolean fullHealPokemonAbnormalNonFaintStatus = item.getStatusHeal().equals(Enums.Status.ANY) &&
                 (!target.getStatus().equals(Enums.Status.NONE) || target.getSubStatuses().contains(Enums.SubStatus.CONFUSED))
-                        && !target.getStatus().equals(Enums.Status.FAINTED);
+                && !target.getStatus().equals(Enums.Status.FAINTED);
 
-        if (!target.getStatus().equals(item.getStatusHeal()) && !fullHealPokemonAbnormalNonFaintStatus){
+        return target.getStatus().equals(item.getStatusHeal()) || fullHealPokemonAbnormalNonFaintStatus;
+    }
+
+    public static int processStatusHealingEffect(Item item, Pokemon target) {
+        target.setStatus(Enums.Status.NONE);
+        int healValue = 0;
+        if (item.getStatusHeal() == Enums.Status.ANY) {
+            target.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
+            target.setConfusionTimer(0);
+        }
+        if (item.getStatusHeal().equals(Enums.Status.FAINTED) && target.getHp() == 0) {
+            healValue = item.getValue() == Item.MAX_HP ? target.getMaxHP() : (int) Math.floor(target.getMaxHP() / 2.0);
+        }
+        return healValue;
+    }
+
+    private void useStatusHealingItem(Pokemon target, HBox pokemonBox, int index, ProgressBar hpBar, Label hpLabel) {
+        if (!checkStatusHealingItemViable(item, target)){
             playIncompatibleItemMessage(target);
             return;
         }
 
-        target.setStatus(Enums.Status.NONE);
-        target.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
-        target.setConfusionTimer(0);
+        int healValue = processStatusHealingEffect(item, target);
         setPokemonInfo(pokemonBox, index);
-
         Timeline healAnimation = battleController.generatePause(1);
 
         if (item.getStatusHeal().equals(Enums.Status.FAINTED) && target.getHp() == 0) {
-            int healValue = item.getValue() == Item.MAX_HP ? target.getMaxHP() : (int) Math.floor(target.getMaxHP() / 2.0);
             healAnimation = getHpAnimation(0, healValue, target.getMaxHP(), hpBar, hpLabel);
             target.setHp(healValue);
         }
@@ -458,7 +477,9 @@ public class SwapPokemonController {
 
         healAnimation.setOnFinished(e -> healInfo.play());
         healInfo.setOnFinished(e -> pause.play());
-        pause.setOnFinished(e -> returnToBattle());
+
+        TrainerAction itemAction = new TrainerAction(Enums.ActionTypes.USE_BAG_ITEM, item.getName(), index);
+        pause.setOnFinished(e -> returnToBattle(itemAction));
 
         healAnimation.play();
     }
@@ -489,13 +510,13 @@ public class SwapPokemonController {
         }
     }
 
-    private void returnToBattle() {
+    private void returnToBattle(TrainerAction itemAction) {
         Scene scene = cancelButton.getScene();
         scene.setRoot(battlePane);
         this.pokemonBox.setDisable(false);
         currentPokemonBox.setDisable(false);
         cancelButton.setDisable(false);
-        battleLogic.battleTurn(null);
+        battleLogic.waitEnemyAction(itemAction);
     }
 
     private void initSwapMenuListener(HBox pokemonBox, Pokemon pokemon, int index) {
@@ -613,7 +634,8 @@ public class SwapPokemonController {
                 battleLogic.applySentOutEffects(battleTimeLine);
                 battleLogic.initAnimationQueue(battleTimeLine);
                 battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
-                        battleLogic.battleTurn(null);
+                        TrainerAction playerAction = new TrainerAction(Enums.ActionTypes.SWITCH_POKEMON, String.valueOf(index));
+                        battleLogic.waitEnemyAction(playerAction);
                 });
                 battleTimeLine.get(0).play();
             }

@@ -3,7 +3,7 @@ package com.delgiudice.pokemonbattlefx.move;
 public enum MoveEnum {
     CONFUSION_DAMAGE("Confusion Damage"),
     STRUGGLE("Struggle"),
-    SWAP_POKEMON("Swap Pokemon"),
+    RECHARGE("Recharge"),
     TACKLE("Tackle"),
     GROWL("Growl"),
     VINE_WHIP("Vine Whip"),

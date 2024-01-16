@@ -1,5 +1,7 @@
 package com.delgiudice.pokemonbattlefx.trainer;
 
+import com.delgiudice.pokemonbattlefx.attributes.Enums;
+import com.delgiudice.pokemonbattlefx.battle.TrainerAction;
 import com.delgiudice.pokemonbattlefx.item.Item;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 
@@ -56,4 +58,9 @@ public abstract class Trainer {
             System.out.println("ERROR: Party full!");
     }
 
+    public Enums.TrainerTypes getTrainerType() {
+        return Enums.TrainerTypes.NONE;
+    }
+
+    abstract public TrainerAction getEnemyAction(Pokemon enemyPokemon);
 }

@@ -422,9 +422,9 @@ public class MoveTemplate {
         newmove.setRecoilUserHp(true);
         moveMap.put(newmove.getName(), newmove);
 
-        newmove = new MoveTemplate(MoveEnum.SWAP_POKEMON, NOT_APPLICABLE, NOT_APPLICABLE, 1, Enums.Subtypes.STATUS,
+        newmove = new MoveTemplate(MoveEnum.RECHARGE, NOT_APPLICABLE, NOT_APPLICABLE, 1, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.NO_TYPE), false);
-        newmove.setMoveDescription("This move is not to be used as an attack. This is a placeholder move signaling that the player wants to swap Pokemon.");
+        newmove.setMoveDescription("This move is not to be used as an attack. This is a placeholder for the recharge period.");
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.TACKLE, 40, 100, 35, Enums.Subtypes.PHYSICAL,

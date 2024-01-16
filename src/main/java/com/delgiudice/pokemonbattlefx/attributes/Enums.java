@@ -290,6 +290,7 @@ public class Enums {
     }
 
     public enum TrainerTypes{
+        NONE(""),
         ACE_TRAINER("Ace Trainer"),
         YOUNGSTER("Youngster");
 
@@ -303,6 +304,15 @@ public class Enums {
             this.typeString = typeString;
         }
     }
+
+    public enum ActionTypes{
+        USE_MOVE,
+        RECHARGE_PHASE,
+        OUT_OF_MOVES,
+        USE_BAG_ITEM,
+        SWITCH_POKEMON,
+    }
+
     public enum ItemType{
         HP_RESTORE,
         PP_RESTORE,
