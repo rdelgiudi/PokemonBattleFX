@@ -17,8 +17,10 @@ public class ServerSyncThread extends SyncThread {
     @Override
     public void run() {
         try {
-            inputStream.readUTF();
-            outputStream.writeUTF("OK");
+            if (inputStream.readUTF().equals("OK")) {
+                outputStream.writeUTF("OK");
+                outputStream.flush();
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

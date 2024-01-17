@@ -8,10 +8,7 @@ import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.move.MoveDamageInfo;
 import com.delgiudice.pokemonbattlefx.move.MoveEnum;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
-import com.delgiudice.pokemonbattlefx.network.ClientMoveSync;
-import com.delgiudice.pokemonbattlefx.network.ClientSyncThread;
-import com.delgiudice.pokemonbattlefx.network.ServerMoveSync;
-import com.delgiudice.pokemonbattlefx.network.ServerSyncThread;
+import com.delgiudice.pokemonbattlefx.network.*;
 import com.delgiudice.pokemonbattlefx.pokemon.Ability;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
@@ -22,6 +19,7 @@ import com.delgiudice.pokemonbattlefx.trainer.Trainer;
 import com.sun.istack.internal.NotNull;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
@@ -44,7 +42,7 @@ public class BattleLogic {
     public static final String POKEMON_SENT_OUT_STRING = "Go! %s!";
     private static final String MOVE_NO_EFFECT_STRING = "It doesn't affect%n%s...";
     private static final String RECHARGE_INFO = "%s needs to recharge!";
-    private static final String AWAITING_SYNC = "Awaiting sync...";
+    static final String AWAITING_SYNC = "Awaiting sync...";
     private static final Font MAIN_FONT = Font.font("Monospaced");
 
     private Player player;
@@ -78,6 +76,18 @@ public class BattleLogic {
     private DataInputStream inputStream;
     private DataOutputStream outputStream;
     private Thread connectionThread;
+
+    public Enums.GameMode getGameMode() {
+        return gameMode;
+    }
+
+    public DataInputStream getInputStream() {
+        return inputStream;
+    }
+
+    public DataOutputStream getOutputStream() {
+        return outputStream;
+    }
 
     public BattleLogic(BattleController controller) {
         this.controller = controller;
@@ -704,9 +714,25 @@ public class BattleLogic {
         }
     }
 
-    // Handles enemy pokemon swap
-    private void processEnemyPokemonSwitch(List<Timeline> battleTimeLine, TrainerAction enemyAction) {
-
+    // Handles enemy pokemon swap TODO: Pursuit handling
+    private void processEnemyPokemonSwitch(List<Timeline> battleTimeLine, TrainerAction enemyAction,
+                                           TrainerAction playerAction) {
+        Timeline swapMesssage = controller.getBattleTextAnimation(String.format("%s %s withdrew %s!",
+                enemy.getTrainerType(), enemy.getName(), enemyParty.get(0).getName()), true);
+        Timeline pokemonReturnAnimation = controller.getPokemonReturnAnimation(false);
+        int newPokemonSlot = Integer.parseInt(enemyAction.actionName);
+        switchPokemon(false, newPokemonSlot);
+        Timeline sendOutMessage = controller.getBattleTextAnimation(String.format("%s %s sends out %s!",
+                enemy.getTrainerType(), enemy.getName(), enemyParty.get(0).getName()), true);
+        Timeline pokemonSendOutAnimation = controller.getIntroAnimation(enemyParty.get(0), enemyParty.get(0).getHp());
+        battleTimeLine.add(swapMesssage);
+        battleTimeLine.add(pokemonReturnAnimation);
+        battleTimeLine.add(controller.generatePause(1000));
+        battleTimeLine.add(sendOutMessage);
+        battleTimeLine.add(pokemonSendOutAnimation);
+        battleTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e -> controller.updatePokemonStatusBox(
+                player.getParty(), enemy.getParty(), enemySeen))));
+        battleTimeLine.add(controller.generatePause(1000));
     }
 
     // Handles enemy using healing items
@@ -744,9 +770,10 @@ public class BattleLogic {
         }
     }
 
-    private void processEnemyNonMoveAction(List<Timeline> battleTimeLine, TrainerAction enemyAction) {
+    private void processEnemyNonMoveAction(List<Timeline> battleTimeLine, TrainerAction enemyAction,
+                                           TrainerAction playerAction) {
         if (enemyAction.actionType == Enums.ActionTypes.SWITCH_POKEMON)
-            processEnemyPokemonSwitch(battleTimeLine, enemyAction);
+            processEnemyPokemonSwitch(battleTimeLine, enemyAction, playerAction);
         else if (enemyAction.actionType == Enums.ActionTypes.USE_BAG_ITEM)
             processEnemyUseItem(battleTimeLine, enemyAction);
     }
@@ -760,6 +787,7 @@ public class BattleLogic {
                 int rand = generator.nextInt(bound);
                 try {
                     outputStream.writeByte(rand);
+                    outputStream.flush();
                     inputStream.readUTF();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -770,6 +798,7 @@ public class BattleLogic {
                 try {
                     serverRand = inputStream.readByte();
                     outputStream.writeUTF("OK");
+                    outputStream.flush();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -787,9 +816,9 @@ public class BattleLogic {
         if (playerAction.actionType == Enums.ActionTypes.SWITCH_POKEMON) {
             switchPokemon(true, Integer.parseInt(playerAction.actionName));
         }
-        if (enemyAction.actionType == Enums.ActionTypes.SWITCH_POKEMON) {
-            switchPokemon(false, Integer.parseInt(enemyAction.actionName));
-        }
+        //if (enemyAction.actionType == Enums.ActionTypes.SWITCH_POKEMON) {
+        //    switchPokemon(false, Integer.parseInt(enemyAction.actionName));
+        //}
 
         if (battleTimeLine == null)
             battleTimeLine = new ArrayList<>();
@@ -801,20 +830,20 @@ public class BattleLogic {
         enemyMove = getMove(enemyAction, false);
 
         if (enemyMove == null) {
-            processEnemyNonMoveAction(battleTimeLine, enemyAction);
+            processEnemyNonMoveAction(battleTimeLine, enemyAction, playerAction);
         }
 
-        if (allyMove == null && enemyMove == null) {
-            battleTurnEnd(battleTimeLine);
-            return;
-        }
+        Pokemon allyPokemon = playerParty.get(0);
+        Pokemon enemyPokemon = enemyParty.get(0);
 
         // sets timers to timer-1, then a check is made at the end of the turn that erases conditions that should be disabled
         processBattlefieldConditionsTimer();
         applySentOutEffects(battleTimeLine);
 
-        Pokemon allyPokemon = playerParty.get(0);
-        Pokemon enemyPokemon = enemyParty.get(0);
+        if ((allyMove == null && enemyMove == null) || allyPokemon.getHp() == 0 || enemyPokemon.getHp() == 0) {
+            battleTurnEnd(battleTimeLine);
+            return;
+        }
 
         int allyPriority = allyMove != null ? allyMove.getPriority() : -1;
         int enemyPriority = enemyMove != null ? enemyMove.getPriority() : -1;
@@ -927,15 +956,11 @@ public class BattleLogic {
         return enemyMove;
     }
 
-    private void waitForEnemyPokemonSwapChoice(Pokemon firstPokemon, Pokemon secondPokemon, Move secondMove,
-                                               Enums.SwitchContext switchContext) {
-
+    public void processEnemySwitchOut(Pokemon firstPokemon, Pokemon secondPokemon, Move secondMove,
+                                      Enums.SwitchContext switchContext, TrainerAction enemyAction) {
         List<Timeline> moveTimeLine = new ArrayList<>();
-        TrainerAction trainerAction = null;
 
-        trainerAction = enemy.getEnemySwitchOut(enemyParty);
-
-        switchPokemon(false, Integer.parseInt(trainerAction.actionName));
+        switchPokemon(false, Integer.parseInt(enemyAction.actionName));
 
         if (switchContext != Enums.SwitchContext.SWITCH_FAINTED) {
             Timeline enemyPokemonReturn = controller.getPokemonReturnAnimation(false);
@@ -981,6 +1006,21 @@ public class BattleLogic {
         if (switchContext == Enums.SwitchContext.SWITCH_FAINTED) {
             applySentOutEffects(moveTimeLine);
             finalChecks(moveTimeLine);
+        }
+    }
+
+    private void waitForEnemyPokemonSwapChoice(Pokemon firstPokemon, Pokemon secondPokemon, Move secondMove,
+                                               Enums.SwitchContext switchContext) {
+
+        if (gameMode == Enums.GameMode.OFFLINE) {
+            TrainerAction enemyAction = enemy.getEnemySwitchOut(enemyParty);
+            processEnemySwitchOut(firstPokemon, secondPokemon, secondMove, switchContext, enemyAction);
+        }
+        else {
+            controller.getBattleText(AWAITING_SYNC, true).play();
+            SwitchDataReceive syncThread = new SwitchDataReceive(inputStream, outputStream, (OnlineTrainer) enemy,
+                    this, firstPokemon, secondPokemon, secondMove, switchContext);
+            syncThread.start();
         }
     }
 
@@ -1037,7 +1077,7 @@ public class BattleLogic {
                 pokemonButton.getScene().setRoot(swapPokemonPane);
             });
             initAnimationQueue(moveTimeLine);
-            moveTimeLine.get(0).play();
+            Platform.runLater(() -> moveTimeLine.get(0).play());
             return;
         }
 
@@ -1064,7 +1104,7 @@ public class BattleLogic {
                 waitForEnemyPokemonSwapChoice(firstPokemon, secondPokemon, secondMove, switchContext);
             });
             initAnimationQueue(moveTimeLine);
-            moveTimeLine.get(0).play();
+            Platform.runLater(() -> moveTimeLine.get(0).play());
             return;
         }
 
@@ -1126,7 +1166,7 @@ public class BattleLogic {
                 pokemonButton.getScene().setRoot(swapPokemonPane);
             });
             initAnimationQueue(moveTimeLine);
-            moveTimeLine.get(0).play();
+            Platform.runLater(() -> moveTimeLine.get(0).play());
             return;
         }
 
@@ -1153,7 +1193,7 @@ public class BattleLogic {
                 waitForEnemyPokemonSwapChoice(firstPokemon, secondPokemon, secondMove, switchContext);
             });
             initAnimationQueue(moveTimeLine);
-            moveTimeLine.get(0).play();
+            Platform.runLater(() -> moveTimeLine.get(0).play());
             return;
         }
 
@@ -1266,7 +1306,7 @@ public class BattleLogic {
                     battleWon();
                 });
 
-                battleTimeLine.get(0).play();
+                Platform.runLater(() -> battleTimeLine.get(0).play());
                 return true;
             }
         }
@@ -1279,7 +1319,7 @@ public class BattleLogic {
                     battleLost();
                 });
 
-                battleTimeLine.get(0).play();
+                Platform.runLater(() -> battleTimeLine.get(0).play());
                 return true;
             }
 
@@ -1293,7 +1333,7 @@ public class BattleLogic {
                     battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
                         battleWon();
                     });
-                    battleTimeLine.get(0).play();
+                    Platform.runLater(() -> battleTimeLine.get(0).play());
                 }
                 else
                     battleWon();
@@ -1416,7 +1456,7 @@ public class BattleLogic {
                 pokemonButton.getScene().setRoot(swapPokemonPane);
             });
             initAnimationQueue(battleTimeLine);
-            battleTimeLine.get(0).play();
+            Platform.runLater(() -> battleTimeLine.get(0).play());
             return;
         }
 
@@ -1426,7 +1466,7 @@ public class BattleLogic {
                         Enums.SwitchContext.SWITCH_FAINTED);
                     });
             initAnimationQueue(battleTimeLine);
-            battleTimeLine.get(0).play();
+            Platform.runLater(() -> battleTimeLine.get(0).play());
             return;
         }
 
@@ -1436,7 +1476,7 @@ public class BattleLogic {
             battleLoop();
         });
 
-        battleTimeLine.get(0).play();
+        Platform.runLater(() -> battleTimeLine.get(0).play());
     }
 
     // Deletes battlefield conditions that have reached their end

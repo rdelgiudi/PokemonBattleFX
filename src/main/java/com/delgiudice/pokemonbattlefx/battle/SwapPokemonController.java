@@ -4,6 +4,7 @@ import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.item.Item;
 import com.delgiudice.pokemonbattlefx.move.Move;
+import com.delgiudice.pokemonbattlefx.network.SwitchDataSend;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.trainer.Player;
 import com.sun.istack.internal.NotNull;
@@ -631,31 +632,16 @@ public class SwapPokemonController {
             Scene scene = pokemonBox.getScene();
             scene.setRoot(battlePane);
 
-            if (switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE) {
-                if (turnPokemon == null || secondMove == null)
-                    throw new ValueException("Values of turnPokemon and secondMove expected to be not null in this context");
-                battleLogic.switchPokemon(true, index);
-                battleLogic.applySentOutEffects(battleTimeLine);
-                battleLogic.processSecondMove(battleTimeLine, party.get(0), turnPokemon.get(1), secondMove);
+            TrainerAction playerAction = new TrainerAction(Enums.ActionTypes.SWITCH_POKEMON, String.valueOf(index));
+            if (battleLogic.getGameMode() != Enums.GameMode.OFFLINE && switchContext != Enums.SwitchContext.SWITCH_FIRST
+                && switchContext != Enums.SwitchContext.SWITCH_SECOND) {
+                battleController.getBattleText(BattleLogic.AWAITING_SYNC, true).play();
+                SwitchDataSend syncThread = new SwitchDataSend(battleLogic.getInputStream(), battleLogic.getOutputStream(),
+                        playerAction, this, battleTimeLine, index);
+                syncThread.start();
             }
-            else if (switchContext == Enums.SwitchContext.SWITCH_FIRST) {
-                //battleLogic.initAnimationQueue(battleTimeLine);
-                //battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
-                //});
-                //battleTimeLine.get(0).play();
-                TrainerAction playerAction = new TrainerAction(Enums.ActionTypes.SWITCH_POKEMON, String.valueOf(index));
-                battleLogic.waitEnemyAction(playerAction, battleTimeLine);
-            }
-            else if (switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE || switchContext == Enums.SwitchContext.SWITCH_SECOND) {
-                battleLogic.switchPokemon(true, index);
-                battleLogic.applySentOutEffects(battleTimeLine);
-                battleLogic.battleTurnEnd(battleTimeLine);
-                }
-            else if (switchContext == Enums.SwitchContext.SWITCH_FAINTED) {
-                battleLogic.switchPokemon(true, index);
-                battleLogic.applySentOutEffects(battleTimeLine);
-                battleLogic.finalChecks(battleTimeLine);
-            }
+            else
+                finalizeSwitchOut(battleTimeLine, index, playerAction);
         });
 
         summaryButton.setOnAction(event -> {
@@ -673,5 +659,32 @@ public class SwapPokemonController {
         closeButton.setOnAction(event -> switchOptionsBox.setVisible(false));
 
         switchOptionsBox.setVisible(true);
+    }
+
+    public void finalizeSwitchOut(List<Timeline> battleTimeLine, int index, TrainerAction playerAction) {
+        if (switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE) {
+            if (turnPokemon == null || secondMove == null)
+                throw new ValueException("Values of turnPokemon and secondMove expected to be not null in this context");
+            battleLogic.switchPokemon(true, index);
+            battleLogic.applySentOutEffects(battleTimeLine);
+            battleLogic.processSecondMove(battleTimeLine, party.get(0), turnPokemon.get(1), secondMove);
+        }
+        else if (switchContext == Enums.SwitchContext.SWITCH_FIRST) {
+            //battleLogic.initAnimationQueue(battleTimeLine);
+            //battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+            //});
+            //battleTimeLine.get(0).play();
+            battleLogic.waitEnemyAction(playerAction, battleTimeLine);
+        }
+        else if (switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE || switchContext == Enums.SwitchContext.SWITCH_SECOND) {
+            battleLogic.switchPokemon(true, index);
+            battleLogic.applySentOutEffects(battleTimeLine);
+            battleLogic.battleTurnEnd(battleTimeLine);
+        }
+        else if (switchContext == Enums.SwitchContext.SWITCH_FAINTED) {
+            battleLogic.switchPokemon(true, index);
+            battleLogic.applySentOutEffects(battleTimeLine);
+            battleLogic.finalChecks(battleTimeLine);
+        }
     }
 }

@@ -18,11 +18,11 @@ public class ClientSyncThread extends SyncThread {
     public void run() {
         try {
             outputStream.writeUTF("OK");
-            inputStream.readUTF();
+            outputStream.flush();
+            if (inputStream.readUTF().equals("OK"))
+                Platform.runLater(runLater);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        Platform.runLater(runLater);
     }
 }

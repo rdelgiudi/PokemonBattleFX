@@ -21,7 +21,7 @@ public class OnlineTrainer extends Trainer{
         return null;
     }
 
-    private void sendAction(DataOutputStream outputStream, TrainerAction trainerAction) {
+    public static void sendAction(DataOutputStream outputStream, TrainerAction trainerAction) {
         StringBuilder builder = new StringBuilder();
         String separator = "--";
         builder.append("HELLO").append(separator);
@@ -32,12 +32,13 @@ public class OnlineTrainer extends Trainer{
         builder.append("GOODBYE");
         try {
             outputStream.writeUTF(builder.toString());
+            outputStream.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private TrainerAction parseAction(String message) {
+    public static TrainerAction parseAction(String message) {
         String[] info = message.split("--");
         if (!info[0].equals("HELLO"))
             return null;
@@ -63,7 +64,7 @@ public class OnlineTrainer extends Trainer{
     }
 
     @Override
-    public TrainerAction getEnemyActionServer(TrainerAction trainerAction ,DataOutputStream outputStream, DataInputStream inputStream) {
+    public TrainerAction getEnemyActionServer(TrainerAction trainerAction, DataOutputStream outputStream, DataInputStream inputStream) {
         String enemyAction;
         try {
             enemyAction = inputStream.readUTF();
@@ -77,5 +78,18 @@ public class OnlineTrainer extends Trainer{
     @Override
     public TrainerAction getEnemySwitchOut(List<Pokemon> enemyParty) {
         return null;
+    }
+
+    public TrainerAction getEnemySwitchOut(DataInputStream inputStream, DataOutputStream outputStream) {
+        String enemyAction;
+        try {
+            enemyAction = inputStream.readUTF();
+            outputStream.writeUTF("OK");
+            outputStream.flush();
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return parseAction(enemyAction);
     }
 }

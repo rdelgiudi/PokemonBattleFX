@@ -10,6 +10,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.List;
 
+// Server thread that swaps information with its client counterpart about trainer moves
 public class ServerMoveSync extends SyncThread{
     private BattleLogic battleLogic;
     private TrainerAction playerAction;
@@ -28,8 +29,6 @@ public class ServerMoveSync extends SyncThread{
     @Override
     public void run() {
         final TrainerAction enemyAction = enemy.getEnemyActionServer(playerAction, outputStream, inputStream);
-        Platform.runLater(() -> {
-            battleLogic.battleTurn(playerAction, enemyAction, battleTimeLine);
-        });
+        battleLogic.battleTurn(playerAction, enemyAction, battleTimeLine);
     }
 }
