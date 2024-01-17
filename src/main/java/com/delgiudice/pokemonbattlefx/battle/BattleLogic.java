@@ -8,10 +8,15 @@ import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.move.MoveDamageInfo;
 import com.delgiudice.pokemonbattlefx.move.MoveEnum;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
+import com.delgiudice.pokemonbattlefx.network.ClientMoveSync;
+import com.delgiudice.pokemonbattlefx.network.ClientSyncThread;
+import com.delgiudice.pokemonbattlefx.network.ServerMoveSync;
+import com.delgiudice.pokemonbattlefx.network.ServerSyncThread;
 import com.delgiudice.pokemonbattlefx.pokemon.Ability;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
 import com.delgiudice.pokemonbattlefx.trainer.NpcTrainer;
+import com.delgiudice.pokemonbattlefx.trainer.OnlineTrainer;
 import com.delgiudice.pokemonbattlefx.trainer.Player;
 import com.delgiudice.pokemonbattlefx.trainer.Trainer;
 import com.sun.istack.internal.NotNull;
@@ -25,6 +30,8 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.Pair;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.*;
@@ -37,6 +44,7 @@ public class BattleLogic {
     public static final String POKEMON_SENT_OUT_STRING = "Go! %s!";
     private static final String MOVE_NO_EFFECT_STRING = "It doesn't affect%n%s...";
     private static final String RECHARGE_INFO = "%s needs to recharge!";
+    private static final String AWAITING_SYNC = "Awaiting sync...";
     private static final Font MAIN_FONT = Font.font("Monospaced");
 
     private Player player;
@@ -65,6 +73,11 @@ public class BattleLogic {
     private Pair<Enums.WeatherEffect, Integer> weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
 
     private boolean[] enemySeen;
+
+    private Enums.GameMode gameMode;
+    private DataInputStream inputStream;
+    private DataOutputStream outputStream;
+    private Thread connectionThread;
 
     public BattleLogic(BattleController controller) {
         this.controller = controller;
@@ -101,6 +114,7 @@ public class BattleLogic {
     }
 
     public void startBattle(Player player, NpcTrainer enemy, Pane teamBuilderPane) {
+        gameMode = Enums.GameMode.OFFLINE;
         resetConditions();
         controller.resetState();
 
@@ -115,6 +129,38 @@ public class BattleLogic {
 
         for (Item item : Item.getItemMap().values())
             player.getItems().put(item, 5);
+
+        if (BattleApplication.isUseInternetSprites()) {
+            for (Pokemon pokemon : player.getParty()) {
+                pokemon.getSpecie().loadNetImage(false);
+            }
+
+            for (Pokemon pokemon : enemy.getParty()) {
+                pokemon.getSpecie().loadNetImage(true);
+            }
+        }
+
+        controller.startBattleThemePlayback();
+        initBattleLoop();
+    }
+
+    public void startOnlineBattle(Player player, OnlineTrainer enemy, Pane teamBuilderPane, Enums.GameMode gameMode,
+                                  DataInputStream inputStream, DataOutputStream outputStream, Thread connectionThread) {
+        this.gameMode = gameMode;
+        this.inputStream = inputStream;
+        this.outputStream = outputStream;
+        this.connectionThread = connectionThread;
+        resetConditions();
+        controller.resetState();
+
+        this.player = player;
+        this.enemy = enemy;
+        playerParty.clear();
+        playerParty.addAll(this.player.getParty());
+        enemyParty.clear();
+        enemyParty.addAll(this.enemy.getParty());
+
+        this.teamBuilderPane = teamBuilderPane;
 
         if (BattleApplication.isUseInternetSprites()) {
             for (Pokemon pokemon : player.getParty()) {
@@ -186,9 +232,27 @@ public class BattleLogic {
                 playerParty.get(0).getHp());
         allyPokemonIntro.setOnFinished(e -> allyInfoAnimation.play());
 
-        allyInfoAnimation.setOnFinished(e -> {
-            battleLoop();
-        });
+        if (gameMode == Enums.GameMode.OFFLINE) {
+            allyInfoAnimation.setOnFinished(e -> {
+                battleLoop();
+            });
+
+        }
+        else if (gameMode == Enums.GameMode.SERVER) {
+
+            allyInfoAnimation.setOnFinished(e -> {
+                controller.getBattleText(AWAITING_SYNC, true).play();
+                ServerSyncThread syncThread = new ServerSyncThread(inputStream, outputStream, this::battleLoop);
+                syncThread.start();
+            });
+        }
+        else {
+            allyInfoAnimation.setOnFinished(e -> {
+                controller.getBattleText(AWAITING_SYNC, true).play();
+                ClientSyncThread syncThread = new ClientSyncThread(inputStream, outputStream, this::battleLoop);
+                syncThread.start();
+            });
+        }
 
         statusBoxAnimation.play();
     }
@@ -600,8 +664,26 @@ public class BattleLogic {
     }
 
     public void waitEnemyAction(TrainerAction playerAction, List<Timeline> battleTimeLine) {
-        TrainerAction enemyAction = enemy.getEnemyAction(enemyParty.get(0));
-        battleTurn(playerAction, enemyAction, battleTimeLine);
+        final TrainerAction enemyAction;
+        controller.getMoveGrid().setVisible(false);
+        controller.switchToPlayerChoice(false);
+
+        if (gameMode == Enums.GameMode.OFFLINE) {
+            enemyAction = enemy.getEnemyAction(enemyParty.get(0));
+            battleTurn(playerAction, enemyAction, battleTimeLine);
+        }
+        else if (gameMode == Enums.GameMode.SERVER) {
+            controller.getBattleText(AWAITING_SYNC, true).play();
+            ServerMoveSync syncThread = new ServerMoveSync(inputStream, outputStream, this, playerAction,
+                    enemy, battleTimeLine);
+            syncThread.start();
+        }
+        else if (gameMode == Enums.GameMode.CLIENT) {
+            controller.getBattleText(AWAITING_SYNC, true).play();
+            ClientMoveSync syncThread = new ClientMoveSync(inputStream, outputStream, this, playerAction,
+                    enemy, battleTimeLine);
+            syncThread.start();
+        }
     }
 
     private Move getMove(TrainerAction action, boolean player) {
@@ -670,8 +752,6 @@ public class BattleLogic {
     // TODO: This should be executed only once per turn!
     public void battleTurn(@NotNull TrainerAction playerAction, @NotNull TrainerAction enemyAction,
                            List<Timeline> battleTimeLine) {
-        controller.getMoveGrid().setVisible(false);
-        controller.switchToPlayerChoice(false);
 
         //TODO: Include Pursuit checks here
         if (playerAction.actionType == Enums.ActionTypes.SWITCH_POKEMON) {

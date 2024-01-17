@@ -5,6 +5,8 @@ import com.delgiudice.pokemonbattlefx.battle.TrainerAction;
 import com.delgiudice.pokemonbattlefx.item.Item;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -65,4 +67,12 @@ public abstract class Trainer {
     abstract public TrainerAction getEnemyAction(Pokemon enemyPokemon);
 
     abstract public TrainerAction getEnemySwitchOut(List<Pokemon> enemyParty);
+
+    public TrainerAction getEnemyActionServer(TrainerAction trainerAction , DataOutputStream outputStream, DataInputStream inputStream) {
+        return null;
+    }
+
+    public TrainerAction getEnemyActionClient(TrainerAction trainerAction , DataOutputStream outputStream, DataInputStream inputStream) {
+        return  null;
+    }
 }

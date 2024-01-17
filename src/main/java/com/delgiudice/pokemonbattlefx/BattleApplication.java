@@ -1,5 +1,6 @@
 package com.delgiudice.pokemonbattlefx;
 
+import com.delgiudice.pokemonbattlefx.network.NetworkThread;
 import com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -19,10 +20,14 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BattleApplication extends Application {
 
-    // Experimental - to be completed after completing initial goals
+    // Experimental - to be completed after completing initial goals]
+
+    public static List<NetworkThread> threadList = new ArrayList<>();
     private static boolean USE_INTERNET_SPRITES = false;
     private static boolean USE_LOCAL_ANIM_SPRITES = false;
 
@@ -64,6 +69,14 @@ public class BattleApplication extends Application {
         });
         stage.setFullScreenExitHint(String.format("Press %s or %s to exit fullscreen",
                 KeyCode.ESCAPE.getName() ,fullscreenKey.getName()));
+
+        stage.setOnCloseRequest(e -> {
+            System.out.println("Closing network threads...");
+            for (NetworkThread thread : threadList) {
+                thread.closeConnection();
+                System.out.println("Ending connection for thread " + thread.getName());
+            }
+        });
     }
 
     public static void main(String[] args) {

@@ -1,5 +1,7 @@
 package com.delgiudice.pokemonbattlefx.pokemon;
 
+import java.util.HashMap;
+
 public enum PokemonEnum {
     BULBASAUR("Bulbasaur"),
     IVYSAUR("Ivysaur"),
@@ -31,6 +33,18 @@ public enum PokemonEnum {
     SANDSHREW("Sandshrew");
 
     private final String name;
+
+    private static HashMap<String, PokemonEnum> map = new HashMap<>();
+
+    static {
+        for (PokemonEnum pokemonEnum : PokemonEnum.values()) {
+            map.put(pokemonEnum.name, pokemonEnum);
+        }
+    }
+
+    public static PokemonEnum findByName(String name) {
+        return map.get(name);
+    }
 
     PokemonEnum(String name) {
         this.name = name;

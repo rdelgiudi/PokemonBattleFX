@@ -234,6 +234,10 @@ public class Pokemon {
         this.level = level;
     }
 
+    public void setIvs(int[] ivs) {
+        this.ivs = ivs;
+    }
+
     public void setTrappedTimer(int trappedTimer) {
         this.trappedTimer = trappedTimer;
     }

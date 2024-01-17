@@ -1,5 +1,9 @@
 package com.delgiudice.pokemonbattlefx.pokemon;
 
+import com.delgiudice.pokemonbattlefx.attributes.Enums;
+
+import java.util.HashMap;
+
 public enum Ability {
     NONE("No ability"),
     OVERGROW("Overgrow",
@@ -32,6 +36,18 @@ public enum Ability {
 
     final private String ability;
     private String description = "No description";
+
+    private static HashMap<String, Ability> map = new HashMap<>();
+
+    static {
+        for (Ability ability : Ability.values()) {
+            map.put(ability.ability, ability);
+        }
+    }
+
+    public static Ability findByName(String ability) {
+        return map.get(ability);
+    }
 
     public String getDescription() {
         return description;

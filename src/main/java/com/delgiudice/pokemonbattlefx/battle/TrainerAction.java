@@ -9,11 +9,11 @@ public class TrainerAction {
     public Enums.ActionTypes actionType;
     // Defines name of the action, it can be one of the following data:
     //move index, pokemon index (swapping), item name
-    String actionName;
+    public String actionName;
     // Defines the target of the action, used mainly to determine item use target
-    int target = NO_TARGET;
+    public int target = NO_TARGET;
     // Target move of pp restoring, for items that restore pp of only a single move
-    int ppRestoreTarget = NO_TARGET;
+    public int ppRestoreTarget = NO_TARGET;
 
     public TrainerAction(Enums.ActionTypes actionType, String actionName) {
         this.actionType = actionType;

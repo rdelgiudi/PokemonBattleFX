@@ -5,16 +5,22 @@ import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.battle.BattleController;
 import com.delgiudice.pokemonbattlefx.battle.BattleLogic;
 import com.delgiudice.pokemonbattlefx.item.Item;
+import com.delgiudice.pokemonbattlefx.move.Move;
+import com.delgiudice.pokemonbattlefx.move.MoveEnum;
+import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.network.ClientThread;
 import com.delgiudice.pokemonbattlefx.network.ServerThread;
+import com.delgiudice.pokemonbattlefx.pokemon.Ability;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.pokemon.PokemonEnum;
+import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
 import com.delgiudice.pokemonbattlefx.trainer.NpcTrainer;
+import com.delgiudice.pokemonbattlefx.trainer.OnlineTrainer;
 import com.delgiudice.pokemonbattlefx.trainer.Player;
-import com.sun.security.ntlm.Server;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -29,9 +35,7 @@ import javafx.util.Duration;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.*;
 
 public class TeamBuilderController {
@@ -65,6 +69,20 @@ public class TeamBuilderController {
     private int PARTY_BUTTON_WIDTH = 100, PARTY_BUTTON_HEIGHT = 100;
 
     private Enums.GameMode gameMode = Enums.GameMode.OFFLINE;
+
+    private Thread connectionThread;
+
+    private DataOutputStream outputStream;
+    private DataInputStream inputStream;
+
+
+    public void setOutputStream(DataOutputStream outputStream) {
+        this.outputStream = outputStream;
+    }
+
+    public void setInputStream(DataInputStream inputStream) {
+        this.inputStream = inputStream;
+    }
 
     public TeamBuilderController() throws IOException {
         Pokemon.generatePokemonExamples();
@@ -397,29 +415,133 @@ public class TeamBuilderController {
     }
 
     private void startOnlineBattleServer() {
-        ServerSocket serverSocket;
-        try {
-            serverSocket = new ServerSocket(1234);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        ServerThread thread = new ServerThread(serverSocket, this);
-        thread.start();
+        inputStream = null;
+        outputStream = null;
+        int port = 1234;
+        connectionThread = new ServerThread(port, this);
+        connectionThread.start();
     }
 
     private void startOnlineBattleClient() {
-        ClientThread thread = new ClientThread(ipAddressField.getText(), this);
-        thread.start();
+        inputStream = null;
+        outputStream = null;
+        int port = 1234;
+        connectionThread = new ClientThread(ipAddressField.getText(), port, this);
+        connectionThread.start();
     }
 
-    public void sendBattleInfo(DataInputStream inputStream, DataOutputStream outputStream) throws IOException {
-        outputStream.writeUTF("Hello world");
+    private StringBuilder createTeamInfo() {
+        StringBuilder teamComposition = new StringBuilder();
+        final String separator = "__";
+        final String teamSeperator = "--";
+        teamComposition.append("HELLO").append(teamSeperator);
+        teamComposition.append(playerName).append(teamSeperator);
+        for (Pokemon pokemon : playerParty) {
+            teamComposition.append(pokemon.getName()).append(separator);
+            teamComposition.append(pokemon.getNature().getValue()).append(separator);
+            teamComposition.append(pokemon.getAbility()).append(separator);
+            for (int iv : pokemon.getIvs())
+                teamComposition.append(iv).append(separator);
+            for (Move move : pokemon.getMoveList())
+                teamComposition.append(move.getName()).append(separator);
+            teamComposition.append(pokemon.getLevel()).append(teamSeperator);
+        }
+        teamComposition.append("GOODBYE").append(teamSeperator);
+        return teamComposition;
     }
 
-    public void readBattleInfo(DataInputStream inputStream, DataOutputStream outputStream) throws IOException {
-        System.out.println("Client response: " + inputStream.readUTF());
+    private void parseTrainerInfo(String info) {
+        final String separator = "__";
+        final String teamSeperator = "--";
+        final String[] teamComposition = info.split(teamSeperator);
+        if (!teamComposition[0].equals("HELLO")) {
+            System.out.println("Transmission corrupted, aborting");
+            return;
+        }
+
+        String enemyName = teamComposition[1];
+
+        List<Pokemon> enemyTeam = new ArrayList<>();
+        for (int a=2; a<teamComposition.length; a++) {
+            String pokemonInfo = teamComposition[a];
+            if (pokemonInfo.equals("GOODBYE"))
+                break;
+            String[] splitInfo = pokemonInfo.split(separator);
+            String pokemonName = splitInfo[0];
+            int pokemonNature = Integer.parseInt(splitInfo[1]);
+            String pokemonAbility = splitInfo[2];
+            int[] ivs = new int[6];
+            int level = 0;
+            List<String> moveNames = new ArrayList<>();
+            for (int i=3; i<=8; i++)
+                ivs[i-3] = Integer.parseInt(splitInfo[i]);
+            for (int i=9; i<=13; i++) {
+                if (splitInfo[i].matches("[0-9]+") && splitInfo[i].length() <= 2) {
+                    level = Integer.parseInt(splitInfo[i]);
+                    break;
+                }
+                moveNames.add(splitInfo[i]);
+            }
+            Move firstMove = new Move(MoveTemplate.getMove(MoveEnum.findByName(moveNames.remove(0))));
+            Ability ability = Ability.findByName(pokemonAbility);
+            Pokemon pokemon = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.findByName(pokemonName)),
+                    level, ability,firstMove);
+            for (String move : moveNames)
+                pokemon.addMove(new Move(MoveTemplate.getMove(MoveEnum.findByName(move))));
+            pokemon.setNature(Enums.Nature.valueOf(pokemonNature));
+            pokemon.setIvs(ivs);
+            pokemon.calculateStats();
+            enemyTeam.add(pokemon);
+        }
+
+        this.enemyName = enemyName;
+        this.enemyParty = enemyTeam;
+    }
+
+    public void sendBattleInfoClient() throws IOException {
+        StringBuilder teamInfo = createTeamInfo();
+        outputStream.writeUTF(teamInfo.toString());
+        outputStream.flush();
+        readBattleInfoClient();
+    }
+
+    private void readBattleInfoClient() throws IOException {
+        String teamInfo = inputStream.readUTF();
+        System.out.println("Server response: " + teamInfo);
+        parseTrainerInfo(teamInfo);
+        startOnlineBattle();
+    }
+
+    public void readBattleInfoServer() throws IOException {
+        String teamInfo = inputStream.readUTF();
+        System.out.println("Client response: " + teamInfo);
+        parseTrainerInfo(teamInfo);
+        sendBattleInfoServer();
+    }
+
+    private void sendBattleInfoServer() throws IOException {
+        StringBuilder teamInfo = createTeamInfo();
+        outputStream.writeUTF(teamInfo.toString());
+        outputStream.flush();
+        startOnlineBattle();
+    }
+
+    private void startOnlineBattle() {
+        Player player = new Player(playerName, playerParty.get(0));
+        OnlineTrainer enemy = new OnlineTrainer(enemyName, enemyParty.get(0));
+
+
+        for (int i=1; i < playerParty.size(); i++)
+            player.addPokemon(playerParty.get(i));
+        for (int i=1; i < enemyParty.size(); i++)
+            enemy.addPokemon(enemyParty.get(i));
+
+        Platform.runLater(() -> {
+            Stage stage = (Stage) startBattleButton.getScene().getWindow();
+            Pane teamBuilderPane = (Pane) startBattleButton.getScene().getRoot();
+            stage.setTitle("Battle!");
+            startBattleButton.getScene().setRoot(battlePane);
+            logic.startOnlineBattle(player, enemy, teamBuilderPane, gameMode, inputStream, outputStream, connectionThread);
+        });
     }
 }

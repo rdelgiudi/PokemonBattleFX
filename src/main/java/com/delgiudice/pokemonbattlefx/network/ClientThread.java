@@ -1,47 +1,30 @@
 package com.delgiudice.pokemonbattlefx.network;
 
+import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ClientThread extends Thread{
-    private Socket clientSocket;
-    private DataOutputStream dataOutputStream;
-    private DataInputStream dataInputStream;
-    private final TeamBuilderController teamBuilderController;
+public class ClientThread extends NetworkThread{
     String host;
 
-    boolean connectionOpen = true;
-
-    public DataOutputStream getDataOutputStream() {
-        return dataOutputStream;
-    }
-
-    public DataInputStream getDataInputStream() {
-        return dataInputStream;
-    }
-
-    public ClientThread(String host, TeamBuilderController teamBuilderController) {
-        super();
+    public ClientThread(String host, int port, TeamBuilderController teamBuilderController) {
+        super(port ,teamBuilderController);
         this.host = host;
-        this.teamBuilderController = teamBuilderController;
-    }
-
-    public void closeConnection() {
-        connectionOpen = false;
     }
 
     @Override
     public void run() {
+        BattleApplication.threadList.add(this);
         int port = 1234;
         System.out.println("Starting client thread...");
         System.out.println("Connecting to: " + host + ":" + port);
         try {
             clientSocket = new Socket(host, port);
+            clientSocket.setKeepAlive(true);
             dataInputStream = new DataInputStream(clientSocket.getInputStream());
             dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
             System.out.println("Connection successful: " + clientSocket.getInetAddress());
@@ -49,21 +32,28 @@ public class ClientThread extends Thread{
             throw new RuntimeException(e);
         }
 
+        teamBuilderController.setInputStream(dataInputStream);
+        teamBuilderController.setOutputStream(dataOutputStream);
+
         try {
-            teamBuilderController.sendBattleInfo(dataInputStream, dataOutputStream);
+            teamBuilderController.sendBattleInfoClient();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         while (connectionOpen) {
             try {
-                Thread.sleep(100);
-                if (!clientSocket.isConnected())
+                Thread.sleep(50);
+                if (!clientSocket.isConnected()) {
+                    System.out.println("Unexpected connection closure!");
                     break;
+                }
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
+
+        System.out.println("Closing streams and sockets...");
 
         try {
             dataInputStream.close();
