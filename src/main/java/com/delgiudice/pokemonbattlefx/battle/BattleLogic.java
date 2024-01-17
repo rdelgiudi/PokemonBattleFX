@@ -327,6 +327,7 @@ public class BattleLogic {
         //battleLostMsg2.setOnFinished(e -> battleLostMsg3.play());
         battleLostMsg3.setOnFinished(e -> paused.play());
         paused.setOnFinished(e -> {
+            BattleApplication.endNetworkThread();
             controller.endBattleThemePlayback();
             stage.setTitle("Pokemon Battle FX");
             controller.getFightButton().getScene().setRoot(teamBuilderPane);
@@ -357,6 +358,7 @@ public class BattleLogic {
         //battleWonMsg1.setOnFinished(e -> battleWonMsg2.play());
         battleWonMsg2.setOnFinished(e -> paused.play());
         paused.setOnFinished(e -> {
+            BattleApplication.endNetworkThread();
             controller.endVictoryThemePlayback();
             stage.setTitle("Pokemon Battle FX");
             controller.getFightButton().getScene().setRoot(teamBuilderPane);
@@ -749,6 +751,34 @@ public class BattleLogic {
             processEnemyUseItem(battleTimeLine, enemyAction);
     }
 
+    private int generateValue(int bound) {
+        SecureRandom generator = new SecureRandom();
+        switch (gameMode) {
+            case OFFLINE:
+                return generator.nextInt(bound);
+            case SERVER:
+                int rand = generator.nextInt(bound);
+                try {
+                    outputStream.writeByte(rand);
+                    inputStream.readUTF();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return rand;
+            case CLIENT:
+                int serverRand;
+                try {
+                    serverRand = inputStream.readByte();
+                    outputStream.writeUTF("OK");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return serverRand;
+            default:
+                return -9999;
+        }
+    }
+
     // TODO: This should be executed only once per turn!
     public void battleTurn(@NotNull TrainerAction playerAction, @NotNull TrainerAction enemyAction,
                            List<Timeline> battleTimeLine) {
@@ -816,8 +846,8 @@ public class BattleLogic {
         }
         //On speed tie, the first attacker is randomized
         else if (tied) {
-            SecureRandom generator = new SecureRandom();
-            int flip = generator.nextInt(2);
+            //SecureRandom generator = new SecureRandom();
+            int flip = generateValue(2);
             if (flip == 1) {
                 processFirstMove(battleTimeLine, allyMove, allyPokemon, enemyMove, enemyPokemon);
             }
@@ -889,8 +919,8 @@ public class BattleLogic {
             return enemyMove;
         }
 
-        SecureRandom generator = new SecureRandom();
-        int enemyMoveIndex = generator.nextInt(availableIndices.size());
+        //SecureRandom generator = new SecureRandom();
+        int enemyMoveIndex = generateValue(availableIndices.size());
 
         enemyMove = enemyPokemon.getMoveList(availableIndices.get(enemyMoveIndex));
 
@@ -1502,8 +1532,8 @@ public class BattleLogic {
 
         if (pokemon.getAbility() == Ability.SHED_SKIN && damagingStatusEffect &&
                 !pokemon.getSubStatuses().contains(Enums.SubStatus.GASTRO_ACID)) {
-            SecureRandom random = new SecureRandom();
-            int rand = random.nextInt(3);
+            //SecureRandom random = new SecureRandom();
+            int rand = generateValue(3);
 
             if (rand == 0) {
                 List<Timeline> timelineList = new ArrayList<>();
@@ -2031,7 +2061,7 @@ public class BattleLogic {
 
         // Initiating the list of animations to be performed during move and an RNG
         List<Timeline> moveTimeLine = new ArrayList<>();
-        SecureRandom generator = new SecureRandom();
+        //SecureRandom generator = new SecureRandom();
 
         // Decreases the multiturn move counter, this is done here because interrupting a multiturn move
         // on its last turn will result in the same effect as the move completing
@@ -2050,7 +2080,7 @@ public class BattleLogic {
         // Also when interrupted during multiturn moves, the algorithm checks if it would be the last turn
         // if yes then the target is also confused on top of other status ailments
         if (user.getStatus() == Enums.Status.PARALYZED) {
-            int rand = generator.nextInt(4);
+            int rand = generateValue(4);
             if (rand == 0) {
                 processUserParalyzed(user, moveTimeLine);
                 if (user.getStateMove() != null) {
@@ -2078,7 +2108,7 @@ public class BattleLogic {
         }
 
         if (user.getStatus() == Enums.Status.FROZEN) {
-            int rand = generator.nextInt(5);
+            int rand = generateValue(5);
             boolean damagingFireMove = move.getType().getTypeEnum() == Enums.Types.FIRE &&
                     move.getSubtype() != Enums.Subtypes.STATUS;
             if (rand == 0 || damagingFireMove) {
@@ -2109,7 +2139,7 @@ public class BattleLogic {
             moveTimeLine.add(confuseMessage);
             moveTimeLine.add(controller.generatePause(2000));
 
-            int confuseInt = generator.nextInt(3);
+            int confuseInt = generateValue(3);
             if (confuseInt == 0) {
                 processConfusionHit(moveTimeLine, user);
                 return moveTimeLine;
@@ -2234,7 +2264,7 @@ public class BattleLogic {
         if (moveAccuracy != MoveTemplate.NOT_APPLICABLE) {
             float accuracyModifier = calculateMoveAccuracyModifier(user, target, move);
             double hit = moveAccuracy * accuracyModifier;
-            int r = generator.nextInt(100) + 1;
+            int r = generateValue(100) + 1;
             if (r > hit || twoTurnModifier == 0) {
                 processMoveMissed(user, moveTimeLine);
                 return moveTimeLine;
@@ -2249,7 +2279,7 @@ public class BattleLogic {
         int hits = move.isMultiturn() ? 1 : move.getHits();
 
         if (hits == MoveTemplate.HITS_RANDOM) {
-            int hitsRand = generator.nextInt(100);
+            int hitsRand = generateValue(100);
             int hitsTemp;
             if (hitsRand < 35)
                 hitsTemp = 2;
@@ -2386,7 +2416,7 @@ public class BattleLogic {
         // assigns appropriate variables
         if (move.isMultiturn() && user.getStateMove() == null && move.isMultiturnConfusion() &&
                 user.getState() == Enums.States.NONE) {
-            int turns = generator.nextInt(2) + 1;
+            int turns = generateValue(2) + 1;
             user.setStateMove(move);
             user.setStateCounter(turns);
             user.setState(Enums.States.MULTITURN);
@@ -2555,8 +2585,8 @@ public class BattleLogic {
 
     private void processStaticCheck(List<Timeline> moveTimeLine, Pokemon user, Pokemon target) {
 
-        SecureRandom generator = new SecureRandom();
-        int staticRandom = generator.nextInt(10);
+        //SecureRandom generator = new SecureRandom();
+        int staticRandom = generateValue(10);
 
         if (staticRandom <= 2) {
             Timeline abilityInfo;
@@ -2586,9 +2616,9 @@ public class BattleLogic {
 
     private void processStatusApplication(List<Timeline> moveTimeLine, Move move, Pokemon user, Pokemon target,
                                           boolean secondaryEffectsImmune) {
-        SecureRandom generator = new SecureRandom();
+        //SecureRandom generator = new SecureRandom();
         int prob = Math.round(move.getStatusProb() * 100.0f);
-        int rand = generator.nextInt(100) + 1;
+        int rand = generateValue(100) + 1;
 
         boolean statusImmunity = isStatusImmune(move, target);
 
@@ -2637,9 +2667,9 @@ public class BattleLogic {
 
     private void processStatUpApplication(List<Timeline> moveTimeLine, Move move, Pokemon user, Pokemon target,
                                           boolean userFainted, boolean secondaryEffectsImmune) {
-        SecureRandom generator = new SecureRandom();
+        //SecureRandom generator = new SecureRandom();
         float prob = move.getStatChangeProb() * 100.0f;
-        int rand = generator.nextInt(100) + 1;
+        int rand = generateValue(100) + 1;
         boolean substituteProtected = target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE) &&
                 move.getStatChange() < 0 && !move.isSelf() && move.getMoveCategory() != Enums.MoveCategory.SOUND_BASED;
 
@@ -2661,9 +2691,9 @@ public class BattleLogic {
 
     private void processSubStatusApplication(List<Timeline> moveTimeLine ,Move move, Pokemon user, Pokemon target,
                                              boolean secondaryEffectsImmune, boolean first) {
-        SecureRandom generator = new SecureRandom();
+        //SecureRandom generator = new SecureRandom();
         float prob = move.getStatChangeProb() * 100.0f;
-        int rand = generator.nextInt(100) + 1;
+        int rand = generateValue(100) + 1;
         Enums.SubStatus moveSubStatus = move.getSubStatus();
         boolean substituteProtected = target.getSubStatuses().contains(Enums.SubStatus.SUBSTITUTE) && !move.isSelf() &&
                 move.getMoveCategory() != Enums.MoveCategory.SOUND_BASED && user.getAbility() != Ability.INFILTRATOR;
@@ -2914,9 +2944,9 @@ public class BattleLogic {
 
         System.out.println(target.getBattleName() + " became confused!");
 
-        SecureRandom generator = new SecureRandom();
+        //SecureRandom generator = new SecureRandom();
 
-        int turns = generator.nextInt(4) + 1;
+        int turns = generateValue(4) + 1;
 
         target.getSubStatuses().add(Enums.SubStatus.CONFUSED);
         target.setConfusionTimer(turns);
@@ -2931,13 +2961,13 @@ public class BattleLogic {
                         "%s was trapped in the vortex!", target.getBattleName()), true);
         //pokemonTrappedMessage.setDelay(Duration.seconds(2));
 
-        SecureRandom generator = new SecureRandom();
+        //SecureRandom generator = new SecureRandom();
 
         System.out.println(target.getBattleName() + " was trapped in vortex");
         int turns;
         switch (move.getName()) {
             case FIRE_SPIN:
-                int rand = generator.nextInt(256);
+                int rand = generateValue(256);
                 if (rand < 96)
                     turns = 2;
                 else if (rand < 192)
@@ -2948,7 +2978,7 @@ public class BattleLogic {
                     turns = 5;
                 break;
             case WHIRLPOOL:
-                turns = generator.nextInt(2) + 4;
+                turns = generateValue(2) + 4;
                 break;
             default:
                 throw new IllegalStateException("Not a trapping move");
@@ -2962,7 +2992,7 @@ public class BattleLogic {
 
     private Timeline processStatusChange(Enums.Status status, Pokemon target) {
         final Timeline statusChangeInfo;
-        SecureRandom generator = new SecureRandom();
+        //SecureRandom generator = new SecureRandom();
 
         if (target.getStatus() != Enums.Status.NONE) {
             statusChangeInfo = controller.getBattleTextAnimation(String.format("%s is already%n%s!",
@@ -2975,7 +3005,7 @@ public class BattleLogic {
                     target.getBattleName(), status.toString()), true);
             System.out.printf("%s is %s!%n", target.getBattleName(), status);
             if (status == Enums.Status.SLEEPING) {
-                int sleepTurns = generator.nextInt(3) + 1;
+                int sleepTurns = generateValue(3) + 1;
                 target.setSleepCounter(sleepTurns);
             }
         }
@@ -3091,7 +3121,7 @@ public class BattleLogic {
     private MoveDamageInfo calculateMoveDamage(Move move, Pokemon user, Pokemon target, int twoTurnModifier,
                                        boolean canCrit, int overridePower)
     {
-        SecureRandom generator = new SecureRandom();
+        //SecureRandom generator = new SecureRandom();
         int bound;
         int critChanceTempIncrease = move.getTemplate().getCritTemporaryIncrease();
         int critChanceIncrease = user.getCritIncrease();
@@ -3116,7 +3146,7 @@ public class BattleLogic {
         if (user.getSubStatuses().contains(Enums.SubStatus.LASER_FOCUS))
             bound = 1;
 
-        int critNum = generator.nextInt(bound);
+        int critNum = generateValue(bound);
         boolean isCrit = false;
         float critMod;
 
@@ -3199,7 +3229,7 @@ public class BattleLogic {
 
         // Miscellaneous stats calculation (stab, random factor, burn debuff)
         double part1 = ((2.0 * user.getLevel())/5.0) + 2;
-        float rand = (generator.nextInt(16) + 85)/100.0f;
+        float rand = (generateValue(16) + 85)/100.0f;
         float stab;
 
         Type firstUserType = user.getType()[0];

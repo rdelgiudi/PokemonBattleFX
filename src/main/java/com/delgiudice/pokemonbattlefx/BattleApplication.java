@@ -71,12 +71,17 @@ public class BattleApplication extends Application {
                 KeyCode.ESCAPE.getName() ,fullscreenKey.getName()));
 
         stage.setOnCloseRequest(e -> {
-            System.out.println("Closing network threads...");
-            for (NetworkThread thread : threadList) {
-                thread.closeConnection();
-                System.out.println("Ending connection for thread " + thread.getName());
-            }
+            endNetworkThread();
         });
+    }
+
+    public static void endNetworkThread() {
+        System.out.println("Closing network threads...");
+        for (NetworkThread thread : threadList) {
+            thread.closeConnection();
+            System.out.println("Ending connection for thread " + thread.getName());
+        }
+        threadList.clear();
     }
 
     public static void main(String[] args) {
