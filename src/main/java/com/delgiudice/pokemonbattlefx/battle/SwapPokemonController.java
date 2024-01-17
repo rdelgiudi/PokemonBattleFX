@@ -85,6 +85,11 @@ public class SwapPokemonController {
         mainPane.setClip(rect);
     }
 
+    public void processSpriteModeSwitch() {
+        SummaryController summaryController = summaryLoader.getController();
+        summaryController.processSpriteModeSwitch();
+    }
+
     public void initVariablesBag(Pane battlePane, Pane bagPane, BattleLogic logic, BattleController controller,
                                  List<Pokemon> party, Player player, Item item) {
         useItem = true;

@@ -43,6 +43,8 @@ public class BattleApplication extends Application {
     public static void setUseInternetSprites(boolean useInternetSprites) {
         if (useInternetSprites)
             PokemonSpecie.toggleAnimatedPokemonSprites();
+        else
+            PokemonSpecie.unloadNetImages();
         USE_INTERNET_SPRITES = useInternetSprites;
     }
 

@@ -37,12 +37,13 @@ public class SummaryController {
     private Pane previousPane;
     private int currentIndex;
     private InvalidationListener animatedSpriteListener;
+    private double maxFitWidth, maxFitHeight;
 
     public void initialize() {
         setListeners();
 
-        double maxFitWidth = pokemonPortrait.getFitWidth();
-        double maxFitHeight = pokemonPortrait.getFitHeight();
+        maxFitWidth = pokemonPortrait.getFitWidth();
+        maxFitHeight = pokemonPortrait.getFitHeight();
         animatedSpriteListener = new InvalidationListener() {
             @Override
             public void invalidated(Observable e) {
@@ -58,6 +59,8 @@ public class SummaryController {
         }
         else {
             pokemonPortrait.imageProperty().removeListener(animatedSpriteListener);
+            pokemonPortrait.setFitWidth(maxFitWidth);
+            pokemonPortrait.setFitHeight(maxFitHeight);
         }
     }
 

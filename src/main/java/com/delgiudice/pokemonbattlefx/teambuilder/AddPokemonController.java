@@ -44,12 +44,13 @@ public class AddPokemonController {
     private boolean editModeAlly;
     private int editModeIndex = -1;
     private InvalidationListener animatedSpriteListener;
+    private double maxFitWidth, maxFitHeight;
 
     public void initialize() {
         setStatisticsListeners();
 
-        double maxFitWidth = pokemonPortrait.getFitWidth();
-        double maxFitHeight = pokemonPortrait.getFitHeight();
+        maxFitWidth = pokemonPortrait.getFitWidth();
+        maxFitHeight = pokemonPortrait.getFitHeight();
         animatedSpriteListener = new InvalidationListener() {
             @Override
             public void invalidated(Observable e) {
@@ -65,6 +66,8 @@ public class AddPokemonController {
         }
         else {
             pokemonPortrait.imageProperty().removeListener(animatedSpriteListener);
+            pokemonPortrait.setFitWidth(maxFitWidth);
+            pokemonPortrait.setFitHeight(maxFitHeight);
         }
     }
 

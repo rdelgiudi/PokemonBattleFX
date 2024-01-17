@@ -74,8 +74,6 @@ public class TeamBuilderController {
     BattleController battleController;
     BattleLogic logic;
 
-    AddPokemonController addPokemonController;
-
     private int FONT_SIZE = 13, POKEMON_BUTTON_WIDTH = 125, POKEMON_BUTTON_HEIGHT = 100, POKEMON_PANE_SIZE = 450;
     private int PARTY_BUTTON_WIDTH = 100, PARTY_BUTTON_HEIGHT = 100;
     private boolean turboMode = false;
@@ -140,8 +138,6 @@ public class TeamBuilderController {
             throw new RuntimeException(ex);
         }
 
-        addPokemonController = addPokemonLoader.getController();
-
         setupStringField(playerNameField, 15);
     }
     @FXML
@@ -171,7 +167,9 @@ public class TeamBuilderController {
     private void toggleAnimatedMode() {
         BattleApplication.setUseInternetSprites(animatedModeCheckBox.isSelected());
         battleController.processSpriteModeSwitch();
+        AddPokemonController addPokemonController = addPokemonLoader.getController();
         addPokemonController.processSpriteModeSwitch();
+        logic.processSpriteModeSwitch();
     }
 
     private static void setupStringField(TextField textField, int characterLimit) {
@@ -477,6 +475,7 @@ public class TeamBuilderController {
         multiplayerOptionsButton.setDisable(value);
         enemySettingsButton.setDisable(value);
         playerSettingsButton.setDisable(value);
+        ipAddressField.setDisable(value);
     }
 
     public void displayConnectionBlock(boolean block) {

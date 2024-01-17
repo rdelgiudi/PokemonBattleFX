@@ -108,6 +108,11 @@ public class BattleLogic {
 
     }
 
+    public void processSpriteModeSwitch() {
+        SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
+        swapPokemonController.processSpriteModeSwitch();
+    }
+
     // resets the battlefield to default
     private void resetConditions() {
         allyBattlefieldConditions.clear();
