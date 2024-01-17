@@ -28,6 +28,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -37,11 +38,15 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.*;
+import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 public class TeamBuilderController {
 
     @FXML
     private HBox playerPartyBox, enemyPartyBox;
+    @FXML
+    private VBox playerSettingsBox;
     @FXML
     private GridPane pokemonGrid;
     @FXML
@@ -49,7 +54,11 @@ public class TeamBuilderController {
     @FXML
     private ScrollPane scrollPane;
     @FXML
-    private TextField ipAddressField;
+    private TextField ipAddressField, playerNameField;
+    @FXML
+    private Label waitingForConnectionLabel;
+    @FXML
+    private CheckBox turboModeCheckBox;
 
     List<Pokemon> playerParty = new ArrayList<>(), enemyParty = new ArrayList<>();
 
@@ -67,6 +76,7 @@ public class TeamBuilderController {
 
     private int FONT_SIZE = 13, POKEMON_BUTTON_WIDTH = 125, POKEMON_BUTTON_HEIGHT = 100, POKEMON_PANE_SIZE = 450;
     private int PARTY_BUTTON_WIDTH = 100, PARTY_BUTTON_HEIGHT = 100;
+    private boolean turboMode = false;
 
     private Enums.GameMode gameMode = Enums.GameMode.OFFLINE;
 
@@ -127,6 +137,41 @@ public class TeamBuilderController {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+
+        setupStringField(playerNameField, 15);
+    }
+    @FXML
+    private void openPlayerSettings() {
+        playerSettingsBox.setVisible(true);
+        disableInput(true);
+    }
+
+    @FXML
+    private void closePlayerSettings() {
+        playerSettingsBox.setVisible(false);
+        updatePlayerName();
+        disableInput(false);
+    }
+
+    @FXML
+    private void updatePlayerName() {
+        playerName = playerNameField.getText();
+    }
+
+    @FXML
+    private void toggleTurboMode() {
+        turboMode = turboModeCheckBox.isSelected();
+    }
+
+    private static void setupStringField(TextField textField, int characterLimit) {
+
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\sa-zA-Z*")) {
+                textField.setText(newValue.replaceAll("[^\\sa-zA-Z]", ""));
+            }
+            if (newValue.length() > characterLimit)
+                textField.setText(newValue.substring(0, characterLimit));
+        });
     }
 
     public void setUiResizeListener() {
@@ -411,10 +456,25 @@ public class TeamBuilderController {
         stage.setTitle("Battle!");
         startBattleButton.getScene().setRoot(battlePane);
 
-        logic.startBattle(player, enemy, teamBuilderPane);
+        logic.startBattle(player, enemy, turboMode, teamBuilderPane);
+    }
+
+    private void disableInput(boolean value) {
+        startBattleButton.setDisable(value);
+        scrollPane.setDisable(value);
+        playerPartyBox.setDisable(value);
+        multiplayerOptionsButton.setDisable(value);
+        enemySettingsButton.setDisable(value);
+        playerSettingsButton.setDisable(value);
+    }
+
+    public void displayConnectionBlock(boolean block) {
+        disableInput(block);
+        waitingForConnectionLabel.setVisible(block);
     }
 
     private void startOnlineBattleServer() {
+        displayConnectionBlock(true);
         inputStream = null;
         outputStream = null;
         int port = 1234;
@@ -541,7 +601,8 @@ public class TeamBuilderController {
             Pane teamBuilderPane = (Pane) startBattleButton.getScene().getRoot();
             stage.setTitle("Battle!");
             startBattleButton.getScene().setRoot(battlePane);
-            logic.startOnlineBattle(player, enemy, teamBuilderPane, gameMode, inputStream, outputStream, connectionThread);
+            displayConnectionBlock(false);
+            logic.startOnlineBattle(player, enemy, turboMode, teamBuilderPane, gameMode, inputStream, outputStream, connectionThread);
         });
     }
 }

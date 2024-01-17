@@ -123,13 +123,14 @@ public class BattleLogic {
             PokemonSpecie.unloadNetImages();
     }
 
-    public void startBattle(Player player, NpcTrainer enemy, Pane teamBuilderPane) {
+    public void startBattle(Player player, NpcTrainer enemy, boolean turboMode, Pane teamBuilderPane) {
         gameMode = Enums.GameMode.OFFLINE;
         resetConditions();
         controller.resetState();
 
         this.player = player;
         this.enemy = enemy;
+        controller.setTurboMode(turboMode);
         playerParty.clear();
         playerParty.addAll(this.player.getParty());
         enemyParty.clear();
@@ -154,7 +155,7 @@ public class BattleLogic {
         initBattleLoop();
     }
 
-    public void startOnlineBattle(Player player, OnlineTrainer enemy, Pane teamBuilderPane, Enums.GameMode gameMode,
+    public void startOnlineBattle(Player player, OnlineTrainer enemy, boolean turboMode, Pane teamBuilderPane, Enums.GameMode gameMode,
                                   DataInputStream inputStream, DataOutputStream outputStream, Thread connectionThread) {
         this.gameMode = gameMode;
         this.inputStream = inputStream;
@@ -165,6 +166,7 @@ public class BattleLogic {
 
         this.player = player;
         this.enemy = enemy;
+        controller.setTurboMode(turboMode);
         playerParty.clear();
         playerParty.addAll(this.player.getParty());
         enemyParty.clear();

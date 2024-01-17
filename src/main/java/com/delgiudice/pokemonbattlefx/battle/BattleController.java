@@ -82,6 +82,8 @@ public class BattleController {
 
     private final Image pokemonIndicatorEmpty, pokemonIndicatorNormal;
 
+    private boolean turboMode = false;
+
     private final static String FIGHT_BUTTON_PRESSED = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: darkred;";
     private final static String FIGHT_BUTTON_RELEASE = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: firebrick;";
     private final static String FIGHT_BUTTON_HOVER = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: crimson;";
@@ -155,6 +157,10 @@ public class BattleController {
 
     public Button getPokemonBackButton() {
         return pokemonBackButton;
+    }
+
+    public void setTurboMode(boolean turboMode) {
+        this.turboMode = turboMode;
     }
 
     public BattleController() throws UnsupportedAudioFileException, LineUnavailableException, IOException, URISyntaxException {
@@ -598,13 +604,14 @@ public class BattleController {
 
     public Timeline getBattleTextAnimation(String text, boolean full) {
         final List<KeyFrame> characterList = new ArrayList<>();
+        final double modifier = turboMode ? 4 : 1;
         for (int i = 0; i <= text.length(); i++) {
             int finalI = i;
             final KeyFrame kf;
             if (full)
-                kf = new KeyFrame(Duration.millis(20 * i), e -> battleTextFull.setText(text.substring(0, finalI)));
+                kf = new KeyFrame(Duration.millis(20 / modifier * i), e -> battleTextFull.setText(text.substring(0, finalI)));
             else
-                kf = new KeyFrame(Duration.millis(20 * i), e -> battleText.setText(text.substring(0, finalI)));
+                kf = new KeyFrame(Duration.millis(20 / modifier * i), e -> battleText.setText(text.substring(0, finalI)));
             characterList.add(kf);
         }
 
@@ -612,10 +619,11 @@ public class BattleController {
         timeline.getKeyFrames().addAll(characterList);
 
         final KeyFrame kf;
+        double ms = 20 / modifier * text.length() + 25;
         if (full)
-            kf = new KeyFrame(Duration.millis(20 * text.length() + 25), e -> battleTextFull.setText(text));
+            kf = new KeyFrame(Duration.millis(ms), e -> battleTextFull.setText(text));
         else
-            kf = new KeyFrame(Duration.millis(20 * text.length() + 25), e -> battleText.setText(text));
+            kf = new KeyFrame(Duration.millis(ms), e -> battleText.setText(text));
 
         timeline.getKeyFrames().add(kf);
 
@@ -1904,7 +1912,8 @@ public class BattleController {
     }
 
     public Timeline generatePause(double millis) {
-        return new Timeline(new KeyFrame(Duration.millis(millis)));
+        double modifier = turboMode ? millis : 1;
+        return new Timeline(new KeyFrame(Duration.millis(millis / modifier)));
     }
 
     public void fightButtonPressed(Pokemon pokemon) {

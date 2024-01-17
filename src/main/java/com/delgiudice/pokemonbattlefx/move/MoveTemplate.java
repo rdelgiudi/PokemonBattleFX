@@ -596,7 +596,7 @@ public class MoveTemplate {
                 Type.getTypeMap().get(Enums.Types.FIRE), false);
         newmove.setMoveDescription("The user attacks by engulfing the target in an intense fire. This leaves the target with a burn.");
         newmove.setStatus(Enums.Status.BURNED);
-        newmove.setStatChangeProb(1.0f);
+        newmove.setStatusProb(1.0f);
         moveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.SCARY_FACE, NOT_APPLICABLE, 100, 10, Enums.Subtypes.STATUS,
