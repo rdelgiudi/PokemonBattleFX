@@ -1474,9 +1474,27 @@ public class BattleLogic {
 
         initAnimationQueue(battleTimeLine);
 
-        battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
-            battleLoop();
-        });
+        if (gameMode == Enums.GameMode.OFFLINE) {
+            battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+                battleLoop();
+            });
+
+        }
+        else if (gameMode == Enums.GameMode.SERVER) {
+
+            battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+                controller.getBattleText(AWAITING_SYNC, true).play();
+                ServerSyncThread syncThread = new ServerSyncThread(inputStream, outputStream, this::battleLoop);
+                syncThread.start();
+            });
+        }
+        else {
+            battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+                controller.getBattleText(AWAITING_SYNC, true).play();
+                ClientSyncThread syncThread = new ClientSyncThread(inputStream, outputStream, this::battleLoop);
+                syncThread.start();
+            });
+        }
 
         Platform.runLater(() -> battleTimeLine.get(0).play());
     }
