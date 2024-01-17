@@ -45,6 +45,8 @@ public class BattleLogic {
     static final String AWAITING_SYNC = "Awaiting sync...";
     private static final Font MAIN_FONT = Font.font("Monospaced");
 
+    private String SEND_OUT_MESSAGE;
+
     private Player player;
     private Trainer enemy;
 
@@ -129,6 +131,8 @@ public class BattleLogic {
     }
 
     public void startBattle(Player player, NpcTrainer enemy, boolean turboMode, Pane teamBuilderPane) {
+        SEND_OUT_MESSAGE = "%s %s%nsends out %s!";
+
         gameMode = Enums.GameMode.OFFLINE;
         resetConditions();
         controller.resetState();
@@ -162,6 +166,8 @@ public class BattleLogic {
 
     public void startOnlineBattle(Player player, OnlineTrainer enemy, boolean turboMode, Pane teamBuilderPane, Enums.GameMode gameMode,
                                   DataInputStream inputStream, DataOutputStream outputStream, Thread connectionThread) {
+        SEND_OUT_MESSAGE = "%s%nsends out %s!";
+
         this.gameMode = gameMode;
         this.inputStream = inputStream;
         this.outputStream = outputStream;
@@ -217,15 +223,25 @@ public class BattleLogic {
 
         Timeline statusBoxAnimation = controller.getPokemonStatusBoxAnimation();
 
-        Timeline battleTextIntro = controller.getBattleTextAnimation(String.format("%s %s%nwants to battle!",
+        Timeline battleTextIntro;
+        if (!enemy.getTrainerType().equals(Enums.TrainerTypes.NONE))
+            battleTextIntro = controller.getBattleTextAnimation(String.format("%s %s%nwants to battle!",
                 enemy.getTrainerType().toString(), enemy.getName()), true);
+        else
+            battleTextIntro = controller.getBattleTextAnimation(String.format("%s%nwants to battle!",
+                    enemy.getName()), true);
         statusBoxAnimation.setOnFinished(e -> battleTextIntro.play());
 
         battleTextIntro.setDelay(Duration.seconds(1));
 
-        Timeline enemyPokemonIntro = controller.getBattleTextAnimation(String.format("%s %s%nsends out %s!",
+        Timeline enemyPokemonIntro;
+        if (!enemy.getTrainerType().equals(Enums.TrainerTypes.NONE))
+            enemyPokemonIntro = controller.getBattleTextAnimation(String.format(SEND_OUT_MESSAGE,
                 enemy.getTrainerType().toString(), enemy.getName(),
                 enemyParty.get(0).getName()), true);
+        else
+            enemyPokemonIntro = controller.getBattleTextAnimation(String.format(SEND_OUT_MESSAGE,
+                    enemy.getName(), enemyParty.get(0).getName()), true);
         controller.battleTextAdvanceByUserInput(battleTextIntro, enemyPokemonIntro);
         //enemyPokemonIntro.setDelay(Duration.seconds(1));
         //battleTextIntro.setOnFinished(e -> enemyPokemonIntro.play());
@@ -364,8 +380,13 @@ public class BattleLogic {
         controller.switchToPlayerChoice(false);
         Stage stage = (Stage) controller.getFightButton().getScene().getWindow();
 
-        Timeline battleWonMsg1 = controller.getBattleTextAnimation(String.format("%s defeated%n%s %s!", player.getName(),
+        Timeline battleWonMsg1;
+        if (!enemy.getTrainerType().equals(Enums.TrainerTypes.NONE))
+            battleWonMsg1 = controller.getBattleTextAnimation(String.format("%s defeated%n%s %s!", player.getName(),
                 enemy.getTrainerType().toString(), enemy.getName()), true);
+        else
+            battleWonMsg1 = controller.getBattleTextAnimation(String.format("%s defeated%n%s!", player.getName(),
+                    enemy.getName()), true);
         Timeline battleWonMsg2 = controller.getBattleTextAnimation("Returning to Team Builder...", true);
         Timeline paused = controller.generatePause(1000);
 
@@ -724,14 +745,30 @@ public class BattleLogic {
     // Handles enemy pokemon swap TODO: Pursuit handling
     private void processEnemyPokemonSwitch(List<Timeline> battleTimeLine, TrainerAction enemyAction,
                                            TrainerAction playerAction) {
-        Timeline swapMesssage = controller.getBattleTextAnimation(String.format("%s %s withdrew %s!",
+        Timeline swapMesssage;
+        if (!enemy.getTrainerType().equals(Enums.TrainerTypes.NONE))
+            swapMesssage = controller.getBattleTextAnimation(String.format("%s %s withdrew %s!",
                 enemy.getTrainerType(), enemy.getName(), enemyParty.get(0).getName()), true);
+        else
+            swapMesssage = controller.getBattleTextAnimation(String.format("%s withdrew %s!", enemy.getName(),
+                    enemyParty.get(0).getName()), true);
         Timeline pokemonReturnAnimation = controller.getPokemonReturnAnimation(false);
         int newPokemonSlot = Integer.parseInt(enemyAction.actionName);
         switchPokemon(false, newPokemonSlot);
-        Timeline sendOutMessage = controller.getBattleTextAnimation(String.format("%s %s sends out %s!",
-                enemy.getTrainerType(), enemy.getName(), enemyParty.get(0).getName()), true);
+        int index = enemy.getParty().indexOf(enemyParty.get(0));
+        enemySeen[index] = true;
+
+        Timeline sendOutMessage;
+        if (!enemy.getTrainerType().equals(Enums.TrainerTypes.NONE))
+            sendOutMessage = controller.getBattleTextAnimation(String.format(SEND_OUT_MESSAGE,
+                    enemy.getTrainerType().toString(), enemy.getName(),
+                    enemyParty.get(0).getName()), true);
+        else
+            sendOutMessage = controller.getBattleTextAnimation(String.format(SEND_OUT_MESSAGE,
+                    enemy.getName(), enemyParty.get(0).getName()), true);
+
         Timeline pokemonSendOutAnimation = controller.getIntroAnimation(enemyParty.get(0), enemyParty.get(0).getHp());
+
         battleTimeLine.add(swapMesssage);
         battleTimeLine.add(pokemonReturnAnimation);
         battleTimeLine.add(controller.generatePause(1000));
@@ -753,7 +790,11 @@ public class BattleLogic {
     }
 
     private void processEnemyUseItem(List<Timeline> battleTimeLine, TrainerAction enemyAction) {
-        String enemyName = enemy.getTrainerType() + " " + enemy.getName();
+        String enemyName;
+        if (!enemy.getTrainerType().equals(Enums.TrainerTypes.NONE))
+            enemyName = enemy.getTrainerType() + " " + enemy.getName();
+        else
+            enemyName = enemy.getName();
         String itemName = enemyAction.actionName;
         Item item = Item.getItemMap().get(itemName);
         Pokemon target = enemyParty.get(enemyAction.target);
@@ -975,12 +1016,19 @@ public class BattleLogic {
             moveTimeLine.add(controller.generatePause(1000));
         }
 
-        System.out.printf("%s %s sends out %s!%n", enemy.getTrainerType().toString(), enemy.getName(),
-                enemyParty.get(0).getName());
-
-        Timeline enemyNewPokemonInfo = controller.getBattleTextAnimation(String.format("%s %s sends out%n%s!",
-                        enemy.getTrainerType().toString(), enemy.getName(), enemyParty.get(0).getName()),
-                true);
+        Timeline enemyNewPokemonInfo;
+        if (!enemy.getTrainerType().equals(Enums.TrainerTypes.NONE)) {
+            System.out.printf("%s %s sends out %s!%n", enemy.getTrainerType().toString(), enemy.getName(),
+                    enemyParty.get(0).getName());
+            enemyNewPokemonInfo = controller.getBattleTextAnimation(String.format(SEND_OUT_MESSAGE,
+                            enemy.getTrainerType().toString(), enemy.getName(), enemyParty.get(0).getName()), true);
+        }
+        else {
+            System.out.printf("%s sends out %s!%n", enemy.getName(),
+                    enemyParty.get(0).getName());
+            enemyNewPokemonInfo = controller.getBattleTextAnimation(String.format(SEND_OUT_MESSAGE,
+                    enemy.getName(), enemyParty.get(0).getName()), true);
+        }
         //enemyNewPokemonInfo.setDelay(Duration.seconds(2));
         moveTimeLine.add(enemyNewPokemonInfo);
 
