@@ -6,6 +6,8 @@ import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.move.MoveEnum;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -41,17 +43,28 @@ public class AddPokemonController {
     private TeamBuilderController previousController;
     private boolean editModeAlly;
     private int editModeIndex = -1;
+    private InvalidationListener animatedSpriteListener;
 
     public void initialize() {
         setStatisticsListeners();
 
+        double maxFitWidth = pokemonPortrait.getFitWidth();
+        double maxFitHeight = pokemonPortrait.getFitHeight();
+        animatedSpriteListener = new InvalidationListener() {
+            @Override
+            public void invalidated(Observable e) {
+                pokemonPortrait.setFitWidth(pokemonPortrait.getImage().getWidth() / 3.5 / 110 * maxFitWidth);
+                pokemonPortrait.setFitHeight(pokemonPortrait.getImage().getWidth() / 3.5 / 110 * maxFitHeight);
+            }
+        };
+    }
+
+    public void processSpriteModeSwitch() {
         if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
-            double maxFitWidth = pokemonPortrait.getFitWidth();
-            double maxFitHeight = pokemonPortrait.getFitHeight();
-            pokemonPortrait.imageProperty().addListener(e -> {
-                pokemonPortrait.setFitWidth(pokemonPortrait.getImage().getWidth() / 4 / 110 * maxFitWidth);
-                pokemonPortrait.setFitHeight(pokemonPortrait.getImage().getWidth() / 4 / 110 * maxFitHeight);
-            });
+            pokemonPortrait.imageProperty().addListener(animatedSpriteListener);
+        }
+        else {
+            pokemonPortrait.imageProperty().removeListener(animatedSpriteListener);
         }
     }
 

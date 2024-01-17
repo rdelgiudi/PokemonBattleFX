@@ -142,9 +142,14 @@
                         </TextField>
                      </children>
                   </HBox>
-                  <CheckBox fx:id="turboModeCheckBox" alignment="CENTER" mnemonicParsing="false" onAction="#toggleTurboMode" prefHeight="60.0" prefWidth="395.0" text="Turbo Mode">
+                  <CheckBox fx:id="turboModeCheckBox" alignment="CENTER" mnemonicParsing="false" onAction="#toggleTurboMode" prefHeight="45.0" prefWidth="395.0" text="Turbo Mode">
                      <font>
-                        <Font name="Monospaced Regular" size="20.0" />
+                        <Font name="Monospaced Regular" size="16.0" />
+                     </font>
+                  </CheckBox>
+                  <CheckBox fx:id="animatedModeCheckBox" alignment="CENTER" mnemonicParsing="false" onAction="#toggleAnimatedMode" prefHeight="45.0" prefWidth="395.0" text="Animated Sprites (experimental)">
+                     <font>
+                        <Font name="Monospaced Regular" size="16.0" />
                      </font>
                   </CheckBox>
                   <Button fx:id="playerSettingsCloseButton" alignment="CENTER" mnemonicParsing="false" onAction="#closePlayerSettings" prefHeight="26.0" prefWidth="107.0" style="-fx-background-color: #87CEEB;" text="Close" />

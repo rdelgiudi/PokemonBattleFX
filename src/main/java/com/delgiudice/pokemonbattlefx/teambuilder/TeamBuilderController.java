@@ -58,7 +58,7 @@ public class TeamBuilderController {
     @FXML
     private Label waitingForConnectionLabel;
     @FXML
-    private CheckBox turboModeCheckBox;
+    private CheckBox turboModeCheckBox, animatedModeCheckBox;
 
     List<Pokemon> playerParty = new ArrayList<>(), enemyParty = new ArrayList<>();
 
@@ -73,6 +73,8 @@ public class TeamBuilderController {
 
     BattleController battleController;
     BattleLogic logic;
+
+    AddPokemonController addPokemonController;
 
     private int FONT_SIZE = 13, POKEMON_BUTTON_WIDTH = 125, POKEMON_BUTTON_HEIGHT = 100, POKEMON_PANE_SIZE = 450;
     private int PARTY_BUTTON_WIDTH = 100, PARTY_BUTTON_HEIGHT = 100;
@@ -138,6 +140,8 @@ public class TeamBuilderController {
             throw new RuntimeException(ex);
         }
 
+        addPokemonController = addPokemonLoader.getController();
+
         setupStringField(playerNameField, 15);
     }
     @FXML
@@ -161,6 +165,13 @@ public class TeamBuilderController {
     @FXML
     private void toggleTurboMode() {
         turboMode = turboModeCheckBox.isSelected();
+    }
+
+    @FXML
+    private void toggleAnimatedMode() {
+        BattleApplication.setUseInternetSprites(animatedModeCheckBox.isSelected());
+        battleController.processSpriteModeSwitch();
+        addPokemonController.processSpriteModeSwitch();
     }
 
     private static void setupStringField(TextField textField, int characterLimit) {

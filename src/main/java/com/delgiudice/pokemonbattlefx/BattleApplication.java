@@ -1,6 +1,7 @@
 package com.delgiudice.pokemonbattlefx;
 
 import com.delgiudice.pokemonbattlefx.network.NetworkThread;
+import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
 import com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -37,6 +38,16 @@ public class BattleApplication extends Application {
 
     public static boolean isUseLocalAnimSprites() {
         return USE_LOCAL_ANIM_SPRITES;
+    }
+
+    public static void setUseInternetSprites(boolean useInternetSprites) {
+        if (useInternetSprites)
+            PokemonSpecie.toggleAnimatedPokemonSprites();
+        USE_INTERNET_SPRITES = useInternetSprites;
+    }
+
+    public static void setUseLocalAnimSprites(boolean useLocalAnimSprites) {
+        USE_LOCAL_ANIM_SPRITES = useLocalAnimSprites;
     }
 
     @Override
@@ -76,7 +87,8 @@ public class BattleApplication extends Application {
     }
 
     public static void endNetworkThread() {
-        System.out.println("Closing network threads...");
+        if (!threadList.isEmpty())
+            System.out.println("Closing network threads...");
         for (NetworkThread thread : threadList) {
             thread.closeConnection();
             System.out.println("Ending connection for thread " + thread.getName());

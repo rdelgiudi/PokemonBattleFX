@@ -84,8 +84,10 @@ public class PokemonSpecie{
     }
 
     private static void initSpriteDatabase() {
-       initSprites("", backSpritesAnim);
-       initSprites("", frontSpritesAnim);
+        if (backSpritesAnim.isEmpty())
+            initSprites("", backSpritesAnim);
+        if (frontSpritesAnim.isEmpty())
+            initSprites("", frontSpritesAnim);
     }
 
     // Loading images from the Web: https://itecnote.com/tecnote/javafx-play-gif-image-in-imageview/
@@ -315,6 +317,13 @@ public class PokemonSpecie{
         if (backSpriteLoc.isPresent()) {
             String backSpriteAnimTemp = backSpriteLoc.get().substring(2);
             backSpriteAnim = spriteUrl + backSpriteAnimTemp;
+        }
+    }
+
+    public static void toggleAnimatedPokemonSprites() {
+        initSpriteDatabase();
+        for (PokemonSpecie pokemonSpecie : pokemonMap.values()) {
+            pokemonSpecie.searchForAnimSprite();
         }
     }
 

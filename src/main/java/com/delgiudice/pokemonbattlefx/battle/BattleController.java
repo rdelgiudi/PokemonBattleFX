@@ -10,6 +10,8 @@ import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.fxml.FXML;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
@@ -101,7 +103,11 @@ public class BattleController {
     private final static String WEATHER_SANDSTORM = "-fx-background-color: linear-gradient(to bottom, #C4A484, #5C4033);";
 
     public final static int SCREEN_WIDTH = 1280, SCREEN_HEIGHT = 720;
-    private double ALLY_INFO_DEFAULT_Y, ALLY_SPRITE_DEFAULT_Y;
+    private double ALLY_INFO_DEFAULT_Y, ALLY_SPRITE_DEFAULT_X, ALLY_SPRITE_DEFAULT_Y, ENEMY_SPRITE_DEFAULT_X, ENEMY_SPRITE_DEFAULT_Y;
+    private double ALLY_SPRITE_DEFAULT_WIDTH, ALLY_SPRITE_DEFAULT_HEIGHT, ENEMY_SPRITE_DEFUALT_WIDTH,
+            ENEMY_SPRITE_DEFAULT_HEIGHT;
+
+    private InvalidationListener allyAnimatedSpriteListener, enemyAnimatedSpriteListener;
 
     public ImageView getAllyPokemonSprite() {
         return allyPokemonSprite;
@@ -204,45 +210,77 @@ public class BattleController {
         idleAnimation = getBattleIdleAnimation();
 
         ALLY_INFO_DEFAULT_Y = allyPokemonInfo.getLayoutY();
+        ALLY_SPRITE_DEFAULT_X = allyPokemonSprite.getLayoutX();
         ALLY_SPRITE_DEFAULT_Y = allyPokemonSprite.getLayoutY();
+        ALLY_SPRITE_DEFAULT_WIDTH = allyPokemonSprite.getFitWidth();
+        ALLY_SPRITE_DEFAULT_HEIGHT = allyPokemonSprite.getFitHeight();
+
+        ENEMY_SPRITE_DEFAULT_X = enemyPokemonSprite.getLayoutX();
+        ENEMY_SPRITE_DEFAULT_Y = enemyPokemonSprite.getLayoutY();
+        ENEMY_SPRITE_DEFUALT_WIDTH = enemyPokemonSprite.getFitWidth();
+        ENEMY_SPRITE_DEFAULT_HEIGHT = enemyPokemonSprite.getFitHeight();
 
         Rectangle rect = new Rectangle(SCREEN_WIDTH, SCREEN_HEIGHT);
         mainPane.setClip(rect);
 
         setupButtons();
 
-        if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
+        final double middleXAlly = allyPokemonSprite.getLayoutX() + allyPokemonSprite.getFitWidth() / 2.0;
+        final double middleYAlly = allyPokemonSprite.getLayoutY() + 50 + allyPokemonSprite.getFitHeight();
+        final double middleXEnemy = enemyPokemonSprite.getLayoutX() + enemyPokemonSprite.getFitWidth() / 2.0;
+        final double middleYEnemy = enemyPokemonSprite.getLayoutY() + 50 + enemyPokemonSprite.getFitHeight();
 
-            allyPokemonSprite.setLayoutY(allyPokemonSprite.getLayoutY() + 50);
-            enemyPokemonSprite.setLayoutY(enemyPokemonSprite.getLayoutY() + 50);
-            enemyBattlePlatform.setLayoutY(enemyBattlePlatform.getLayoutY() + 50);
-
-            final double middleXAlly = allyPokemonSprite.getLayoutX() + allyPokemonSprite.getFitWidth() / 2.0;
-            final double middleYAlly = allyPokemonSprite.getLayoutY() + allyPokemonSprite.getFitHeight();
-            final double middleXEnemy = enemyPokemonSprite.getLayoutX() + enemyPokemonSprite.getFitWidth() / 2.0;
-            final double middleYEnemy = enemyPokemonSprite.getLayoutY() + enemyPokemonSprite.getFitHeight();
-            allyPokemonSprite.setFitWidth(0);
-            allyPokemonSprite.setFitHeight(0);
-            //enemyPokemonSprite.setFitWidth(0);
-            //enemyPokemonSprite.setFitWidth(0);
-
-            allyPokemonSprite.imageProperty().addListener(e -> {
+        allyAnimatedSpriteListener = new InvalidationListener() {
+            @Override
+            public void invalidated(Observable e) {
                 allyPokemonSprite.setFitWidth(0);
                 allyPokemonSprite.setFitHeight(0);
                 double newX = middleXAlly - allyPokemonSprite.getImage().getWidth() / 2.0;
                 double newY = middleYAlly - allyPokemonSprite.getImage().getHeight();
                 allyPokemonSprite.setLayoutX(newX);
                 allyPokemonSprite.setLayoutY(newY);
-            });
-
-            enemyPokemonSprite.imageProperty().addListener(e -> {
+            }
+        };
+        enemyAnimatedSpriteListener = new InvalidationListener() {
+            @Override
+            public void invalidated(Observable e) {
                 enemyPokemonSprite.setFitWidth(0);
                 enemyPokemonSprite.setFitHeight(0);
                 double newX = middleXEnemy - enemyPokemonSprite.getImage().getWidth() / 2.0;
                 double newY = middleYEnemy - enemyPokemonSprite.getImage().getHeight();
                 enemyPokemonSprite.setLayoutX(newX);
                 enemyPokemonSprite.setLayoutY(newY);
-            });
+            }
+        };
+    }
+
+    public void processSpriteModeSwitch() {
+        if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
+            allyPokemonSprite.setLayoutY(allyPokemonSprite.getLayoutY() + 50);
+            enemyPokemonSprite.setLayoutY(enemyPokemonSprite.getLayoutY() + 50);
+            enemyBattlePlatform.setLayoutY(enemyBattlePlatform.getLayoutY() + 50);
+
+            allyPokemonSprite.imageProperty().addListener(allyAnimatedSpriteListener);
+
+            enemyPokemonSprite.imageProperty().addListener(enemyAnimatedSpriteListener);
+        }
+        else {
+            allyPokemonSprite.imageProperty().removeListener(allyAnimatedSpriteListener);
+            enemyPokemonSprite.imageProperty().removeListener(enemyAnimatedSpriteListener);
+
+            allyPokemonSprite.setLayoutY(allyPokemonSprite.getLayoutY() - 50);
+            enemyPokemonSprite.setLayoutY(enemyPokemonSprite.getLayoutY() - 50);
+            enemyBattlePlatform.setLayoutY(enemyBattlePlatform.getLayoutY() - 50);
+
+            allyPokemonSprite.setFitWidth(ALLY_SPRITE_DEFAULT_WIDTH);
+            allyPokemonSprite.setFitHeight(ALLY_SPRITE_DEFAULT_HEIGHT);
+            allyPokemonSprite.setLayoutX(ALLY_SPRITE_DEFAULT_X);
+            allyPokemonSprite.setLayoutY(ALLY_SPRITE_DEFAULT_Y);
+
+            enemyPokemonSprite.setFitWidth(ENEMY_SPRITE_DEFUALT_WIDTH);
+            enemyPokemonSprite.setFitHeight(ENEMY_SPRITE_DEFAULT_HEIGHT);
+            enemyPokemonSprite.setLayoutX(ENEMY_SPRITE_DEFAULT_X);
+            enemyPokemonSprite.setLayoutY(ENEMY_SPRITE_DEFAULT_Y);
         }
     }
 
