@@ -925,6 +925,9 @@ public class BattleLogic {
         else if (tied) {
             //SecureRandom generator = new SecureRandom();
             int flip = generateValue(2);
+            if (gameMode == Enums.GameMode.CLIENT)
+                flip = flip == 1 ? 0 : 1;
+
             if (flip == 1) {
                 processFirstMove(battleTimeLine, allyMove, allyPokemon, enemyMove, enemyPokemon);
             }
