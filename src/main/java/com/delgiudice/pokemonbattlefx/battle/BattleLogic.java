@@ -1133,9 +1133,11 @@ public class BattleLogic {
 
         boolean playerSwitchOutEligible = firstPokemon.isSwap() && firstPokemon.getOwner().isPlayer() && firstMove.isSwitchOut() &&
                 getAllyAbleToBattleNum() > 1;
+        boolean enemySwitchOutEligible = firstPokemon.isSwap() && !firstPokemon.getOwner().isPlayer() && firstMove.isSwitchOut() &&
+                getEnemyAbleToBattleNum() > 1;
 
         // If in battle Pokemon faints, forfeit next move
-        if ((secondPokemon.getHp() == 0 && !playerSwitchOutEligible) || firstPokemon.getHp() == 0) {
+        if ((secondPokemon.getHp() == 0 && !playerSwitchOutEligible && !enemySwitchOutEligible) || firstPokemon.getHp() == 0) {
             battleTurnEnd(moveTimeLine);
             return;
         }
@@ -1164,15 +1166,6 @@ public class BattleLogic {
             });
             initAnimationQueue(moveTimeLine);
             Platform.runLater(() -> moveTimeLine.get(0).play());
-            return;
-        }
-
-        boolean enemySwitchOutEligible = firstPokemon.isSwap() && !firstPokemon.getOwner().isPlayer() && firstMove.isSwitchOut() &&
-                getEnemyAbleToBattleNum() > 1;
-
-        // If in battle Pokemon faints, forfeit next move
-        if ((secondPokemon.getHp() == 0 && !enemySwitchOutEligible) || firstPokemon.getHp() == 0) {
-            battleTurnEnd(moveTimeLine);
             return;
         }
 
@@ -1226,9 +1219,11 @@ public class BattleLogic {
         // Checks if ally Pokemon can swap after executing move
         boolean playerSwitchOutEligible = secondPokemon.isSwap() && secondPokemon.getOwner().isPlayer() &&
                 secondMove.isSwitchOut() && getAllyAbleToBattleNum() > 1;
+        boolean enemySwitchOutEligible = secondPokemon.isSwap() && !secondPokemon.getOwner().isPlayer() && secondMove.isSwitchOut() &&
+                getEnemyAbleToBattleNum() > 1;
 
         // If in battle Pokemon faints, forfeit next move
-        if ((firstPokemon.getHp() == 0 && !playerSwitchOutEligible) || secondPokemon.getHp() == 0) {
+        if ((firstPokemon.getHp() == 0 && !playerSwitchOutEligible && !enemySwitchOutEligible) || secondPokemon.getHp() == 0) {
             battleTurnEnd(moveTimeLine);
             return;
         }
@@ -1253,15 +1248,6 @@ public class BattleLogic {
             });
             initAnimationQueue(moveTimeLine);
             Platform.runLater(() -> moveTimeLine.get(0).play());
-            return;
-        }
-
-        boolean enemySwitchOutEligible = secondPokemon.isSwap() && !secondPokemon.getOwner().isPlayer() && secondMove.isSwitchOut() &&
-                getEnemyAbleToBattleNum() > 1;
-
-        // If in battle Pokemon faints, forfeit next move
-        if ((firstPokemon.getHp() == 0 && !enemySwitchOutEligible) || secondPokemon.getHp() == 0) {
-            battleTurnEnd(moveTimeLine);
             return;
         }
 
