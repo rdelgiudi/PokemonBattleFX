@@ -168,9 +168,6 @@ public class BattleLogic {
                                   DataInputStream inputStream, DataOutputStream outputStream, Thread connectionThread) {
         SEND_OUT_MESSAGE = "%s%nsends out %s!";
 
-        player.getParty(0).setHp(1);
-        enemy.getParty(0).setHp(1);
-
         this.gameMode = gameMode;
         this.inputStream = inputStream;
         this.outputStream = outputStream;
