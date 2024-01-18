@@ -6,6 +6,7 @@ import com.delgiudice.pokemonbattlefx.battle.TrainerAction;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.trainer.OnlineTrainer;
+import javafx.application.Platform;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -32,7 +33,8 @@ public class SwitchDataReceive extends SyncThread{
 
     @Override
     public void run() {
-        TrainerAction enemyAction = enemy.getEnemySwitchOut(inputStream, outputStream);
-        logic.processEnemySwitchOut(firstPokemon, secondPokemon, secondMove, switchContext, enemyAction);
+        TrainerAction enemyAction = enemy.getEnemySwitchOut();
+        Platform.runLater(() -> logic.processEnemySwitchOut(firstPokemon, secondPokemon,
+                secondMove, switchContext, enemyAction));
     }
 }

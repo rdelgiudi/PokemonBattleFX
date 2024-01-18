@@ -68,11 +68,7 @@ public abstract class Trainer {
 
     abstract public TrainerAction getEnemySwitchOut(List<Pokemon> enemyParty);
 
-    public TrainerAction getEnemyActionServer(TrainerAction trainerAction , DataOutputStream outputStream, DataInputStream inputStream) {
+    public TrainerAction getEnemyAction(TrainerAction trainerAction) {
         return null;
-    }
-
-    public TrainerAction getEnemyActionClient(TrainerAction trainerAction , DataOutputStream outputStream, DataInputStream inputStream) {
-        return  null;
     }
 }

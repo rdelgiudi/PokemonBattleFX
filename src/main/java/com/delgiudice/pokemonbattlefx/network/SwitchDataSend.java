@@ -38,6 +38,7 @@ public class SwitchDataSend extends SyncThread{
                 System.out.println("Thread " + this.getClass().getName() + "failed!");
             }
         } catch (IOException e) {
+            swapPokemonController.finalizeSwitchOut(battleTimeLine, index, playerAction);
             throw new RuntimeException(e);
         }
     }

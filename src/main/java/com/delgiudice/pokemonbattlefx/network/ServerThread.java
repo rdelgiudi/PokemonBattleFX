@@ -42,7 +42,7 @@ public class ServerThread extends NetworkThread{
         while (connectionOpen) {
             try {
                 Thread.sleep(50);
-                if (!clientSocket.isConnected()) {
+                if (clientSocket.isClosed()) {
                     System.out.println("Unexpected connection closure!");
                     break;
                 }

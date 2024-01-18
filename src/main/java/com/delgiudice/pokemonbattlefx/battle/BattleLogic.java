@@ -275,14 +275,18 @@ public class BattleLogic {
 
             allyInfoAnimation.setOnFinished(e -> {
                 controller.getBattleText(AWAITING_SYNC, true).play();
-                ServerSyncThread syncThread = new ServerSyncThread(inputStream, outputStream, this::battleLoop);
+                ServerSyncThread syncThread = new ServerSyncThread(inputStream, outputStream, this::battleLoop,
+                        playerParty, allyBattlefieldConditions, allySpikes, enemyParty, enemyBattlefieldConditions,
+                        enemySpikes, weatherEffect, this);
                 syncThread.start();
             });
         }
         else {
             allyInfoAnimation.setOnFinished(e -> {
                 controller.getBattleText(AWAITING_SYNC, true).play();
-                ClientSyncThread syncThread = new ClientSyncThread(inputStream, outputStream, this::battleLoop);
+                ClientSyncThread syncThread = new ClientSyncThread(inputStream, outputStream, this::battleLoop,
+                        playerParty, allyBattlefieldConditions, allySpikes, enemyParty, enemyBattlefieldConditions,
+                        enemySpikes, weatherEffect, this);
                 syncThread.start();
             });
         }
@@ -412,6 +416,35 @@ public class BattleLogic {
         battleWonMsg1.play();
         controller.endBattleThemePlayback();
         controller.startVictoryThemePlayback();
+        controller.stopLowHpEffect();
+    }
+
+    public void endOnlineGameDisconnected(boolean syncError) {
+        controller.switchToPlayerChoice(false);
+        Stage stage = (Stage) controller.getFightButton().getScene().getWindow();
+        String errorString = syncError ? "A sync error has occurred.\nGame can't continue."
+                : "Connection closed unexpectedly.\nGame can't continue.";
+        Timeline battleMsg = controller.getBattleTextAnimation(errorString, true);
+        Timeline battleMsg2 = controller.getBattleTextAnimation("Returning to Team Builder...", true);
+        Timeline paused = controller.generatePause(1000);
+
+        controller.battleTextAdvanceByUserInput(battleMsg, battleMsg2);
+        battleMsg2.setOnFinished(e -> paused.play());
+        paused.setOnFinished(e -> {
+            BattleApplication.endNetworkThread();
+            stage.setTitle("Pokemon Battle FX");
+            controller.getFightButton().getScene().setRoot(teamBuilderPane);
+        });
+
+        for (Pokemon pokemon : playerParty) {
+            pokemon.restoreAll();
+        }
+        for (Pokemon pokemon : enemyParty) {
+            pokemon.restoreAll();
+        }
+
+        battleMsg.play();
+        controller.endBattleThemePlayback();
         controller.stopLowHpEffect();
     }
 
@@ -712,15 +745,9 @@ public class BattleLogic {
             enemyAction = enemy.getEnemyAction(enemyParty.get(0));
             battleTurn(playerAction, enemyAction, battleTimeLine);
         }
-        else if (gameMode == Enums.GameMode.SERVER) {
+        else {
             controller.getBattleText(AWAITING_SYNC, true).play();
-            ServerMoveSync syncThread = new ServerMoveSync(inputStream, outputStream, this, playerAction,
-                    enemy, battleTimeLine);
-            syncThread.start();
-        }
-        else if (gameMode == Enums.GameMode.CLIENT) {
-            controller.getBattleText(AWAITING_SYNC, true).play();
-            ClientMoveSync syncThread = new ClientMoveSync(inputStream, outputStream, this, playerAction,
+            MoveSync syncThread = new MoveSync(inputStream, outputStream, this, playerAction,
                     enemy, battleTimeLine);
             syncThread.start();
         }
@@ -838,6 +865,7 @@ public class BattleLogic {
                     outputStream.flush();
                     inputStream.readUTF();
                 } catch (IOException e) {
+                    endOnlineGameDisconnected(false);
                     throw new RuntimeException(e);
                 }
                 return rand;
@@ -848,6 +876,7 @@ public class BattleLogic {
                     outputStream.writeUTF("OK");
                     outputStream.flush();
                 } catch (IOException e) {
+                    endOnlineGameDisconnected(false);
                     throw new RuntimeException(e);
                 }
                 return serverRand;
@@ -1540,14 +1569,18 @@ public class BattleLogic {
 
             battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
                 controller.getBattleText(AWAITING_SYNC, true).play();
-                ServerSyncThread syncThread = new ServerSyncThread(inputStream, outputStream, this::battleLoop);
+                ServerSyncThread syncThread = new ServerSyncThread(inputStream, outputStream, this::battleLoop,
+                        playerParty, allyBattlefieldConditions, allySpikes, enemyParty, enemyBattlefieldConditions, enemySpikes,
+                        weatherEffect, this);
                 syncThread.start();
             });
         }
         else {
             battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
                 controller.getBattleText(AWAITING_SYNC, true).play();
-                ClientSyncThread syncThread = new ClientSyncThread(inputStream, outputStream, this::battleLoop);
+                ClientSyncThread syncThread = new ClientSyncThread(inputStream, outputStream, this::battleLoop,
+                        playerParty, allyBattlefieldConditions, allySpikes, enemyParty, enemyBattlefieldConditions, enemySpikes,
+                        weatherEffect, this);
                 syncThread.start();
             });
         }

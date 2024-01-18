@@ -500,24 +500,60 @@ public class TeamBuilderController {
         connectionThread.start();
     }
 
+    private String createPokemonInfo(Pokemon pokemon) {
+        StringBuilder pokemonComposition = new StringBuilder();
+        final String separator = "__";
+
+        pokemonComposition.append(pokemon.getSpecie().getName().ordinal()).append(separator);
+        pokemonComposition.append(pokemon.getName()).append(separator);
+        pokemonComposition.append(pokemon.getNature().getValue()).append(separator);
+        pokemonComposition.append(pokemon.getAbility().ordinal()).append(separator);
+        pokemonComposition.append(pokemon.getLevel());
+        for (int iv : pokemon.getIvs())
+            pokemonComposition.append(separator).append(iv);
+        for (Move move : pokemon.getMoveList())
+            pokemonComposition.append(separator).append(move.getName().ordinal());
+
+        return pokemonComposition.toString();
+    }
+
     private StringBuilder createTeamInfo() {
         StringBuilder teamComposition = new StringBuilder();
-        final String separator = "__";
         final String teamSeperator = "--";
         teamComposition.append("HELLO").append(teamSeperator);
         teamComposition.append(playerName).append(teamSeperator);
         for (Pokemon pokemon : playerParty) {
-            teamComposition.append(pokemon.getName()).append(separator);
-            teamComposition.append(pokemon.getNature().getValue()).append(separator);
-            teamComposition.append(pokemon.getAbility()).append(separator);
-            for (int iv : pokemon.getIvs())
-                teamComposition.append(iv).append(separator);
-            for (Move move : pokemon.getMoveList())
-                teamComposition.append(move.getName()).append(separator);
-            teamComposition.append(pokemon.getLevel()).append(teamSeperator);
+            teamComposition.append(createPokemonInfo(pokemon));
+            teamComposition.append(teamSeperator);
         }
-        teamComposition.append("GOODBYE").append(teamSeperator);
+        teamComposition.append("GOODBYE");
         return teamComposition;
+    }
+
+    private Pokemon parsePokemonInfo(String[] splitInfo) {
+        int pokemonSpecie = Integer.parseInt(splitInfo[0]); // specie enum number
+        String pokemonName = splitInfo[1]; // for custom name, currently unused
+        int pokemonNature = Integer.parseInt(splitInfo[2]); // nature enum number
+        int pokemonAbility = Integer.parseInt(splitInfo[3]); // ability enum number
+        int level = Integer.parseInt(splitInfo[4]); // level
+        int[] ivs = new int[6];
+        for (int i=5; i<=10; i++)
+            ivs[i-5] = Integer.parseInt(splitInfo[i]);
+
+        List<Integer> moveValues = new ArrayList<>(); // move enum number
+        for (int i=11; i<splitInfo.length; i++)
+            moveValues.add(Integer.parseInt(splitInfo[i]));
+
+        Move firstMove = new Move(MoveTemplate.getMove(MoveEnum.values()[moveValues.remove(0)]));
+        Ability ability = Ability.values()[pokemonAbility];
+        Pokemon pokemon = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.values()[pokemonSpecie]),
+                level, ability,firstMove);
+        for (int move : moveValues)
+            pokemon.addMove(new Move(MoveTemplate.getMove(MoveEnum.values()[move])));
+        pokemon.setNature(Enums.Nature.valueOf(pokemonNature));
+        pokemon.setIvs(ivs);
+        pokemon.calculateStats();
+        return pokemon;
     }
 
     private void parseTrainerInfo(String info) {
@@ -537,31 +573,7 @@ public class TeamBuilderController {
             if (pokemonInfo.equals("GOODBYE"))
                 break;
             String[] splitInfo = pokemonInfo.split(separator);
-            String pokemonName = splitInfo[0];
-            int pokemonNature = Integer.parseInt(splitInfo[1]);
-            String pokemonAbility = splitInfo[2];
-            int[] ivs = new int[6];
-            int level = 0;
-            List<String> moveNames = new ArrayList<>();
-            for (int i=3; i<=8; i++)
-                ivs[i-3] = Integer.parseInt(splitInfo[i]);
-            for (int i=9; i<=13; i++) {
-                if (splitInfo[i].matches("[0-9]+") && splitInfo[i].length() <= 2) {
-                    level = Integer.parseInt(splitInfo[i]);
-                    break;
-                }
-                moveNames.add(splitInfo[i]);
-            }
-            Move firstMove = new Move(MoveTemplate.getMove(MoveEnum.findByName(moveNames.remove(0))));
-            Ability ability = Ability.findByName(pokemonAbility);
-            Pokemon pokemon = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.findByName(pokemonName)),
-                    level, ability,firstMove);
-            for (String move : moveNames)
-                pokemon.addMove(new Move(MoveTemplate.getMove(MoveEnum.findByName(move))));
-            pokemon.setNature(Enums.Nature.valueOf(pokemonNature));
-            pokemon.setIvs(ivs);
-            pokemon.calculateStats();
-            enemyTeam.add(pokemon);
+            enemyTeam.add(parsePokemonInfo(splitInfo));
         }
 
         this.enemyName = enemyName;
@@ -598,7 +610,7 @@ public class TeamBuilderController {
 
     private void startOnlineBattle() {
         Player player = new Player(playerName, playerParty.get(0));
-        OnlineTrainer enemy = new OnlineTrainer(enemyName, enemyParty.get(0));
+        OnlineTrainer enemy = new OnlineTrainer(enemyName, enemyParty.get(0), inputStream, outputStream, logic);
 
 
         for (int i=1; i < playerParty.size(); i++)
