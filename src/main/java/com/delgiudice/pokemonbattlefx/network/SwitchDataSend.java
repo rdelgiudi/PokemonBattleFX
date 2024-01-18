@@ -35,7 +35,7 @@ public class SwitchDataSend extends SyncThread{
             if (inputStream.readUTF().equals("OK"))
                 swapPokemonController.finalizeSwitchOut(battleTimeLine, index, playerAction);
             else {
-                System.out.println("Thread " + this.getClass().getName() + "failed!");
+                System.out.println("Thread " + this.getClass().getName() + " failed!");
             }
         } catch (IOException e) {
             swapPokemonController.finalizeSwitchOut(battleTimeLine, index, playerAction);

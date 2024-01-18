@@ -34,7 +34,7 @@ public class SwitchDataReceive extends SyncThread{
     @Override
     public void run() {
         TrainerAction enemyAction = enemy.getEnemySwitchOut();
-        Platform.runLater(() -> logic.processEnemySwitchOut(firstPokemon, secondPokemon,
-                secondMove, switchContext, enemyAction));
+        // Not necessary to Platform.runLater()
+        logic.processEnemySwitchOut(firstPokemon, secondPokemon, secondMove, switchContext, enemyAction);
     }
 }

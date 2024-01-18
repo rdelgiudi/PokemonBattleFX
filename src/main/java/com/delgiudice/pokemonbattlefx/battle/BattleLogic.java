@@ -168,6 +168,9 @@ public class BattleLogic {
                                   DataInputStream inputStream, DataOutputStream outputStream, Thread connectionThread) {
         SEND_OUT_MESSAGE = "%s%nsends out %s!";
 
+        player.getParty(0).setHp(1);
+        enemy.getParty(0).setHp(1);
+
         this.gameMode = gameMode;
         this.inputStream = inputStream;
         this.outputStream = outputStream;
@@ -1083,12 +1086,11 @@ public class BattleLogic {
 
         applySentOutEffects(moveTimeLine);
 
-        if (switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE || switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE) {
-            if (secondMove != null)
-                processSecondMove(moveTimeLine, firstPokemon, secondPokemon, secondMove);
-            else
-                battleTurnEnd(moveTimeLine);
+        if (switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE) {
+            processSecondMove(moveTimeLine, firstPokemon, secondPokemon, secondMove);
         }
+        else if (switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE)
+            battleTurnEnd(moveTimeLine);
 
         if (switchContext == Enums.SwitchContext.SWITCH_FAINTED) {
             applySentOutEffects(moveTimeLine);
@@ -1517,6 +1519,29 @@ public class BattleLogic {
         }
     }
 
+    private void processNewAllySendOut(List<Timeline> battleTimeLine) {
+        battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+            Button pokemonButton = controller.getPokemonButton();
+
+            Stage stage = (Stage) pokemonButton.getScene().getWindow();
+            SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
+            swapPokemonController.initVariablesSwitch((Pane) pokemonButton.getScene().getRoot(), this, controller, playerParty,
+                    true, Enums.SwitchContext.SWITCH_FAINTED, null, null);
+            pokemonButton.getScene().setRoot(swapPokemonPane);
+        });
+        initAnimationQueue(battleTimeLine);
+        Platform.runLater(() -> battleTimeLine.get(0).play());
+    }
+
+    private void processNewEnemySendOut(List<Timeline> battleTimeLine) {
+        battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+            waitForEnemyPokemonSwapChoice(null, null, null,
+                    Enums.SwitchContext.SWITCH_FAINTED);
+        });
+        initAnimationQueue(battleTimeLine);
+        Platform.runLater(() -> battleTimeLine.get(0).play());
+    }
+
     // Send out new ally Pokemon if available, else game over for the player, even if enemy also out of Pokemon
     // Send out new enemy Pokemon and config timeline list
     public void finalChecks(List<Timeline> battleTimeLine) {
@@ -1527,38 +1552,27 @@ public class BattleLogic {
         boolean allyFainted = playerParty.get(0).getHp() == 0;
         boolean enemyFainted = enemyParty.get(0).getHp() == 0;
 
-        if (allyFainted) {
-            battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
-                //controller.pokemonButtonPressed(playerParty);
-                //controller.switchToPlayerChoice(true);
-                //setPokemonSwapListeners(true);
-
-
-                Button pokemonButton = controller.getPokemonButton();
-
-                Stage stage = (Stage) pokemonButton.getScene().getWindow();
-                SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
-                swapPokemonController.initVariablesSwitch((Pane) pokemonButton.getScene().getRoot(), this, controller, playerParty,
-                        true, Enums.SwitchContext.SWITCH_FAINTED, null, null);
-                pokemonButton.getScene().setRoot(swapPokemonPane);
-            });
-            initAnimationQueue(battleTimeLine);
-            Platform.runLater(() -> battleTimeLine.get(0).play());
+        // Offline and server checks
+        if (allyFainted && gameMode != Enums.GameMode.CLIENT) {
+            processNewAllySendOut(battleTimeLine);
+            return;
+        }
+        if (enemyFainted && gameMode != Enums.GameMode.CLIENT) {
+            processNewEnemySendOut(battleTimeLine);
             return;
         }
 
+        // Client checks
         if (enemyFainted) {
-            battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
-                waitForEnemyPokemonSwapChoice(null, null, null,
-                        Enums.SwitchContext.SWITCH_FAINTED);
-                    });
-            initAnimationQueue(battleTimeLine);
-            Platform.runLater(() -> battleTimeLine.get(0).play());
+            processNewEnemySendOut(battleTimeLine);
+            return;
+        }
+        if (allyFainted) {
+            processNewAllySendOut(battleTimeLine);
             return;
         }
 
         initAnimationQueue(battleTimeLine);
-
         if (gameMode == Enums.GameMode.OFFLINE) {
             battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
                 battleLoop();
