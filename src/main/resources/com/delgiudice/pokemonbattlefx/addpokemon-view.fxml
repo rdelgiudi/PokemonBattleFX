@@ -325,7 +325,7 @@
                      <children>
                         <HBox prefHeight="60.0" prefWidth="778.0">
                            <children>
-                              <TextField prefHeight="60.0" prefWidth="600.0" text="Move 1">
+                              <TextField prefHeight="41.0" prefWidth="400.0" text="Move 1">
                                  <font>
                                     <Font name="Monospaced Regular" size="13.0" />
                                  </font>
@@ -336,11 +336,16 @@
                                     <Font name="Monospaced Regular" size="12.0" />
                                  </font>
                               </Button>
+                              <Button mnemonicParsing="false" prefHeight="41.0" prefWidth="204.0" text="From Move List">
+                                 <font>
+                                    <Font name="Monospaced Regular" size="12.0" />
+                                 </font>
+                              </Button>
                            </children>
                         </HBox>
                         <HBox prefHeight="60.0" prefWidth="778.0">
                            <children>
-                              <TextField prefHeight="60.0" prefWidth="600.0" text="Move 2">
+                              <TextField prefHeight="41.0" prefWidth="400.0" text="Move 2">
                                  <font>
                                     <Font name="Monospaced Regular" size="13.0" />
                                  </font>
@@ -351,11 +356,16 @@
                                     <Font name="Monospaced Regular" size="12.0" />
                                  </font>
                               </Button>
+                              <Button mnemonicParsing="false" prefHeight="41.0" prefWidth="204.0" text="From Move List">
+                                 <font>
+                                    <Font name="Monospaced Regular" size="12.0" />
+                                 </font>
+                              </Button>
                            </children>
                         </HBox>
                         <HBox prefHeight="60.0" prefWidth="778.0">
                            <children>
-                              <TextField prefHeight="60.0" prefWidth="600.0" text="Move 3">
+                              <TextField prefHeight="42.0" prefWidth="400.0" text="Move 3">
                                  <font>
                                     <Font name="Monospaced Regular" size="13.0" />
                                  </font>
@@ -366,17 +376,27 @@
                                     <Font name="Monospaced Regular" size="12.0" />
                                  </font>
                               </Button>
+                              <Button mnemonicParsing="false" prefHeight="41.0" prefWidth="204.0" text="From Move List">
+                                 <font>
+                                    <Font name="Monospaced Regular" size="12.0" />
+                                 </font>
+                              </Button>
                            </children>
                         </HBox>
                         <HBox prefHeight="60.0" prefWidth="778.0">
                            <children>
-                              <TextField prefHeight="60.0" prefWidth="600.0" text="Move 4">
+                              <TextField prefHeight="42.0" prefWidth="400.0" text="Move 4">
                                  <font>
                                     <Font name="Monospaced Regular" size="13.0" />
                                  </font>
                               </TextField>
                               <Label alignment="CENTER" prefHeight="30.0" prefWidth="178.0" text="ok" />
                               <Button mnemonicParsing="false" prefHeight="41.0" prefWidth="204.0" text="Move Info">
+                                 <font>
+                                    <Font name="Monospaced Regular" size="12.0" />
+                                 </font>
+                              </Button>
+                              <Button mnemonicParsing="false" prefHeight="41.0" prefWidth="204.0" text="From Move List">
                                  <font>
                                     <Font name="Monospaced Regular" size="12.0" />
                                  </font>

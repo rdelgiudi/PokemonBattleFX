@@ -761,9 +761,9 @@ public class BattleLogic {
                 int moveIndex = Integer.parseInt(action.actionName);
                 return party.get(0).getMoveList(moveIndex);
             case OUT_OF_MOVES:
-                return new Move(MoveTemplate.getMove(MoveEnum.STRUGGLE));
+                return new Move(MoveTemplate.getHiddenMoveMap().get(MoveEnum.STRUGGLE));
             case RECHARGE_PHASE:
-                return new Move(MoveTemplate.getMove(MoveEnum.RECHARGE));
+                return new Move(MoveTemplate.getHiddenMoveMap().get(MoveEnum.RECHARGE));
             default:
                 return null;
         }
@@ -1024,7 +1024,7 @@ public class BattleLogic {
                 availableIndices.add(i);
         }
         if (availableIndices.isEmpty()) {
-            enemyMove = new Move(MoveTemplate.getMoveMap().get(MoveEnum.STRUGGLE));
+            enemyMove = new Move(MoveTemplate.getHiddenMoveMap().get(MoveEnum.STRUGGLE));
             return enemyMove;
         }
 
@@ -2072,7 +2072,7 @@ public class BattleLogic {
         moveTimeLine.add(controller.generatePause(500));
 
         MoveDamageInfo confusionDamageInfo = calculateMoveDamage(new Move(
-                MoveTemplate.getMoveMap().get(MoveEnum.CONFUSION_DAMAGE)), user, user, 1, false, -1);
+                MoveTemplate.getHiddenMoveMap().get(MoveEnum.CONFUSION_DAMAGE)), user, user, 1, false, -1);
 
         int confusionDamage = confusionDamageInfo.damage;
         if (confusionDamage > user.getHp())

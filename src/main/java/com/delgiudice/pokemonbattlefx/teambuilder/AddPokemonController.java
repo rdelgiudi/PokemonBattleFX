@@ -6,9 +6,11 @@ import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.move.MoveEnum;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
+import com.sun.istack.internal.Nullable;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
@@ -18,6 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,6 +40,10 @@ public class AddPokemonController {
     @FXML
     private ChoiceBox<String> natureChoiceBox;
 
+    private Pane movelistPane;
+
+    private FXMLLoader moveListLoader;
+
     private Pokemon currentPokemon;
     private Pane previousPane;
     private List<Pokemon> playerParty, enemyParty;
@@ -45,6 +52,16 @@ public class AddPokemonController {
     private int editModeIndex = -1;
     private InvalidationListener animatedSpriteListener;
     private double maxFitWidth, maxFitHeight;
+
+    public AddPokemonController() {
+        moveListLoader = new FXMLLoader(BattleApplication.class.getResource("movelist-view.fxml"));
+        movelistPane = null;
+        try {
+            movelistPane = moveListLoader.load();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
     public void initialize() {
         setStatisticsListeners();
@@ -146,12 +163,12 @@ public class AddPokemonController {
         returnToBuilder();
     }
 
-    private String format(double val) {
+    private static String format(double val) {
         String in = Integer.toHexString((int) Math.round(val * 255));
         return in.length() == 1 ? "0" + in : in;
     }
 
-    public String toHexString(Color value) {
+    public static String toHexString(Color value) {
         return "#" + (format(value.getRed()) + format(value.getGreen()) + format(value.getBlue()) + format(value.getOpacity()))
                 .toUpperCase();
     }
@@ -231,6 +248,86 @@ public class AddPokemonController {
         natureChoiceBox.setValue(currentPokemon.getNature().toString());
     }
 
+    private boolean isMoveDuplicate(int index, boolean startFromIndex, @Nullable boolean[] skip) {
+
+        boolean repeats = false;
+        HBox hBox = (HBox) moveBox.getChildren().get(index);
+        TextField moveField = (TextField) hBox.getChildren().get(0);
+        String compare = moveField.getText();
+        int startValue = startFromIndex ? index : 0;
+
+        for (int i=startValue; i < moveBox.getChildren().size(); i++) {
+            if (i == index)
+                continue;
+
+            hBox = (HBox) moveBox.getChildren().get(i);
+            moveField = (TextField) hBox.getChildren().get(0);
+            if (moveField.getText().equalsIgnoreCase(compare) && !compare.isEmpty()) {
+                repeats = true;
+                if (skip != null)
+                    skip[i] = true;
+                break;
+            }
+        }
+
+        return repeats;
+    }
+
+    private boolean checkIfMoveListHasDuplicate() {
+        for (int i=0; i < moveBox.getChildren().size(); i++) {
+            if (isMoveDuplicate(i, true, null))
+                return true;
+        }
+        return false;
+    }
+
+    private void setMoveBoxFlagDuplicate(Label moveOkLabel, Button moveInfoButton) {
+        moveOkLabel.setText("duplicate");
+        moveInfoButton.setDisable(false);
+        moveOkLabel.setTextFill(Color.ORANGE);
+    }
+
+    private void setMoveBoxFlagOk(Label moveOkLabel, Button moveInfoButton, String moveFieldText) {
+        moveOkLabel.setText("ok");
+        moveInfoButton.setDisable(Objects.equals(moveFieldText, ""));
+        moveOkLabel.setTextFill(Color.GREEN);
+    }
+
+    private void setMoveBoxNotFound(Label moveOkLabel, Button moveInfoButton) {
+        moveOkLabel.setText("not found");
+        moveInfoButton.setDisable(true);
+        moveOkLabel.setTextFill(Color.RED);
+    }
+
+    private void refreshMoveTags() {
+
+        boolean[] skip = new boolean[]{false, false, false, false};
+
+        for (int i=0; i < moveBox.getChildren().size(); i++) {
+
+            HBox hBox = (HBox) moveBox.getChildren().get(i);
+            TextField moveField = (TextField) hBox.getChildren().get(0);
+            Label moveOkLabel = (Label) hBox.getChildren().get(1);
+            Button moveInfoButton = (Button) hBox.getChildren().get(2);
+            String moveFieldText = moveField.getText();
+
+            if (skip[i]) {
+                setMoveBoxFlagDuplicate(moveOkLabel, moveInfoButton);
+                continue;
+            }
+
+            MoveTemplate moveTemplate = MoveTemplate.getMove(MoveEnum.findByName(moveFieldText));
+
+            if (moveTemplate != null && isMoveDuplicate(i, false, skip)) {
+                setMoveBoxFlagDuplicate(moveOkLabel, moveInfoButton);
+            } else if (moveTemplate != null || Objects.equals(moveFieldText, "")) {
+                setMoveBoxFlagOk(moveOkLabel, moveInfoButton, moveFieldText);
+            } else {
+                setMoveBoxNotFound(moveOkLabel, moveInfoButton);
+            }
+        }
+    }
+
     public void setStatisticsListeners() {
         setNatureChoiceBox();
 
@@ -275,23 +372,10 @@ public class AddPokemonController {
         for (int i=0; i < moveBox.getChildren().size(); i++) {
             HBox hBox = (HBox) moveBox.getChildren().get(i);
             TextField moveField = (TextField) hBox.getChildren().get(0);
-            Label moveOkLabel = (Label) hBox.getChildren().get(1);
-            Button moveInfoButton = (Button) hBox.getChildren().get(2);
 
             moveField.textProperty().addListener((observable, oldValue, newValue) -> {
 
-                MoveTemplate moveTemplate = MoveTemplate.getMove(MoveEnum.findByName(newValue));
-
-                if (moveTemplate != null ||
-                        Objects.equals(newValue, "")) {
-                    moveOkLabel.setText("ok");
-                    moveInfoButton.setDisable(Objects.equals(newValue, ""));
-                    moveOkLabel.setTextFill(Color.GREEN);
-                } else {
-                    moveOkLabel.setText("not found");
-                    moveInfoButton.setDisable(true);
-                    moveOkLabel.setTextFill(Color.RED);
-                }
+                refreshMoveTags();
 
                 addPlayerButton.setDisable(!(checkOkPlayer() && (editModeAlly || editModeIndex == -1)));
                 addEnemyButton.setDisable(!(checkEnemyOk() && (!editModeAlly || editModeIndex == -1)));
@@ -353,17 +437,13 @@ public class AddPokemonController {
     private boolean checkOkPlayer() {
         if (!checkMovesOk())
             return false;
-        if (playerParty.size() >= 6)
-            return false;
-        return true;
+        return playerParty.size() < 6;
     }
 
     private boolean checkEnemyOk() {
         if (!checkMovesOk())
             return false;
-        if (enemyParty.size() >= 6)
-            return false;
-        return true;
+        return enemyParty.size() < 6;
     }
 
     private void setPokemonMoves() {
@@ -372,6 +452,7 @@ public class AddPokemonController {
             TextField moveField = (TextField) hBox.getChildren().get(0);
             Label moveOkLabel = (Label) hBox.getChildren().get(1);
             Button moveInfoButton = (Button) hBox.getChildren().get(2);
+            Button movelistButton = (Button) hBox.getChildren().get(3);
             moveOkLabel.setTextFill(Color.GREEN);
             if (i >= currentPokemon.getMoveList().size()) {
                 moveField.setText("");
@@ -384,6 +465,13 @@ public class AddPokemonController {
                 prepareMoveInfo(MoveTemplate.getMove(MoveEnum.findByName(moveField.getText())));
                 moveInfoBox.setVisible(true);
                 closeMoveInfoButton.setVisible(true);
+            });
+
+            movelistButton.setOnMouseClicked(e -> {
+                Scene scene = movelistButton.getScene();
+                MovelistController movelistController = moveListLoader.getController();
+                movelistController.initMenu(moveField, (Pane) scene.getRoot());
+                scene.setRoot(movelistPane);
             });
         }
     }

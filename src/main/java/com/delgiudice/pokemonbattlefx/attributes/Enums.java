@@ -14,6 +14,7 @@ public class Enums {
 
     //All types
     public enum Types {        //lista typów
+        ANY("ANY", Color.WHITE),
         NORMAL("NORMAL", Color.valueOf("#A8A878")),       //0
         FIRE("FIRE", Color.valueOf("#F08030")),           //1
         WATER("WATER", Color.valueOf("#6890F0")),         //2

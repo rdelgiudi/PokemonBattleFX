@@ -16,6 +16,8 @@ public class MoveTemplate {
 
     // moveMap - a map of all moves available
     private static final HashMap<MoveEnum, MoveTemplate> moveMap = new HashMap<>();
+    // hiddenMoveMap - for storing moves that shouldn't be accessible by players
+    private static final HashMap<MoveEnum, MoveTemplate> hiddenMoveMap = new HashMap<>();
 
     //name - name of the move in enum form, can also return a string if needed
     MoveEnum name;
@@ -200,6 +202,10 @@ public class MoveTemplate {
 
     public static HashMap<MoveEnum , MoveTemplate> getMoveMap() {
         return moveMap;
+    }
+
+    public static HashMap<MoveEnum , MoveTemplate> getHiddenMoveMap() {
+        return hiddenMoveMap;
     }
 
     public float getRecoil() {
@@ -412,7 +418,7 @@ public class MoveTemplate {
         //This is not a move, it should only be used to process confusion damage
         MoveTemplate newmove = new MoveTemplate(MoveEnum.CONFUSION_DAMAGE, 40, NOT_APPLICABLE, 1, Enums.Subtypes.PHYSICAL,
                 Type.getTypeMap().get(Enums.Types.NO_TYPE), false);
-        moveMap.put(newmove.getName(), newmove);
+        hiddenMoveMap.put(newmove.getName(), newmove);
 
         //Struggle, used only when all moves are out of PP
         newmove = new MoveTemplate(MoveEnum.STRUGGLE, 50, NOT_APPLICABLE, 1, Enums.Subtypes.PHYSICAL,
@@ -420,12 +426,12 @@ public class MoveTemplate {
         newmove.setMoveDescription("This attack is used in desperation only if the user has no remaining PP. It also damages the user a little.");
         newmove.setRecoil(1/4f);
         newmove.setRecoilUserHp(true);
-        moveMap.put(newmove.getName(), newmove);
+        hiddenMoveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.RECHARGE, NOT_APPLICABLE, NOT_APPLICABLE, 1, Enums.Subtypes.STATUS,
                 Type.getTypeMap().get(Enums.Types.NO_TYPE), false);
         newmove.setMoveDescription("This move is not to be used as an attack. This is a placeholder for the recharge period.");
-        moveMap.put(newmove.getName(), newmove);
+        hiddenMoveMap.put(newmove.getName(), newmove);
 
         newmove = new MoveTemplate(MoveEnum.TACKLE, 40, 100, 35, Enums.Subtypes.PHYSICAL,
                 Type.getTypeMap().get(Enums.Types.NORMAL), true);
