@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+// Handles connecting to the client
 public class ServerThread extends NetworkThread{
 
     private ServerSocket serverSocket;
@@ -19,14 +20,14 @@ public class ServerThread extends NetworkThread{
     @Override
     public void run() {
         BattleApplication.threadList.add(this);
-        System.out.println("Starting server...");
+        System.out.println("[INFO] Starting server...");
         try {
             serverSocket = new ServerSocket(port);
             clientSocket = serverSocket.accept();
             clientSocket.setKeepAlive(true);
             dataInputStream = new DataInputStream(clientSocket.getInputStream());
             dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
-            System.out.println("Connection successful: " + clientSocket.getInetAddress());
+            System.out.println("[INFO] Connection successful: " + clientSocket.getInetAddress());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -39,24 +40,13 @@ public class ServerThread extends NetworkThread{
             throw new RuntimeException(e);
         }
 
-        while (connectionOpen) {
-            try {
-                Thread.sleep(50);
-                if (clientSocket.isClosed()) {
-                    System.out.println("Unexpected connection closure!");
-                    break;
-                }
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+        // If thread receives signal to close connection, the loop is broken and all opened objects are closed
+        waitForConnectionClose();
 
-        System.out.println("Closing streams and sockets...");
+        System.out.println("[INFO] Closing streams and sockets...");
 
         try {
-            dataInputStream.close();
-            dataOutputStream.close();
-            clientSocket.close();
+            closeObjects();
             serverSocket.close();
         } catch (IOException e) {
             throw new RuntimeException(e);

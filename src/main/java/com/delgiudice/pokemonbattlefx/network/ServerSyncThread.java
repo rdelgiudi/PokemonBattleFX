@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
+// Serverside thread that swaps information about the game state to confirm the games are in sync
 public class ServerSyncThread extends SyncThread {
     Runnable runLater;
 
@@ -46,8 +47,8 @@ public class ServerSyncThread extends SyncThread {
 
     @Override
     public void run() {
-        String gameState = generateGameState(playerTeam, playerTeamConditions, playerTeamSpikes, enemyTeam, enemyTeamConditions,
-                enemyTeamSpikes, weatherEffect);
+        String gameState = generateGameState(playerTeam, playerTeamConditions, playerTeamSpikes, enemyTeam,
+                enemyTeamConditions, enemyTeamSpikes, weatherEffect);
 
         try {
             if (inputStream.readUTF().equals(gameState)) {

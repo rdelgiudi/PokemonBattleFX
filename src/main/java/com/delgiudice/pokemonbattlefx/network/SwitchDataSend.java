@@ -12,6 +12,7 @@ import java.util.List;
 
 import static com.delgiudice.pokemonbattlefx.trainer.OnlineTrainer.sendAction;
 
+// Thread that handles sending data about the next Pokemon sent out by the player
 public class SwitchDataSend extends SyncThread{
 
     private TrainerAction playerAction;

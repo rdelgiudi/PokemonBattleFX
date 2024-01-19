@@ -10,7 +10,7 @@ import java.io.DataOutputStream;
 import java.util.HashMap;
 import java.util.List;
 
-// Thread for comparing game state and waiting - checks if everything is in order
+// Base class of a thread for comparing game state and waiting - checks if game state is identical between both players
 abstract public class SyncThread extends Thread{
 
     protected static String ENTITY_SEPARATOR = "--";
@@ -19,23 +19,31 @@ abstract public class SyncThread extends Thread{
     protected DataInputStream inputStream;
     protected DataOutputStream outputStream;
 
-    protected static String generatePokemonStats(Pokemon pokemon) {
+    public SyncThread(DataInputStream inputStream, DataOutputStream outputStream) {
+        super();
+        this.inputStream = inputStream;
+        this.outputStream = outputStream;
+    }
+
+    // Generates state of a Pokemon
+    protected static String generatePokemonState(Pokemon pokemon) {
         StringBuilder builder = new StringBuilder();
-        builder.append(pokemon.getSpecie().getName()).append(FIELD_SEPARATOR);
+        builder.append(pokemon.getSpecie().getName().ordinal()).append(FIELD_SEPARATOR);
         builder.append(pokemon.getHp()).append(FIELD_SEPARATOR);
 
         for (Move move : pokemon.getMoveList()) {
             builder.append(move.getPp()).append(FIELD_SEPARATOR);
         }
 
-        builder.append(pokemon.getStatus()).append(FIELD_SEPARATOR);
+        builder.append(pokemon.getStatus().ordinal()).append(FIELD_SEPARATOR);
 
         return builder.toString();
     }
 
+    // Generates state of Pokemon index 0 - currently sent out Pokemon
     protected static String generateCurrentPokemonState(Pokemon pokemon) {
         StringBuilder builder = new StringBuilder();
-        builder.append(generatePokemonStats(pokemon));
+        builder.append(generatePokemonState(pokemon));
 
         for (Enums.StatType statType : Enums.StatType.values()) {
             if (pokemon.getStatModifiers().containsKey(statType))
@@ -43,7 +51,7 @@ abstract public class SyncThread extends Thread{
         }
 
         for (Enums.SubStatus subStatus : pokemon.getSubStatuses())
-            builder.append(subStatus).append(FIELD_SEPARATOR);
+            builder.append(subStatus.ordinal()).append(FIELD_SEPARATOR);
 
         builder.append(pokemon.getConfusionTimer()).append(FIELD_SEPARATOR);
         builder.append(pokemon.getLeechSeedTimer()).append(FIELD_SEPARATOR);
@@ -52,6 +60,7 @@ abstract public class SyncThread extends Thread{
         return builder.toString();
     }
 
+    // Generates state of one team: Pokemon, conditions and ground hazards (spikes)
     protected static String generateTeamGameState(List<Pokemon> team,
                                                   HashMap<Enums.BattlefieldCondition, Integer> teamConditions,
                                                   HashMap<Enums.Spikes, Integer> teamSpikes) {
@@ -65,13 +74,14 @@ abstract public class SyncThread extends Thread{
 
         for (Enums.BattlefieldCondition battlefieldCondition : Enums.BattlefieldCondition.values()) {
             if (teamConditions.containsKey(battlefieldCondition))
-                builder.append(battlefieldCondition).append(":").append(teamConditions.get(battlefieldCondition)).append(FIELD_SEPARATOR);
+                builder.append(battlefieldCondition.ordinal()).append(":")
+                        .append(teamConditions.get(battlefieldCondition)).append(FIELD_SEPARATOR);
 
         }
 
         for (Enums.Spikes spikes : Enums.Spikes.values()) {
             if (teamSpikes.containsKey(spikes))
-                builder.append(spikes).append(":").append(teamSpikes.get(spikes)).append(FIELD_SEPARATOR);
+                builder.append(spikes.ordinal()).append(":").append(teamSpikes.get(spikes)).append(FIELD_SEPARATOR);
         }
 
         int len = builder.length();
@@ -81,6 +91,7 @@ abstract public class SyncThread extends Thread{
         return builder.toString();
     }
 
+    // Generates complete state of the game
     protected static String generateGameState(
             List<Pokemon> firstTeam, HashMap<Enums.BattlefieldCondition, Integer> firstTeamConditions,
             HashMap<Enums.Spikes, Integer> firstTeamSpikes,
@@ -95,11 +106,5 @@ abstract public class SyncThread extends Thread{
         builder.append("GAME_STATE_END");
 
         return builder.toString();
-    }
-
-    public SyncThread(DataInputStream inputStream, DataOutputStream outputStream) {
-        super();
-        this.inputStream = inputStream;
-        this.outputStream = outputStream;
     }
 }

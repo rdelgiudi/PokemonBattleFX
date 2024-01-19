@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
+// Clientside thread that swaps information about the game state to confirm the games are in sync
 public class ClientSyncThread extends SyncThread {
     private Runnable runLater;
 
@@ -45,8 +46,8 @@ public class ClientSyncThread extends SyncThread {
 
     @Override
     public void run() {
-        String gameState = generateGameState(enemyTeam, enemyTeamConditions, enemyTeamSpikes, playerTeam, playerTeamConditions,
-                playerTeamSpikes, weatherEffect);
+        String gameState = generateGameState(enemyTeam, enemyTeamConditions, enemyTeamSpikes, playerTeam,
+                playerTeamConditions, playerTeamSpikes, weatherEffect);
         try {
             outputStream.writeUTF(gameState);
             outputStream.flush();

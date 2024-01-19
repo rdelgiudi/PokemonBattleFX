@@ -12,11 +12,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
 
+// Trainer variant responsible for handling multiplayer matches
+// This class handles swapping actions between players
 public class OnlineTrainer extends Trainer{
 
-    private DataInputStream inputStream;
-    private DataOutputStream outputStream;
-    private BattleLogic battleLogic;
+    private final DataInputStream inputStream;
+    private final DataOutputStream outputStream;
+    private final BattleLogic battleLogic;
 
     public OnlineTrainer(String name, Pokemon pokemon, DataInputStream inputStream,
                          DataOutputStream outputStream, BattleLogic battleLogic) {
@@ -31,6 +33,7 @@ public class OnlineTrainer extends Trainer{
         return null;
     }
 
+    // Transforms player action into a message and sends it to the other player
     public static void sendAction(DataOutputStream outputStream, TrainerAction trainerAction) {
         StringBuilder builder = new StringBuilder();
         String separator = "--";
@@ -48,6 +51,7 @@ public class OnlineTrainer extends Trainer{
         }
     }
 
+    // Parses action received from the other player
     public static TrainerAction parseAction(String message) {
         String[] info = message.split("--");
         if (!info[0].equals("HELLO_ACTION"))
@@ -61,7 +65,9 @@ public class OnlineTrainer extends Trainer{
         else
             return null;
     }
-    public TrainerAction getEnemyActionClient(TrainerAction trainerAction) {
+
+    // Handles flow of communication of the client
+    private TrainerAction getEnemyActionClient(TrainerAction trainerAction) {
         sendAction(outputStream, trainerAction);
         String enemyAction;
         try {
@@ -72,7 +78,9 @@ public class OnlineTrainer extends Trainer{
         }
         return parseAction(enemyAction);
     }
-    public TrainerAction getEnemyActionServer(TrainerAction trainerAction) {
+
+    // Handles flow of communication of the server
+    private TrainerAction getEnemyActionServer(TrainerAction trainerAction) {
         String enemyAction;
         try {
             enemyAction = inputStream.readUTF();
@@ -83,6 +91,8 @@ public class OnlineTrainer extends Trainer{
         sendAction(outputStream, trainerAction);
         return parseAction(enemyAction);
     }
+
+    // Method executed to swap their actions between them
     @Override
     public TrainerAction getEnemyAction(TrainerAction trainerAction) {
         if (battleLogic.getGameMode() == Enums.GameMode.SERVER)
@@ -96,6 +106,7 @@ public class OnlineTrainer extends Trainer{
         return null;
     }
 
+    // Reads information about the next Pokemon that the enemy decides to send
     public TrainerAction getEnemySwitchOut() {
         String enemyAction;
         TrainerAction parsedEnemyAction;
