@@ -1,19 +1,20 @@
 # PokemonBattleFX
-Implementation of the Battle Engine from Pokémon games with primitive GUI. Made with Java and JavaFX.
+Implementation of the battle system from Pokémon games with primitive GUI. Made with Java and JavaFX.
 
 ## Opening project
-This project was written with Java 8 in mind. It requires JDK 1.8 or higher and JavaFX.
+This project was written with Java 8 in mind. It requires JDK 1.8 and JavaFX.
 
 ## Overview
 This is a work in progress. The engine aims to imitate mechanics from more recent generations but with graphics more akin to generation 3. So far, the project contains:
-- Working (but somewhat incomplete) battle system with proper turn order.
+- Working battle system with proper turn order (single battles only).
+- Basic online multiplayer mode.
 - 25+ Pokémon species with 90+ unique moves.
 - Fully implemented non-volatile status effects: Poison (and badly Poisoned), Paralysis, Sleep, Burn and Freeze.
 - Some secondary status effects, such as confusion and flinching.
 - Battlefield effects (such as Tailwind).
 - Pokémon abilities.
 - Team builder, that allows to customize your team, as well as the opponent's.
-- Fully working interactive summary screen acessible during battle.
+- Fully working interactive summary screen accessible during battle.
 - Working bag menu, with some items already implemented.
 - Weather effects (only rain so far).
 
@@ -21,10 +22,11 @@ Plans for future updates:
 - Adding all 151 Kanto Pokémon and their main abilities.
 - Adding most (if not all) moves known by Kanto Pokémon.
 - Implementing held items and missing usable items.
-- Trainer customization, including names and AI difficulty (so far, the AI trainers select moves at random).
+- Enemy trainer customization, including names and AI difficulty (so far, the AI trainers select moves at random).
 - Adding missing weather effects.
 - Adding Battlefield types (used for some moves, like Nature Power).
 - Adding missing secondary status effects (like Attract).
+- Double / Triple Battle Support.
 
 ## Screenshots
 
