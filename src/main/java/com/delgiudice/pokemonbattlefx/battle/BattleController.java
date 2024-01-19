@@ -169,12 +169,16 @@ public class BattleController {
         this.turboMode = turboMode;
     }
 
-    public BattleController() throws UnsupportedAudioFileException, LineUnavailableException, IOException, URISyntaxException {
+    public BattleController(){
         // Looped battle intro, requires main loop and intro in two separate audio files
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sound/battle_theme_loop.wav");
         if (inputStream != null) {
             battleThemeLoopInputStream = new BufferedInputStream(inputStream);
-            configBattleTheme();
+            try {
+                configBattleTheme();
+            } catch (UnsupportedAudioFileException | IOException | LineUnavailableException | URISyntaxException e) {
+                System.out.println("[WARN] Loading battle theme failed " + e);
+            }
         }
         else
             battleThemeLoopInputStream = null;
@@ -183,7 +187,11 @@ public class BattleController {
         inputStream = getClass().getClassLoader().getResourceAsStream("sound/victory_theme_loop.wav");
         if (inputStream != null) {
             victoryThemeInputStream = new BufferedInputStream(inputStream);
-            configVictoryTheme();
+            try {
+                configVictoryTheme();
+            } catch (UnsupportedAudioFileException | IOException | LineUnavailableException | URISyntaxException e) {
+                System.out.println("[WARN] Loading victory theme failed " + e);
+            }
         }
         else
             victoryThemeInputStream = null;
@@ -192,7 +200,11 @@ public class BattleController {
 
         if (inputStream != null) {
             allyLowHpInputStream = new BufferedInputStream(inputStream);
-            configLowHpEffect();
+            try {
+                configLowHpEffect();
+            } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+                System.out.println("[WARN] Loading low HP effect failed " + e);
+            }
         }
         else
             allyLowHpInputStream = null;
@@ -309,6 +321,14 @@ public class BattleController {
 
     private void configBattleTheme()
             throws UnsupportedAudioFileException, IOException, LineUnavailableException, URISyntaxException {
+
+        AudioInputStream audioStreamLoop = AudioSystem.getAudioInputStream(battleThemeLoopInputStream);
+        AudioFormat audioFormatLoop = audioStreamLoop.getFormat();
+        DataLine.Info infoLoop = new DataLine.Info(Clip.class, audioFormatLoop);
+        battleThemeLoopAudioClip = (Clip) AudioSystem.getLine(infoLoop);
+        battleThemeLoopAudioClip.open(audioStreamLoop);
+        setVolume(battleThemeLoopAudioClip, 0.25f);
+
         Media media = new Media(Objects.requireNonNull(
                 getClass().getClassLoader().getResource("sound/battle_theme_intro.wav")).toURI().toString());
         introPlayer = new MediaPlayer(media);
@@ -317,17 +337,18 @@ public class BattleController {
             battleThemeLoopAudioClip.setFramePosition(0);
             battleThemeLoopAudioClip.loop(Clip.LOOP_CONTINUOUSLY);
         });
-
-        AudioInputStream audioStreamLoop = AudioSystem.getAudioInputStream(battleThemeLoopInputStream);
-        AudioFormat audioFormatLoop = audioStreamLoop.getFormat();
-        DataLine.Info infoLoop = new DataLine.Info(Clip.class, audioFormatLoop);
-        battleThemeLoopAudioClip = (Clip) AudioSystem.getLine(infoLoop);
-        battleThemeLoopAudioClip.open(audioStreamLoop);
-        setVolume(battleThemeLoopAudioClip, 0.25f);
     }
 
     private void configVictoryTheme()
             throws URISyntaxException, UnsupportedAudioFileException, IOException, LineUnavailableException {
+
+        AudioInputStream audioStreamLoop = AudioSystem.getAudioInputStream(victoryThemeInputStream);
+        AudioFormat audioFormatLoop = audioStreamLoop.getFormat();
+        DataLine.Info infoLoop = new DataLine.Info(Clip.class, audioFormatLoop);
+        victoryThemeLoopAudioClip = (Clip) AudioSystem.getLine(infoLoop);
+        victoryThemeLoopAudioClip.open(audioStreamLoop);
+        setVolume(victoryThemeLoopAudioClip, 0.25f);
+
         Media media = new Media(Objects.requireNonNull(
                 getClass().getClassLoader().getResource("sound/victory_theme_intro.wav")).toURI().toString());
         victoryIntroPlayer = new MediaPlayer(media);
@@ -336,13 +357,6 @@ public class BattleController {
             victoryThemeLoopAudioClip.setFramePosition(0);
             victoryThemeLoopAudioClip.loop(Clip.LOOP_CONTINUOUSLY);
         });
-
-        AudioInputStream audioStreamLoop = AudioSystem.getAudioInputStream(victoryThemeInputStream);
-        AudioFormat audioFormatLoop = audioStreamLoop.getFormat();
-        DataLine.Info infoLoop = new DataLine.Info(Clip.class, audioFormatLoop);
-        victoryThemeLoopAudioClip = (Clip) AudioSystem.getLine(infoLoop);
-        victoryThemeLoopAudioClip.open(audioStreamLoop);
-        setVolume(victoryThemeLoopAudioClip, 0.25f);
     }
 
     private void configLowHpEffect()
@@ -396,10 +410,10 @@ public class BattleController {
     private void playEffect(InputStream inputStream) {
         try {
             prepareEffectClip(inputStream);
+            audioEffectsClip.start();
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException ex) {
-            throw new RuntimeException("Error while processing sound effects: " + ex);
+            System.out.println("[WARN] Failed playing sound effect " + ex);
         }
-        audioEffectsClip.start();
     }
 
     private void playLowHpEffect()  {
@@ -866,10 +880,10 @@ public class BattleController {
 
 
         final List<KeyFrame> keyFrameList = new ArrayList<>();
+        final InputStream soundInputStream = getClass().getClassLoader().getResourceAsStream("sound/pokemon_sent_out.wav");
 
         final KeyFrame configPokemonSprite = new KeyFrame(Duration.millis(1), e -> {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sound/pokemon_sent_out.wav");
-            if (inputStream != null) playEffect(inputStream);
+            if (soundInputStream != null) playEffect(soundInputStream);
 
             if (ally) setAllyInformation(pokemon, hp);
             else setEnemyInformation(pokemon, hp);
