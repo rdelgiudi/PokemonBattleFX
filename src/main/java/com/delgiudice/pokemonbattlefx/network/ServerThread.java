@@ -24,7 +24,6 @@ public class ServerThread extends NetworkThread{
         try {
             serverSocket = new ServerSocket(port);
             clientSocket = serverSocket.accept();
-            clientSocket.setKeepAlive(true);
             dataInputStream = new DataInputStream(clientSocket.getInputStream());
             dataOutputStream = new DataOutputStream(clientSocket.getOutputStream());
             System.out.println("[INFO] Connection successful: " + clientSocket.getInetAddress());
