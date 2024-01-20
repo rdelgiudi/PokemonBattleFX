@@ -1,19 +1,38 @@
 package com.delgiudice.pokemonbattlefx.attributes;
 
+import com.delgiudice.pokemonbattlefx.battle.BattleLogic;
+import com.delgiudice.pokemonbattlefx.battle.SwapPokemonController;
+import com.delgiudice.pokemonbattlefx.battle.TrainerAction;
+import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
+import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
+import com.delgiudice.pokemonbattlefx.trainer.NpcTrainer;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 
 import java.util.HashMap;
+import java.util.List;
 
+/**
+ * Contains various Enums used in the program.
+ */
 public class Enums {
-
+    /**
+     * Defines the mode in which the game has been started.
+     * @see BattleLogic#gameMode
+     */
     public enum GameMode {
         OFFLINE,
         SERVER,
         CLIENT;
     }
 
-    //All types
-    public enum Types {        //lista typów
+    /**
+     * Contains all Types present in the game, as well as the color value that should be used when displaying it.
+     * @see Type
+     */
+    public enum Types {
         ANY("ANY", Color.WHITE),
         NORMAL("NORMAL", Color.valueOf("#A8A878")),       //0
         FIRE("FIRE", Color.valueOf("#F08030")),           //1
@@ -52,7 +71,11 @@ public class Enums {
             this.typeColor = typeColor;
         }
     }
-    public enum Subtypes {     //move subtype list
+
+    /**
+     * Contains all Subtypes present in the game.
+     */
+    public enum Subtypes {
         PHYSICAL("PHYSICAL"),
         SPECIAL("SPECIAL"),
         STATUS("STATUS");
@@ -68,6 +91,13 @@ public class Enums {
             this.typeString = typeString;
         }
     }
+
+    /**
+     * Contains all types of stats used in the game. This includes special stat modifiers that don't appear in regular
+     * numerical stats. These are <code>ACCURACY</code> and <code>EVASIVENESS</code>.
+     * @see Pokemon#stats
+     * @see Pokemon#statModifiers
+     */
     public enum StatType {       //pokemon statistics (both regular and stat changes)
         MAX_HP(0,"Max HP"),
         ATTACK(1,"Attack"),
@@ -103,6 +133,11 @@ public class Enums {
             this.typeString = typeString;
         }
     }
+
+    /**
+     * Contains all status effects that can be applied to a Pokémon.
+     * @see Pokemon#status
+     */
     public enum Status {       //status list
         NONE("NONE"),
         PARALYZED("paralyzed"),
@@ -124,6 +159,12 @@ public class Enums {
             this.statusString = statusString;
         }
     }
+
+    /**
+     * Substatus effects that can be applied to Pokémon. These can be stacked and usually are discarded when the Pokémon
+     * is switched out.
+     * @see Pokemon#subStatuses
+     */
     public enum SubStatus {
         NONE("no abnormal status"),
         CONFUSED("became confused"),
@@ -148,6 +189,11 @@ public class Enums {
         }
     }
 
+    /**
+     * Move categories which help group some of the moves. This is useful for moves that can or cannot affect Pokemon
+     * in special conditions
+     * @see MoveTemplate#moveCategory
+     */
     public enum MoveCategory {
         NONE("None"),
         AURA_PULSE("Aura and pulse"),
@@ -172,6 +218,9 @@ public class Enums {
         }
     }
 
+    /**
+     * Contains conditions that affect the entire side of the field.
+     */
     public enum BattlefieldCondition {
         NONE("No condition"),
         TAILWIND("Tailwind");
@@ -187,6 +236,11 @@ public class Enums {
         }
     }
 
+    /**
+     * Contains ground hazards that may be placed on one side of the field.
+     * @see BattleLogic#allySpikes
+     * @see BattleLogic#enemySpikes
+     */
     public enum Spikes {
         NONE("No spikes"),
         TOXIC_SPIKES("Toxic Spikes");
@@ -202,6 +256,10 @@ public class Enums {
         }
     }
 
+    /**
+     * Contains all existing weather effects that may occur on the battlefield.
+     * @see BattleLogic#weatherEffect
+     */
     public enum WeatherEffect {
         NONE("Regular weather"),
         RAIN("rain"),
@@ -218,6 +276,12 @@ public class Enums {
         }
     }
 
+    /**
+     * Contains all contexts for switching a Pokémon. It allows the <code>SwapPokemonController</code> to determine
+     * which phase the turn is currently in.
+     * @see SwapPokemonController#finalizeSwitchOut(List, int, TrainerAction)
+     * @see SwapPokemonController#switchContext
+     */
     public enum SwitchContext {
         SWITCH_FIRST,
         SWITCH_FIRST_MOVE,
@@ -226,6 +290,11 @@ public class Enums {
         SWITCH_FAINTED;
     }
 
+    /**
+     * Contains all natures that can occur in a Pokémon. Natures give a boost to one of the statistic at the cost of
+     * lowering others. Natures that don't boost any are boosting and lowering the same statistic.
+     * @see Pokemon#nature
+     */
     public enum Nature {       //nature list
         HARDY(0, "Hardy", 0, 0, 0, 0, 0),
         LONELY(1,"Lonely", 1, -1, 0, 0, 0),
@@ -290,6 +359,12 @@ public class Enums {
             this.value = value;
         }
     }
+
+    /**
+     * Contains states in which the Pokémon can be in. These usually are used for marking Pokémon that are locked into executing
+     * a move or Pokémon which may benefit from executing a move repeatedly.
+     * @see Pokemon#state
+     */
     public enum States{
         NONE,
         TWOTURN,
@@ -297,6 +372,10 @@ public class Enums {
         RAGE;
     }
 
+    /**
+     * Contains trainer types which can be assigned to NPC trainers.
+     * @see NpcTrainer
+     */
     public enum TrainerTypes{
         NONE(""),
         ACE_TRAINER("Ace Trainer"),
@@ -313,6 +392,10 @@ public class Enums {
         }
     }
 
+    /**
+     * Contains action types that might be performed by a trainer.
+     * @see BattleLogic#processPlayerAction(TrainerAction)
+     */
     public enum ActionTypes{
         USE_MOVE,
         RECHARGE_PHASE,
@@ -321,6 +404,11 @@ public class Enums {
         SWITCH_POKEMON,
     }
 
+    /**
+     * Contains all item types that can be used by a trainer during battle.
+     * @see SwapPokemonController#useItem(Pokemon, HBox, int, ProgressBar, Label)
+     * @see BattleLogic#processEnemyUseItem(List, TrainerAction)
+     */
     public enum ItemType{
         HP_RESTORE,
         PP_RESTORE,

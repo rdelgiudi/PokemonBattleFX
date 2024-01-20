@@ -181,6 +181,17 @@ public class TeamBuilderController {
         });
     }
 
+    protected static void setupStringFieldMove(TextField textField, int characterLimit) {
+
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\sa-zA-Z-*")) {
+                textField.setText(newValue.replaceAll("[^\\sa-zA-Z-]", ""));
+            }
+            if (newValue.length() > characterLimit)
+                textField.setText(newValue.substring(0, characterLimit));
+        });
+    }
+
     public void setUiResizeListener() {
         Scene scene = startBattleButton.getScene();
 

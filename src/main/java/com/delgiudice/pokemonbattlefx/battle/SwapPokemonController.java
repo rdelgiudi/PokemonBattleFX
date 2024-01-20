@@ -321,17 +321,35 @@ public class SwapPokemonController {
         });
     }
 
-    private void initBoxElementListener(HBox pokemonBox, Pokemon pokemon, int index, ProgressBar hpBar, Label hpLabel) {
+    private void useItem(Pokemon pokemon, HBox pokemonSelectBox, int index, ProgressBar hpBar, Label hpLabel) {
+        currentPokemonBox.setDisable(true);
+        this.pokemonBox.setDisable(true);
+        cancelButton.setDisable(true);
+        switch (item.getType()) {
+            case HP_RESTORE:
+                useHealingItem(pokemon, pokemonSelectBox, index, hpBar, hpLabel);
+                break;
+            case PP_RESTORE:
+                break;
+            case STATUS_HEALING:
+                useStatusHealingItem(pokemon, pokemonSelectBox, index, hpBar, hpLabel);
+                break;
+            case X_ITEMS:
+                break;
+        }
+    }
+
+    private void initBoxElementListener(HBox pokemonSelectBox, Pokemon pokemon, int index, ProgressBar hpBar, Label hpLabel) {
         if (!useItem) {
-            pokemonBox.setOnMouseClicked(e -> {
+            pokemonSelectBox.setOnMouseClicked(e -> {
 
                 // Adding parent layout location applies a correction for the elements in a VBox, since without correction
                 // it doesn't account for the offset of it
-                double correctionX = pokemonBox.getParent().getClass() == VBox.class ? pokemonBox.getParent().getLayoutX() : 0;
-                double correctionY = pokemonBox.getParent().getClass() == VBox.class ? pokemonBox.getParent().getLayoutY() : 0;
+                double correctionX = pokemonSelectBox.getParent().getClass() == VBox.class ? pokemonSelectBox.getParent().getLayoutX() : 0;
+                double correctionY = pokemonSelectBox.getParent().getClass() == VBox.class ? pokemonSelectBox.getParent().getLayoutY() : 0;
 
-                double mouseLayoutX = e.getX() + pokemonBox.getLayoutX() + correctionX;
-                double mouseLayoutY = e.getY() + pokemonBox.getLayoutY() + correctionY;
+                double mouseLayoutX = e.getX() + pokemonSelectBox.getLayoutX() + correctionX;
+                double mouseLayoutY = e.getY() + pokemonSelectBox.getLayoutY() + correctionY;
 
                 double boxWidth = switchOptionsBox.getWidth();
                 double boxHeight = switchOptionsBox.getHeight();
@@ -346,35 +364,21 @@ public class SwapPokemonController {
                 else
                     switchOptionsBox.setLayoutY(mouseLayoutY);
 
-                initSwapMenuListener(pokemonBox, pokemon, index);
+                initSwapMenuListener(pokemonSelectBox, pokemon, index);
             });
         }
         else {
-            pokemonBox.setOnMouseClicked(e -> {
-                currentPokemonBox.setDisable(true);
-                this.pokemonBox.setDisable(true);
-                cancelButton.setDisable(true);
-                switch (item.getType()) {
-                    case HP_RESTORE:
-                        useHealingItem(pokemon, pokemonBox, index, hpBar, hpLabel);
-                        break;
-                    case PP_RESTORE:
-                        break;
-                    case STATUS_HEALING:
-                        useStatusHealingItem(pokemon, pokemonBox, index, hpBar, hpLabel);
-                        break;
-                    case X_ITEMS:
-                        break;
-                }
+            pokemonSelectBox.setOnMouseClicked(e -> {
+                useItem(pokemon, pokemonSelectBox, index, hpBar, hpLabel);
             });
         }
 
-        pokemonBox.setOnMouseEntered(e -> pokemonBox.setStyle(HOVER_STYLE));
-        pokemonBox.setOnMouseExited(e -> {
+        pokemonSelectBox.setOnMouseEntered(e -> pokemonSelectBox.setStyle(HOVER_STYLE));
+        pokemonSelectBox.setOnMouseExited(e -> {
             if (pokemon.getHp() == 0)
-                pokemonBox.setStyle(FAINTED_STYLE);
+                pokemonSelectBox.setStyle(FAINTED_STYLE);
             else
-                pokemonBox.setStyle(REGULAR_STYLE);
+                pokemonSelectBox.setStyle(REGULAR_STYLE);
         });
     }
 
@@ -395,7 +399,7 @@ public class SwapPokemonController {
         return healValue;
     }
 
-    private void useHealingItem(Pokemon target, HBox pokemonBox, int index, ProgressBar hpBar, Label hpLabel) {
+    private void useHealingItem(Pokemon target, HBox pokemonSelectBox, int index, ProgressBar hpBar, Label hpLabel) {
         if (!checkHealingItemViable(item, target)) {
             playIncompatibleItemMessage(target);
             return;
@@ -425,7 +429,7 @@ public class SwapPokemonController {
             target.setStatus(Enums.Status.NONE);
             target.getSubStatuses().remove(Enums.SubStatus.CONFUSED);
             target.setConfusionTimer(0);
-            setPokemonInfo(pokemonBox, index);
+            setPokemonInfo(pokemonSelectBox, index);
         }
 
         if (index == 0) {
@@ -462,7 +466,7 @@ public class SwapPokemonController {
         return healValue;
     }
 
-    private void useStatusHealingItem(Pokemon target, HBox pokemonBox, int index, ProgressBar hpBar, Label hpLabel) {
+    private void useStatusHealingItem(Pokemon target, HBox pokemonSelectBox, int index, ProgressBar hpBar, Label hpLabel) {
         if (!checkStatusHealingItemViable(item, target)){
             playIncompatibleItemMessage(target);
             return;
@@ -471,7 +475,7 @@ public class SwapPokemonController {
         List<Timeline> battleTimeLine = new ArrayList<>();
 
         int healValue = processStatusHealingEffect(item, target);
-        setPokemonInfo(pokemonBox, index);
+        setPokemonInfo(pokemonSelectBox, index);
         Timeline healAnimation = battleController.generatePause(1);
 
         if (item.getStatusHeal().equals(Enums.Status.FAINTED) && target.getHp() == 0) {

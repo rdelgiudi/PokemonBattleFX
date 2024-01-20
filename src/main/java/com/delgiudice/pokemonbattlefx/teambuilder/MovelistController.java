@@ -1,3 +1,5 @@
+
+
 package com.delgiudice.pokemonbattlefx.teambuilder;
 
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
@@ -27,9 +29,12 @@ import java.util.Map;
 
 import static com.delgiudice.pokemonbattlefx.teambuilder.AddPokemonController.toHexString;
 import static com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController.setupStringField;
+import static com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController.setupStringFieldMove;
 
+/**
+ * This class defines the controller which is tied to the Movelist menu.
+ */
 public class MovelistController {
-
     private static final int FONT_SIZE = 14, MOVE_BUTTON_WIDTH = 144, MOVE_BUTTON_HEIGHT = 60;
 
     private static final String CATEGORY_BUTTON_STYLE_RELEASED = "-fx-background-color: linear-gradient(to left, darkmagenta, indigo)";
@@ -66,6 +71,10 @@ public class MovelistController {
 
     private Enums.Subtypes currentType = null;
 
+    /**
+     * Initializes UI elements as well as sorts the Movelist.
+     * @see #initMenu(TextField, Pane)
+     */
     public void initialize() {
 
         sortedMoves.addAll(MoveTemplate.getMoveMap().values());
@@ -87,9 +96,14 @@ public class MovelistController {
             populateMoveGrid();
         });
 
-        setupStringField(moveNameSearchField, 15);
+        setupStringFieldMove(moveNameSearchField, 15);
     }
 
+    /**
+     * Initializes the Movelist menu. This should always be executed before moving to the Movelist screen.
+     * @param currentMoveSelectTextField defines to which text field should the selected move be inserted to
+     * @param addPokemonPane defines the Pane from which this menu was entered
+     */
     public void initMenu(TextField currentMoveSelectTextField, Pane addPokemonPane) {
         this.currentMoveSelectTextField = currentMoveSelectTextField;
         gridDisplayAllMoves();
@@ -101,6 +115,9 @@ public class MovelistController {
         });
     }
 
+    /**
+     * Initializes the typeChoiceBox, which allows to display moves of only one Type.
+     */
     private void setTypeChoiceBox() {
         typeChoiceBox.setValue(Enums.Types.ANY);
 
@@ -114,6 +131,13 @@ public class MovelistController {
         });
     }
 
+    /**
+     * Configures a label to represent a specific type. This method changes the background properties of the label
+     * as well as sets the appropriate text.
+     * @param typeLabel label to be modified
+     * @param moveTemplate move template from which the type should be extracted
+     * @see #setMoveInfo(MoveTemplate)
+     */
     private static void setMoveType(Label typeLabel, MoveTemplate moveTemplate) {
         typeLabel.setTextFill(Color.WHITE);
         Enums.Types typeEnum = moveTemplate.getType().getTypeEnum();
@@ -126,6 +150,11 @@ public class MovelistController {
         typeLabel.setStyle(String.format(TYPE_INFO_STYLE, colorHex));
     }
 
+    /**
+     * Sets move information in the move preview section at the bottom of the screen.
+     * @param moveTemplate move template from which the information is extracted
+     *
+     */
     private void setMoveInfo(MoveTemplate moveTemplate) {
         setMoveType(moveTypeLabel, moveTemplate);
         moveNameLabel.setText(moveTemplate.getName().toString());
@@ -143,6 +172,10 @@ public class MovelistController {
         moveDescriptionLabel.setText(moveTemplate.getMoveDescription());
     }
 
+    /**
+     * Resets the move information to default in the move preview section at the bottom of the screen.
+     * @see #setMoveType(Label, MoveTemplate)
+     */
     private void resetMoveInfo() {
         setMoveType(moveTypeLabel, MoveTemplate.getHiddenMoveMap().get(MoveEnum.STRUGGLE));
         moveNameLabel.setText("Move");
@@ -153,12 +186,21 @@ public class MovelistController {
         moveDescriptionLabel.setText("");
     }
 
+    /**
+     * Checks if str2 is contained inside str1. Case-insensitive.
+     * @param str1
+     * @param str2
+     * @return <code>true</code> if str2 is contained inside str1, <code>false</code> otherwise
+     */
     public static boolean containsIgnoreCase(String str1, String str2) {
         str1 = str1.toLowerCase();
         str2 = str2.toLowerCase();
         return str1.contains(str2);
     }
 
+    /**
+     * Populates the grid with moves that match the requirements set by the other settings, such as Subtype or Type.
+     */
     public void populateMoveGrid() {
 
         moveGrid.getChildren().clear();
@@ -231,6 +273,9 @@ public class MovelistController {
         }
     }
 
+    /**
+     * Initializes button listeners, which defines visual changes to the button depending on user action.
+     */
     public void initButtonListeners() {
         for (Node button : categoryBox.getChildren()) {
             button.setOnMouseEntered(e -> button.setStyle(CATEGORY_BUTTON_STYLE_HOVER));
@@ -245,44 +290,55 @@ public class MovelistController {
         backButton.setOnMouseReleased(e -> backButton.setStyle(CATEGORY_BUTTON_STYLE_RELEASED));
     }
 
+    /**
+     * Enables all category buttons.
+     */
     private void enableAllButtons() {
         for (Node button : categoryBox.getChildren()) {
             button.setDisable(false);
         }
     }
 
-    private void clearGrid() {
-        enableAllButtons();
-        moveGrid.getChildren().clear();
-    }
-
+    /**
+     * Refreshes grid. Sets to display moves of all subtypes.
+     * @see #populateMoveGrid()
+     */
     @FXML
     public void gridDisplayAllMoves() {
-        clearGrid();
+        enableAllButtons();
         categoryAllMoves.setDisable(true);
         currentType = null;
         populateMoveGrid();
     }
-
+    /**
+     * Refreshes grid. Sets to display physical moves.
+     * @see #populateMoveGrid()
+     */
     @FXML
     public void gridDisplayPhysicalMoves() {
-        clearGrid();
+        enableAllButtons();
         categoryPhysicalMoves.setDisable(true);
         currentType = Enums.Subtypes.PHYSICAL;
         populateMoveGrid();
     }
-
+    /**
+     * Refreshes grid. Sets to display special moves.
+     * @see #populateMoveGrid()
+     */
     @FXML
     public void gridDisplaySpecialMoves() {
-        clearGrid();
+        enableAllButtons();
         categorySpecialMoves.setDisable(true);
         currentType = Enums.Subtypes.SPECIAL;
         populateMoveGrid();
     }
-
+    /**
+     * Refreshes grid. Sets to display status moves.
+     * @see #populateMoveGrid()
+     */
     @FXML
     public void gridDisplayStatusMoves() {
-        clearGrid();
+        enableAllButtons();
         categoryStatusMoves.setDisable(true);
         currentType = Enums.Subtypes.STATUS;
         populateMoveGrid();

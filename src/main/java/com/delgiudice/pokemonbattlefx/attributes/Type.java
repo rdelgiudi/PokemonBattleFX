@@ -4,15 +4,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-///This class indicates the typing of move/Pokemon as well as contains type strengths and weaknesses
+/**
+ * This class indicates the typing of move/Pokémon as well as contains type strengths and weaknesses.
+ * @see Enums.Types
+ */
 public class Type {
 
     private static final HashMap<Enums.Types,Type> typeMap = new HashMap<>();
 
+    /**
+     * Used to get a specific <code>Type</code> object.
+     * @param type enum corresponding to the requested <code>Type</code>
+     * @return <code>Type</code> object from the map
+     */
     public static Type getTypeMap(Enums.Types type) {
         return typeMap.get(type);
     }
 
+    /**
+     * Used to get the entire <code>Type</code> map.
+     */
     public static HashMap<Enums.Types,Type> getTypeMap() {
         return typeMap;
     }
@@ -22,27 +33,49 @@ public class Type {
     private final List<Enums.Types> strongAgainst = new ArrayList<>();
     private Enums.Types noEffectAgainst = Enums.Types.MISSING;
 
+    /**
+     * Class constructor.
+     * @param type enum representing the <code>Type</code> to be created
+     */
     public Type(Enums.Types type) {
         this.type = type;
         setEffectiveness();       //fills effectiveness
     }
 
+    /**
+     * Returns all <code>Enums.Types</code> which this <code>Type</code> is weak against.
+     * @return <code>List</code> of all weaknesses
+     */
     public List<Enums.Types> getWeakAgainst() {
         return weakAgainst;
     }
-
+    /**
+     * Returns all <code>Enums.Types</code> which this <code>Type</code> is strong against.
+     * @return <code>List</code> of all strengths
+     */
     public List<Enums.Types> getStrongAgainst() {
         return strongAgainst;
     }
-
+    /**
+     * Returns all <code>Enums.Types</code> which this <code>Type</code> has no effect against.
+     * @return enum representing <code>Type</code> which isn't affected by this <code>Type</code>
+     */
     public Enums.Types getNoEffectAgainst() {
         return noEffectAgainst;
     }
 
+    /**
+     * Getter for the <code>type</code> field
+     * @return <code>type</code>
+     */
     public Enums.Types getTypeEnum() {
         return type;
     }
 
+    /**
+     * Return name of the <code>Type</code>
+     * @return name of the type in <code>String</code> form.
+     */
     public String toString() {
         return type.toString();
     }

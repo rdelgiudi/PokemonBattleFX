@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController.setupStringField;
+import static com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController.setupStringFieldMove;
 
 public class AddPokemonController {
     @FXML
@@ -375,7 +376,7 @@ public class AddPokemonController {
             HBox hBox = (HBox) moveBox.getChildren().get(i);
             TextField moveField = (TextField) hBox.getChildren().get(0);
 
-            setupStringField(moveField, 15);
+            setupStringFieldMove(moveField, 15);
 
             moveField.textProperty().addListener((observable, oldValue, newValue) -> {
 
