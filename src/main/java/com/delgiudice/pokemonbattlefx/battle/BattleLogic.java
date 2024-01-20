@@ -202,7 +202,7 @@ public class BattleLogic {
     // function that initiates a battle, adding looping checks here should be avoided
     private void initBattleLoop() {
 
-        controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
+        controller.updatePokemonPartyBox(player.getParty(), enemy.getParty(), enemySeen);
 
         boolean allyPokemonSelected = checkIfAllyAbleToBattle(true);
         boolean enemyPokemonSelected = checkIfEnemyAbleToBattle(true);
@@ -218,10 +218,10 @@ public class BattleLogic {
         enemySentOut = true;
         allySentOut = true;
 
-        controller.updateStatus(playerParty.get(0), true, playerParty.get(0).getStatus()).play();
-        controller.updateStatus(enemyParty.get(0), false, enemyParty.get(0).getStatus()).play();
+        controller.updateStatus(true, playerParty.get(0).getStatus()).play();
+        controller.updateStatus(false, enemyParty.get(0).getStatus()).play();
 
-        Timeline statusBoxAnimation = controller.getPokemonStatusBoxAnimation();
+        Timeline statusBoxAnimation = controller.getPokemonPartyBoxAnimation();
 
         Timeline battleTextIntro;
         if (!enemy.getTrainerType().equals(Enums.TrainerTypes.NONE))
@@ -253,7 +253,7 @@ public class BattleLogic {
             enemyInfoAnimation.play();
             int index = enemy.getParty().indexOf(enemyParty.get(0));
             enemySeen[index] = true;
-            controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
+            controller.updatePokemonPartyBox(player.getParty(), enemy.getParty(), enemySeen);
         });
 
         Timeline allyPokemonIntro = controller.getBattleTextAnimation(String.format(POKEMON_SENT_OUT_STRING,
@@ -465,7 +465,7 @@ public class BattleLogic {
                 statusChange = processStatusChange(Enums.Status.BADLY_POISONED, target);
 
             battleTimeLine.add(statusChange);
-            battleTimeLine.add(controller.updateStatus(target, target.getOwner().isPlayer(), target.getStatus()));
+            battleTimeLine.add(controller.updateStatus(target.getOwner().isPlayer(), target.getStatus()));
             battleTimeLine.add(controller.generatePause(2000));
         }
     }
@@ -548,7 +548,7 @@ public class BattleLogic {
 
     private void battleLoop() {
 
-        controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
+        controller.updatePokemonPartyBox(player.getParty(), enemy.getParty(), enemySeen);
 
         allyFaintedProcessed = false;
         enemyFaintedProcessed = false;
@@ -801,7 +801,7 @@ public class BattleLogic {
         battleTimeLine.add(controller.generatePause(1000));
         battleTimeLine.add(sendOutMessage);
         battleTimeLine.add(pokemonSendOutAnimation);
-        battleTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e -> controller.updatePokemonStatusBox(
+        battleTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e -> controller.updatePokemonPartyBox(
                 player.getParty(), enemy.getParty(), enemySeen))));
         battleTimeLine.add(controller.generatePause(1000));
     }
@@ -1067,10 +1067,10 @@ public class BattleLogic {
         moveTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e -> {
             int index = enemy.getParty().indexOf(enemyParty.get(0));
             enemySeen[index] = true;
-            controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
+            controller.updatePokemonPartyBox(player.getParty(), enemy.getParty(), enemySeen);
         })));
 
-        Timeline updateStatus = controller.updateStatus(enemyParty.get(0), false, enemyParty.get(0).getStatus());
+        Timeline updateStatus = controller.updateStatus(false, enemyParty.get(0).getStatus());
         moveTimeLine.add(updateStatus);
         moveTimeLine.add(controller.generatePause(1000));
 
@@ -1696,7 +1696,7 @@ public class BattleLogic {
                         "%s was cured of its status effect!", pokemon.getBattleName()), true);
                 //damageInfoTimeline.setDelay(Duration.seconds(2));
                 timelineList.add(damageInfoTimeline);
-                timelineList.add(controller.updateStatus(pokemon, pokemon.getOwner().isPlayer(), pokemon.getStatus()));
+                timelineList.add(controller.updateStatus(pokemon.getOwner().isPlayer(), pokemon.getStatus()));
                 timelineList.add(controller.generatePause(1000));
                 return timelineList;
             }
@@ -1766,7 +1766,7 @@ public class BattleLogic {
     private Timeline setFaintedStatus(Pokemon pokemon) {
         KeyFrame kf = new KeyFrame(Duration.millis(1), e -> {
             pokemon.setStatus(Enums.Status.FAINTED);
-            controller.updatePokemonStatusBox(player.getParty(), enemy.getParty(), enemySeen);
+            controller.updatePokemonPartyBox(player.getParty(), enemy.getParty(), enemySeen);
         });
         return new Timeline(kf);
     }
@@ -1847,7 +1847,7 @@ public class BattleLogic {
         Timeline sleepInfo = controller.getBattleTextAnimation(String.format("%s woke up!", user.getBattleName()),
                 true);
         user.setStatus(Enums.Status.NONE);
-        Timeline statusChange = controller.updateStatus(user, user.getOwner().isPlayer(), user.getStatus());
+        Timeline statusChange = controller.updateStatus(user.getOwner().isPlayer(), user.getStatus());
         //statusChange.setDelay(Duration.seconds(1));
 
         moveTimeLine.add(sleepInfo);
@@ -1872,7 +1872,7 @@ public class BattleLogic {
         moveTimeLine.add(frozenInfo);
 
         user.setStatus(Enums.Status.NONE);
-        Timeline updateStatus = controller.updateStatus(user, user.getOwner().isPlayer(), user.getStatus());
+        Timeline updateStatus = controller.updateStatus(user.getOwner().isPlayer(), user.getStatus());
         //updateStatus.setDelay(Duration.seconds(1));
         moveTimeLine.add(updateStatus);
         moveTimeLine.add(controller.generatePause(2000));
@@ -2748,7 +2748,7 @@ public class BattleLogic {
             Timeline abilityMessage = controller.getBattleTextAnimation(String.format(
                     "%s's Static makes %s%nunable to move!", target.getBattleName(),
                     user.getBattleNameMiddle()), true);
-            Timeline updateStatus = controller.updateStatus(user, !isPlayerStaticCheck, user.getStatus());
+            Timeline updateStatus = controller.updateStatus(!isPlayerStaticCheck, user.getStatus());
 
             System.out.printf("%s affected by %s's Static, now paralyzed%n",
                     user.getBattleName(), target.getBattleNameMiddle());
@@ -2773,7 +2773,7 @@ public class BattleLogic {
             //statusChangeInfo.setDelay(Duration.seconds(1));
             moveTimeLine.add(statusChangeInfo);
 
-            Timeline updateStatus = controller.updateStatus(target, target.getOwner().isPlayer(), target.getStatus());
+            Timeline updateStatus = controller.updateStatus(target.getOwner().isPlayer(), target.getStatus());
             if (move.getStatus() == Enums.Status.SLEEPING || move.getStatus() == Enums.Status.FROZEN) {
                 checkMultiturnMoveInterruptEffect(moveTimeLine, target);
                 processTwoTurnMoveComplete(moveTimeLine, target);

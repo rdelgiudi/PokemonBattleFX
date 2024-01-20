@@ -80,14 +80,18 @@ public class Type {
         return type.toString();
     }
 
-    //initializes list of available types
+    /**
+     * Initializes list of available types.
+     */
     public static void setTypeList()
     {
         for(Enums.Types type: Enums.Types.values())
             typeMap.put(type ,new Type(type));
     }
 
-    ///Sets effectiveness of types (very effective, not very effective and no effect)
+    /**
+     * Sets effectiveness of types (very effective, not very effective and no effect).
+     */
     public void setEffectiveness()
     {
         switch (type) {

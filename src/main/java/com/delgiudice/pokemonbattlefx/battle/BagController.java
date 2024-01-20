@@ -58,6 +58,9 @@ public class BagController {
 
     private Enums.ItemType currentType = Enums.ItemType.HP_RESTORE;
 
+    /**
+     * Configures UI elements.
+     */
     public void initialize() {
         initButtonListeners();
 
@@ -65,6 +68,17 @@ public class BagController {
         mainPane.setClip(rect);
     }
 
+    /**
+     * Initializes the Bag menu. This should always be executed before entering the Bag screen.
+     * @param player object representing the in-battle player
+     * @param swapPokemonPane pane containing the Swap Pokémon menu
+     * @param swapPokemonController Swap Pokémon menu controller
+     * @param battlePane pane containing the Battle pane (previous screen)
+     * @param logic logic responsible for Battle backend
+     * @param controller Battle menu controller, responsible only for UI elements
+     * @param party player party, using the order used in current battle instead of this found inside the
+     *              <code>player</code> object
+     */
     public void initMenu(Player player, Pane swapPokemonPane, SwapPokemonController swapPokemonController,
                          Pane battlePane, BattleLogic logic, BattleController controller, List<Pokemon> party) {
         this.player = player;
@@ -83,17 +97,18 @@ public class BagController {
         });
     }
 
+    /**
+     * Enables all category buttons.
+     */
     private void enableAllButtons() {
         for (Node button : categoryBox.getChildren()) {
             button.setDisable(false);
         }
     }
 
-    private void clearGrid() {
-        enableAllButtons();
-        itemGrid.getChildren().clear();
-    }
-
+    /**
+     * Populates the item grid with items that meet currently imposed criteria.
+     */
     public void populateItemGrid() {
 
         descriptionField.setText("");
@@ -161,6 +176,9 @@ public class BagController {
         }
     }
 
+    /**
+     * Initiates listeners responsible for the button's visual behavior.
+     */
     public void initButtonListeners() {
         for (Node button : categoryBox.getChildren()) {
             button.setOnMouseEntered(e -> button.setStyle(CATEGORY_BUTTON_STYLE_HOVER));
@@ -175,33 +193,42 @@ public class BagController {
         backButton.setOnMouseReleased(e -> backButton.setStyle(CATEGORY_BUTTON_STYLE_RELEASED));
     }
 
+    /**
+     * Displays health restore items in player's possession on screen.
+     */
     @FXML
     public void gridDisplayHpRestoreItems() {
-        clearGrid();
+        enableAllButtons();
         categoryHpRestoreButton.setDisable(true);
         currentType = Enums.ItemType.HP_RESTORE;
         populateItemGrid();
     }
-
+    /**
+     * Displays PP restore items in player's possession on screen.
+     */
     @FXML
     public void gridDisplayPpRestoreItems() {
-        clearGrid();
+        enableAllButtons();
         categoryPpRestoreButton.setDisable(true);
         currentType = Enums.ItemType.PP_RESTORE;
         populateItemGrid();
     }
-
+    /**
+     * Displays status healing in player's possession items on screen.
+     */
     @FXML
     public void gridDisplayStatusItems() {
-        clearGrid();
+        enableAllButtons();
         categoryStatusHealingButton.setDisable(true);
         currentType = Enums.ItemType.STATUS_HEALING;
         populateItemGrid();
     }
-
+    /**
+     * Displays X items on in player's possession screen.
+     */
     @FXML
     public void gridDisplayXItems() {
-        clearGrid();
+        enableAllButtons();
         categoryXItemsButton.setDisable(true);
         currentType = Enums.ItemType.X_ITEMS;
         populateItemGrid();

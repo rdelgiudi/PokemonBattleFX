@@ -4,6 +4,8 @@ import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.attributes.Type;
 import com.delgiudice.pokemonbattlefx.move.Move;
+import com.delgiudice.pokemonbattlefx.move.MoveEnum;
+import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
 import javafx.animation.Animation;
@@ -35,15 +37,16 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.util.Duration;
+import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 
 import javax.sound.sampled.*;
+import javax.swing.event.ChangeListener;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,7 +62,7 @@ public class BattleController {
     @FXML
     private VBox allyPokemonInfo, enemyPokemonInfo, moveTypeBox;
     @FXML
-    private HBox allyPokemonStatusBox, enemyPokemonStatusBox;
+    private HBox allyPokemonPartyBox, enemyPokemonPartyBox;
     @FXML
     private ImageView allyPokemonSprite, enemyPokemonSprite, allyBattlePlatform, enemyBattlePlatform, textArrowView;
     @FXML
@@ -97,6 +100,10 @@ public class BattleController {
     private final static String BAG_BUTTON_PRESSED = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: #cc7722;";
     private final static String BAG_BUTTON_RELEASE = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: goldenrod;";
     private final static String BAG_BUTTON_HOVER = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: #f4c430;";
+
+    private final static String RUN_BUTTON_PRESSED = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: #1773cd;";
+    private final static String RUN_BUTTON_RELEASE = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: dodgerblue;";
+    private final static String RUN_BUTTON_HOVER = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: #75b3f0;";
 
     private final static String WEATHER_NONE = "-fx-background-color: linear-gradient(to bottom, lightskyblue, darkorange);";
     private final static String WEATHER_RAIN = "-fx-background-color: linear-gradient(to bottom, lightgray, darkblue);";
@@ -169,6 +176,9 @@ public class BattleController {
         this.turboMode = turboMode;
     }
 
+    /**
+     * Class constructor
+     */
     public BattleController(){
         // Looped battle intro, requires main loop and intro in two separate audio files
         InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sound/battle_theme_loop.wav");
@@ -213,6 +223,9 @@ public class BattleController {
         pokemonIndicatorNormal = new Image("/sprites/indicator_normal.png");
     }
 
+    /**
+     * Configures UI elements.
+     */
     public void initialize() {
         battleText.setMouseTransparent(true);
         battleText.setFocusTraversable(false);
@@ -266,6 +279,10 @@ public class BattleController {
         };
     }
 
+    /**
+     * One of the methods responsible for modifying element positions depending on using animated sprites or not. Using
+     * animated sprites requires lowering some elements down the screen.
+     */
     public void processSpriteModeSwitch() {
         if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
             allyPokemonSprite.setLayoutY(allyPokemonSprite.getLayoutY() + 50);
@@ -296,6 +313,9 @@ public class BattleController {
         }
     }
 
+    /**
+     * Resets screen to default state.
+     */
     public void resetState() {
         battleTextFull.setVisible(true);
         battleText.setVisible(false);
@@ -306,19 +326,34 @@ public class BattleController {
     }
 
     //https://stackoverflow.com/questions/40514910/set-volume-of-java-clip
-    // Converts Clip's logarithmic audio volume controls to a linear scale, between 0 and 1, for ease of use
+
+    /**
+     * Method for checking volume. Converts Clip's logarithmic audio volume controls to a linear scale,between 0 and 1,
+     * for ease of use.
+     * @param clip Clip whose volume should be checked
+     * @return volume, in values between 0 and 1
+     */
     public float getVolume(Clip clip) {
         FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
         return (float) Math.pow(10f, gainControl.getValue() / 20f);
     }
 
-    public void setVolume(Clip clip ,float volume) {
+    /**
+     * Method responsible for changing volume. Converts Clip's logarithmic audio volume controls to a linear scale,
+     * between 0 and 1, for ease of use.
+     * @param clip Clip whose volume should be changed
+     * @param volume value of volume, between 0 and 1
+     */
+    public void setVolume(Clip clip, float volume) {
         if (volume < 0f || volume > 1f)
             throw new IllegalArgumentException("Volume not valid: " + volume);
         FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
         gainControl.setValue(20f * (float) Math.log10(volume));
     }
 
+    /**
+     * Configurations related to battle theme playback.
+     */
     private void configBattleTheme()
             throws UnsupportedAudioFileException, IOException, LineUnavailableException, URISyntaxException {
 
@@ -338,7 +373,10 @@ public class BattleController {
             battleThemeLoopAudioClip.loop(Clip.LOOP_CONTINUOUSLY);
         });
     }
-
+    
+    /**
+     * Configurations related to victory theme playback.
+     */
     private void configVictoryTheme()
             throws URISyntaxException, UnsupportedAudioFileException, IOException, LineUnavailableException {
 
@@ -359,6 +397,9 @@ public class BattleController {
         });
     }
 
+    /**
+     * Configurations related to low hp effect playback.
+     */
     private void configLowHpEffect()
             throws UnsupportedAudioFileException, IOException, LineUnavailableException{
 
@@ -371,6 +412,12 @@ public class BattleController {
         setVolume(allyLowHpClip, 0.5f);
     }
 
+    /**
+     * Method which prepares the sound effect that should be played during hit animation.
+     * @param typeEffect type effectiveness of used move
+     * @return <code>InputStream</code> of requested sound effect
+     * @see BattleLogic#calculateTypeEffect(Move, Type, Type) 
+     */
     private InputStream prepareHitEffect(float typeEffect) {
         InputStream inputStream;
 
@@ -384,6 +431,12 @@ public class BattleController {
         return inputStream;
     }
 
+    /**
+     * Method which prepares the sound effect that should be played during stat changes.
+     * @param statChange value of stat change that is occurring to a Pokémon on screen
+     * @return <code>InputStream</code> of requested sound effect
+     * @see BattleLogic#processStatChange(List, Move, Pokemon, boolean) 
+     */
     private InputStream prepareStatChangeEffect(float statChange) {
         InputStream inputStream;
 
@@ -395,6 +448,11 @@ public class BattleController {
         return inputStream;
     }
 
+    /**
+     * Method which loads requested sound effect into the <code>audioEffectsClip</code> variable. This is the final
+     * preparation before playing back the sound.
+     * @param inputStream <code>InputStream</code> of the requested sound
+     */
     private void prepareEffectClip(InputStream inputStream)
             throws UnsupportedAudioFileException, IOException, LineUnavailableException {
 
@@ -407,6 +465,10 @@ public class BattleController {
         setVolume(audioEffectsClip, 0.5f);
     }
 
+    /**
+     * Method that plays the requested sound effect.
+     * @param inputStream <code>InputStream</code> of the requested sound
+     */
     private void playEffect(InputStream inputStream) {
         try {
             prepareEffectClip(inputStream);
@@ -416,6 +478,9 @@ public class BattleController {
         }
     }
 
+    /**
+     * Method that starts looped playback of the low HP sound effect (if it exists).
+     */
     private void playLowHpEffect()  {
         if (allyLowHpClip != null) {
             if (!allyLowHpClip.isActive()) {
@@ -425,11 +490,21 @@ public class BattleController {
         }
     }
 
+    /**
+     * Method that stops playback of the low HP sound effect (if it exists).
+     */
     public void stopLowHpEffect() {
         if (allyLowHpClip != null)
             allyLowHpClip.stop();
     }
 
+    /**
+     * Method that prepares a Timeline object that begins playback of a hit effect. This most often should be 
+     * played right before hit animations.
+     * @param typeEffect type effectiveness of used move
+     * @return <code>Timeline</code> object that executes sound playback when played
+     * @see BattleLogic#calculateTypeEffect(Move, Type, Type) 
+     */
     public Timeline getHitEffectClipPlayback(float typeEffect) {
 
         KeyFrame kf = new KeyFrame(Duration.millis(1), e -> {
@@ -442,6 +517,13 @@ public class BattleController {
         return new Timeline(kf);
     }
 
+    /**
+     * Method that prepares a Timeline object that begins playback of a stat change effect. This most often should be
+     * played right before stat change animations
+     * @param statChange value of stat change that is occurring to a Pokémon on screen
+     * @return <code>Timeline</code> object that executes sound playback when played
+     * @see BattleLogic#processStatChange(List, Move, Pokemon, boolean)
+     */
     public Timeline getStatChangeClipPlayback(int statChange) {
         KeyFrame kf = new KeyFrame(Duration.millis(1), e -> {
             InputStream inputStream = prepareStatChangeEffect(statChange);
@@ -453,6 +535,11 @@ public class BattleController {
         return new Timeline(kf);
     }
 
+    /**
+     * Method that prepares a <code>KeyFrame</code> object that begins playback of a faint animation effect. This is used
+     * as the first <code>KeyFrame</code> that is played during the faint animation
+     * @return <code>KeyFrame</code> object which executes sound playback when played
+     */
     private KeyFrame getPokemonFaintedClipPlayback() {
         return new KeyFrame(Duration.millis(1), e-> {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream("sound/pokemon_fainted.wav");
@@ -462,11 +549,17 @@ public class BattleController {
         });
     }
 
+    /**
+     * Method that starts playing the victory theme (if it exists).
+     */
     public void startVictoryThemePlayback() {
         if (victoryIntroPlayer != null)
             victoryIntroPlayer.play();
     }
 
+    /**
+     * Method that stops playing the victory theme (if it exists).
+     */
     public void endVictoryThemePlayback() {
         if (victoryIntroPlayer != null)
             victoryIntroPlayer.stop();
@@ -474,11 +567,17 @@ public class BattleController {
             victoryThemeLoopAudioClip.stop();
     }
 
+    /**
+     * Method that starts playing the battle theme (if it exists).
+     */
     public void startBattleThemePlayback() {
         if (introPlayer != null)
             introPlayer.play();
     }
 
+    /**
+     * Method that stops playing the battle theme (if it exists).
+     */
     public void endBattleThemePlayback() {
         if (introPlayer != null)
             introPlayer.stop();
@@ -486,72 +585,132 @@ public class BattleController {
             battleThemeLoopAudioClip.stop();
     }
 
+    /**
+     * Method that calls multiple visual configurations of buttons. This also handles custom button focus.
+     */
     private void setupButtons() {
         setFightButton();
         setPokemonButton();
         setBagButton();
+        setRunButton();
+
+        optionGrid.setOnKeyPressed(e -> {
+            switch (e.getCode()) {
+                case LEFT:
+                    bagButton.requestFocus();
+                    break;
+                case UP:
+                    fightButton.requestFocus();
+                    break;
+                case RIGHT:
+                    pokemonButton.requestFocus();
+                    break;
+                case DOWN:
+                    runButton.requestFocus();
+                    break;
+            }
+        });
     }
 
+    /**
+     * Method responsible for setting up an option button visual effects
+     * @param button one of the option buttons
+     * @param index index of the option button; 0:Fight, 1:Pokémon, 2:Bag, 3:Run
+     */
+    private static void setButton(Button button, int index) {
+        String styleRelease, stylePressed, styleHover;
+        switch (index) {
+            case 0:
+                styleRelease = FIGHT_BUTTON_RELEASE;
+                stylePressed = FIGHT_BUTTON_PRESSED;
+                styleHover = FIGHT_BUTTON_HOVER;
+                break;
+            case 1:
+                styleRelease = POKEMON_BUTTON_RELEASE;
+                stylePressed = POKEMON_BUTTON_PRESSED;
+                styleHover = POKEMON_BUTTON_HOVER;
+                break;
+            case 2:
+                styleRelease = BAG_BUTTON_RELEASE;
+                stylePressed = BAG_BUTTON_PRESSED;
+                styleHover = BAG_BUTTON_HOVER;
+                break;
+            case 3:
+                styleRelease = RUN_BUTTON_RELEASE;
+                stylePressed = RUN_BUTTON_PRESSED;
+                styleHover = RUN_BUTTON_HOVER;
+                break;
+            default:
+                throw new ValueException("Unexpected index value: " + index);
+        }
+
+        button.setOnMousePressed(e -> {
+            button.setStyle(stylePressed);
+        });
+
+        button.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.SPACE)
+                button.setStyle(stylePressed);
+        });
+
+        button.setOnKeyReleased(e -> {
+            if (e.getCode() == KeyCode.SPACE)
+                button.setStyle(styleRelease);
+        });
+
+        button.setOnMouseReleased(e -> {
+            button.setStyle(styleRelease);
+        });
+
+        button.setOnMouseEntered(e -> {
+            button.requestFocus();
+            button.setText(">" + button.getText().substring(1));
+            button.setStyle(styleHover);
+        });
+
+        button.focusedProperty().addListener(observable -> {
+            if (button.isFocused()) {
+                button.setText(">" + button.getText().substring(1));
+                button.setStyle(styleHover);
+            }
+            else {
+                button.setText(" " + button.getText().substring(1));
+                button.setStyle(styleRelease);
+            }
+        });
+    }
+
+    /**
+     * Method that sets up the Fight button
+     */
     private void setFightButton() {
-        fightButton.setOnMousePressed(e -> {
-            fightButton.setStyle(FIGHT_BUTTON_PRESSED);
-        });
-
-        fightButton.setOnMouseReleased(e -> {
-            fightButton.setStyle(FIGHT_BUTTON_RELEASE);
-        });
-
-        fightButton.setOnMouseEntered(e -> {
-            fightButton.setText(">" + fightButton.getText().substring(1));
-            fightButton.setStyle(FIGHT_BUTTON_HOVER);
-        });
-
-        fightButton.setOnMouseExited(e -> {
-            fightButton.setText(" " + fightButton.getText().substring(1));
-            fightButton.setStyle(FIGHT_BUTTON_RELEASE);
-        });
+        setButton(fightButton, 0);
     }
-
+    /**
+     * Method that sets up the Pokémon button
+     */
     private void setPokemonButton() {
-        pokemonButton.setOnMousePressed(e -> {
-            pokemonButton.setStyle(POKEMON_BUTTON_PRESSED);
-        });
-
-        pokemonButton.setOnMouseReleased(e -> {
-            pokemonButton.setStyle(POKEMON_BUTTON_RELEASE);
-        });
-
-        pokemonButton.setOnMouseEntered(e -> {
-            pokemonButton.setText(">" + pokemonButton.getText().substring(1));
-            pokemonButton.setStyle(POKEMON_BUTTON_HOVER);
-        });
-
-        pokemonButton.setOnMouseExited(e -> {
-            pokemonButton.setText(" " + pokemonButton.getText().substring(1));
-            pokemonButton.setStyle(POKEMON_BUTTON_RELEASE);
-        });
+        setButton(pokemonButton, 1);
     }
-
+    /**
+     * Method that sets up the Bag button
+     */
     private void setBagButton() {
-        bagButton.setOnMousePressed(e -> {
-            bagButton.setStyle(BAG_BUTTON_PRESSED);
-        });
-
-        bagButton.setOnMouseReleased(e -> {
-            bagButton.setStyle(BAG_BUTTON_RELEASE);
-        });
-
-        bagButton.setOnMouseEntered(e -> {
-            bagButton.setText(">" + bagButton.getText().substring(1));
-            bagButton.setStyle(BAG_BUTTON_HOVER);
-        });
-
-        bagButton.setOnMouseExited(e -> {
-            bagButton.setText(" " + bagButton.getText().substring(1));
-            bagButton.setStyle(BAG_BUTTON_RELEASE);
-        });
+        setButton(bagButton, 2);
     }
 
+    /**
+     * Method that sets up the Run button
+     */
+    private void setRunButton() {
+        setButton(runButton, 3);
+    }
+
+    /**
+     * Method called to obtain an idle animation, which is played when waiting for player choice. It loops until it is
+     * stopped manually.
+     * @return <code>Timeline</code> object containing requested idle animation
+     */
     private Timeline getBattleIdleAnimation() {
 
         double infoLayoutYPos = allyPokemonInfo.getLayoutY();
@@ -613,6 +772,11 @@ public class BattleController {
         return fadeTransition;
     }
 
+    /**
+     * Sets the screen into choice or display mode. Choice mode allows the player to input the next command. Display
+     * mode is used to display turn outcome.
+     * @param choice when <code>true</code> enters choice mode, otherwise enters display mode
+     */
     public void switchToPlayerChoice(boolean choice) {
         battleTextFull.setVisible(!choice);
         battleText.setVisible(choice);
@@ -625,11 +789,16 @@ public class BattleController {
             if (!BattleApplication.isUseInternetSprites() && !BattleApplication.isUseLocalAnimSprites())
                 allyPokemonSprite.setLayoutY(ALLY_SPRITE_DEFAULT_Y);
             allyPokemonInfo.setLayoutY(ALLY_INFO_DEFAULT_Y);
-            //AnchorPane.setBottomAnchor(allyPokemonSprite, 63.0);
-            //AnchorPane.setBottomAnchor(allyPokemonInfo, 220.0);
         }
     }
 
+    /**
+     * Method used to signal when text should be wiped. Wipes text from both the full text display and the small text
+     * display, known in code as <code>battleText</code> and <code>battleTextFull</code>.
+     * @param inTimeline if <code>true</code> only returns text wipe action as <code>Timeline</code>, otherwise wipes 
+     *                   text as soon as the method is called
+     * @return <code>Timeline</code> object containing the action of text wipe
+     */
     public Timeline wipeText(boolean inTimeline) {
         KeyFrame kf = new KeyFrame(Duration.millis(1), e -> {
             battleText.setText("");
@@ -644,6 +813,14 @@ public class BattleController {
         return timeline;
     }
 
+    /**
+     * Method called to put text into the textbox. All text appears as soon as the <code>Timeline</code> is played.
+     * @param text <code>String</code> containing the text that should appear
+     * @param full if <code>true</code> display text on <code>battleTextFull</code>, otherwise displays on
+     *             <code>battleText</code>
+     * @return <code>Timeline</code> object containing the action of filling screen with text
+     * @see #getBattleTextAnimation(String, boolean) 
+     */
     public Timeline getBattleText(String text, boolean full) {
         KeyFrame kf;
         if (full)
@@ -654,6 +831,15 @@ public class BattleController {
         return new Timeline(kf);
     }
 
+    /**
+     * Method called to put text into a textbox. Text appears letter by letter at a fixed speed. It can be sped up
+     * when turbo mode is active.
+     * @param text <code>String</code> containing the text that should appear
+     * @param full if <code>true</code> display text on <code>battleTextFull</code>, otherwise displays on
+     *             <code>battleText</code>
+     * @return <code>Timeline</code> object containing the animation of filling screen with text letter by letter
+     * @see #getBattleText(String, boolean)
+     */
     public Timeline getBattleTextAnimation(String text, boolean full) {
         final List<KeyFrame> characterList = new ArrayList<>();
         final double modifier = turboMode ? 4 : 1;
@@ -682,29 +868,33 @@ public class BattleController {
         return timeline;
     }
 
+    /**
+     * Makes the transition between two text animations be triggered by user input.
+     * @param text <code>Timeline</code> object containing the pre transition text animation
+     * @param nextText <code>Timeline</code> object containing the after transition text animation
+     * @see #getBattleTextAnimation(String, boolean)
+     */
     public void battleTextAdvanceByUserInput(Timeline text, Timeline nextText) {
-
-        Parent root = battleTextFull.getScene().getRoot();
 
         text.setOnFinished(e -> {
 
             final Timeline timeline = getTextArrowAnimation();
 
-            root.setOnMouseClicked(event -> {
+            mainPane.setOnMouseClicked(event -> {
                 if (event.getButton() == MouseButton.PRIMARY) {
                     textArrowView.setVisible(false);
                     nextText.play();
-                    root.setOnMouseClicked(null);
-                    root.setOnKeyPressed(null);
+                    mainPane.setOnMouseClicked(null);
+                    battleTextFull.setOnKeyPressed(null);
                     timeline.stop();
                 }
             });
-            root.setOnKeyPressed(event -> {
-                if (event.getCode() == KeyCode.ENTER) {
+            battleTextFull.setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.SPACE) {
                     textArrowView.setVisible(false);
                     nextText.play();
-                    root.setOnMouseClicked(null);
-                    root.setOnKeyPressed(null);
+                    mainPane.setOnMouseClicked(null);
+                    battleTextFull.setOnKeyPressed(null);
                     timeline.stop();
                 }
             });
@@ -714,6 +904,11 @@ public class BattleController {
             });
     }
 
+    /**
+     * Method that generates the text arrow animation visible when text can be advanced by user input. Loops until
+     * stopped manually.
+     * @return <code>Timeline</code> object containing the arrow animation
+     */
     private Timeline getTextArrowAnimation() {
 
         List<KeyFrame> keyFrameList = new ArrayList<>();
@@ -770,6 +965,12 @@ public class BattleController {
         return timeline;
     }
 
+    /**
+     * Method used to display the slide animation introducing an allied Pokémon's ability. This animation is played every
+     * time a Pokémon's ability effect is triggered.
+     * @param pokemon the Pokémon whose ability has been triggered
+     * @return <code>Timeline</code> object containing the requested animation
+     */
     public Timeline getAllyAbilityInfoAnimation(Pokemon pokemon) {
         final List<KeyFrame> keyFrameList = new ArrayList<>();
         double width = allyAbilityInfo.getPrefWidth();
@@ -800,6 +1001,12 @@ public class BattleController {
         return timeline;
     }
 
+    /**
+     * Method used to display the slide animation introducing an enemy Pokémon's ability. This animation is played every
+     * time a Pokémon's ability effect is triggered.
+     * @param pokemon the Pokémon whose ability has been triggered
+     * @return <code>Timeline</code> object containing the requested animation
+     */
     public Timeline getEnemyAbilityInfoAnimation(Pokemon pokemon) {
         final List<KeyFrame> keyFrameList = new ArrayList<>();
         double width = enemyAbilityInfo.getPrefWidth();
@@ -833,6 +1040,13 @@ public class BattleController {
     }
 
     //https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
+    /**
+     * Shifts the colors displayed on an <code>ImageView</code> to the specified color.
+     * @param imageView <code>ImageView</code> which should have its color shifted
+     * @param opacity opacity of this effect, the higher the value, the more pronounced the effect
+     * @param color <code>Color</code> object representing the desired color of the effect
+     * @see #resetColorShiftEffect(ImageView)
+     */
     private void setColorShiftEffect(ImageView imageView, double opacity, Color color) {
 
         ImageView copy = new ImageView(imageView.getImage());
@@ -853,11 +1067,22 @@ public class BattleController {
         imageView.setEffect(blush);
     }
 
+    /**
+     * Resets any applied color shift effect. This can also reset other effects that have been applied.
+     * @param imageView <code>ImageView</code> object which should be reset
+     * @see #setColorShiftEffect(ImageView, double, Color)
+     */
     private void resetColorShiftEffect(ImageView imageView) {
         imageView.setEffect(null);
         imageView.setClip(null);
     }
 
+    /**
+     * Generates an intro animation for the Pokémon. This type of animation is used when a Pokémon is being sent out.
+     * @param pokemon Pokémon to be sent out
+     * @param hp HP value of sent out Pokémon
+     * @return <code>Timeline</code> object representing the requested animation
+     */
     public Timeline getIntroAnimation(Pokemon pokemon, int hp) {
 
         final boolean ally = pokemon.getOwner().isPlayer();
@@ -982,6 +1207,10 @@ public class BattleController {
         return timeline;
     }
 
+    /**
+     * Configures enemy information on screen. This includes sprite image and the HP box visible beside the sprite.
+     * @param pokemon Pokémon whose info should be entered
+     */
     public void setEnemyInformation(Pokemon pokemon) {
         enemyNameLabel.setText(pokemon.getName());
         enemyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
@@ -992,6 +1221,12 @@ public class BattleController {
         setEnemyHpBar(pokemon.getHp(), pokemon.getMaxHP());
     }
 
+    /**
+     * Configures enemy information on screen. This includes sprite image and the HP box visible beside the sprite.
+     * Overrides the HP value displayed.
+     * @param pokemon Pokémon whose info should be entered
+     * @param overrideHp HP value which should be displayed instead of the one contained in Pokémon information.
+     */
     public void setEnemyInformation(Pokemon pokemon, int overrideHp) {
         enemyNameLabel.setText(pokemon.getName());
         enemyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
@@ -1002,6 +1237,12 @@ public class BattleController {
         setEnemyHpBar(overrideHp, pokemon.getMaxHP());
     }
 
+    /**
+     * Sets the enemy Pokémon's HP bar.
+     * @param hp the HP value that the bar should be set to
+     * @param maxhp the maximum amount of HP the current Pokémon can have
+     * @see #getEnemyHpAnimation(int, int, int)
+     */
     public void setEnemyHpBar(int hp, int maxhp) {
         double currentHpPercentage = (double) hp / maxhp;
         if (currentHpPercentage < 0.03 && hp != 0)
@@ -1017,6 +1258,14 @@ public class BattleController {
             enemyHpBar.setStyle("-fx-accent: red");
     }
 
+    /**
+     * Generates an animation of losing (or gaining) HP for the enemy.
+     * @param from starting amount of HP
+     * @param to the amount of HP the starting amount should be reduced to
+     * @param max maximum possible amount of HP for this Pokémon
+     * @return <code>Timeline</code> object containing the requested animation
+     * @see #setEnemyHpBar(int, int)
+     */
     public Timeline getEnemyHpAnimation(int from, int to, int max) {
         final List<KeyFrame> keyFrameList = new ArrayList<>();
 
@@ -1042,6 +1291,11 @@ public class BattleController {
         return timeline;
     }
 
+    /**
+     * Generates an animation for getting hit with a move.
+     * @param ally if <code>true</code> generates animation for allied Pokémon, otherwise generates animation for enemy
+     * @return <code>Timeline</code> object containing the requested animation
+     */
     public Timeline getMoveDamageAnimation(boolean ally) {
         int animationDuration = 4;
         Timeline timeline = new Timeline();
@@ -1081,7 +1335,12 @@ public class BattleController {
         return timeline;
     }
 
-    public static void setStatusStyle(Pokemon pokemon, Label statusLabel, Enums.Status status) {
+    /**
+     * Configures the status label to display the requested status. Changes text and background color.
+     * @param statusLabel label that should be formatted
+     * @param status the status which should be displayed by the label
+     */
+    public static void setStatusStyle(Label statusLabel, Enums.Status status) {
         statusLabel.setTextFill(Color.WHITE);
 
         final String style = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: ";
@@ -1121,13 +1380,19 @@ public class BattleController {
                 finalStyle = style + "maroon";
         }
 
-        if (pokemon.getStatus() != Enums.Status.NONE) {
+        if (status != Enums.Status.NONE) {
             statusLabel.setStyle(finalStyle);
             statusLabel.setVisible(true);
         }
     }
 
-    public Timeline updateStatus(Pokemon pokemon, boolean ally, Enums.Status status) {
+    /**
+     * Method that generates an animation responsible for displaying a Pokémon's status change.
+     * @param ally sets ally's status label if <code>true</code>, the enemy's otherwise
+     * @param status determines which status should be represented by the label
+     * @return <code>Timeline</code> object containing the requested animation
+     */
+    public Timeline updateStatus(boolean ally, Enums.Status status) {
 
         final Label statusLabel;
         if (ally)
@@ -1136,12 +1401,17 @@ public class BattleController {
             statusLabel = enemyStatusLabel;
 
         final KeyFrame kf = new KeyFrame(Duration.millis(1), e-> {
-            setStatusStyle(pokemon, statusLabel, status);
+            setStatusStyle(statusLabel, status);
         });
 
         return new Timeline(kf);
     }
 
+    /**
+     * Generates an animation that changes the weather effect present on the battlefield.
+     * @param weatherEffect determines which weather should the field be changed to
+     * @return <code>Timeline</code> object containing the requested animation
+     */
     public Timeline updateFieldWeatherEffect(Enums.WeatherEffect weatherEffect) {
 
         final KeyFrame kf;
@@ -1190,7 +1460,10 @@ public class BattleController {
             //imageView.setImage(img);
         }
     }
-
+    /**
+     * Configures ally information on screen. This includes sprite image and the HP box visible beside the sprite.
+     * @param pokemon Pokémon whose info should be entered
+     */
     public void setAllyInformation(Pokemon pokemon) {
         allyNameLabel.setText(pokemon.getName());
         allyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
@@ -1201,6 +1474,12 @@ public class BattleController {
         setAllyHpBar(pokemon.getHp(), pokemon.getMaxHP(), true);
     }
 
+    /**
+     * Configures ally information on screen. This includes sprite image and the HP box visible beside the sprite.
+     * Overrides the HP value displayed.
+     * @param pokemon Pokémon whose info should be entered
+     * @param overrideHp HP value which should be displayed instead of the one contained in Pokémon information.
+     */
     public void setAllyInformation(Pokemon pokemon, int overrideHp) {
         allyNameLabel.setText(pokemon.getName());
         allyLvLabel.setText(String.format("Lv. %d", pokemon.getLevel()));
@@ -1211,6 +1490,12 @@ public class BattleController {
         setAllyHpBar(overrideHp, pokemon.getMaxHP(), true);
     }
 
+    /**
+     * Sets the ally Pokémon's HP bar.
+     * @param hp the HP value that the bar should be set to
+     * @param maxhp the maximum amount of HP the current Pokémon can have
+     * @see #getAllyHpAnimation(int, int, int)
+     */
     public void setAllyHpBar(int hp, int maxhp, boolean applySound) {
         double currentHpPercentage = (double) hp / maxhp;
         if (currentHpPercentage < 0.03 && hp != 0)
@@ -1236,6 +1521,14 @@ public class BattleController {
         }
     }
 
+    /**
+     * Generates an animation of losing (or gaining) HP for the ally.
+     * @param from starting amount of HP
+     * @param to the amount of HP the starting amount should be reduced to
+     * @param max maximum possible amount of HP for this Pokémon
+     * @return <code>Timeline</code> object containing the requested animation
+     * @see #setAllyHpBar(int, int, boolean)
+     */
     public Timeline getAllyHpAnimation(int from, int to, int max) {
         final List<KeyFrame> keyFrameList = new ArrayList<>();
 
@@ -1276,6 +1569,11 @@ public class BattleController {
         return timeline;
     }
 
+    /**
+     * Generates a fainted animation.
+     * @param ally if <code>true</code> applies animation to ally, otherwise applies it to enemy
+     * @return <code>Timeline</code> object containing the requested animation
+     */
     public Timeline getPokemonFaintedAnimation(boolean ally) {
         final List<KeyFrame> keyFrameList = new ArrayList<>();
 
@@ -1335,6 +1633,11 @@ public class BattleController {
         return timeline;
     }
 
+    /**
+     * Generates animation of Pokémon being recalled by the trainer.
+     * @param ally if <code>true</code> applies animation to ally, otherwise applies it to enemy
+     * @return <code>Timeline</code> object containing the requested animation
+     */
     public Timeline getPokemonReturnAnimation(boolean ally) {
 
         final List<KeyFrame> keyFrameList = new ArrayList<>();
@@ -1410,11 +1713,20 @@ public class BattleController {
         return in.length() == 1 ? "0" + in : in;
     }
 
+    /**
+     * Converts <code>Color</code> object to a hexadecimal value representation in <code>String</code> format.
+     * @param value color that should be converted
+     * @return converted color <code>String</code>
+     */
     public static String toHexString(Color value) {
         return "#" + (format(value.getRed()) + format(value.getGreen()) + format(value.getBlue()) + format(value.getOpacity()))
                 .toUpperCase();
     }
 
+    /**
+     * Method called to display information about the currently highlighted move. This includes type and PP.
+     * @param move move which information should be displayed
+     */
     private void setMoveTypeBox(Move move) {
 
         Type type = move.getType();
@@ -1443,6 +1755,11 @@ public class BattleController {
             movePPLabel.setTextFill(textColorNoPP);
     }
 
+    /**
+     * Sets move information into the specified button. This also initiates visual related listeners.
+     * @param button button into which the information should be inserted
+     * @param move the move which information should be inserted into the button
+     */
     private void setMoveInformation(Button button, Move move) {
 
         //String ppInfo = "%s%nPP: %-2d/%2d%nType: %s";
@@ -1490,6 +1807,10 @@ public class BattleController {
         });
     }
 
+    /**
+     * Updates the information of available moves.
+     * @param pokemon Pokémon which moves should be inserted into buttons.
+     */
     public void updateAvailableMoves(Pokemon pokemon) {
         List<Move> moveList = pokemon.getMoveList();
         int size = moveList.size();
@@ -1514,15 +1835,27 @@ public class BattleController {
         }
     }
 
-    public void updatePokemonStatusBox(List<Pokemon> allyPokemon, List<Pokemon> enemyPokemon, boolean[] enemySeen) {
-        updateAllyStatusBox(allyPokemon);
+    /**
+     * Updates the party boxes, which contain basic info about the party size and if each individual member is able
+     * to battle.
+     * @param allyPokemon list containing the ally's party
+     * @param enemyPokemon list containing the enemy's party
+     * @param enemySeen an array that tracks which enemy party members were seen by the player
+     */
+    public void updatePokemonPartyBox(List<Pokemon> allyPokemon, List<Pokemon> enemyPokemon, boolean[] enemySeen) {
+        updateAllyPartyBox(allyPokemon);
         updateEnemyStatusBox(enemyPokemon, enemySeen);
     }
 
-    private void updateAllyStatusBox(List<Pokemon> allyPokemon) {
+    /**
+     * Updates the ally's party box, which contain basic info about the party size and if each individual member is able
+     * to battle.
+     * @param allyPokemon list containing the ally's party
+     */
+    private void updateAllyPartyBox(List<Pokemon> allyPokemon) {
         int allySize = allyPokemon.size();
         ArrayList<ImageView> allImageViews = new ArrayList<>();
-        addAllImageViewFromBox(allyPokemonStatusBox, allImageViews);
+        addAllImageViewFromBox(allyPokemonPartyBox, allImageViews);
 
         for (int i=0; i < 6; i++) {
             List<ImageView> subList = allImageViews.subList(i*2, 2+i*2);
@@ -1548,10 +1881,16 @@ public class BattleController {
         }
     }
 
+    /**
+     * Updates the ally's party box, which contain basic info about the party size and if each individual member is able
+     * to battle.
+     * @param enemyPokemon list containing the enemy's party
+     * @param seenArray an array that tracks which enemy party members were seen by the player
+     */
     private void updateEnemyStatusBox(List<Pokemon> enemyPokemon, boolean[] seenArray) {
         int enemySize = enemyPokemon.size();
         ArrayList<ImageView> allImageViews = new ArrayList<>();
-        addAllImageViewFromBox(enemyPokemonStatusBox, allImageViews);
+        addAllImageViewFromBox(enemyPokemonPartyBox, allImageViews);
 
         for (int i=0; i < 6; i++) {
             List<ImageView> subList = allImageViews.subList((5-i)*2, 2+(5-i)*2);
@@ -1584,12 +1923,17 @@ public class BattleController {
         }
     }
 
-    public Timeline getPokemonStatusBoxAnimation() {
+    /**
+     * Generates the animation that is displayed at the start of the battle. It makes each of the individual party icon
+     * appear on screen.
+     * @return <code>Timeline</code> object containing the requested animation
+     */
+    public Timeline getPokemonPartyBoxAnimation() {
         ArrayList<ImageView> allyStatusPanes = new ArrayList<>();
-        addAllImageViewFromBox(allyPokemonStatusBox, allyStatusPanes);
+        addAllImageViewFromBox(allyPokemonPartyBox, allyStatusPanes);
 
         ArrayList<ImageView> enemyStatusPanes = new ArrayList<>();
-        addAllImageViewFromBox(enemyPokemonStatusBox, enemyStatusPanes);
+        addAllImageViewFromBox(enemyPokemonPartyBox, enemyStatusPanes);
 
         KeyFrame setup = new KeyFrame(Duration.millis(1), e -> {
             for (ImageView node : allyStatusPanes) {
@@ -1636,6 +1980,14 @@ public class BattleController {
         return timeline;
     }
 
+    /**
+     * Modifies size and opacity of a party box member to the specifies values.
+     * @param iconForeground object containing the member sprite
+     * @param iconBackground object containing the member background
+     * @param newSize value of the size to which the background should be scaled
+     * @param newSizePokemon value of the size which the sprite should be scaled
+     * @param newOpacity value of the opacity that should be applied to the group
+     */
     private static void modifySizeAndOpacity(ImageView iconForeground, ImageView iconBackground, double newSize,
                                              double newSizePokemon, double newOpacity) {
         iconBackground.setOpacity(newOpacity);
@@ -1648,6 +2000,12 @@ public class BattleController {
         iconForeground.setFitHeight(newSizePokemon);
     }
 
+    /**
+     * Adds all found ImageView objects found among the children of the parent node. This also includes the children
+     * of the found parent nodes.
+     * @param parent parent node which should be searched
+     * @param nodes list into which all found <code>ImageView</code> nodes are inserted
+     */
     private static void addAllImageViewFromBox(Parent parent, ArrayList<ImageView> nodes) {
         for (Node node : parent.getChildrenUnmodifiable()) {
             if (node instanceof ImageView)
@@ -1657,6 +2015,12 @@ public class BattleController {
         }
     }
 
+    /**
+     * Old function used for inserting Pokémon information into buttons, The Pokémon menu has been inserted into a
+     * separate screen.
+     * @param party list of player's party
+     * @deprecated
+     */
     public void updateSelectPokemonButtons(List<Pokemon> party) {
 
         int partySize = party.size();
@@ -1741,6 +2105,11 @@ public class BattleController {
         }
     }
 
+    /**
+     * Generates an animation tied to the Substitute move. It fades away the user and places a substitute in place of it.
+     * @param pokemon move user
+     * @return <code>Timeline</code> object which contains the requested animation
+     */
     public List<Timeline> generateSubstituteAppearAnimation(Pokemon pokemon) {
         final boolean isPlayer = pokemon.getOwner().isPlayer();
 
@@ -1850,6 +2219,11 @@ public class BattleController {
         return substituteTimeline;
     }
 
+    /**
+     * Generates the animation of a substitute being destroyed, and the user returning to the battlefield.
+     * @param pokemon move user
+     * @return <code>Timeline</code> object which contains the requested animation
+     */
     public List<Timeline> generateSubstituteFadeAnimation(Pokemon pokemon) {
         final boolean isPlayer = pokemon.getOwner().isPlayer();
 
@@ -1926,7 +2300,14 @@ public class BattleController {
         return substituteTimeline;
     }
 
-    private Timeline moveDown(Node node, double distance, double frameTime) {
+    /**
+     * Moves a node down by the specified amount
+     * @param node node which should be moved
+     * @param distance distance by which the node should be moved down, if negative moves the node up
+     * @param frameTime determines how long each frame should last
+     * @return <code>Timeline</code> object which contains the requested animation
+     */
+    private static Timeline moveDown(Node node, double distance, double frameTime) {
 
         Timeline output = new Timeline();
 
@@ -1945,7 +2326,14 @@ public class BattleController {
         return output;
     }
 
-    private Timeline moveRight(Node node, double distance, double frameTime) {
+    /**
+     * Moves a node right by the specified amount
+     * @param node node which should be moved
+     * @param distance distance by which the node should be moved right, if negative moves the node left
+     * @param frameTime determines how long each frame should last
+     * @return <code>Timeline</code> object which contains the requested animation
+     */
+    private static Timeline moveRight(Node node, double distance, double frameTime) {
 
         Timeline output = new Timeline();
         final double[] currentPosition = new double[1];
@@ -1963,11 +2351,20 @@ public class BattleController {
         return output;
     }
 
+    /**
+     * Generates a pause in animation. This pause is greatly shortened when turbo mode is active.
+     * @param millis amount of milliseconds that the pause should last
+     * @return <code>Timeline</code> object that represents the requested pause
+     */
     public Timeline generatePause(double millis) {
         double modifier = turboMode ? millis : 1;
         return new Timeline(new KeyFrame(Duration.millis(millis / modifier)));
     }
 
+    /**
+     * Method that is executed when the Fight button is pressed
+     * @param pokemon Pokémon which moves should appear on the screen
+     */
     public void fightButtonPressed(Pokemon pokemon) {
 
         updateAvailableMoves(pokemon);
@@ -1976,11 +2373,18 @@ public class BattleController {
         moveGrid.setVisible(true);
     }
 
+    /**
+     * Method that is executed when the back (when browsing available moves) button is pressed
+     */
     public void backButtonPressed() {
         optionGrid.setVisible(true);
         moveGrid.setVisible(false);
     }
 
+    /**
+     * Method that is executed when the Pokémon button is pressed. Unused because of the changes to the Pokémon menu.
+     * @deprecated
+     */
     public void pokemonButtonPressed(List<Pokemon> party) {
         optionGrid.setVisible(false);
         pokemonGrid.setVisible(true);
@@ -1990,6 +2394,13 @@ public class BattleController {
         //updateAvailablePokemon(party);
     }
 
+    /**
+     * Returns the node of specified row and column position.
+     * @param gridPane <code>GridPane</code> from which the node should be returned
+     * @param col node's column position
+     * @param row node's row position
+     * @return requested node
+     */
     public Node getNodeFromGridPane(GridPane gridPane, int col, int row) {
         for (Node node : gridPane.getChildren()) {
             if (GridPane.getColumnIndex(node) == col && GridPane.getRowIndex(node) == row) {

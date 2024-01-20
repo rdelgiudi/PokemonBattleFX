@@ -254,7 +254,7 @@ public class SwapPokemonController {
 
         Label statusLabel = (Label) hpBox.getChildren().get(2);
 
-        BattleController.setStatusStyle(pokemon, statusLabel, pokemon.getStatus());
+        BattleController.setStatusStyle(statusLabel, pokemon.getStatus());
 
         if (pokemon.getHp() == 0)
             pokemonBox.setStyle(FAINTED_STYLE);
@@ -434,7 +434,7 @@ public class SwapPokemonController {
 
         if (index == 0) {
             battleController.setAllyHpBar(target.getHp(), target.getMaxHP(), true);
-            battleController.updateStatus(target, true, target.getStatus()).play();
+            battleController.updateStatus(true, target.getStatus()).play();
         }
         reduceItemAmount();
 
@@ -484,7 +484,7 @@ public class SwapPokemonController {
         }
 
         if (index == 0)
-            battleController.updateStatus(target, true, target.getStatus()).play();
+            battleController.updateStatus(true, target.getStatus()).play();
 
         Timeline healInfo = getInfoText(String.format(
                 "%s's status was cleared.", target.getBattleName()));
@@ -630,7 +630,7 @@ public class SwapPokemonController {
                     party.get(index).getBattleName()), true);
             battleTimeLine.add(allyPokemonIntro);
 
-            Timeline updateStatus = battleController.updateStatus(party.get(index), true,
+            Timeline updateStatus = battleController.updateStatus(true,
                     party.get(index).getStatus());
             battleTimeLine.add(updateStatus);
 

@@ -32,12 +32,12 @@
             </ImageView>
             <ImageView fx:id="allyPokemonSprite" fitHeight="350.0" fitWidth="350.0" layoutX="201.0" layoutY="223.0" pickOnBounds="true" preserveRatio="true" smooth="false" />
             <ImageView fx:id="enemyPokemonSprite" fitHeight="280.0" fitWidth="280.0" layoutX="899.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" smooth="false" visible="false" />
-            <TextArea fx:id="battleTextFull" editable="false" layoutY="560.0" prefHeight="160.0" prefWidth="1280.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: white;">
+            <TextArea fx:id="battleTextFull" editable="false" layoutY="560.0" prefHeight="160.0" prefWidth="1280.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: white;" wrapText="true">
                <font>
                   <Font name="Monospaced Regular" size="40.0" />
                </font>
             </TextArea>
-            <TextArea fx:id="battleText" editable="false" layoutY="560.0" prefHeight="160.0" prefWidth="730.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: white;" visible="false">
+            <TextArea fx:id="battleText" editable="false" focusTraversable="false" layoutY="560.0" prefHeight="160.0" prefWidth="730.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: white;" visible="false" wrapText="true">
                <font>
                   <Font name="Monospaced Regular" size="40.0" />
                </font>
@@ -50,7 +50,7 @@
                   <Image url="@../../../sprites/text_arrow.png" />
                </image>
             </ImageView>
-            <GridPane fx:id="optionGrid" alignment="CENTER" hgap="5.0" layoutX="730.0" layoutY="560.0" prefHeight="160.0" prefWidth="550.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: lightgray;" vgap="5.0" visible="false">
+            <GridPane fx:id="optionGrid" alignment="CENTER" focusTraversable="true" hgap="5.0" layoutX="730.0" layoutY="560.0" prefHeight="160.0" prefWidth="550.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: lightgray;" vgap="5.0" visible="false">
                <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="150.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="230.0" />
@@ -62,22 +62,22 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <Button fx:id="fightButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" prefHeight="60.0" prefWidth="533.0" style="-fx-background-color: firebrick; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Fight" textFill="WHITE" GridPane.columnSpan="3">
+                  <Button fx:id="fightButton" alignment="CENTER" contentDisplay="CENTER" focusTraversable="false" mnemonicParsing="false" prefHeight="60.0" prefWidth="533.0" style="-fx-background-color: firebrick; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Fight" textFill="WHITE" GridPane.columnSpan="3">
                      <font>
                         <Font name="Monospaced Regular" size="18.0" />
                      </font>
                   </Button>
-                  <Button fx:id="bagButton" mnemonicParsing="false" prefHeight="75.0" prefWidth="165.0" style="-fx-background-color: goldenrod; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Bag" textFill="WHITE" GridPane.rowIndex="1" GridPane.rowSpan="2">
+                  <Button fx:id="bagButton" focusTraversable="false" mnemonicParsing="false" prefHeight="75.0" prefWidth="165.0" style="-fx-background-color: goldenrod; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Bag" textFill="WHITE" GridPane.rowIndex="1" GridPane.rowSpan="2">
                      <font>
                         <Font name="Monospaced Regular" size="18.0" />
                      </font>
                   </Button>
-                  <Button fx:id="pokemonButton" mnemonicParsing="false" prefHeight="115.0" prefWidth="175.0" style="-fx-background-color: forestgreen; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Pokemon" textFill="WHITE" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="2">
+                  <Button fx:id="pokemonButton" focusTraversable="false" mnemonicParsing="false" prefHeight="115.0" prefWidth="175.0" style="-fx-background-color: forestgreen; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Pokemon" textFill="WHITE" GridPane.columnIndex="2" GridPane.rowIndex="1" GridPane.rowSpan="2">
                      <font>
                         <Font name="Monospaced Regular" size="18.0" />
                      </font>
                   </Button>
-                  <Button fx:id="runButton" mnemonicParsing="false" prefHeight="35.0" prefWidth="230.0" style="-fx-background-color: dodgerblue; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Run" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                  <Button fx:id="runButton" focusTraversable="false" mnemonicParsing="false" prefHeight="35.0" prefWidth="230.0" style="-fx-background-color: dodgerblue; -fx-border-radius: 10; -fx-background-radius: 10;" text=" Run" textFill="WHITE" GridPane.columnIndex="1" GridPane.rowIndex="2">
                      <font>
                         <Font name="Monospaced Regular" size="18.0" />
                      </font>
@@ -294,7 +294,7 @@
                   <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                </padding>
             </GridPane>
-            <HBox fx:id="allyPokemonStatusBox" alignment="CENTER_RIGHT" layoutX="862.0" layoutY="485.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="60.0" prefWidth="60.0" spacing="5.0">
+            <HBox fx:id="allyPokemonPartyBox" alignment="CENTER_RIGHT" layoutX="862.0" layoutY="485.0" nodeOrientation="LEFT_TO_RIGHT" prefHeight="60.0" prefWidth="60.0" spacing="5.0">
                <children>
                   <StackPane maxHeight="40.0" maxWidth="40.0" prefHeight="7.0" prefWidth="0.0">
                      <children>
@@ -334,7 +334,7 @@
                   </StackPane>
                </children>
             </HBox>
-            <HBox fx:id="enemyPokemonStatusBox" alignment="CENTER_LEFT" layoutX="46.0" layoutY="193.0" prefHeight="60.0" prefWidth="60.0" spacing="5.0">
+            <HBox fx:id="enemyPokemonPartyBox" alignment="CENTER_LEFT" layoutX="46.0" layoutY="193.0" prefHeight="60.0" prefWidth="60.0" spacing="5.0">
                <children>
                   <StackPane maxHeight="40.0" maxWidth="40.0" prefHeight="7.0" prefWidth="0.0">
                      <children>

@@ -72,7 +72,7 @@ public class MovelistController {
     private Enums.Subtypes currentType = null;
 
     /**
-     * Initializes UI elements as well as sorts the Movelist.
+     * Configures UI elements as well as sorts the Movelist.
      * @see #initMenu(TextField, Pane)
      */
     public void initialize() {

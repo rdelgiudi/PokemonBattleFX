@@ -109,7 +109,7 @@ public class SummaryController {
 
         pokemonPortrait.setImage(pokemon.getSpecie().getFrontSprite());
 
-        BattleController.setStatusStyle(pokemon, statusLabel, pokemon.getStatus());
+        BattleController.setStatusStyle(statusLabel, pokemon.getStatus());
     }
 
     private void setPokemonTypes(Pokemon pokemon) {
