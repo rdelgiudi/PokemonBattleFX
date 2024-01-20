@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+import static com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController.setupStringField;
+
 public class AddPokemonController {
     @FXML
     private Label pokemonNameLabel, itemLabel, abilityLabel, abilityDescriptionLabel, firstTypeLabel, secondTypeLabel;
@@ -372,6 +374,8 @@ public class AddPokemonController {
         for (int i=0; i < moveBox.getChildren().size(); i++) {
             HBox hBox = (HBox) moveBox.getChildren().get(i);
             TextField moveField = (TextField) hBox.getChildren().get(0);
+
+            setupStringField(moveField, 15);
 
             moveField.textProperty().addListener((observable, oldValue, newValue) -> {
 

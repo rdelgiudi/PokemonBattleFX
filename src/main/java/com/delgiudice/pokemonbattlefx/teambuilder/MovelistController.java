@@ -4,6 +4,8 @@ import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.battle.BattleController;
 import com.delgiudice.pokemonbattlefx.move.MoveEnum;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
+import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
+import com.delgiudice.pokemonbattlefx.pokemon.PokemonEnum;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -18,7 +20,13 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+
 import static com.delgiudice.pokemonbattlefx.teambuilder.AddPokemonController.toHexString;
+import static com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController.setupStringField;
 
 public class MovelistController {
 
@@ -47,7 +55,11 @@ public class MovelistController {
             moveDescriptionLabel;
     @FXML
     private ChoiceBox<Enums.Types> typeChoiceBox;
-    
+    @FXML
+    private TextField moveNameSearchField;
+
+    private List<MoveTemplate> sortedMoves = new ArrayList<>();
+
     private Pane addPokemonPane;
     
     private TextField currentMoveSelectTextField;
@@ -55,12 +67,27 @@ public class MovelistController {
     private Enums.Subtypes currentType = null;
 
     public void initialize() {
-        initButtonListeners();
+
+        sortedMoves.addAll(MoveTemplate.getMoveMap().values());
+
+        sortedMoves.sort(new Comparator<MoveTemplate>() {
+            @Override
+            public int compare(MoveTemplate o1, MoveTemplate o2) {
+                return String.CASE_INSENSITIVE_ORDER.compare(o1.getName().toString(), o2.getName().toString());
+            }
+        });
 
         Rectangle rect = new Rectangle(BattleController.SCREEN_WIDTH, BattleController.SCREEN_HEIGHT);
         mainPane.setClip(rect);
 
+        initButtonListeners();
         setTypeChoiceBox();
+
+        moveNameSearchField.textProperty().addListener(observable -> {
+            populateMoveGrid();
+        });
+
+        setupStringField(moveNameSearchField, 15);
     }
 
     public void initMenu(TextField currentMoveSelectTextField, Pane addPokemonPane) {
@@ -126,17 +153,26 @@ public class MovelistController {
         moveDescriptionLabel.setText("");
     }
 
+    public static boolean containsIgnoreCase(String str1, String str2) {
+        str1 = str1.toLowerCase();
+        str2 = str2.toLowerCase();
+        return str1.contains(str2);
+    }
+
     public void populateMoveGrid() {
 
         moveGrid.getChildren().clear();
 
         int i = 0, j = 0;
 
-        for (MoveTemplate move : MoveTemplate.getMoveMap().values()) {
+        for (MoveTemplate move : sortedMoves) {
 
-            if ((currentType == null || move.getSubtype() == currentType) &&
-                    (move.getType().getTypeEnum() == typeChoiceBox.getValue() ||
-                            typeChoiceBox.getValue() == Enums.Types.ANY)) {
+            boolean moveSubTypeMatch = currentType == null || move.getSubtype() == currentType;
+            boolean moveTypeMatch = move.getType().getTypeEnum() == typeChoiceBox.getValue() ||
+                    typeChoiceBox.getValue() == Enums.Types.ANY;
+            boolean moveNameMatch = containsIgnoreCase(move.getName().toString(), moveNameSearchField.getText());
+
+            if ( moveSubTypeMatch && moveTypeMatch && moveNameMatch) {
                 VBox moveButton = new VBox();
                 Label moveButtonType = new Label();
                 Label moveButtonText = new Label();

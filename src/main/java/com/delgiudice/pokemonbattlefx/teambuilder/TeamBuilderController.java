@@ -109,9 +109,7 @@ public class TeamBuilderController {
 
     public void initialize() {
 
-        for (Map.Entry<PokemonEnum, Pokemon> entry : Pokemon.getPokemonExamples().entrySet()) {
-            sortedPokemon.add(entry.getValue());
-        }
+        sortedPokemon.addAll(Pokemon.getPokemonExamples().values());
 
         sortedPokemon.sort(new Comparator<Pokemon>() {
             @Override
@@ -172,7 +170,7 @@ public class TeamBuilderController {
         logic.processSpriteModeSwitch();
     }
 
-    private static void setupStringField(TextField textField, int characterLimit) {
+    protected static void setupStringField(TextField textField, int characterLimit) {
 
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue.matches("\\sa-zA-Z*")) {
