@@ -7,15 +7,39 @@ import javafx.scene.image.Image;
 import java.net.URL;
 import java.util.HashMap;
 
+/**
+ * Class representing a usable item.
+ */
 public class Item {
 
     public static final int MAX_HP = -1;
+    /**
+     * <code>HashMap</code> containing all existing items.
+     */
     private static final HashMap<String, Item> itemMap = new HashMap<>();
+    /**
+     * Name of the item.
+     */
     private String name;
+    /**
+     * Type of the item.
+     */
     Enums.ItemType type;
+    /**
+     * Status healed by this item.
+     */
     Enums.Status statusHeal = Enums.Status.NONE;
+    /**
+     * Value of item, usually signals the amount of health it restores.
+     */
     int value;
+    /**
+     * Description of item that appears when item is hovered over.
+     */
     String description = "No description";
+    /**
+     * Sprite path.
+     */
     String sprite = "sprites/default.png";
 
     public String getName() {
@@ -42,6 +66,11 @@ public class Item {
         return itemMap;
     }
 
+    /**
+     * Gets sprite from the path held in the <code>sprite</code> variable. If file of specified path does not exist,
+     * loads the default question mark sprite.
+     * @return object containing the requested image
+     */
     public Image getSprite() {
         Image image;
         URL frontSpriteUrl = getClass().getResource(sprite);
@@ -76,7 +105,9 @@ public class Item {
         this.sprite = sprite;
     }
 
-
+    /**
+     * Sets a map containing all programmed in items.
+     */
     public static void setItemMap() {
         Item newItem = new Item("Potion", Enums.ItemType.HP_RESTORE, 20, "/sprites/potion.png");
         newItem.description = "A spray-type medicine for treating wounds. It can be used to restore 20 HP to a Pokémon.";
