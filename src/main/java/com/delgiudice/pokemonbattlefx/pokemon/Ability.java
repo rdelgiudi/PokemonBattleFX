@@ -4,6 +4,9 @@ import com.delgiudice.pokemonbattlefx.attributes.Enums;
 
 import java.util.HashMap;
 
+/**
+ * Contains all abilities present in the game. Some are not implemented yet and only mentioned in interactions.
+ */
 public enum Ability {
     NONE("No ability"),
     OVERGROW("Overgrow",
