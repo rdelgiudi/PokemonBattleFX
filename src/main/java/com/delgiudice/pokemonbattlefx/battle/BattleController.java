@@ -8,6 +8,7 @@ import com.delgiudice.pokemonbattlefx.move.MoveEnum;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
+import com.delgiudice.pokemonbattlefx.teambuilder.AddPokemonController;
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -281,7 +282,9 @@ public class BattleController {
 
     /**
      * One of the methods responsible for modifying element positions depending on using animated sprites or not. Using
-     * animated sprites requires lowering some elements down the screen.
+     * animated sprites requires lowering some elements down the screen and modifying sizes.
+     * @see AddPokemonController#processSpriteModeSwitch()
+     * @see SummaryController#processSpriteModeSwitch()
      */
     public void processSpriteModeSwitch() {
         if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {

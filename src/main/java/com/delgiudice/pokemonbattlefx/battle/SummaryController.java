@@ -4,6 +4,7 @@ import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
+import com.delgiudice.pokemonbattlefx.teambuilder.AddPokemonController;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.fxml.FXML;
@@ -18,6 +19,9 @@ import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 
 import java.util.List;
+
+import static com.delgiudice.pokemonbattlefx.battle.BattleController.setStatusStyle;
+import static com.delgiudice.pokemonbattlefx.battle.BattleController.toHexString;
 
 public class SummaryController {
 
@@ -39,6 +43,9 @@ public class SummaryController {
     private InvalidationListener animatedSpriteListener;
     private double maxFitWidth, maxFitHeight;
 
+    /**
+     * Configures UI elements
+     */
     public void initialize() {
         setListeners();
 
@@ -53,6 +60,12 @@ public class SummaryController {
         };
     }
 
+    /**
+     * One of the methods responsible for modifying element positions depending on using animated sprites or not. Using
+     * animated sprites requires modifying sizes of some elements.
+     * @see BattleController#processSpriteModeSwitch()
+     * @see AddPokemonController#processSpriteModeSwitch()
+     */
     public void processSpriteModeSwitch() {
         if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
             pokemonPortrait.imageProperty().addListener(animatedSpriteListener);
@@ -72,16 +85,10 @@ public class SummaryController {
         this.previousPane = previousPane;
     }
 
-    private String format(double val) {
-        String in = Integer.toHexString((int) Math.round(val * 255));
-        return in.length() == 1 ? "0" + in : in;
-    }
-
-    public String toHexString(Color value) {
-        return "#" + (format(value.getRed()) + format(value.getGreen()) + format(value.getBlue()) + format(value.getOpacity()))
-                .toUpperCase();
-    }
-
+    /**
+     * Fills the summary screen with information about the currently previewed Pokémon.
+     * @param index index of the player's party member
+     */
     public void displayPokemonStat(int index) {
 
         moveInfoBox.setVisible(false);
@@ -109,9 +116,13 @@ public class SummaryController {
 
         pokemonPortrait.setImage(pokemon.getSpecie().getFrontSprite());
 
-        BattleController.setStatusStyle(statusLabel, pokemon.getStatus());
+        setStatusStyle(statusLabel, pokemon.getStatus());
     }
 
+    /**
+     * Fills the type section with information about the currently selected Pokémon's type.
+     * @param pokemon the party member whose type is to be displayed
+     */
     private void setPokemonTypes(Pokemon pokemon) {
         String styleString = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: ";
         firstTypeLabel.setText(pokemon.getType()[0].getTypeEnum().toString());
@@ -133,6 +144,10 @@ public class SummaryController {
         }
     }
 
+    /**
+     * Fills the statistics section with information about the currently selected Pokémon's stats.
+     * @param pokemon the party member whose statistics are to be displayed
+     */
     private void setPokemonStatistics(Pokemon pokemon) {
         for (int i=1; i < baseStatBox.getChildren().size(); i++) {
             TextField baseStat = (TextField) baseStatBox.getChildren().get(i);
@@ -154,6 +169,10 @@ public class SummaryController {
         }
     }
 
+    /**
+     * Fills the moves section with information about the currently selected Pokémon's moves.
+     * @param pokemon the party member whose moves are to be dispalyed
+     */
     private void setMoves(Pokemon pokemon) {
         String styleString = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: ";
 
@@ -196,6 +215,10 @@ public class SummaryController {
         }
     }
 
+    /**
+     * Prepares move information that is about to be displayed to the player
+     * @param move move whose information that is about to be displayed
+     */
     private void prepareMoveInfo(Move move) {
         String styleString = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: ";
         HBox generalInfoBox = (HBox) moveInfoBox.getChildren().get(0);
@@ -233,6 +256,10 @@ public class SummaryController {
         descriptionLabel.setText(move.getMoveDescription());
     }
 
+    /**
+     * Initiates listeners that control the functions of the back, previous and next buttons. They also control the
+     * function of the button that closes currently displayed move info (only visible when the info is being displayed).
+     */
     private void setListeners() {
         backButton.setOnAction(e -> {
             Scene scene = backButton.getScene();

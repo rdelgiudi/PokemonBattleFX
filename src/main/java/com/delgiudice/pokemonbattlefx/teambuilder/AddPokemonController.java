@@ -2,6 +2,8 @@ package com.delgiudice.pokemonbattlefx.teambuilder;
 
 import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
+import com.delgiudice.pokemonbattlefx.battle.BattleController;
+import com.delgiudice.pokemonbattlefx.battle.SummaryController;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.move.MoveEnum;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
@@ -24,6 +26,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+import static com.delgiudice.pokemonbattlefx.battle.BattleController.toHexString;
 import static com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController.setupStringField;
 import static com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController.setupStringFieldMove;
 
@@ -80,6 +83,12 @@ public class AddPokemonController {
         };
     }
 
+    /**
+     * One of the methods responsible for modifying element positions depending on using animated sprites or not. Using
+     * animated sprites requires modifying sizes of some elements.
+     * @see BattleController#processSpriteModeSwitch()
+     * @see SummaryController#processSpriteModeSwitch()
+     */
     public void processSpriteModeSwitch() {
         if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
             pokemonPortrait.imageProperty().addListener(animatedSpriteListener);
@@ -164,16 +173,6 @@ public class AddPokemonController {
         }
         previousController.refreshParties();
         returnToBuilder();
-    }
-
-    private static String format(double val) {
-        String in = Integer.toHexString((int) Math.round(val * 255));
-        return in.length() == 1 ? "0" + in : in;
-    }
-
-    public static String toHexString(Color value) {
-        return "#" + (format(value.getRed()) + format(value.getGreen()) + format(value.getBlue()) + format(value.getOpacity()))
-                .toUpperCase();
     }
 
     private void refreshStats() {
