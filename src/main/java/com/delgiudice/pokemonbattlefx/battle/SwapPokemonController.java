@@ -67,6 +67,9 @@ public class SwapPokemonController {
     @FXML
     private Button cancelButton, switchOutButton, summaryButton, closeButton;
 
+    /**
+     * Class constructor
+     */
     public SwapPokemonController() {
         summaryLoader = new FXMLLoader(BattleApplication.class.getResource("summary-view.fxml"));
         try {
@@ -78,6 +81,9 @@ public class SwapPokemonController {
         //BattleApplication.letterbox(summaryScene, pane);
     }
 
+    /**
+     * Configures UI elements
+     */
     public void initialize() {
         initListeners();
 
@@ -85,11 +91,26 @@ public class SwapPokemonController {
         mainPane.setClip(rect);
     }
 
+    /**
+     * Passes along information to the <code>SummaryController</code> object that the sprite mode has been switched
+     * @see SummaryController#processSpriteModeSwitch()
+     */
     public void processSpriteModeSwitch() {
         SummaryController summaryController = summaryLoader.getController();
         summaryController.processSpriteModeSwitch();
     }
 
+    /**
+     * Initiates variables for opening this screen to select a Pokémon on which to use an item. This item was selected
+     * in the previous screen.
+     * @param battlePane screen from which the bag menu was initiated
+     * @param bagPane screen from which the item was selected (previous screen to this)
+     * @param logic <code>BattleLogic</code> object which handles all logic related to the battle itself
+     * @param controller controller which handles UI changes related to the battle
+     * @param party player party using the in battle order
+     * @param player object that represents the player's trainer
+     * @param item item selected in the previous screen
+     */
     public void initVariablesBag(Pane battlePane, Pane bagPane, BattleLogic logic, BattleController controller,
                                  List<Pokemon> party, Player player, Item item) {
         useItem = true;
@@ -109,6 +130,18 @@ public class SwapPokemonController {
         initPokemonInfo(false);
     }
 
+    /**
+     * Initiates variables for opening this screen to select a Pokémon to switch into.
+     * @param battlePane screen from which the switch action is initiated
+     * @param logic <code>BattleLogic</code> object which handles all logic related to the battle itself
+     * @param controller controller which handles UI changes related to the battle
+     * @param party player party using the in battle order
+     * @param force if <code>true</code>, it doesn't allow the player to back out of the switch, this is used when the
+     *              previous Pokémon has fainted or used a move that initiates a switch automatically
+     * @param switchContext context of the switch
+     * @param turnPokemon list of Pokémon currently taking part in the turn, ordered by attack order
+     * @param secondMove next move to be used after the switch
+     */
     public void initVariablesSwitch(Pane battlePane, BattleLogic logic, BattleController controller, List<Pokemon> party,
                                     boolean force, Enums.SwitchContext switchContext, List<Pokemon> turnPokemon, Move secondMove) {
         useItem = false;
@@ -130,12 +163,22 @@ public class SwapPokemonController {
         });
     }
 
+    /**
+     * Generates an animation that sets the information text at the bottom of the screen. Makes the letters appear all
+     * at once.
+     * @param text nex text to be set
+     * @return <code>Timeline</code> object containing the requested animation
+     */
     public Timeline getInfoText(String text) {
         KeyFrame kf = new KeyFrame(Duration.millis(1), e -> infoLabel.setText(text));
 
         return new Timeline(kf);
     }
 
+    /**
+     * Sets the Pokémon information into their respective tabs.
+     * @param force <code>true</code> if player is forced to switch, <code>false</code> otherwise
+     */
     private void initPokemonInfo(boolean force) {
 
         int currentAllyPokemon = 0;
@@ -160,6 +203,11 @@ public class SwapPokemonController {
         }
     }
 
+    /**
+     * This method is called if the slot isn't filled with any Pokémon. It sets its state to empty, blocking any
+     * interaction with this box.
+     * @param pokemonBox box to which this setting is to be applied
+     */
     private void disableBox(HBox pokemonBox) {
 
         ImageView icon = (ImageView) pokemonBox.getChildren().get(0);
@@ -180,6 +228,13 @@ public class SwapPokemonController {
         pokemonBox.setOnMouseClicked(null);
     }
 
+    /**
+     * Sets the HP bar to the desired amount.
+     * @param hp value to which the bar should be set
+     * @param maxhp maximum possible HP value
+     * @param hpBar object representing the HP bar
+     * @param hpLabel text label containing the numerical information about HP
+     */
     private void setHpBar(int hp, int maxhp, ProgressBar hpBar, Label hpLabel) {
         double currentHpPercentage = (double) hp / maxhp;
         if (currentHpPercentage < 0.03 && hp != 0)
@@ -195,6 +250,16 @@ public class SwapPokemonController {
         else
             hpBar.setStyle("-fx-accent: red");
     }
+
+    /**
+     * Generates animation of increasing (or decreasing) the amount of HP on the selected HP bar.
+     * @param from initial amount of HP
+     * @param to target amount of HP
+     * @param max maximum amount of HP
+     * @param hpBar object representing the HP bar
+     * @param hpLabel text label containing the numerical information about HP
+     * @return <code>Timeline</code> object containing the requested animation
+     */
     @NotNull
     private Timeline getHpAnimation(int from, int to, int max, ProgressBar hpBar, Label hpLabel) {
         final List<KeyFrame> keyFrameList = new ArrayList<>();
@@ -225,6 +290,11 @@ public class SwapPokemonController {
         return timeline;
     }
 
+    /**
+     * Fills one of the boxes with information about a Pokémon.
+     * @param pokemonBox selected box
+     * @param index points to which of the player party Pokémon's info should be used
+     */
     private void setPokemonInfo(HBox pokemonBox, int index) {
 
         Pokemon pokemon = party.get(index);
@@ -267,6 +337,9 @@ public class SwapPokemonController {
         hpBox.setVisible(true);
     }
 
+    /**
+     * Initiates visual listeners for the buttons
+     */
     private void initListeners() {
         switchOutButton.setOnMouseEntered(e -> {
             switchOutButton.setStyle(OPTIONS_HOVER_STYLE);
@@ -321,6 +394,15 @@ public class SwapPokemonController {
         });
     }
 
+    /**
+     * Method called when player selects a Pokémon after selecting an item from the bag. Checks for item type and
+     * executes appropriate method.
+     * @param pokemon target Pokémon of the item
+     * @param pokemonSelectBox box in which te selected Pokémon's info are situated
+     * @param index index of the selected Pokémon
+     * @param hpBar object representing the selected Pokémon's HP bar
+     * @param hpLabel text representing the numerical value of HP
+     */
     private void useItem(Pokemon pokemon, HBox pokemonSelectBox, int index, ProgressBar hpBar, Label hpLabel) {
         currentPokemonBox.setDisable(true);
         this.pokemonBox.setDisable(true);
@@ -339,6 +421,15 @@ public class SwapPokemonController {
         }
     }
 
+    /**
+     * Method that initiates logical and visual listeners for the selected box. Behaves differently depending on the
+     * mode in which the screen was initiated in.
+     * @param pokemonSelectBox the box whose listeners are to be initiated
+     * @param pokemon the party member contained in the box
+     * @param index the position in the player's party of Pokémon contained in the box
+     * @param hpBar object representing the HP bar of this Pokémon
+     * @param hpLabel label representing the numerical value of HP
+     */
     private void initBoxElementListener(HBox pokemonSelectBox, Pokemon pokemon, int index, ProgressBar hpBar, Label hpLabel) {
         if (!useItem) {
             pokemonSelectBox.setOnMouseClicked(e -> {
@@ -382,6 +473,12 @@ public class SwapPokemonController {
         });
     }
 
+    /**
+     * Checks if healing item can be used on selected Pokémon
+     * @param item selected item
+     * @param target item target
+     * @return <code>true</code> if item can be used, <code>false</code> otherwise
+     */
     public static boolean checkHealingItemViable(Item item, Pokemon target) {
         boolean fullHealPokemonAbnormalNonFaintStatus = item.getStatusHeal().equals(Enums.Status.ANY) &&
                 (!target.getStatus().equals(Enums.Status.NONE) || target.getSubStatuses().contains(Enums.SubStatus.CONFUSED))
@@ -391,6 +488,12 @@ public class SwapPokemonController {
                 fullHealPokemonAbnormalNonFaintStatus;
     }
 
+    /**
+     * Calculates how much health is restored by using the specified item.
+     * @param item selected item
+     * @param target item target
+     * @return amount of health restored
+     */
     public static int calculateHealingItemEffect(Item item, Pokemon target) {
         int healValue;
         int hpToMax = target.getMaxHP() - target.getHp();
@@ -399,6 +502,15 @@ public class SwapPokemonController {
         return healValue;
     }
 
+    /**
+     * Tries to use item on selected Pokémon. If item cannot be used on selected Pokémon, displays information to player
+     * and returns to Pokémon selection.
+     * @param target target of the selected item
+     * @param pokemonSelectBox box containing information about the selected Pokémon
+     * @param index index of the selected Pokémon in the player's party
+     * @param hpBar object representing the Pokémon's HP bar
+     * @param hpLabel text representing the numerical value of HP
+     */
     private void useHealingItem(Pokemon target, HBox pokemonSelectBox, int index, ProgressBar hpBar, Label hpLabel) {
         if (!checkHealingItemViable(item, target)) {
             playIncompatibleItemMessage(target);
@@ -445,6 +557,12 @@ public class SwapPokemonController {
         returnToBattle(itemAction, battleTimeLine);
     }
 
+    /**
+     * Checks if status healing item can be used on selected target.
+     * @param item selected item
+     * @param target item target
+     * @return <code>true</code> if item can be used, <code>false</code> otherwise
+     */
     public static boolean checkStatusHealingItemViable(Item item, Pokemon target) {
         boolean fullHealPokemonAbnormalNonFaintStatus = item.getStatusHeal().equals(Enums.Status.ANY) &&
                 (!target.getStatus().equals(Enums.Status.NONE) || target.getSubStatuses().contains(Enums.SubStatus.CONFUSED))
@@ -453,6 +571,12 @@ public class SwapPokemonController {
         return target.getStatus().equals(item.getStatusHeal()) || fullHealPokemonAbnormalNonFaintStatus;
     }
 
+    /**
+     * Processes the effects of selected status healing item. If the item revives fainted Pokémon, it also restores HP.
+     * @param item selected item
+     * @param target item target
+     * @return amount of health restored by the item, if item doesn't restore health returns 0
+     */
     public static int processStatusHealingEffect(Item item, Pokemon target) {
         target.setStatus(Enums.Status.NONE);
         int healValue = 0;
@@ -466,6 +590,15 @@ public class SwapPokemonController {
         return healValue;
     }
 
+    /**
+     * Tries to use a status healing item on selected Pokémon. If item cannot be used on selected Pokémon,
+     * displays information to player and returns to Pokémon selection.
+     * @param target item target
+     * @param pokemonSelectBox box containing the target's information
+     * @param index index of the target in the player's party
+     * @param hpBar object representing the HP bar of the target
+     * @param hpLabel label representing the numerical value of target's HP.
+     */
     private void useStatusHealingItem(Pokemon target, HBox pokemonSelectBox, int index, ProgressBar hpBar, Label hpLabel) {
         if (!checkStatusHealingItemViable(item, target)){
             playIncompatibleItemMessage(target);
@@ -499,6 +632,10 @@ public class SwapPokemonController {
         returnToBattle(itemAction, battleTimeLine);
     }
 
+    /**
+     * Displays message that item cannot be used on selected target.
+     * @param target selected Pokémon
+     */
     private void playIncompatibleItemMessage(Pokemon target) {
         Timeline noUseItemMessage = getInfoText(String.format(
                 "%s can't use this item!", target.getBattleName()));
@@ -515,6 +652,9 @@ public class SwapPokemonController {
         noUseItemMessage.play();
     }
 
+    /**
+     * Reduces the amount of items of selected type by 1
+     */
     private void reduceItemAmount() {
         int itemRemaining = player.getItems().get(item);
         if (itemRemaining == 1)
@@ -525,6 +665,11 @@ public class SwapPokemonController {
         }
     }
 
+    /**
+     * After successfully completing the selected item action, returns to the battle screen.
+     * @param itemAction selected item represented by itemAction
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void returnToBattle(TrainerAction itemAction, List<Timeline> battleTimeLine) {
         battleTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e -> {
             Scene scene = cancelButton.getScene();
@@ -537,6 +682,12 @@ public class SwapPokemonController {
         battleLogic.waitEnemyAction(itemAction, battleTimeLine);
     }
 
+    /**
+     * Initiates listeners of the swap menu which appears if player presses on a Pokémon box when in swap mode.
+     * @param pokemonBox selected box
+     * @param pokemon selected party member
+     * @param index index of party member in player's party
+     */
     private void initSwapMenuListener(HBox pokemonBox, Pokemon pokemon, int index) {
 
         int currentAllyPokemon = 0;
@@ -670,6 +821,13 @@ public class SwapPokemonController {
         switchOptionsBox.setVisible(true);
     }
 
+    /**
+     * Method called when finalizing switching out. Depending on the switch context, sends player to different moments
+     * of the turn.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param index index of the selected Pokémon
+     * @param playerAction <code>TrainerAction</code> representing player choice
+     */
     public void finalizeSwitchOut(List<Timeline> battleTimeLine, int index, TrainerAction playerAction) {
         if (switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE) {
             if (turnPokemon == null || secondMove == null)

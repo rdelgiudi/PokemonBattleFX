@@ -27,7 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static com.delgiudice.pokemonbattlefx.teambuilder.AddPokemonController.toHexString;
+import static com.delgiudice.pokemonbattlefx.battle.BattleController.toHexString;
 import static com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController.setupStringField;
 import static com.delgiudice.pokemonbattlefx.teambuilder.TeamBuilderController.setupStringFieldMove;
 
