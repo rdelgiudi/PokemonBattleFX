@@ -1074,8 +1074,8 @@ public class BattleLogic {
             return;
         }
 
-        int allyPriority = allyMove != null ? allyMove.getPriority() : -1;
-        int enemyPriority = enemyMove != null ? enemyMove.getPriority() : -1;
+        int allyPriority = allyMove != null ? allyMove.getPriority() : -9999;
+        int enemyPriority = enemyMove != null ? enemyMove.getPriority() : -9999;
 
         // Move of higher priority is always the fastest
         if (allyPriority > enemyPriority) {

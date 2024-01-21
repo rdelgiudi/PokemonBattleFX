@@ -9,87 +9,206 @@ import java.util.List;
 
 ///Class which allows to describe a move
 public class MoveTemplate {
-    // HITS_RANDOM - when the number of hits is randomly generated between 2 and 5
+    /**
+     * Used when a multihit move hits a random amount of times, between 2 and 5.
+     */
     public static int HITS_RANDOM = -1;
-    // NOT_APPLICABLE - when a move doesn't have power (status moves) or accuracy (always hits)
+
+    /**
+     * Used when a move doesn't have any power or accuracy.
+     */
     public static int NOT_APPLICABLE = 0;
 
-    // moveMap - a map of all moves available
+    /**
+     * A map containing all programmed in moves.
+     */
     private static final HashMap<MoveEnum, MoveTemplate> moveMap = new HashMap<>();
-    // hiddenMoveMap - for storing moves that shouldn't be accessible by players
+
+    /**
+     * A map containing hidden moves that aren't meant for the player to see. They include fallback moves like
+     * Struggle, when a Pokémon runs of PP.
+     */
     private static final HashMap<MoveEnum, MoveTemplate> hiddenMoveMap = new HashMap<>();
 
-    //name - name of the move in enum form, can also return a string if needed
+    /**
+     * Name of the move in enum form.
+     */
     MoveEnum name;
-    // power - move power, used for damage calculations
-    // accuracy - move accuracy, used for hit calculations
-    private final int power, accuracy;
-    // maxpp - maximum amount of PP (Power Points) that a move has
-    // hits - the amount of hits that a move inflicts (each move's critical hit and damage is calculated separately)
-    // statChange - the amount of stages of a stat that a move changes (typically from -3 to 3)
-    // secondaryStatChange - holds the same information as statChange, in case a move changes a set of stats in different
-    // ways than the primary change
-    // critIncrease - the amount of stages of critical hit chance that a move changes (typically 1 or 2)
-    // critTemporaryIncrease - the amount of stages of critical hit chance that the move changes for the time of its
-    // execution
-    // priority - priority of a given move, between -7 and 5
-    private int maxpp, hits = 1, statChange = 0, secondaryStatChange = 0, critIncrease = 0, critTemporaryIncrease = 0,
-            priority = 0;
-    // statusProb - probability of inflicting status effects after move execution, typically 1 for status moves, <1 otherwise
-    // statChangeProb - probability of changing a stat, typically 1 for status moves, <1 otherwise
-    // recoil - the percentage of damage dealt that should be converted to recoil except the move Struggle, that deals a
-    // percentage of max HP instead
-    // lifesteal - the percentage of damage dealt that should be converted to health restoration for the user
-    // hprestore - the percentage of user's max HP to be restored by this move (only for status moves)
-    private float statusProb = 0, statChangeProb = 0, recoil = 0, lifesteal = 0, hpRestore = 0;
 
-    // twoturn - determines if a move has a charging phase before executing
-    // self - determines whether a move's secondary effect affects its user
-    // trap - determines whether a move is a trap move, trap moves hurt the target for 2 to 5 turns and prevent them
-    // from switching
-    // charging - determines whether a twoturn move is purely a charging move, i.e. doesn't involve a semi invulnerable
-    // state when charging the move
-    // multiturn - determines whether a move is a charging move
-    // recoilUserHp - determines if a move calculates recoil based on user max HP instead of damage dealt
-    // contactMove - check if the move makes contact for calculations related to some Pokemon abilities,
-    // such as static
-    // multiturnConfusion - checks if the move causes confusion at the end of its execution (such as Outrage)
-    // recharge - determines whether a move needs a turn to recharge after use
-    // oneHitKOMove - determines whether a move is a one hit KO move (if move hits enemy Pokemon faints)
-    // switchOut - user switches out after move is successfully executed
-    // removesSpikes - determines whether a move erases opponent's entry hazards (spikes)
-    private boolean twoturn = false, self = false, trap = false, charging = false, multiturn = false,
-                    recoilUserHp = false, statUpDuringCharging = false, contactMove = false, multiturnConfusion = false,
-                    recharge = false, oneHitKOMove = false, switchOut = false, removesSpikes = false;
+    /**
+     * Move power, used for damage calculations.
+     */
+    private final int power;
+    /**
+     * Move accuracy, used for hit calculations.
+     */
+    private final int accuracy;
 
-    // moveDescription - contains the description of the move, displayed in summary menu
+    /**
+     * Maximum amount of PP (Power Points) that a move has.
+     */
+    private int maxpp;
+    /**
+     * The amount of hits that a move inflicts (each move's critical hit and damage is calculated separately).
+     */
+    private int hits = 1;
+    /**
+     * The amount of stages of a stat that a move changes (typically from -3 to 3)
+     */
+    private int statChange = 0;
+    /**
+     * Holds the same information as statChange, in case a move changes a set of stats in different ways than the
+     * primary change
+     */
+    private int secondaryStatChange = 0;
+    /**
+     * The amount of stages of critical hit chance that a move changes (typically 1 or 2).
+     */
+    private int critIncrease = 0;
+    /**
+     * The amount of stages of critical hit chance that the move changes for the time of its execution.
+     */
+    private int critTemporaryIncrease = 0;
+    /**
+     * Priority of the move, between -7 and 5.
+     */
+    private int priority = 0;
+
+    /**
+     * Probability of inflicting status effects after move execution, typically 1 for status moves, <1 otherwise.
+     */
+    private float statusProb = 0;
+    /**
+     * Probability of changing a stat, typically 1 for status moves, <1 otherwise.
+     */
+    private float statChangeProb = 0;
+    /**
+     * The percentage of damage dealt that should be converted to recoil. Struggle is an exception, it deals a
+     * percentage of max HP instead.
+     */
+    private float recoil = 0;
+    /**
+     * The percentage of damage dealt that should be converted to health restoration for the user.
+     */
+    private float lifesteal = 0;
+    /**
+     * The percentage of user's max HP to be restored by this move (only for status moves).
+     */
+    private float hpRestore = 0;
+
+    /**
+     * Determines if a move has a charging phase before executing.
+     */
+    private boolean twoturn = false;
+    /**
+     * Determines whether a move's secondary effect affects its user.
+     */
+    private boolean self = false;
+    /**
+     * Determines whether a move is a trap (binding) move, trap moves hurt the target for 2 to 5 turns and prevent them
+     * from switching.
+     */
+    private boolean trap = false;
+    /**
+     * Determines whether a twoturn move is purely a charging move, i.e. doesn't involve a semi invulnerable state when
+     * charging the move.
+     */
+    private boolean charging = false;
+    /**
+     * Determines whether a move is a multi turn move. Multi turn moves are executed for multiple time without giving
+     * its user a choice.
+     */
+    private boolean multiturn = false;
+    /**
+     * Determines if a move calculates recoil based on user max HP instead of damage dealt.
+     */
+    private boolean recoilUserHp = false;
+    /**
+     * Determines if a two turn move also raises a stat during charging phase.
+     */
+    private boolean statUpDuringCharging = false;
+    /**
+     * Determine if the move makes contact for calculations related to some Pokémon abilities, such as Static.
+     */
+    private boolean contactMove = false;
+    /**
+     * Checks if the move causes confusion at the end of its execution (such as Outrage).
+     */
+    private boolean multiturnConfusion = false;
+    /**
+     * Determines whether a move needs a turn to recharge after use.
+     */
+    private boolean recharge = false;
+    /**
+     * Cetermines whether a move is a one hit KO move (if move hits enemy Pokémon faints).
+     */
+    private boolean oneHitKOMove = false;
+    /**
+     * User switches out after move is successfully executed.
+     */
+    private boolean switchOut = false;
+    /**
+     * Determines whether a move erases opponent's entry hazards (spikes).
+     */
+    private boolean removesSpikes = false;
+
+    /**
+     * Contains the description of the move, displayed in summary menu
+     */
     private String moveDescription = "No description";
 
-    // subtype - subtype of move, Physical, Special or Status
+    /**
+     * Subtype of move, Physical, Special or Status.
+     */
     private final Enums.Subtypes subtype;
-    // type - type of move, for example: Fire, Grass, Water, Normal
+    /**
+     * Type of move, for example: Fire, Grass, Water, Normal.
+     */
     private final Type type;
-    // statTypes - a list of stat changes that the move inflicts
-    // secondaryStatTypes - another list of stat changes that the move inflicts, used in case they increase or decrease
-    // by a different value than the primary stat change
-    private List<Enums.StatType> statTypes = new ArrayList<>(), secondaryStatTypes = new ArrayList<>();
-    // status - status effect that the move inflicts
+    // statTypes -
+    // secondaryStatTypes -
+    /**
+     * A list of stat changes that the move inflicts.
+     */
+    private List<Enums.StatType> statTypes = new ArrayList<>();
+    /**
+     * Another list of stat changes that the move inflicts, used in case they increase or decrease by a different value
+     * than the primary stat change.
+     */
+    private List<Enums.StatType> secondaryStatTypes = new ArrayList<>();
+    /**
+     * Status effect that the move inflicts.
+     */
     private Enums.Status status = Enums.Status.NONE;
-    // subStatus - secondary status effect that the move inflicts, secondary effects usually don't last very long or can
-    // be cured by switching out a Pokemon
+    /**
+     * Secondary status effect that the move inflicts, secondary effects usually don't last very long or can be cured by
+     * switching out a Pokémon.
+     */
     private Enums.SubStatus subStatus = Enums.SubStatus.NONE;
-    // condition - condition applied on the battlefield, mostly temporary stat boosts
+    /**
+     * Condition applied on the battlefield, mostly temporary stat boosts.
+     */
     private Enums.BattlefieldCondition condition = Enums.BattlefieldCondition.NONE;
-    // spikeType - type of spike that the move represents, spikes scatter on enemy field and apply various effects on
-    // Pokemon that are sent out
+    /**
+     * Type of spike that the move represents, spikes scatter on enemy field and apply various effects on Pokémon that
+     * are sent out.
+     */
     private Enums.Spikes spikeType = Enums.Spikes.NONE;
-    // weatherEffect - type of weather effect induced on the battlefield by the move
+    /**
+     * Type of weather effect induced on the battlefield by the move.
+     */
     private Enums.WeatherEffect weatherEffect = Enums.WeatherEffect.NONE;
-    // moveCategory - additional move category that allow to modify its effects with other moves or abilities
+    /**
+     * Additional move category that allow to modify its interactions with other moves or abilities.
+     */
     private Enums.MoveCategory moveCategory = Enums.MoveCategory.NONE;
-    // trappingMoveCounter - list of trapping moves that are countered by this move
+    /**
+     * List of trapping moves that are dispelled by this move.
+     */
     private List<MoveEnum> trappingMoveNegation = new ArrayList<>();
-    // subStatusNegation - list of substatuses negated by this move
+    /**
+     * :ist of substatuses negated by this move.
+     */
     private List<Enums.SubStatus> subStatusNegation = new ArrayList<>();
 
     public MoveEnum getName() {
