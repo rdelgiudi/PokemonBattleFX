@@ -7,8 +7,16 @@ import java.util.List;
 
 public class Move {
 
+    /**
+     * <code>MoveTemplate</code> which this item uses. A template specifies the effects of the move when used as well
+     * as defines other characteristics.
+     * @see MoveTemplate
+     */
     private MoveTemplate template;
 
+    /**
+     * Amount of PP remaining for this move. PP (or Power Points) defines how many times can be used in battle.
+     */
     private int pp;
 
     public MoveEnum getName() {
