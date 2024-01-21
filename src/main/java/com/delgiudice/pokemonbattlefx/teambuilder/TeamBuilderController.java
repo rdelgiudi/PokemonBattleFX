@@ -633,7 +633,7 @@ public class TeamBuilderController {
             stage.setTitle("Battle!");
             startBattleButton.getScene().setRoot(battlePane);
             displayConnectionBlock(false);
-            logic.startOnlineBattle(player, enemy, turboMode, teamBuilderPane, gameMode, inputStream, outputStream, connectionThread);
+            logic.startOnlineBattle(player, enemy, turboMode, teamBuilderPane, gameMode, inputStream, outputStream);
         });
     }
 }

@@ -27,6 +27,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import javafx.util.Pair;
+import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -50,9 +51,13 @@ public class BattleLogic {
     private Player player;
     private Trainer enemy;
 
-    // Variables holding "local" party order -
-    // any swaps performed during battle affect the party only until the battle ends
+    /**
+     * List that keeps track of player party order in battle
+     */
     private final List<Pokemon> playerParty = new ArrayList<>();
+    /**
+     * List that keeps track of enemy party order in battle
+     */
     private final List<Pokemon> enemyParty = new ArrayList<>();
 
     private final FXMLLoader swapPokemonLoader, bagLoader;
@@ -75,9 +80,14 @@ public class BattleLogic {
     private boolean[] enemySeen;
 
     private Enums.GameMode gameMode;
+    /**
+     * Input stream connected to the online enemy player (online play only).
+     */
     private DataInputStream inputStream;
+    /**
+     * Output stream connected to the online enemy player (online play only).
+     */
     private DataOutputStream outputStream;
-    private Thread connectionThread;
 
     public Enums.GameMode getGameMode() {
         return gameMode;
@@ -91,6 +101,10 @@ public class BattleLogic {
         return outputStream;
     }
 
+    /**
+     * Class constructor
+     * @param controller object responsible for updating the user interface
+     */
     public BattleLogic(BattleController controller) {
         this.controller = controller;
 
@@ -110,12 +124,17 @@ public class BattleLogic {
 
     }
 
+    /**
+     * Method called when the sprite options has been switched. It ensures UI elements are adjusted.
+     */
     public void processSpriteModeSwitch() {
         SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
         swapPokemonController.processSpriteModeSwitch();
     }
 
-    // resets the battlefield to default
+    /**
+     * Resets the battlefield to a default state.
+     */
     private void resetConditions() {
         allyBattlefieldConditions.clear();
         enemyBattlefieldConditions.clear();
@@ -130,6 +149,13 @@ public class BattleLogic {
             PokemonSpecie.unloadNetImages();
     }
 
+    /**
+     * Starts battle in offline mode.
+     * @param player object representing the player trainer
+     * @param enemy object representing the enemy trainer
+     * @param turboMode enables turbo mode if <code>true</code>, otherwise disables it
+     * @param teamBuilderPane the pane from which the game is started from
+     */
     public void startBattle(Player player, NpcTrainer enemy, boolean turboMode, Pane teamBuilderPane) {
         SEND_OUT_MESSAGE = "%s %s%nsends out %s!";
 
@@ -164,14 +190,23 @@ public class BattleLogic {
         initBattleLoop();
     }
 
+    /**
+     * Starts battle in online mode
+     * @param player object representing the player trainer
+     * @param enemy object representing the enemy trainer
+     * @param turboMode enables turbo mode if <code>true</code>, otherwise disables it
+     * @param teamBuilderPane the pane from which the game is started from
+     * @param gameMode game mode in which the game should be running (either client or server)
+     * @param inputStream input stream connected to enemy player
+     * @param outputStream output stream connected to enemy player
+     */
     public void startOnlineBattle(Player player, OnlineTrainer enemy, boolean turboMode, Pane teamBuilderPane, Enums.GameMode gameMode,
-                                  DataInputStream inputStream, DataOutputStream outputStream, Thread connectionThread) {
+                                  DataInputStream inputStream, DataOutputStream outputStream) {
         SEND_OUT_MESSAGE = "%s%nsends out %s!";
 
         this.gameMode = gameMode;
         this.inputStream = inputStream;
         this.outputStream = outputStream;
-        this.connectionThread = connectionThread;
         resetConditions();
         controller.resetState();
 
@@ -199,7 +234,10 @@ public class BattleLogic {
         initBattleLoop();
     }
 
-    // function that initiates a battle, adding looping checks here should be avoided
+    /**
+     * Method that initiates a battle by introducing the enemy, showing number of party members and sending out a
+     * Pokémon by each trainer.
+     */
     private void initBattleLoop() {
 
         controller.updatePokemonPartyBox(player.getParty(), enemy.getParty(), enemySeen);
@@ -294,6 +332,10 @@ public class BattleLogic {
         statusBoxAnimation.play();
     }
 
+    /**
+     * Check the number of party members in player's party that are able to battle.
+     * @return number of party members able to battle
+     */
     private int getAllyAbleToBattleNum() {
         int num = 0;
 
@@ -305,6 +347,10 @@ public class BattleLogic {
         return num;
     }
 
+    /**
+     * Check the number of party members in enemy's party that are able to battle.
+     * @return number of party members able to battle
+     */
     private int getEnemyAbleToBattleNum() {
         int num = 0;
 
@@ -316,6 +362,12 @@ public class BattleLogic {
         return num;
     }
 
+    /**
+     * Checks if player is able to continue battle.
+     * @param set switches currently sent out Pokémon to one able to battle if <code>true</code>, otherwise keeps party
+     *            order intact
+     * @return <code>true</code> if able to battle, <code>false</code> otherwise
+     */
     private boolean checkIfAllyAbleToBattle(boolean set) {
         int index = 0;
 
@@ -330,6 +382,12 @@ public class BattleLogic {
         return false;
     }
 
+    /**
+     * Checks if enemy is able to continue battle.
+     * @param set switches currently sent out Pokémon to one able to battle if <code>true</code>, otherwise keeps party
+     *            order intact
+     * @return <code>true</code> if able to battle, <code>false</code> otherwise
+     */
     private boolean checkIfEnemyAbleToBattle(boolean set) {
         int index = 0;
 
@@ -344,6 +402,9 @@ public class BattleLogic {
         return false;
     }
 
+    /**
+     * Concludes battle with a loss for the player.
+     */
     private void battleLost() {
         controller.switchToPlayerChoice(false);
         Stage stage = (Stage) controller.getFightButton().getScene().getWindow();
@@ -380,6 +441,9 @@ public class BattleLogic {
         battleLostMsg1.play();
     }
 
+    /**
+     * Concludes battle with a win for the player.
+     */
     private void battleWon() {
         controller.switchToPlayerChoice(false);
         Stage stage = (Stage) controller.getFightButton().getScene().getWindow();
@@ -419,6 +483,11 @@ public class BattleLogic {
         controller.stopLowHpEffect();
     }
 
+    /**
+     * Ends battle if the game was unexpectedly disconnected or the state of the game is out of sync between players.
+     * @param syncError should be set to <code>true</code> if the cause of the disconnect is a sync error,
+     *                  <code>false</code> otherwise
+     */
     public void endOnlineGameDisconnected(boolean syncError) {
         controller.switchToPlayerChoice(false);
         Stage stage = (Stage) controller.getFightButton().getScene().getWindow();
@@ -448,6 +517,11 @@ public class BattleLogic {
         controller.stopLowHpEffect();
     }
 
+    /**
+     * Processes the effect of Toxic Spikes on newly sent out Pokémon.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param target target of the check
+     */
     private void processToxicSpikeEffect(List<Timeline> battleTimeLine, Pokemon target) {
         boolean toxicSpikeImmuneType = target.containsType(Enums.Types.FLYING) ||
                 target.containsType(Enums.Types.POISON) || target.containsType(Enums.Types.STEEL);
@@ -470,6 +544,10 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Applies effects that occur when a Pokémon is freshly sent out.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     protected void applySentOutEffects(List<Timeline> battleTimeLine) {
 
         Pokemon allyPokemon = playerParty.get(0);
@@ -546,6 +624,10 @@ public class BattleLogic {
             return;
     }
 
+    /**
+     * Function that is called every time a new turn begins. Keeps track of timers of effects and allows the player
+     * to make a choice after all initial checks are performed.
+     */
     private void battleLoop() {
 
         controller.updatePokemonPartyBox(player.getParty(), enemy.getParty(), enemySeen);
@@ -691,6 +773,10 @@ public class BattleLogic {
         });
     }
 
+    /**
+     * Decrements timers of all currently applied battlefield conditions.
+     * @see Enums.BattlefieldCondition
+     */
     private void processBattlefieldConditionsTimer() {
         for (Map.Entry<Enums.BattlefieldCondition, Integer> condition : allyBattlefieldConditions.entrySet()) {
             condition.setValue(condition.getValue() - 1);
@@ -708,6 +794,11 @@ public class BattleLogic {
             pokemon.setConfusionTimer(pokemon.getConfusionTimer() - 1);
     }
 
+    /**
+     * Processes action taken by the player.
+     * @param playerAction action taken by the player; at this stage of the turn, this variable is only complete if the
+     *                     player decided to attack
+     */
     public void processPlayerAction(TrainerAction playerAction) {
 
         TrainerAction enemyAction;
@@ -736,6 +827,12 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * If run in offline mode, this method returns the action generated by the AI trainer. In online mode however, this
+     * method starts a thread that swaps information with enemy player about each trainer's action.
+     * @param playerAction action taken by the player
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     public void waitEnemyAction(TrainerAction playerAction, List<Timeline> battleTimeLine) {
         final TrainerAction enemyAction;
         controller.getMoveGrid().setVisible(false);
@@ -753,7 +850,14 @@ public class BattleLogic {
         }
     }
 
-    private Move getMove(TrainerAction action, boolean player) {
+    /**
+     * Generates move based of the content of the trainer action. This fails if the move isn't attack related.
+     * @param action action taken by the trainer
+     * @param player should be set to <code>true</code> if this action is being taken by the player, <code>false</code>
+     *               otherwise
+     * @return generated move corresponding to input action
+     */
+    private Move generateMoveFromTrainerAction(TrainerAction action, boolean player) {
         List<Pokemon> party = player ? playerParty : enemyParty;
 
         switch (action.actionType) {
@@ -769,9 +873,17 @@ public class BattleLogic {
         }
     }
 
-    // Handles enemy pokemon swap TODO: Pursuit handling
+    /**
+     * Handles events occurring when enemy decides to swap Pokémon.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param enemyAction action taken by the enemy, in this case should be always a swap
+     * @param playerAction action taken by the player
+     */
     private void processEnemyPokemonSwitch(List<Timeline> battleTimeLine, TrainerAction enemyAction,
                                            TrainerAction playerAction) {
+        //TODO: Pursuit handling
+        if (enemyAction.actionType != Enums.ActionTypes.SWITCH_POKEMON)
+            throw new ValueException("Enemy action cannot be any other than SWITCH_POKEMON here");
         Timeline swapMesssage;
         if (!enemy.getTrainerType().equals(Enums.TrainerTypes.NONE))
             swapMesssage = controller.getBattleTextAnimation(String.format("%s %s withdrew %s!",
@@ -806,17 +918,36 @@ public class BattleLogic {
         battleTimeLine.add(controller.generatePause(1000));
     }
 
-    // Handles enemy using healing items
+    /**
+     * Handles enemy using healing items. Not implemented.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param item item that was selected by the enemy
+     * @param target target of the selected item
+     */
     private void processEnemyUseHealingItem(List<Timeline> battleTimeLine, Item item, Pokemon target) {
 
     }
 
-    // Handles enemy using status restoring items
+    /**
+     * Handles enemy using status restoring items. Not implemented.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param item item that was selected by the enemy
+     * @param target target of the selected item
+     */
     private void processEnemyUseStatusHealingItem(List<Timeline> battleTimeLine ,Item item, Pokemon target) {
 
     }
 
+    /**
+     * Handles enemy using items. Not implemented
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param enemyAction action taken by the player, this should always be <code>USE_BAG_ITEM</code> here
+     */
     private void processEnemyUseItem(List<Timeline> battleTimeLine, TrainerAction enemyAction) {
+
+        if (enemyAction.actionType != Enums.ActionTypes.USE_BAG_ITEM)
+            throw new ValueException("Enemy action should be USE_BAG_ITEM here");
+
         String enemyName;
         if (!enemy.getTrainerType().equals(Enums.TrainerTypes.NONE))
             enemyName = enemy.getTrainerType() + " " + enemy.getName();
@@ -845,14 +976,29 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Handles all actions performed by the enemy that don't involve using a move
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param enemyAction action taken by the enemy
+     * @param playerAction action taken by the player
+     */
     private void processEnemyNonMoveAction(List<Timeline> battleTimeLine, TrainerAction enemyAction,
                                            TrainerAction playerAction) {
         if (enemyAction.actionType == Enums.ActionTypes.SWITCH_POKEMON)
             processEnemyPokemonSwitch(battleTimeLine, enemyAction, playerAction);
         else if (enemyAction.actionType == Enums.ActionTypes.USE_BAG_ITEM)
             processEnemyUseItem(battleTimeLine, enemyAction);
+        else {
+            throw new ValueException("Unexpected actionType found");
+        }
     }
 
+    /**
+     * Generates a pseudorandom integer. If this method is used in online battles by the client, the generated value is
+     * instead read from the server to maintain synchronization.
+     * @param bound upper bound (exclusive)
+     * @return generated value
+     */
     private int generateValue(int bound) {
         SecureRandom generator = new SecureRandom();
         switch (gameMode) {
@@ -885,7 +1031,13 @@ public class BattleLogic {
         }
     }
 
-    // TODO: This should be executed only once per turn!
+    /**
+     * Starts turn when all actions are decided by both trainers. Determines the action order of the turn.
+     * This method should be called only once per turn.
+     * @param playerAction action taken by the player
+     * @param enemyAction action taken by the enemy
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     public void battleTurn(@NotNull TrainerAction playerAction, @NotNull TrainerAction enemyAction,
                            List<Timeline> battleTimeLine) {
 
@@ -903,8 +1055,8 @@ public class BattleLogic {
         final Move allyMove;
         final Move enemyMove;
 
-        allyMove = getMove(playerAction, true);
-        enemyMove = getMove(enemyAction, false);
+        allyMove = generateMoveFromTrainerAction(playerAction, true);
+        enemyMove = generateMoveFromTrainerAction(enemyAction, false);
 
         if (enemyMove == null) {
             processEnemyNonMoveAction(battleTimeLine, enemyAction, playerAction);
@@ -970,6 +1122,13 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Calculates the effective speed of two Pokémon. This method takes into account all special conditions that can
+     * modify speed in any way.
+     * @param allyPokemon player Pokémon
+     * @param enemyPokemon enemy Pokémon
+     * @return an array of length 2 that contains the calculated speeds
+     */
     private double[] calculateEffectiveSpeeds(Pokemon allyPokemon, Pokemon enemyPokemon) {
         double playerSpeed = allyPokemon.getStats().get(Enums.StatType.SPEED);
         double enemySpeed = enemyPokemon.getStats().get(Enums.StatType.SPEED);
@@ -1036,9 +1195,24 @@ public class BattleLogic {
         return enemyMove;
     }
 
+    /**
+     * Handles when the enemy swaps Pokémon in the middle of a turn. This may be caused by moves that initiate a switch
+     * after executing or by the previous enemy Pokémon fainting.
+     * @param firstPokemon Pokémon that attacks first in this turn
+     * @param secondPokemon Pokémon that attacks second in this turn
+     * @param secondMove move selected by the second Pokémon's trainer in this turn
+     * @param switchContext context behind the switch, this should be either a Pokémon fainting or a switch caused by a
+     *                      move
+     * @param enemyAction action taken by the enemy; it should be a <code>SWITCH_POKEMON</code> action
+     */
     public void processEnemySwitchOut(Pokemon firstPokemon, Pokemon secondPokemon, Move secondMove,
                                       Enums.SwitchContext switchContext, TrainerAction enemyAction) {
         List<Timeline> moveTimeLine = new ArrayList<>();
+        if (enemyAction.actionType != Enums.ActionTypes.SWITCH_POKEMON)
+            throw new ValueException("The received action isn't a switch action");
+        if (switchContext == Enums.SwitchContext.SWITCH_FIRST ||
+                switchContext == Enums.SwitchContext.SWITCH_SECOND)
+            throw new ValueException("Invalid switch context; this method handles move or faint switching only");
 
         switchPokemon(false, Integer.parseInt(enemyAction.actionName));
 
@@ -1095,6 +1269,16 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Generates information about the enemy's next choice after fainting or using a Pokémon swapping move.
+     * If used during an offline battle, generates a swap choice and continues the turn. If used during online battle,
+     * creates a thread that waits for information from the enemy about which Pokémon is being sent out next.
+     * @param firstPokemon Pokémon that attacks first in this turn
+     * @param secondPokemon Pokémon that attacks second in this turn
+     * @param secondMove move selected by the second Pokémon's trainer in this turn
+     * @param switchContext context behind the switch, this should be either a Pokémon fainting or a switch caused by a
+     *                      move
+     */
     private void waitForEnemyPokemonSwapChoice(Pokemon firstPokemon, Pokemon secondPokemon, Move secondMove,
                                                Enums.SwitchContext switchContext) {
 
@@ -1110,7 +1294,14 @@ public class BattleLogic {
         }
     }
 
-    // Process turn starting with the move used by the faster Pokemon
+    /**
+     * Processes turn starting with the move used by the faster Pokémon (or higher priority move).
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param firstMove move selected by the first Pokémon's trainer this turn
+     * @param firstPokemon Pokémon that executes the move first
+     * @param secondMove move selected by the second Pokémon's trainer this turn
+     * @param secondPokemon Pokémon that executes the move second
+     */
     private void processFirstMove(List<Timeline> moveTimeLine, Move firstMove, Pokemon firstPokemon, Move secondMove,
                                   Pokemon secondPokemon) {
 
@@ -1193,7 +1384,13 @@ public class BattleLogic {
             battleTurnEnd(moveTimeLine);
     }
 
-    // Process second Pokemon's move
+    /**
+     * Processes the second move used in this turn.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param firstPokemon Pokémon that executes the move first
+     * @param secondMove move selected by the second Pokémon's trainer this turn
+     * @param secondPokemon Pokémon that executes the move second
+     */
     protected void processSecondMove(List<Timeline> moveTimeLine , Pokemon firstPokemon, Pokemon secondPokemon, Move secondMove) {
 
         // Extra check for fainted, used during swap moves
@@ -1272,6 +1469,10 @@ public class BattleLogic {
         battleTurnEnd(moveTimeLine);
     }
 
+    /**
+     * Checks if either Pokémon fainted and starts methods that handle displaying fainted information.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void processFainted(List<Timeline> battleTimeLine) {
         boolean allyFainted = playerParty.get(0).getHp() == 0;
         boolean enemyFainted = enemyParty.get(0).getHp() == 0;
@@ -1284,6 +1485,11 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Method executed that ends the move portion of the turn and starts checks related to conditions affecting Pokémon
+     * and the field.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     public void battleTurnEnd(List<Timeline> battleTimeLine) {
         processFainted(battleTimeLine);
 
@@ -1294,7 +1500,10 @@ public class BattleLogic {
         //finalChecks(battleTimeLine, enemyFainted);
     }
 
-    // Applies damaging status effect if applicable
+    /**
+     * Applies damaging status effect if applicable.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void applyStatusEffectDamage(List<Timeline> battleTimeLine) {
         boolean allyFainted = playerParty.get(0).getHp() == 0;
         boolean enemyFainted = enemyParty.get(0).getHp() == 0;
@@ -1331,6 +1540,10 @@ public class BattleLogic {
         applyTrappedEffects(battleTimeLine);
     }
 
+    /**
+     * Applies damaging effects connected to binding moves
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void applyTrappedEffects(List<Timeline> battleTimeLine) {
         boolean allyFainted = playerParty.get(0).getHp() == 0;
         boolean enemyFainted = enemyParty.get(0).getHp() == 0;
@@ -1366,6 +1579,12 @@ public class BattleLogic {
         //finalChecks(battleTimeLine);
         applyWeatherEffects(battleTimeLine);
     }
+
+    /**
+     * Checks if one of the trainers is out of Pokémon. Handles game end if it has been detected.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @return <code>true</code> if battle has come to an end, <code>false</code> otherwise
+     */
     private boolean checkBattleEnd(List<Timeline> battleTimeLine) {
         boolean allyFainted = playerParty.get(0).getHp() == 0;
         boolean enemyFainted = enemyParty.get(0).getHp() == 0;
@@ -1415,7 +1634,10 @@ public class BattleLogic {
         return false;
     }
 
-    // Updates weather timer as well as applies additional effects (for example Hail and Sandstorm damage)
+    /**
+     * Updates weather timer as well as applies additional effects (for example Hail and Sandstorm damage).
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void applyWeatherEffects(List<Timeline> battleTimeLine) {
 
         Enums.WeatherEffect currentWeatherEffect = weatherEffect.getKey();
@@ -1471,6 +1693,11 @@ public class BattleLogic {
         finalChecks(battleTimeLine);
     }
 
+    /**
+     * Handles damage calculations and animations related to Sandstorm.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param pokemon affected Pokémon
+     */
     private void processDamageSandstorm(List<Timeline> battleTimeLine, Pokemon pokemon) {
         boolean pokemonImmuneType = pokemon.containsType(Enums.Types.ROCK) || pokemon.containsType(Enums.Types.STEEL)
                 || pokemon.containsType(Enums.Types.GROUND);
@@ -1502,6 +1729,10 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Handles giving player an option select new Pokémon when the previous one faints
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void processNewAllySendOut(List<Timeline> battleTimeLine) {
         battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
             Button pokemonButton = controller.getPokemonButton();
@@ -1516,6 +1747,10 @@ public class BattleLogic {
         Platform.runLater(() -> battleTimeLine.get(0).play());
     }
 
+    /**
+     * Handles waiting for enemy selection of next Pokémon to send out
+     * @param battleTimeLine
+     */
     private void processNewEnemySendOut(List<Timeline> battleTimeLine) {
         battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
             waitForEnemyPokemonSwapChoice(null, null, null,
@@ -1525,8 +1760,11 @@ public class BattleLogic {
         Platform.runLater(() -> battleTimeLine.get(0).play());
     }
 
-    // Send out new ally Pokemon if available, else game over for the player, even if enemy also out of Pokemon
-    // Send out new enemy Pokemon and config timeline list
+    /**
+     * Allows the player and the enemy to send out new Pokemon if necessary. If everything is in order, starts a new
+     * turn.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     public void finalChecks(List<Timeline> battleTimeLine) {
 
         if (checkBattleEnd(battleTimeLine))
@@ -1585,7 +1823,10 @@ public class BattleLogic {
         Platform.runLater(() -> battleTimeLine.get(0).play());
     }
 
-    // Deletes battlefield conditions that have reached their end
+    /**
+     * Deletes battlefield conditions that have reached their end.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void deleteEndedConditions(List<Timeline> battleTimeLine) {
         for (Map.Entry<Enums.BattlefieldCondition, Integer> condition : allyBattlefieldConditions.entrySet()) {
             if (condition.getValue() <= 0) {
@@ -1606,6 +1847,12 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Initiates animation queue. This configures all <code>Timeline</code> objects to execute after the previous one
+     * is finished. The only objects exculded from this procedure are the ones with already defined
+     * <code>onFinishedProperty()</code>
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     public void initAnimationQueue(List<Timeline> battleTimeLine) {
         for (int i=1; i<battleTimeLine.size(); i++) {
             final int finalI = i;
@@ -1614,7 +1861,12 @@ public class BattleLogic {
         }
     }
 
-    // Calculates damage dealt as a result of vortex traps like Fire Spin
+    /**
+     * Calculates damage dealt as a result of binding moves like Fire Spin
+     * @param pokemon target Pokémon affected by trapping move
+     * @return <code>Timeline</code> object containing the damage animation or <code>null</code> if <code>pokemon</code>
+     * isn't affected by any binding moves
+     */
     private List<Timeline> processDamageTrapped(Pokemon pokemon) {
 
         List<Timeline> timelineList = new ArrayList<>();
@@ -1667,7 +1919,12 @@ public class BattleLogic {
         return null;
     }
 
-    //Processes damaging status effects (poison and burn)
+    /**
+     * Processes damaging status effects (poison and burn).
+     * @param pokemon target Pokémon affected by damaging status effect.
+     * @return <code>Timeline</code> object containing the damage animation or <code>null</code> if <code>pokemon</code>
+     * isn't affected by any damaging status
+     */
     private List<Timeline> processDamageStatusEffects(Pokemon pokemon) {
 
         double damageDouble = 0;
@@ -1763,6 +2020,11 @@ public class BattleLogic {
         return null;
     }
 
+    /**
+     * Sets fainted status on selected Pokémon and updates their status in the party box.
+     * @param pokemon Pokémon to which the status should be applied
+     * @return <code>Timeline</code> object containing the requested change
+     */
     private Timeline setFaintedStatus(Pokemon pokemon) {
         KeyFrame kf = new KeyFrame(Duration.millis(1), e -> {
             pokemon.setStatus(Enums.Status.FAINTED);
