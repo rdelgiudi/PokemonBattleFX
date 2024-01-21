@@ -206,7 +206,7 @@
                   <Insets right="10.0" />
                </padding>
             </VBox>
-            <GridPane fx:id="moveGrid" hgap="5.0" layoutY="560.0" prefHeight="160.0" prefWidth="1280.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: white;" vgap="5.0" visible="false">
+            <GridPane fx:id="moveGrid" focusTraversable="true" hgap="5.0" layoutY="560.0" prefHeight="160.0" prefWidth="1280.0" style="-fx-border-color: black; -fx-border-width: 5; -fx-background-radius: 10; -fx-border-radius: 10; -fx-background-color: white;" vgap="5.0" visible="false">
                <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="313.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="350.0" />

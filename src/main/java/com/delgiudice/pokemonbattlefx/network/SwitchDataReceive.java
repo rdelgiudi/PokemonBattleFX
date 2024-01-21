@@ -11,7 +11,9 @@ import javafx.application.Platform;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
-// Thread that handles receiving data about the next Pokemon sent out by the online enemy
+/**
+ * Thread that handles receiving data about the next Pokémon sent out by the online enemy.
+ */
 public class SwitchDataReceive extends SyncThread{
 
     private OnlineTrainer enemy;

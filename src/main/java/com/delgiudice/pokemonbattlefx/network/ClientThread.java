@@ -8,7 +8,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-// Handles connecting to the server
+/**
+ * Handles connecting to the server as well as maintaining connection.
+ */
 public class ClientThread extends NetworkThread{
     String host;
 

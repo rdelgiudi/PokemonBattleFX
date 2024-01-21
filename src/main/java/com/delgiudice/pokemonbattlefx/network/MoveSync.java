@@ -9,7 +9,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.List;
 
-// Thread that initiates information swap between players about the move they are about to take
+/**
+ * Thread that initiates information swap between players about the move they are about to take
+ */
 public class MoveSync extends SyncThread{
     private BattleLogic battleLogic;
     private TrainerAction playerAction;

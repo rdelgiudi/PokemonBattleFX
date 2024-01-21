@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-// Clientside thread that swaps information about the game state to confirm the games are in sync
+/**
+ * Clientside thread that swaps information about the game state to confirm the games are in sync.
+ */
 public class ClientSyncThread extends SyncThread {
     private Runnable runLater;
 

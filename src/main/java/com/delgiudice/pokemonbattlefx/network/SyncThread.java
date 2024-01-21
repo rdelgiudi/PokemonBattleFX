@@ -10,7 +10,9 @@ import java.io.DataOutputStream;
 import java.util.HashMap;
 import java.util.List;
 
-// Base class of a thread for comparing game state and waiting - checks if game state is identical between both players
+/**
+ * Base class of a thread for comparing game state and waiting - checks if game state is identical between both players.
+ */
 abstract public class SyncThread extends Thread{
 
     protected static String ENTITY_SEPARATOR = "--";

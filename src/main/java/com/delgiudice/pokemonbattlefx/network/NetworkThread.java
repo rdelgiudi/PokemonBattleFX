@@ -7,7 +7,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-// Base class of threads that handle network connection during multiplayer games
+/**
+ * Base class of threads that handle network connection during multiplayer games.
+ */
 abstract public class NetworkThread extends Thread{
 
     protected Socket clientSocket;

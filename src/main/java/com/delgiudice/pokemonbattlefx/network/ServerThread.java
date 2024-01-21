@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-// Handles connecting to the client
+/**
+ * Handles connecting to the client.
+ */
 public class ServerThread extends NetworkThread{
 
     private ServerSocket serverSocket;
