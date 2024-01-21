@@ -1,5 +1,9 @@
 package com.delgiudice.pokemonbattlefx.move;
 
+/**
+ * Contains all referenced in code moves. Not all of them have to be implemented. Some are used to define future
+ * interactions.
+ */
 public enum MoveEnum {
     CONFUSION_DAMAGE("Confusion Damage"),
     STRUGGLE("Struggle"),
@@ -126,6 +130,11 @@ public enum MoveEnum {
         this.name = name;
     }
 
+    /**
+     * Finds <code>MoveEnum</code> with matching name represented as <code>String</code>
+     * @param name move name
+     * @return requested object or <code>null</code> if not found
+     */
     public static MoveEnum findByName(String name) {
         MoveEnum result = null;
         for (MoveEnum moveEnum : values()) {
