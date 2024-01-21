@@ -1749,7 +1749,7 @@ public class BattleLogic {
 
     /**
      * Handles waiting for enemy selection of next Pokémon to send out
-     * @param battleTimeLine
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
      */
     private void processNewEnemySendOut(List<Timeline> battleTimeLine) {
         battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
@@ -2033,7 +2033,10 @@ public class BattleLogic {
         return new Timeline(kf);
     }
 
-    // Processes fainting enemy
+    /**
+     * Processes animations related to enemy fainting.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void processEnemyFainted(List<Timeline> battleTimeLine) {
         Timeline enemyPokemonFainted = controller.getPokemonFaintedAnimation(false);
         //enemyPokemonFainted.setDelay(Duration.seconds(2));
@@ -2061,7 +2064,10 @@ public class BattleLogic {
         //finalChecks(battleTimeLine, enemyFainted);
     }
 
-    // Processes fainting ally
+    /**
+     * Processes animations related to ally fainting.
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void processAllyFainted(List<Timeline> battleTimeLine) {
         Timeline allyPokemonFainted = controller.getPokemonFaintedAnimation(true);
         //allyPokemonFainted.setDelay(Duration.seconds(2));
@@ -2088,14 +2094,24 @@ public class BattleLogic {
 
     }
 
+    /**
+     * Processes animations related to the Pokémon failing a paralysis roll and having its turn skipped.
+     * @param user the Pokémon which is having its turn skipped
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void processUserParalyzed(Pokemon user, List<Timeline> moveTimeLine) {
-        Timeline paralysisInfo = controller.getBattleTextAnimation(String.format("%s is%nfully paralyzed!",
+        Timeline paralysisInfo = controller.getBattleTextAnimation(String.format("%s is%nfully paralyzed!\nIt can't move!",
                 user.getBattleName()), true);
         moveTimeLine.add(paralysisInfo);
         moveTimeLine.add(controller.generatePause(2000));
-        System.out.println(user.getBattleName() + "is fully paralyzed!");
+        System.out.println(user.getBattleName() + "is fully paralyzed! Move skipped.");
     }
 
+    /**
+     * Processes animations and logic related to the Pokémon being asleep.
+     * @param user the Pokémon which is having its turn skipped
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void processUserAsleep(Pokemon user, List<Timeline> moveTimeLine) {
         Timeline sleepInfo = controller.getBattleTextAnimation(String.format("%s is%nfast asleep!", user.getBattleName()),
                 true);
@@ -2105,6 +2121,11 @@ public class BattleLogic {
         System.out.printf("%s is asleep!%n", user.getBattleName());
     }
 
+    /**
+     * Processes animations and logic related to the Pokémon waking up from sleep.
+     * @param user the Pokémon that is waking up
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void processUserWakeUp(Pokemon user, List<Timeline> moveTimeLine) {
         Timeline sleepInfo = controller.getBattleTextAnimation(String.format("%s woke up!", user.getBattleName()),
                 true);
@@ -2121,6 +2142,11 @@ public class BattleLogic {
         user.setSleepCounter(0);
     }
 
+    /**
+     * Processes animations related to the Pokémon being frozen.
+     * @param user the Pokémon which is having its turn skipped
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void processUserFrozen(Pokemon user, List<Timeline> moveTimeLine) {
         Timeline frozenInfo = controller.getBattleTextAnimation(String.format("%s is frozen solid!",
                 user.getBattleName()), true);
@@ -2128,6 +2154,11 @@ public class BattleLogic {
         moveTimeLine.add(controller.generatePause(2000));
     }
 
+    /**
+     * Processes animations and logic related to the Pokémon thawing out.
+     * @param user the Pokémon that thawed out
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void processUserThawOut(Pokemon user, List<Timeline> moveTimeLine) {
         Timeline frozenInfo = controller.getBattleTextAnimation(String.format("%s thawed out!", user.getBattleName()),
                 true);
@@ -2140,6 +2171,11 @@ public class BattleLogic {
         moveTimeLine.add(controller.generatePause(2000));
     }
 
+    /**
+     * Processes animations and logic related to the Pokémon missing a move.
+     * @param user the Pokémon that missed
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     */
     private void processMoveMissed(Pokemon user, List<Timeline> moveTimeLine) {
         System.out.println("Move missed!");
         Timeline moveMissedDialogue = controller.getBattleTextAnimation(String.format("%s's%nattack missed!",
@@ -2154,6 +2190,11 @@ public class BattleLogic {
             checkMultiturnMoveInterruptEffect(moveTimeLine, user);
     }
 
+    /**
+     * Processes animation and logic related to a Pokémon finishing its two stage move (like Fly or Solar Beam).
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param user user of the two-turn move
+     */
     private void processTwoTurnMoveComplete(List<Timeline> moveTimeLine, Pokemon user) {
         if (user.getState() == Enums.States.TWOTURN) {
             user.setStateMove(null);
@@ -2171,6 +2212,12 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Method that generates appropriate text box message related to the usage of a two-turn (two stage) move.
+     * @param move the two-turn move used
+     * @param user user of the move
+     * @return <code>Timeline</code> object containing the requested animation
+     */
     private Timeline getTwoTurnMoveInfo(Move move, Pokemon user) {
         Timeline timeline;
         switch(move.getName()) {
@@ -2197,6 +2244,14 @@ public class BattleLogic {
         return timeline;
     }
 
+    /**
+     * Handles logic related to special interactions between two-turn semi invulnerable state. Some moves can bypass
+     * this state and hit the target. Sometimes it also increases the power of the move used.
+     * @param move move that has been used
+     * @param target target in a semi invulnerable state
+     * @return <code>0</code> if the move doesn't have any special interactions and misses, otherwise returns the
+     * damage multiplier that is to be applied to the move
+     */
     private int checkTwoTurnMiss(Move move, Pokemon target) {
         Move twoturnmove = target.getStateMove();
 
@@ -2228,25 +2283,15 @@ public class BattleLogic {
         return 0;
     }
 
-    private List<Timeline> processHealthRestore(List<Timeline> moveTimeLine, Move move, Pokemon user) {
+    /**
+     * Processes animations and logic related to restoring health.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param move health restoring move
+     * @param user user of the health restoring move
+     */
+    private void processHealthRestore(List<Timeline> moveTimeLine, Move move, Pokemon user) {
         if (user.getHp() != user.getMaxHP()) {
-            double moveHpRestore = move.getHpRestore();
-            boolean weatherAffectedRestoreMove = move.getName() == MoveEnum.SYNTHESIS ||
-                    move.getName() == MoveEnum.MOONLIGHT || move.getName() == MoveEnum.MORNING_SUN;
-            boolean weatherEffectRainReduction = weatherEffect.getKey() == Enums.WeatherEffect.RAIN && weatherAffectedRestoreMove;
-            boolean weatherEffectSandstormReduction = weatherEffect.getKey() == Enums.WeatherEffect.SANDSTORM && weatherAffectedRestoreMove;
-
-            if (weatherEffectRainReduction || weatherEffectSandstormReduction)
-                moveHpRestore *= 0.5;
-
-            boolean weatherEffectSandstormIncrease = weatherEffect.getKey() == Enums.WeatherEffect.SANDSTORM && move.getName() == MoveEnum.SHORE_UP;
-            if (weatherEffectSandstormIncrease)
-                moveHpRestore = 2/3.0;
-
-            double restoredHealth = user.getMaxHP() * moveHpRestore;
-            double healthChange = restoredHealth + user.getHp();
-            if (healthChange > user.getMaxHP())
-                healthChange = user.getMaxHP();
+            double healthChange = getHealthChange(move, user);
             int oldHp = user.getHp();
             int healthChangeInt = (int) Math.round(healthChange);
             user.setHp(healthChangeInt);
@@ -2279,9 +2324,43 @@ public class BattleLogic {
         }
 
         moveTimeLine.add(controller.generatePause(2000));
-        return moveTimeLine;
     }
 
+    /**
+     * Calculates the health change that will occur when move completes.
+     * @param move health restoring move
+     * @param user user of the health restoring move
+     * @return health change
+     */
+    private double getHealthChange(Move move, Pokemon user) {
+        double moveHpRestore = move.getHpRestore();
+        if (moveHpRestore == 0)
+            throw new ValueException("Health restore related methods called on move without HP restoring properties");
+        boolean weatherAffectedRestoreMove = move.getName() == MoveEnum.SYNTHESIS ||
+                move.getName() == MoveEnum.MOONLIGHT || move.getName() == MoveEnum.MORNING_SUN;
+        boolean weatherEffectRainReduction = weatherEffect.getKey() == Enums.WeatherEffect.RAIN && weatherAffectedRestoreMove;
+        boolean weatherEffectSandstormReduction = weatherEffect.getKey() == Enums.WeatherEffect.SANDSTORM && weatherAffectedRestoreMove;
+
+        if (weatherEffectRainReduction || weatherEffectSandstormReduction)
+            moveHpRestore *= 0.5;
+
+        boolean weatherEffectSandstormIncrease = weatherEffect.getKey() == Enums.WeatherEffect.SANDSTORM && move.getName() == MoveEnum.SHORE_UP;
+        if (weatherEffectSandstormIncrease)
+            moveHpRestore = 2/3.0;
+
+        double restoredHealth = user.getMaxHP() * moveHpRestore;
+        double healthChange = restoredHealth + user.getHp();
+        if (healthChange > user.getMaxHP())
+            healthChange = user.getMaxHP();
+        return healthChange;
+    }
+
+    /**
+     * Handles the end of executing a multi turn move (like Petal Dance or Outrage). Confuses the target. Stopping
+     * execution of the move on its last turn also triggers this effect.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param user user of the multi turn move
+     */
     private void processMultiturnMoveCompleted(List<Timeline> moveTimeLine, Pokemon user) {
         if (!user.getSubStatuses().contains(Enums.SubStatus.CONFUSED)) {
             Timeline userConfusedMsg = controller.getBattleTextAnimation(String.format("%s has become confused%ndue to fatigue!",
@@ -2296,12 +2375,23 @@ public class BattleLogic {
         processMultiturnMoveInterrupted(user);
     }
 
+    /**
+     * Handles the interruption of execution of a multi turn move. Grants no negative effects to the move user.
+     * @param user user of the multi turn move.
+     */
     private void processMultiturnMoveInterrupted(Pokemon user) {
         user.setStateMove(null);
         user.setStateCounter(0);
         user.setState(Enums.States.NONE);
     }
 
+    /**
+     * Checks if the multi turn execution was interrupted on its last turn or not.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param user user of multi turn move
+     * @see #processMultiturnMoveInterrupted(Pokemon)
+     * @see #processMultiturnMoveCompleted(List, Pokemon)
+     */
     private void checkMultiturnMoveInterruptEffect(List<Timeline> moveTimeLine, Pokemon user) {
         if (user.getState() == Enums.States.MULTITURN && (
                 user.getStateCounter() > 0 || !user.getStateMove().isMultiturnConfusion())) {
@@ -2312,11 +2402,16 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Handles animation and logic connected to confusion. If the confusion timer runs out, it removes the confused
+     * status. Otherwise, decrements the confusion timer.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param user confused move user
+     */
     private void updateConfusionStatus(List<Timeline> moveTimeLine, Pokemon user) {
 
         Timeline snappedOutMessage = controller.getBattleTextAnimation(String.format(
                 "%s snapped out of confusion!", user.getBattleName()), true);
-
 
         if (user.getConfusionTimer() == 0) {
             System.out.println(user.getBattleName() + " snapped out of confusion");
@@ -2328,6 +2423,11 @@ public class BattleLogic {
             user.setConfusionTimer(user.getConfusionTimer() - 1);
     }
 
+    /**
+     * Handles animation and logic after losing confusion roll. Calculates confusion damage and applies it to user.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param user confused move user
+     */
     private void processConfusionHit(List<Timeline> moveTimeLine, Pokemon user) {
         Timeline messageConfusion = controller.getBattleTextAnimation("It hurt itself in its\nconfusion!", true);
         moveTimeLine.add(messageConfusion);
@@ -2362,6 +2462,12 @@ public class BattleLogic {
         processMultiturnMoveInterrupted(user);
     }
 
+    /**
+     * Handles animation and logic related to move user flinching. If the user was executing moves that last multiple
+     * turns, it checks for interruption effects.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param user user that has flinched
+     */
     private void processUserFlinched(List<Timeline> moveTimeLine, Pokemon user) {
         Timeline messagePokemonFlinched = controller.getBattleTextAnimation(
                 user.getBattleName() + " flinched!", true);
@@ -2375,6 +2481,14 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Calculates accuracy modifier. The modifier is then applied to the move's base accuracy. The result is used in
+     * hit calculations.
+     * @param user user of the move
+     * @param target target of the move
+     * @param move move being used
+     * @return accuracy modifier
+     */
     private float calculateMoveAccuracyModifier(Pokemon user, Pokemon target, Move move) {
         int statAccuracy;
         if (user.getAbility() != Ability.KEEN_EYE || user.getSubStatuses().contains(Enums.SubStatus.GASTRO_ACID))
@@ -2402,6 +2516,14 @@ public class BattleLogic {
         return accuracyModifier;
     }
 
+    /**
+     * Handles animation and logic related to moves that add battlefield conditions to the field. Compared to stat boost,
+     * they apply an effect that works on all allied party members. This means that switching out doesn't disable these
+     * effects.
+     * @param moveTimeline list containing all <code>Timeline</code> objects to be played during current turn
+     * @param move battlefield condition applying move
+     * @param user user of the move
+     */
     private void processBattlefieldConditionMove(List<Timeline> moveTimeline, Move move, Pokemon user) {
 
         Timeline conditionMessage;
@@ -2433,6 +2555,13 @@ public class BattleLogic {
         moveTimeline.add(controller.generatePause(2000));
     }
 
+    /**
+     * Handles logic and animation related to weather applying moves. If the weather that is being applied is already
+     * present, the move fails.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param move weather changing move
+     * @param user user of the move
+     */
     private void processWeatherConditionMove(List<Timeline> moveTimeLine, Move move, Pokemon user) {
         Timeline weatherMessage;
         Timeline weatherChange;
@@ -2464,7 +2593,17 @@ public class BattleLogic {
         moveTimeLine.add(controller.generatePause(2000));
     }
 
-    // Processes using a move, as well as status effects or accuracy checks that might prevent from using it
+    /**
+     * Processes using a move, as well as status effects or accuracy checks that might prevent from using it. This
+     * method should be called every time when calculating move effects, unless there is only interest in calculating
+     * move damage.
+     * @param move move that is being used
+     * @param user user of the move
+     * @param target target of the move
+     * @param first should be <code>true</code> if the user attacks first, <code>false</code> otherwise
+     * @return list containing all <code>Timeline</code> objects to be played during current turn
+     * @see #calculateMoveDamage(Move, Pokemon, Pokemon, int, boolean, int)
+     */
     private List<Timeline> useMove(Move move, Pokemon user, Pokemon target, boolean first) {
 
         // Initiating the list of animations to be performed during move and an RNG
@@ -2717,8 +2856,10 @@ public class BattleLogic {
                 damageInfo = calculateMoveDamage(move, user, target, twoTurnModifier, true, -1);
             // Health restore moves
             else {
-                if (move.getHpRestore() > 0)
-                    return processHealthRestore(moveTimeLine, move, user);
+                if (move.getHpRestore() > 0) {
+                    processHealthRestore(moveTimeLine, move, user);
+                    return moveTimeLine;
+                }
             }
             //****************************************
 
@@ -2975,6 +3116,12 @@ public class BattleLogic {
         return moveTimeLine;
     }
 
+    /**
+     * Handles removal of binding moves if the user freed itself before the binding move timer finished.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param user user of the move that freed it
+     * @param target the user of the binding move that was in effect
+     */
     private void processTrapMoveRemoval(List<Timeline> moveTimeLine, Pokemon user, Pokemon target) {
         moveTimeLine.add(controller.getBattleText(String.format("%s was released%nby %s", user.getBattleName(),
                 target.getBattleNameMiddle()), true));
@@ -2982,6 +3129,11 @@ public class BattleLogic {
         user.setTrappedTimer(0);
     }
 
+    /**
+     * Handles removal of substatuses if the user freed itself using a move.
+     * @param user user of the move that freed it
+     * @param move move that was used
+     */
     private void processSubStatusMoveRemoval(Pokemon user, Move move) {
         for (Enums.SubStatus subStatus : move.getSubstatusNegation()) {
             if (user.getSubStatuses().remove(subStatus)) {
@@ -2991,7 +3143,16 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Checks if user of a contact move will be affected by static.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param user user of the current move
+     * @param target target of the move that posses the ability <code>Static</code>
+     */
     private void processStaticCheck(List<Timeline> moveTimeLine, Pokemon user, Pokemon target) {
+
+        if (target.getAbility() != Ability.STATIC)
+            throw new ValueException("Expected target to posses ability Static");
 
         //SecureRandom generator = new SecureRandom();
         int staticRandom = generateValue(10);
@@ -3022,6 +3183,16 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Handles animation and logic related to checks connected to status effects (like paralysis or poison) from moves.
+     * Calculates if target can be affected by status and rolls if the status will trigger.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param move move that applies status effect
+     * @param user user of the status applying move
+     * @param target target of the status applying move
+     * @param secondaryEffectsImmune <code>true</code> if target is immune to secondary effects and this move's status
+     *                               effect applying qualifies as secondary, <code>false</code> otherwise
+     */
     private void processStatusApplication(List<Timeline> moveTimeLine, Move move, Pokemon user, Pokemon target,
                                           boolean secondaryEffectsImmune) {
         //SecureRandom generator = new SecureRandom();
@@ -3030,7 +3201,7 @@ public class BattleLogic {
 
         boolean statusImmunity = isStatusImmune(move, target);
 
-        if (prob >= rand && !secondaryEffectsImmune && !statusImmunity) {
+        if (prob >= rand && !secondaryEffectsImmune && !statusImmunity && target.getStatus() == Enums.Status.NONE) {
             Timeline statusChangeInfo = processStatusChange(move.getStatus(), target);
             //statusChangeInfo.setDelay(Duration.seconds(1));
             moveTimeLine.add(statusChangeInfo);
@@ -3054,8 +3225,19 @@ public class BattleLogic {
             moveTimeLine.add(effectInfo);
             moveTimeLine.add(controller.generatePause(2000));
         }
+        else if (target.getStatus() != Enums.Status.NONE && move.getSubtype() == Enums.Subtypes.STATUS) {
+            Timeline statusChangeInfo = processStatusChange(move.getStatus(), target);
+            moveTimeLine.add(statusChangeInfo);
+            moveTimeLine.add(controller.generatePause(1000));
+        }
     }
 
+    /**
+     * Checks if target is immune to the status effect that is being applied
+     * @param move move that applies a status effect
+     * @param target target of the move
+     * @return <code>true</code> if the target is immune to this particular status effect, <code>false</code> otherwise
+     */
     private boolean isStatusImmune(Move move, Pokemon target) {
         boolean firePokemonImmunity = move.getStatus() == Enums.Status.BURNED &&
                 (target.getType()[0].getTypeEnum() == Enums.Types.FIRE ||
@@ -3073,6 +3255,16 @@ public class BattleLogic {
         return firePokemonImmunity || electricPokemonImmunity || poisonPokemonImmunity;
     }
 
+    /**
+     * Handles logic and animations related to applying stat changes.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param move move that applies stat changes
+     * @param user user of the stat change move
+     * @param target opposing Pokémon, not always the target of the move because it can be directed at self
+     * @param userFainted checks if user of the move has fainted
+     * @param secondaryEffectsImmune <code>true</code> if target is immune to secondary effects and this move's stat
+     *                               change applying qualifies as secondary, <code>false</code> otherwise
+     */
     private void processStatUpApplication(List<Timeline> moveTimeLine, Move move, Pokemon user, Pokemon target,
                                           boolean userFainted, boolean secondaryEffectsImmune) {
         //SecureRandom generator = new SecureRandom();
@@ -3097,6 +3289,16 @@ public class BattleLogic {
 //        }
     }
 
+    /**
+     * Handles logic and animation related to applying substatus effects.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param move move that applies substatus
+     * @param user user of the move
+     * @param target opposing Pokémon, depending on the move it is not always the target
+     * @param secondaryEffectsImmune <code>true</code> if target is immune to secondary effects and this move's
+     *                               substatus applying qualifies as secondary, <code>false</code> otherwise
+     * @param first <code>true</code> if the move was executed first, <code>false</code> otherwise
+     */
     private void processSubStatusApplication(List<Timeline> moveTimeLine ,Move move, Pokemon user, Pokemon target,
                                              boolean secondaryEffectsImmune, boolean first) {
         //SecureRandom generator = new SecureRandom();
@@ -3208,6 +3410,14 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Handles logic and animation related to damaging moves that don't follow standard damage calculations.
+     * @param move non standard damaging move
+     * @param user user of the move
+     * @param target target of the move
+     * @return <code>MoveDamageInfo</code> object containing the damage dealt by the move
+     * @see MoveDamageInfo
+     */
     private MoveDamageInfo processNonStandardDamagingMove(Move move, Pokemon user, Pokemon target) {
 
         int damage;
@@ -3263,6 +3473,12 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Handles logic and animations related to placing spikes.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param user user of the spike placing move
+     * @param move move that places spikes
+     */
     private void processSpikesPlaced(List<Timeline> moveTimeLine, Pokemon user, Move move) {
         switch (move.getSpikeType()) {
             case TOXIC_SPIKES:
@@ -3275,9 +3491,20 @@ public class BattleLogic {
                             "Spikes were scattered all around\nyour team's feet!", true);
                 moveTimeLine.add(spikeMessage);
                 moveTimeLine.add(controller.generatePause(2000));
+                break;
+            default:
+                throw new ValueException("Unhandled spike move:" + move.getSpikeType());
         }
     }
 
+    /**
+     * Handles logic and animations related to moves that recover a percentage of health dealt to the target
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param move lifesteal move
+     * @param user user of the move
+     * @param target target of the move
+     * @param damage damage that was dealt by the move
+     */
     private void processLifesteal(List<Timeline> moveTimeLine, Move move, Pokemon user, Pokemon target, int damage) {
         float lifeStolen = move.getLifesteal() * damage;
         int lifeStolenInteger = Math.round(lifeStolen);
@@ -3311,6 +3538,14 @@ public class BattleLogic {
                 target.getBattleNameMiddle(), oldUserHp, user.getHp());
     }
 
+    /**
+     * Handles logic and animation related to recoil damage. Calculates the damage based on the percentage of damage
+     * dealt. When calculating recoil for Struggle, the recoil damage is calculated from a percentage of user HP.
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param user user of the recoil move
+     * @param damage damage dealt by the recoil move
+     * @param move the recoil move
+     */
     private void processRecoil(List<Timeline> moveTimeLine, Pokemon user, int damage, Move move) {
         Timeline recoilText = controller.getBattleTextAnimation(String.format(
                 "%s took damage%nfrom recoil!",user.getBattleName()),true);
@@ -3345,6 +3580,11 @@ public class BattleLogic {
                 user.getHp());
     }
 
+    /**
+     * Handles logic and animation related to applying confusion to designated target
+     * @param target confusion target
+     * @return <code>Timeline</code> object containing the requested animation
+     */
     private Timeline applyConfusion(Pokemon target) {
         Timeline confusionMessage = controller.getBattleTextAnimation(String.format("%s became %nconfused!",
                 target.getBattleName()), true);
@@ -3362,6 +3602,12 @@ public class BattleLogic {
         return confusionMessage;
     }
 
+    /**
+     * Handles logic and animation related to binding moves.
+     * @param move binding move
+     * @param target target of the binding move
+     * @return <code>Timeline</code> object containing the requested animation
+     */
     private Timeline processInVortex(Move move, Pokemon target) {
         Timeline pokemonTrappedMessage;
 
@@ -3398,6 +3644,14 @@ public class BattleLogic {
         return pokemonTrappedMessage;
     }
 
+    /**
+     * Handles logic and animation related to applying status change. If the target is already affected by a status
+     * change, changes nothing and notifies the player.
+     * @param status status effect to be applied
+     * @param target target of the status effect
+     * @return <code>Timeline</code> object containing the requested animation
+     * @see #processStatusApplication(List, Move, Pokemon, Pokemon, boolean)
+     */
     private Timeline processStatusChange(Enums.Status status, Pokemon target) {
         final Timeline statusChangeInfo;
         //SecureRandom generator = new SecureRandom();
@@ -3421,6 +3675,15 @@ public class BattleLogic {
         return statusChangeInfo;
     }
 
+    /**
+     * Handles calculations and animation related to a stat change. Checks if the stat change that is being applied
+     * doesn't cross the limit. In battle stat changes range from -6 to 6 (both inclusive).
+     * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
+     * @param move move that changes a stat
+     * @param target target of the stat change
+     * @param primary should be <code>true</code> if this is the move's primary stat change, <code>false</code>
+     *                otherwise
+     */
     private void processStatChange(List<Timeline> moveTimeLine, Move move, Pokemon target, boolean primary) {
 
         List<Enums.StatType> statTypes;
@@ -3510,7 +3773,7 @@ public class BattleLogic {
                             target.getBattleName(), statType), true));
                         break;
                     default:
-                        throw new IllegalStateException(
+                        throw new ValueException(
                             "Wrong change value, should be between -3 and 3 (excluding 0), is: " + change);
                 }
             }
@@ -3526,6 +3789,18 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Calculates the damage dealt by a standard damaging move. Takes into account all positive and negative effects
+     * than can affect move damage.
+     * @param move damaging move
+     * @param user user of the move
+     * @param target target of the move
+     * @param twoTurnModifier modifier that is applied related to the target being in a semi invulnerable state
+     * @param canCrit <code>true</code> if the move can deal critical damage, <code>false</code> otherwise
+     * @param overridePower an override to move power, replaces the power defined in move data
+     * @return <code>MoveDamageInfo</code> object containing data about the move damage
+     * @see MoveDamageInfo
+     */
     private MoveDamageInfo calculateMoveDamage(Move move, Pokemon user, Pokemon target, int twoTurnModifier,
                                        boolean canCrit, int overridePower)
     {
@@ -3724,6 +3999,13 @@ public class BattleLogic {
         return new MoveDamageInfo(damage, isCrit, typeEffect);
     }
 
+    /**
+     * Calculates the effectiveness of the move on the target.
+     * @param move damage move
+     * @param firstTargetType first type of the target (with modifiers, if any)
+     * @param secondTargetType second type of the target (with modifiers, if any)
+     * @return type effectiveness which multiplies move damage
+     */
     private float calculateTypeEffect(Move move, Type firstTargetType, Type secondTargetType) {
         float typeEffect = 1;
         Enums.Types noEffecttype = move.getType().getNoEffectAgainst();
@@ -3744,6 +4026,11 @@ public class BattleLogic {
         return typeEffect;
     }
 
+    /**
+     * Calculates multiplier related to weather effects. Some weathers boost or dampen the power of certain moves.
+     * @param move move that is being used
+     * @return damage multiplier
+     */
     private double calculateWeatherMultiplier(Move move) {
         switch (weatherEffect.getKey()) {
             case RAIN:
@@ -3762,6 +4049,12 @@ public class BattleLogic {
         }
     }
 
+    /**
+     * Calculates multiplier related to user abilities.
+     * @param move move that is being used
+     * @param user user of the move
+     * @return damage multiplier
+     */
     private double processAbilityMultiplier(Move move, Pokemon user) {
         Enums.Types boostedType = Enums.Types.MISSING;
         boolean generalBoost = false;
@@ -3794,6 +4087,11 @@ public class BattleLogic {
         return 1.0;
     }
 
+    /**
+     * Handles logic related to switching out a Pokémon.
+     * @param ally <code>true</code> if Pokémon to be switched out is an ally, <code>false</code> otherwise
+     * @param slot slot number of Pokémon to be sent out.
+     */
     public void switchPokemon(boolean ally, int slot) {
 
         Pokemon pokemon, opponent;
@@ -3816,6 +4114,11 @@ public class BattleLogic {
         opponent.setTrappedTimer(0);
     }
 
+    /**
+     * Resets statistics that persist only when sent out. This is applied to newly switched in Pokémon to ensure they
+     * are properly reset.
+     * @param pokemon Pokémon whose in battle stats are reset
+     */
     private void resetStats(Pokemon pokemon)
     {
         pokemon.getStatModifiers().clear();
