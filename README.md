@@ -1,5 +1,5 @@
 # PokemonBattleFX
-Implementation of the battle system from Pokémon games with primitive GUI. Made with Java and JavaFX.
+Implementation of the battle system from Pokémon games with primitive GUI. Made with Java and JavaFX. Project documentation available [here](https://rdelgiudi.github.io/PokemonBattleFX/).
 
 ## Opening project
 This project was written with Java 8 in mind. It requires JDK 1.8 and JavaFX.
