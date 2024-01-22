@@ -22,24 +22,54 @@ public class PokemonSpecie{
 
     private static double ANIMATED_ALLY_SCALE = 6, ANIMATED_ENEMY_SCALE = 3.5;
 
-    // List of all animated sprites parsed from site
+    /**
+     * List of all animated sprites parsed from an internet site. Used when animated sprites are activated.
+     */
     private static final List<String> frontSpritesAnim = new ArrayList<>(), backSpritesAnim = new ArrayList<>();
 
-    // pokemonMap - a map of all available Pokemon species
+    /**
+     * A map of all available Pokémon species.
+     */
     private static final HashMap<PokemonEnum, PokemonSpecie> pokemonMap = new HashMap<>();
-    // name - name of the Pokemon in form of an enum, can also return string if needed
+    /**
+     * Name of the Pokémon in form of an enum. Can also return string if needed.
+     */
     private PokemonEnum name;
-    // pokedexNumber - the number in the PokeDex occupied by this specie
+
+    /**
+     * The number in the Pokédex occupied by this specie.
+     */
     private int pokedexNumber;
-    // type - type of the Pokemon
+
+    /**
+     * Type of the Pokémon. Each specie can have up to two types.
+     */
     private Type[] type = {new Type(Enums.Types.NO_TYPE), new Type(Enums.Types.NO_TYPE)};
-    // baseStats - base statistics of a specie, from which their actual stats are calculated
+    /**
+     * Base statistics of a specie, from which their actual stats are calculated.
+     */
     private LinkedHashMap<Enums.StatType, Integer> baseStats = new LinkedHashMap<>();
-    // frontSprite - path to image of the Pokemon front sprite (enemy)
-    // backSprite - path to image of the Pokemon back sprite (ally)
-    private String frontSprite, backSprite, frontSpriteAnim, backSpriteAnim;
-    // Internet sprites loaded into memory
+    /**
+     * Path to image of the Pokémon front sprite.
+     */
+    private String frontSprite;
+    /**
+     * Path to image of the Pokémon back sprite.
+     */
+    private String backSprite;
+    /**
+     * Url to image of the Pokémon front sprite (animated).
+     */
+    private String frontSpriteAnim;
+    /**
+     * Url to image of the Pokémon back sprite (animated).
+     */
+    private String backSpriteAnim;
+    /**
+     * Internet sprites loaded into memory.
+     */
     private Image frontSpriteLoaded = null, backSpriteLoaded = null;
+
     public int getPokedexNumber() {
         return pokedexNumber;
     }
@@ -56,7 +86,11 @@ public class PokemonSpecie{
         return type;
     }
 
-
+    /**
+     * Searches the specified url for animated sprite images.
+     * @param url <code>String</code> containing the URL where images should be searched
+     * @param urlList list of URLs containing all the found images.
+     */
     private static void initSprites(String url, List<String> urlList) {
         NodeList imgs;
         List<String> srcs = new ArrayList<String>();
@@ -83,6 +117,9 @@ public class PokemonSpecie{
         }
     }
 
+    /**
+     * Initiates the search for front and back sprites in the specified URLs.
+     */
     private static void initSpriteDatabase() {
         if (backSpritesAnim.isEmpty())
             initSprites("", backSpritesAnim);
@@ -91,8 +128,15 @@ public class PokemonSpecie{
     }
 
     // Loading images from the Web: https://itecnote.com/tecnote/javafx-play-gif-image-in-imageview/
-    // The image is loaded twice to first probe the width and height of the image
-    // Resizing an animated image once loaded is not supported by the implemented methods
+    /**
+     * Loads an animated image from the specified URL. The image is loaded twice to first probe the width and height of
+     * the image. Resizing an animated image once loaded is not supported by the implemented methods.
+     * @param url <code>String</code> containing the URL
+     * @param front <code>true</code> if the loaded image is a front sprite, <code>false</code> otherwise
+     * @param thumbnail <code>true</code> if the requested image is going to be used for a thumbnail
+     * @return <code>Image</code> object containing the requested image
+     * @throws IOException if no image was found under this URL
+     */
     private Image createImageUrl(String url, boolean front, boolean thumbnail) throws IOException {
         URLConnection conn = new URL(url).openConnection();
         conn.setRequestProperty("User-Agent", "Wget/1.13.4 (linux-gnu)");
@@ -111,6 +155,13 @@ public class PokemonSpecie{
         }
     }
 
+    /**
+     * Load the image from a specified resource path. If no image was found, loads the default question mark image.
+     * @param sprite sprite resource path
+     * @param align if <code>true</code> aligns the image to the bottom, changes nothing otherwise
+     * @param scaleFactor the factor used when scaling up the image
+     * @return <code>Image</code> object containing the requested image
+     */
     private Image createImage(String sprite, boolean align, int scaleFactor) {
         Image image;
         URL frontSpriteUrl = getClass().getResource(sprite);
@@ -128,6 +179,15 @@ public class PokemonSpecie{
         return image;
     }
 
+    /***
+     * Loads the animated image from a specified resource path. If no image was found, tries to load a non-animated
+     * variant of the image.
+     * @param sprite sprite resource path
+     * @param front should be set to <code>true</code> if the front image is requested, <code>false</code> otherwise
+     * @param align if <code>true</code> aligns the image to the bottom, changes nothing otherwise
+     * @param thumbnail <code>true</code> if the requested image is going to be used for a thumbnail
+     * @return <code>Image</code> object containing the requested image
+     */
     private Image createAnimImage(String sprite, boolean front, boolean align, boolean thumbnail) {
         Image image;
         String spriteAnim = sprite.split("\\.")[0] + ".gif";
@@ -150,6 +210,13 @@ public class PokemonSpecie{
         return image;
     }
 
+    /**
+     * Loads sprite image of the species. Depending on game settings, it can be either animated or not.
+     * @param front should be set to <code>true</code> if the front image is requested, <code>false</code> otherwise
+     * @param align if <code>true</code> aligns the image to the bottom (static sprites only), changes nothing otherwise
+     * @param thumbnail <code>true</code> if the requested image is going to be used for a thumbnail
+     * @return <code>Image</code> object containing the requested image
+     */
     private Image loadSpriteImage(boolean front, boolean align, boolean thumbnail) {
         if (front && frontSpriteLoaded != null)
             return frontSpriteLoaded;
@@ -174,15 +241,23 @@ public class PokemonSpecie{
         else {
             image = createImage(sprite, align, thumbnail ? 2 : 5);
         }
+
         return image;
     }
 
+    /**
+     * Loads the specie's animated sprite into memory for future use.
+     * @param onlyFront if set to <code>true</code> only loads the front sprite, loads both otherwise
+     */
     public void loadNetImage(boolean onlyFront) {
         frontSpriteLoaded = loadSpriteImage(true, false, false);
         if (!onlyFront)
             backSpriteLoaded = loadSpriteImage(false, false, false);
     }
 
+    /**
+     * Tries to unload the specie's animated sprite from memory.
+     */
     public static void unloadNetImages() {
         for (PokemonSpecie pokemonSpecie : pokemonMap.values()) {
             pokemonSpecie.frontSpriteLoaded = null;
@@ -191,22 +266,42 @@ public class PokemonSpecie{
         System.gc();
     }
 
+    /**
+     * Returns front sprite for viewing in the summary screen.
+     * @return <code>Image</code> object containing the requested image
+     */
     public Image getFrontSprite() {
         return loadSpriteImage(true, false, false);
     }
 
+    /**
+     * Returns front sprite for use during battle.
+     * @return <code>Image</code> object containing the requested image
+     */
     public Image getFrontSpriteBattle() {
         return loadSpriteImage(true, true, false);
     }
 
+    /**
+     * Returns front sprite for usage as a small icon.
+     * @return <code>Image</code> object containing the requested image
+     */
     public Image getFrontSpriteThumbnail() {
         return loadSpriteImage(true, false, true);
     }
 
+    /**
+     * Returns back sprite for use during battle.
+     * @return <code>Image</code> object containing the requested image
+     */
     public Image getBackSpriteBattle() {
         return loadSpriteImage(false, true, false);
     }
 
+    /**
+     * Returns back sprite for viewing in the summary screen.
+     * @return <code>Image</code> object containing the requested image
+     */
     public Image getBackSprite() {
         return loadSpriteImage(false, false, false);
     }
@@ -297,6 +392,11 @@ public class PokemonSpecie{
         this.pokedexNumber = original.pokedexNumber;
     }
 
+    /**
+     * Searches for animated sprite from the previously gathered list of sprites. The method that gathers the list
+     * should be called before using this method
+     * @see #initSpriteDatabase()
+     */
     private void searchForAnimSprite() {
         String spriteUrl = "https://www.pokencyclopedia.info";
         String pokedexNumFormat = String.format("%03d", pokedexNumber);
@@ -320,6 +420,10 @@ public class PokemonSpecie{
         }
     }
 
+    /**
+     * When game switches to using animated sprites, starts the search for them and finds each individual specie's
+     * sprite location.
+     */
     public static void toggleAnimatedPokemonSprites() {
         initSpriteDatabase();
         for (PokemonSpecie pokemonSpecie : pokemonMap.values()) {
@@ -327,6 +431,9 @@ public class PokemonSpecie{
         }
     }
 
+    /**
+     * Fills a map with currently programmed in Pokémon species.
+     */
     public static void setPokemonMap(){        //fills pokemon list, maybe some alternatives on how to execute this?
         MoveTemplate.setMoveMap(); //first we initialize movelist
         if (BattleApplication.isUseInternetSprites())

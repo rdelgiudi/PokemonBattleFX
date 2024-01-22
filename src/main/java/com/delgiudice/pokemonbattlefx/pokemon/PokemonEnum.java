@@ -2,6 +2,9 @@ package com.delgiudice.pokemonbattlefx.pokemon;
 
 import java.util.HashMap;
 
+/**
+ * Enum containing the names of all existing species so far.
+ */
 public enum PokemonEnum {
     BULBASAUR("Bulbasaur"),
     IVYSAUR("Ivysaur"),
