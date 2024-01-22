@@ -2,6 +2,7 @@ package com.delgiudice.pokemonbattlefx.network;
 
 import com.delgiudice.pokemonbattlefx.battle.BattleLogic;
 import com.delgiudice.pokemonbattlefx.battle.TrainerAction;
+import com.delgiudice.pokemonbattlefx.trainer.EnemyTrainer;
 import com.delgiudice.pokemonbattlefx.trainer.Trainer;
 import javafx.animation.Timeline;
 
@@ -15,11 +16,11 @@ import java.util.List;
 public class MoveSync extends SyncThread{
     private BattleLogic battleLogic;
     private TrainerAction playerAction;
-    private Trainer enemy;
+    private EnemyTrainer enemy;
     List<Timeline> battleTimeLine;
 
     public MoveSync(DataInputStream inputStream, DataOutputStream outputStream, BattleLogic battleLogic,
-                    TrainerAction playerAction, Trainer enemy, List<Timeline> battleTimeLine) {
+                    TrainerAction playerAction, EnemyTrainer enemy, List<Timeline> battleTimeLine) {
         super(inputStream, outputStream);
         this.battleLogic = battleLogic;
         this.playerAction = playerAction;

@@ -5,6 +5,9 @@ import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 
 import java.util.List;
 
+/**
+ * Class that represents the player. Automatically flags the trainer as player during constructor call.
+ */
 public class Player extends Trainer {
 
     public Player(String name, Pokemon pokemon)
@@ -13,15 +16,4 @@ public class Player extends Trainer {
         player = true;
         addPokemon(pokemon);
     }
-
-    @Override
-    public TrainerAction getEnemyAction(Pokemon enemyPokemon) {
-        return null;
-    }
-
-    @Override
-    public TrainerAction getEnemySwitchOut(List<Pokemon> enemyParty) {
-        return null;
-    }
-
 }

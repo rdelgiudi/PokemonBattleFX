@@ -14,10 +14,16 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class NpcTrainer extends Trainer {
+/**
+ * Class that represents an AI trainer.
+ */
+public class NpcTrainer extends EnemyTrainer {
     public static HashMap<String, NpcTrainer> trainerList = new LinkedHashMap<>();
     private Enums.TrainerTypes trainerType;
 
+    /**
+     * Class constructor.
+     */
     public NpcTrainer(String name, Enums.TrainerTypes type, Pokemon pokemon)
     {
         super(name, pokemon);
@@ -32,8 +38,9 @@ public class NpcTrainer extends Trainer {
             getParty().add(new Pokemon(copypoke));
         }
 
-    }
-*/  @Override
+    }*/
+
+    @Override
     public Enums.TrainerTypes getTrainerType() {
         return trainerType;
     }
@@ -42,9 +49,15 @@ public class NpcTrainer extends Trainer {
 
     }
 
-    // For now enemy move is randomly generated, maybe gym leader AI implementation in the future
+    /**
+     * Generates the enemy action. For now only attacks with randomly generated move, gym leader/Elite Four AI
+     * implementation planned in the future.
+     * @param trainerAction unused
+     * @return the action decided by the enemy
+     */
     @Override
-    public TrainerAction getEnemyAction(Pokemon enemyPokemon) {
+    public TrainerAction getEnemyAction(TrainerAction trainerAction) {
+        Pokemon enemyPokemon = partyBattleOrder.get(0);
         Move enemyMove;
 
         if (enemyPokemon.getStateMove() != null && enemyPokemon.getStateCounter() > 0 &&
@@ -81,12 +94,16 @@ public class NpcTrainer extends Trainer {
                 String.valueOf(enemyPokemon.getMoveList().indexOf(enemyMove)));
     }
 
+    /**
+     * Gets next Pokémon to be sent out by the enemy.
+     * @return the action decided by the enemy
+     */
     @Override
-    public TrainerAction getEnemySwitchOut(List<Pokemon> enemyParty) {
+    public TrainerAction getEnemySwitchOut() {
 
         int newPokemonIndex = -1;
-        for (int i=1; i<enemyParty.size(); i++) {
-            if (enemyParty.get(i).getHp() > 0) {
+        for (int i=1; i<partyBattleOrder.size(); i++) {
+            if (partyBattleOrder.get(i).getHp() > 0) {
                 newPokemonIndex = i;
                 break;
             }

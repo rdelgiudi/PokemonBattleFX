@@ -12,10 +12,7 @@ import com.delgiudice.pokemonbattlefx.network.*;
 import com.delgiudice.pokemonbattlefx.pokemon.Ability;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
-import com.delgiudice.pokemonbattlefx.trainer.NpcTrainer;
-import com.delgiudice.pokemonbattlefx.trainer.OnlineTrainer;
-import com.delgiudice.pokemonbattlefx.trainer.Player;
-import com.delgiudice.pokemonbattlefx.trainer.Trainer;
+import com.delgiudice.pokemonbattlefx.trainer.*;
 import com.sun.istack.internal.NotNull;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -49,7 +46,7 @@ public class BattleLogic {
     private String SEND_OUT_MESSAGE;
 
     private Player player;
-    private Trainer enemy;
+    private EnemyTrainer enemy;
 
     /**
      * List that keeps track of player party order in battle
@@ -170,6 +167,7 @@ public class BattleLogic {
         playerParty.addAll(this.player.getParty());
         enemyParty.clear();
         enemyParty.addAll(this.enemy.getParty());
+        enemy.setPartyBattleOrder(enemyParty);
 
         this.teamBuilderPane = teamBuilderPane;
 
@@ -839,7 +837,7 @@ public class BattleLogic {
         controller.switchToPlayerChoice(false);
 
         if (gameMode == Enums.GameMode.OFFLINE) {
-            enemyAction = enemy.getEnemyAction(enemyParty.get(0));
+            enemyAction = enemy.getEnemyAction(playerAction);
             battleTurn(playerAction, enemyAction, battleTimeLine);
         }
         else {
@@ -1283,7 +1281,7 @@ public class BattleLogic {
                                                Enums.SwitchContext switchContext) {
 
         if (gameMode == Enums.GameMode.OFFLINE) {
-            TrainerAction enemyAction = enemy.getEnemySwitchOut(enemyParty);
+            TrainerAction enemyAction = enemy.getEnemySwitchOut();
             processEnemySwitchOut(firstPokemon, secondPokemon, secondMove, switchContext, enemyAction);
         }
         else {
