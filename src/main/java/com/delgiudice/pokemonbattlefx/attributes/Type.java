@@ -23,6 +23,7 @@ public class Type {
 
     /**
      * Used to get the entire <code>Type</code> map.
+     * @return type map
      */
     public static HashMap<Enums.Types,Type> getTypeMap() {
         return typeMap;

@@ -188,8 +188,8 @@ public class MovelistController {
 
     /**
      * Checks if str2 is contained inside str1. Case-insensitive.
-     * @param str1
-     * @param str2
+     * @param str1 first string
+     * @param str2 second string
      * @return <code>true</code> if str2 is contained inside str1, <code>false</code> otherwise
      */
     public static boolean containsIgnoreCase(String str1, String str2) {

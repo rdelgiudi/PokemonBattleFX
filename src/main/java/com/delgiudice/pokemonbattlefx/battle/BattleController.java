@@ -1497,6 +1497,7 @@ public class BattleController {
      * Sets the ally Pokémon's HP bar.
      * @param hp the HP value that the bar should be set to
      * @param maxhp the maximum amount of HP the current Pokémon can have
+     * @param applySound set to <code>true</code> to check if low hp sound playback should be started or stopped
      * @see #getAllyHpAnimation(int, int, int)
      */
     public void setAllyHpBar(int hp, int maxhp, boolean applySound) {
