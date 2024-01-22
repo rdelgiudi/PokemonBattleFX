@@ -580,6 +580,13 @@ public class PokemonSpecie{
     }
 
     //https://stackoverflow.com/questions/16089304/javafx-imageview-without-any-smoothing
+
+    /**
+     * Scales the input image by the specified factor.
+     * @param input input image
+     * @param scaleFactor factor by which the image is scaled
+     * @return scaled image
+     */
     public static Image resample(Image input, int scaleFactor) {
 
         final int W = (int) input.getWidth();
@@ -607,6 +614,11 @@ public class PokemonSpecie{
         return output;
     }
 
+    /**
+     * Aligns all opaque elements of the image to the bottom of the image.
+     * @param input input image
+     * @return image after the aligning process
+     */
     public static Image alignBottom(Image input) {
         final int W = (int) input.getWidth();
         final int H = (int) input.getHeight();
