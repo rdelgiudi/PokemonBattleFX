@@ -75,11 +75,11 @@ public class MoveTemplate {
     private int priority = 0;
 
     /**
-     * Probability of inflicting status effects after move execution, typically 1 for status moves, <1 otherwise.
+     * Probability of inflicting status effects after move execution, typically 1 for status moves, &lt;1 otherwise.
      */
     private float statusProb = 0;
     /**
-     * Probability of changing a stat, typically 1 for status moves, <1 otherwise.
+     * Probability of changing a stat, typically 1 for status moves, &lt;1 otherwise.
      */
     private float statChangeProb = 0;
     /**
