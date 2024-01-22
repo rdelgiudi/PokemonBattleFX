@@ -21,7 +21,11 @@
             </Button>
             <HBox fx:id="currentPokemonBox" layoutX="23.0" layoutY="30.0" prefHeight="286.0" prefWidth="440.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                <children>
-                  <ImageView fitHeight="130.0" fitWidth="130.0" pickOnBounds="true" preserveRatio="true" />
+                  <HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="130.0" prefWidth="130.0">
+                     <children>
+                        <ImageView fitHeight="130.0" fitWidth="130.0" pickOnBounds="true" preserveRatio="true" />
+                     </children>
+                  </HBox>
                   <VBox prefHeight="150.0" prefWidth="300.0">
                      <children>
                         <Label prefHeight="150.0" prefWidth="299.0" text="Pokemon name">
@@ -82,9 +86,13 @@
             </HBox>
             <VBox fx:id="pokemonBox" layoutX="501.0" layoutY="30.0" prefHeight="600.0" prefWidth="700.0" spacing="10.0" style="-fx-opacity: 1;">
                <children>
-                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
+                  <HBox alignment="CENTER" prefHeight="110.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                      <children>
-                        <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="100.0">
+                           <children>
+                              <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                           </children>
+                        </HBox>
                         <VBox alignment="CENTER" prefHeight="70.0" prefWidth="300.0">
                            <children>
                               <Label prefHeight="50.0" prefWidth="299.0" text="Pokemon name">
@@ -143,9 +151,13 @@
                         <Insets />
                      </VBox.margin>
                   </HBox>
-                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
+                  <HBox alignment="CENTER" prefHeight="110.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                      <children>
-                        <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="100.0">
+                           <children>
+                              <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                           </children>
+                        </HBox>
                         <VBox alignment="CENTER" prefHeight="70.0" prefWidth="300.0">
                            <children>
                               <Label prefHeight="50.0" prefWidth="299.0" text="Pokemon name">
@@ -201,9 +213,13 @@
                         </VBox>
                      </children>
                   </HBox>
-                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
+                  <HBox alignment="CENTER" prefHeight="110.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                      <children>
-                        <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="100.0">
+                           <children>
+                              <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                           </children>
+                        </HBox>
                         <VBox alignment="CENTER" prefHeight="70.0" prefWidth="300.0">
                            <children>
                               <Label prefHeight="50.0" prefWidth="299.0" text="Pokemon name">
@@ -259,9 +275,13 @@
                         </VBox>
                      </children>
                   </HBox>
-                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
+                  <HBox alignment="CENTER" prefHeight="110.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                      <children>
-                        <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="100.0">
+                           <children>
+                              <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                           </children>
+                        </HBox>
                         <VBox alignment="CENTER" prefHeight="70.0" prefWidth="300.0">
                            <children>
                               <Label prefHeight="50.0" prefWidth="299.0" text="Pokemon name">
@@ -317,9 +337,13 @@
                         </VBox>
                      </children>
                   </HBox>
-                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
+                  <HBox alignment="CENTER" prefHeight="110.0" prefWidth="700.0" style="-fx-background-color: linear-gradient(to left, lightskyblue, azure); -fx-border-color: black; -fx-border-width: 5; -fx-border-radius: 10; -fx-background-radius: 15;">
                      <children>
-                        <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="100.0">
+                           <children>
+                              <ImageView fitHeight="100.0" fitWidth="100.0" pickOnBounds="true" preserveRatio="true" />
+                           </children>
+                        </HBox>
                         <VBox alignment="CENTER" prefHeight="70.0" prefWidth="300.0">
                            <children>
                               <Label prefHeight="50.0" prefWidth="299.0" text="Pokemon name">

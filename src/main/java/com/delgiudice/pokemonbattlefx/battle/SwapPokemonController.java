@@ -4,12 +4,16 @@ import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.item.Item;
 import com.delgiudice.pokemonbattlefx.move.Move;
+import com.delgiudice.pokemonbattlefx.network.SwitchDataReceive;
 import com.delgiudice.pokemonbattlefx.network.SwitchDataSend;
+import com.delgiudice.pokemonbattlefx.network.SyncThread;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.trainer.Player;
 import com.sun.istack.internal.NotNull;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -56,6 +60,10 @@ public class SwapPokemonController {
     private List<Pokemon> turnPokemon;
     private Move secondMove;
 
+    private List<InvalidationListener> animatedSpriteListeners = new ArrayList<>();
+    private List<Double> maxFitWidth = new ArrayList<>();
+    private List<Double> maxFitHeight = new ArrayList<>();
+
     @FXML
     private Pane mainPane;
     @FXML
@@ -89,6 +97,34 @@ public class SwapPokemonController {
 
         Rectangle rect = new Rectangle(BattleController.SCREEN_WIDTH, BattleController.SCREEN_HEIGHT);
         mainPane.setClip(rect);
+
+        HBox primaryViewBox = (HBox) currentPokemonBox.getChildren().get(0);
+        ImageView primaryView = (ImageView) primaryViewBox.getChildren().get(0);
+        maxFitWidth.add(primaryView.getFitWidth());
+        maxFitHeight.add(primaryView.getFitHeight());
+        animatedSpriteListeners.add(new InvalidationListener() {
+            @Override
+            public void invalidated(Observable e) {
+                primaryView.setFitWidth(primaryView.getImage().getWidth() / 3.5 / 110 * maxFitWidth.get(0));
+                primaryView.setFitHeight(primaryView.getImage().getWidth() / 3.5 / 110 * maxFitHeight.get(0));
+            }
+        });
+
+        for (int i=0; i<5; i++) {
+            HBox partyMemberBox = (HBox) pokemonBox.getChildren().get(i);
+            HBox partyMemberBoxBox = (HBox) partyMemberBox.getChildren().get(0);
+            ImageView partyMemberView = (ImageView) partyMemberBoxBox.getChildren().get(0);
+            maxFitWidth.add(partyMemberView.getFitWidth());
+            maxFitHeight.add(partyMemberView.getFitHeight());
+            int finalI = i;
+            animatedSpriteListeners.add(new InvalidationListener() {
+                @Override
+                public void invalidated(Observable e) {
+                    partyMemberView.setFitWidth(partyMemberView.getImage().getWidth() / 3.5 / 110 * maxFitWidth.get(finalI +1));
+                    partyMemberView.setFitHeight(partyMemberView.getImage().getWidth() / 3.5 / 110 * maxFitHeight.get(finalI +1));
+                }
+            });
+        }
     }
 
     /**
@@ -98,6 +134,33 @@ public class SwapPokemonController {
     public void processSpriteModeSwitch() {
         SummaryController summaryController = summaryLoader.getController();
         summaryController.processSpriteModeSwitch();
+
+        HBox primaryViewBox = (HBox) currentPokemonBox.getChildren().get(0);
+        ImageView primaryView = (ImageView) primaryViewBox.getChildren().get(0);
+
+        if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
+            primaryView.imageProperty().addListener(animatedSpriteListeners.get(0));
+        }
+        else {
+            primaryView.imageProperty().removeListener(animatedSpriteListeners.get(0));
+            primaryView.setFitWidth(maxFitWidth.get(0));
+            primaryView.setFitHeight(maxFitHeight.get(0));
+        }
+
+        for (int i=0; i<5; i++) {
+            HBox partyMemberBox = (HBox) pokemonBox.getChildren().get(i);
+            HBox partyMemberBoxBox = (HBox) partyMemberBox.getChildren().get(0);
+            ImageView partyMemberView = (ImageView) partyMemberBoxBox.getChildren().get(0);
+
+            if (BattleApplication.isUseInternetSprites() || BattleApplication.isUseLocalAnimSprites()) {
+                partyMemberView.imageProperty().addListener(animatedSpriteListeners.get(i+1));
+            }
+            else {
+                partyMemberView.imageProperty().removeListener(animatedSpriteListeners.get(i+1));
+                partyMemberView.setFitWidth(maxFitWidth.get(i+1));
+                partyMemberView.setFitHeight(maxFitHeight.get(i+1));
+            }
+        }
     }
 
     /**
@@ -210,7 +273,8 @@ public class SwapPokemonController {
      */
     private void disableBox(HBox pokemonBox) {
 
-        ImageView icon = (ImageView) pokemonBox.getChildren().get(0);
+        HBox iconBox = (HBox) pokemonBox.getChildren().get(0);
+        ImageView icon = (ImageView) iconBox.getChildren().get(0);
         VBox infoBox = (VBox) pokemonBox.getChildren().get(1);
         VBox hpBox = (VBox) pokemonBox.getChildren().get(2);
 
@@ -299,7 +363,8 @@ public class SwapPokemonController {
 
         Pokemon pokemon = party.get(index);
 
-        ImageView icon = (ImageView) pokemonBox.getChildren().get(0);
+        HBox iconBox = (HBox) pokemonBox.getChildren().get(0);
+        ImageView icon = (ImageView) iconBox.getChildren().get(0);
         icon.setImage(pokemon.getSpecie().getFrontSprite());
 
         VBox infoBox = (VBox) pokemonBox.getChildren().get(1);
