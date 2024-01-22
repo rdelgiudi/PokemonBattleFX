@@ -10,6 +10,10 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 //https://stackoverflow.com/questions/16606162/javafx-fullscreen-resizing-elements-based-upon-screen-size
+
+/**
+ * Listener that scales the displayed elements to window size.
+ */
 public class SceneSizeChangeListener implements ChangeListener<Number> {
     private final Scene scene;
     private final double ratio;

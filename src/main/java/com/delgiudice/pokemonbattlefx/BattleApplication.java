@@ -24,13 +24,20 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class that initiates application components and settings.
+ */
 public class BattleApplication extends Application {
 
-    // Experimental - to be completed after completing initial goals]
-
+    /**
+     * List of running network threads.
+     */
     public static List<NetworkThread> threadList = new ArrayList<>();
+
+    // Experimental - to be completed after completing initial goals
     private static boolean USE_INTERNET_SPRITES = false;
     private static boolean USE_LOCAL_ANIM_SPRITES = false;
+    //****************************************
 
     public static boolean isUseInternetSprites() {
         return USE_INTERNET_SPRITES;
@@ -40,6 +47,10 @@ public class BattleApplication extends Application {
         return USE_LOCAL_ANIM_SPRITES;
     }
 
+    /**
+     * Switches the use of animated sprites on or off.
+     * @param useInternetSprites set <code>true</code> to use animated sprites, <code>false</code> otherwise
+     */
     public static void setUseInternetSprites(boolean useInternetSprites) {
         if (useInternetSprites)
             PokemonSpecie.toggleAnimatedPokemonSprites();
@@ -52,6 +63,9 @@ public class BattleApplication extends Application {
         USE_LOCAL_ANIM_SPRITES = useLocalAnimSprites;
     }
 
+    /**
+     * Configures UI and starts the application.
+     */
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(BattleApplication.class.getResource("teambuilder-view.fxml"));
@@ -88,6 +102,9 @@ public class BattleApplication extends Application {
         });
     }
 
+    /**
+     * Ends all running network threads present on the list.
+     */
     public static void endNetworkThread() {
         if (!threadList.isEmpty())
             System.out.println("Closing network threads...");
@@ -103,6 +120,14 @@ public class BattleApplication extends Application {
     }
 
     //https://stackoverflow.com/questions/16606162/javafx-fullscreen-resizing-elements-based-upon-screen-size
+    /**
+     * Allows to scale the scene to window size.
+     * @param scene current scene
+     * @param contentPane root Pane
+     * @param initWidth width of the scene
+     * @param initHeight height of the scene
+     * @see SceneSizeChangeListener
+     */
     public static void letterbox(final Scene scene, final Pane contentPane, final double initWidth, final double initHeight) {
         //final double initWidth  = scene.getWidth();
         //final double initHeight = scene.getHeight();
