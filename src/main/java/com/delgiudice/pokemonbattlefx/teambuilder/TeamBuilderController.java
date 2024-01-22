@@ -4,6 +4,7 @@ import com.delgiudice.pokemonbattlefx.*;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.battle.BattleController;
 import com.delgiudice.pokemonbattlefx.battle.BattleLogic;
+import com.delgiudice.pokemonbattlefx.battle.SummaryController;
 import com.delgiudice.pokemonbattlefx.item.Item;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.move.MoveEnum;
@@ -23,13 +24,16 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -43,6 +47,8 @@ import java.util.regex.Pattern;
 
 public class TeamBuilderController {
 
+    private static String PLAYER_PARTY_STYLE = "-fx-background-color: #87CEEB";
+    private static String ENEMY_PARTY_STYLE = "-fx-background-color: lightcoral";
     @FXML
     private HBox playerPartyBox, enemyPartyBox;
     @FXML
@@ -94,12 +100,19 @@ public class TeamBuilderController {
         this.inputStream = inputStream;
     }
 
-    public TeamBuilderController() throws IOException {
+    /**
+     * Class constructor
+     */
+    public TeamBuilderController() {
         Pokemon.generatePokemonExamples();
 
         battleLoader = new FXMLLoader(BattleApplication.class.getResource("battle-view.fxml"));
         //Pane teamBuilderPane = (Pane) startBattleButton.getScene().getRoot();
-        battlePane = battleLoader.load();
+        try {
+            battlePane = battleLoader.load();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         Item.setItemMap();
 
@@ -107,6 +120,9 @@ public class TeamBuilderController {
         logic = new BattleLogic(battleController);
     }
 
+    /**
+     * Configures UI elements and creates a list of available Pokémon, sorted by Pokédex number.
+     */
     public void initialize() {
 
         sortedPokemon.addAll(Pokemon.getPokemonExamples().values());
@@ -138,12 +154,19 @@ public class TeamBuilderController {
 
         setupStringField(playerNameField, 15);
     }
+
+    /**
+     * Opens player settings menu.
+     */
     @FXML
     private void openPlayerSettings() {
         playerSettingsBox.setVisible(true);
         disableInput(true);
     }
 
+    /**
+     * Closes player settings menu.
+     */
     @FXML
     private void closePlayerSettings() {
         playerSettingsBox.setVisible(false);
@@ -151,16 +174,30 @@ public class TeamBuilderController {
         disableInput(false);
     }
 
+    /**
+     * Updates the player name variable.
+     * @see #playerName
+     */
     @FXML
     private void updatePlayerName() {
         playerName = playerNameField.getText();
     }
 
+    /**
+     * Changes the <code>turboMode</code> variable to the state in the <code>CheckBox</code>
+     * @see #turboModeCheckBox
+     */
     @FXML
     private void toggleTurboMode() {
         turboMode = turboModeCheckBox.isSelected();
     }
 
+    /**
+     * Toggles the option to use animated sprites downloaded from the internet.
+     * @see BattleController#processSpriteModeSwitch()
+     * @see AddPokemonController#processSpriteModeSwitch()
+     * @see SummaryController#processSpriteModeSwitch()
+     */
     @FXML
     private void toggleAnimatedMode() {
         BattleApplication.setUseInternetSprites(animatedModeCheckBox.isSelected());
@@ -170,6 +207,11 @@ public class TeamBuilderController {
         logic.processSpriteModeSwitch();
     }
 
+    /**
+     * Method that makes the selected text field accept only letters and also limits the amount of characters.
+     * @param textField selected text field
+     * @param characterLimit limit of characters to be set
+     */
     protected static void setupStringField(TextField textField, int characterLimit) {
 
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -181,6 +223,12 @@ public class TeamBuilderController {
         });
     }
 
+    /**
+     * Method that makes the selected text field accept only characters that occur in move names and also limits the
+     * amount of characters.
+     * @param textField selected text field
+     * @param characterLimit limit of characters to be set
+     */
     protected static void setupStringFieldMove(TextField textField, int characterLimit) {
 
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -192,6 +240,10 @@ public class TeamBuilderController {
         });
     }
 
+    /**
+     * Old method that controlled automatic resizing of UI elements. Unused
+     * @deprecated
+     */
     public void setUiResizeListener() {
         Scene scene = startBattleButton.getScene();
 
@@ -212,6 +264,10 @@ public class TeamBuilderController {
         });
     }
 
+    /**
+     * Changes the mode in which the battle will run.
+     * @see com.delgiudice.pokemonbattlefx.attributes.Enums.GameMode
+     */
     @FXML
     private void changeGameMode() {
 
@@ -240,12 +296,21 @@ public class TeamBuilderController {
         }
     }
 
+    /**
+     * Refreshes the UI.
+     */
     private void refreshUi() {
         populatePokemonGrid();
         refreshParties();
         scrollPane.setPrefHeight(POKEMON_PANE_SIZE);
     }
 
+    /**
+     * Prepares the button used to represent party members.
+     * @param partyBox the box that contains party member buttons
+     * @param party the party whose information is to be inserted
+     * @param player <code>true</code> if the party to be inserted is the player's party, false <code>otherwise</code>
+     */
     public void preparePartyButtons(HBox partyBox, List<Pokemon> party, boolean player) {
         for (int i=0; i < partyBox.getChildren().size(); i++) {
             Button button = (Button) partyBox.getChildren().get(i);
@@ -291,6 +356,12 @@ public class TeamBuilderController {
         }
     }
 
+    /**
+     * Configures an animation that makes the party's buttons flash. This is used when moving party members around.
+     * @param partyBox box containing the party members' buttons
+     * @param player <code>true</code> if the party to be inserted is the player's party, false <code>otherwise</code>
+     * @return <code>Timeline</code> object containing the requested animation.
+     */
     private Timeline setButtonsFlashingEffect(HBox partyBox, boolean player) {
         Timeline timeline;
         String color1 = player ? "#87CEEB": "lightcoral";
@@ -324,6 +395,9 @@ public class TeamBuilderController {
         return timeline;
     }
 
+    /**
+     * Sets up visual listeners for all current party member's buttons.
+     */
     public void preparePartyButtonEffects() {
 
         for (int i=0; i < playerPartyBox.getChildren().size(); i++) {
@@ -337,6 +411,9 @@ public class TeamBuilderController {
         }
     }
 
+    /**
+     * Populates the grid with all available Pokémon.
+     */
     public void populatePokemonGrid() {
 
         pokemonGrid.getChildren().clear();
@@ -345,12 +422,16 @@ public class TeamBuilderController {
 
         for (Pokemon pokemon : sortedPokemon) {
             Button pokemonButton = new Button();
-            pokemonButton.setText(String.format("No. %03d%n%s", pokemon.getPokedexNumber(), pokemon.getOriginalName().toString()));
+            pokemonButton.setText(String.format("No. %03d%n%n%n%n%s", pokemon.getPokedexNumber(), pokemon.getOriginalName().toString()));
             pokemonButton.setFont(Font.font("Monospaced", FONT_SIZE));
+            pokemonButton.setTextAlignment(TextAlignment.CENTER);
+            pokemonButton.setAlignment(Pos.TOP_CENTER);
             pokemonGrid.add(pokemonButton, i, j);
 
             pokemonButton.setPrefHeight(POKEMON_BUTTON_HEIGHT);
             pokemonButton.setPrefWidth(POKEMON_BUTTON_WIDTH);
+
+            setPokemonListButtonEffect(pokemonButton);
 
             i++;
             if (i > 8) {
@@ -372,6 +453,11 @@ public class TeamBuilderController {
         }
     }
 
+    /**
+     * Enters the Pokémon edit menu.
+     * @param index party index of the Pokémon to be edited.
+     * @param party list of current party members
+     */
     private void editPokemon(int index, List<Pokemon> party) {
         Stage stage = (Stage) startBattleButton.getScene().getWindow();
         Scene scene = startBattleButton.getScene();
@@ -383,6 +469,9 @@ public class TeamBuilderController {
         scene.setRoot(addPokemonPane);
     }
 
+    /**
+     * Refreshes the information contained in each of the party boxes.
+     */
     public void refreshParties() {
         //playerPartyBox.setPrefSize((PARTY_BUTTON_WIDTH +5) * 6, PARTY_BUTTON_HEIGHT);
         //enemyPartyBox.setPrefSize((PARTY_BUTTON_WIDTH +5) * 6, PARTY_BUTTON_HEIGHT);
@@ -396,6 +485,8 @@ public class TeamBuilderController {
             enemyPokemonButton.setFont(Font.font("Monospaced", FONT_SIZE));
             playerPokemonButton.setPrefSize(PARTY_BUTTON_WIDTH, PARTY_BUTTON_HEIGHT);
             enemyPokemonButton.setPrefSize(PARTY_BUTTON_WIDTH, PARTY_BUTTON_HEIGHT);
+            playerPokemonButton.setStyle(PLAYER_PARTY_STYLE);
+            enemyPokemonButton.setStyle(ENEMY_PARTY_STYLE);
             if (i < playerParty.size()) {
                 playerPokemonButton.setText(String.format(buttonText, playerParty.get(i).getName(), playerParty.get(i).getLevel()));
                 playerPokemonButton.setDisable(false);
@@ -429,22 +520,52 @@ public class TeamBuilderController {
             startBattleButton.setDisable(playerParty.isEmpty());
     }
 
+    /**
+     * Sets the button effects for a button representing a Pokémon from the center list.
+     * @param button button to which the changes will be applied to
+     */
+    public void setPokemonListButtonEffect(Button button) {
+
+        String styleBeginning = "-fx-text-fill: linear-gradient(white 50%, black 100%); -fx-border-radius: 10; " +
+                "-fx-background-radius: 10; -fx-border-color: black; -fx-border-width: 2; -fx-background-color: ";
+
+        button.setStyle(styleBeginning + "linear-gradient(#800020 40%, lightgray 60%, #EAEAEA 100%)");
+
+        button.setOnMouseExited(e -> button.setStyle(styleBeginning + "linear-gradient(#800020 40%, lightgray 60%, #EAEAEA 100%)"));
+        button.setOnMouseReleased(e -> button.setStyle(styleBeginning + "linear-gradient(#800020 40%, lightgray 60%, #EAEAEA 100%)"));
+
+        button.setOnMouseEntered(e -> button.setStyle(styleBeginning +  "linear-gradient(#b26679 40%, #EAEAEA 60%, #f2f2f2 100%)"));
+        button.setOnMousePressed(e -> button.setStyle(styleBeginning + "linear-gradient(#4c0013 40%, gray 60%, #8c8c8c 100%)"));
+    }
+
+    /**
+     * Sets the button effects for a button representing the player's party member.
+     * @param button button to which the changes will be applied to
+     */
     public void setButtonEffect(Button button) {
-        button.setOnMouseExited(e -> button.setStyle("-fx-background-color: #87CEEB"));
-        button.setOnMouseReleased(e -> button.setStyle("-fx-background-color: #87CEEB"));
+        button.setOnMouseExited(e -> button.setStyle(PLAYER_PARTY_STYLE));
+        button.setOnMouseReleased(e -> button.setStyle(PLAYER_PARTY_STYLE));
 
         button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: powderblue"));
         button.setOnMousePressed(e -> button.setStyle("-fx-background-color: steelblue"));
     }
 
+    /**
+     * Sets the button effects for a button representing the player's party member.
+     * @param button button to which the changes will be applied to
+     */
     public void setButtonEffectEnemy(Button button) {
-        button.setOnMouseExited(e -> button.setStyle("-fx-background-color: lightcoral"));
-        button.setOnMouseReleased(e -> button.setStyle("-fx-background-color: lightcoral"));
+        button.setOnMouseExited(e -> button.setStyle(ENEMY_PARTY_STYLE));
+        button.setOnMouseReleased(e -> button.setStyle(ENEMY_PARTY_STYLE));
 
         button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: lightpink"));
         button.setOnMousePressed(e -> button.setStyle("-fx-background-color: indianred"));
     }
 
+    /**
+     * Method called when pressing the "Start battle" button. It calls the appropriate starting method depending on
+     * game mode.
+     */
     @FXML
     private void startBattle(){
         switch (gameMode) {
@@ -460,6 +581,9 @@ public class TeamBuilderController {
         }
     }
 
+    /**
+     * Starts offline battle.
+     */
     private void startOfflineBattle() {
         Player player = new Player(playerName, playerParty.get(0));
         NpcTrainer enemy = new NpcTrainer(enemyName, trainerType, enemyParty.get(0));
@@ -477,6 +601,10 @@ public class TeamBuilderController {
         logic.startBattle(player, enemy, turboMode, teamBuilderPane);
     }
 
+    /**
+     * Disables the ability to interact with any UI elements.
+     * @param value set <code>true</code> to disable all elements, <code>false</code> to enable
+     */
     private void disableInput(boolean value) {
         startBattleButton.setDisable(value);
         scrollPane.setDisable(value);
@@ -487,11 +615,20 @@ public class TeamBuilderController {
         ipAddressField.setDisable(value);
     }
 
+    /**
+     * Blocks user input end displays that the game is waiting for a connection. Used when starting battle in server
+     * mode.
+     * @param block <code>true</code> to display the message, <code>false</code> to hide it
+     * @see #disableInput(boolean)
+     */
     public void displayConnectionBlock(boolean block) {
         disableInput(block);
         waitingForConnectionLabel.setVisible(block);
     }
 
+    /**
+     * Starts online battle in server mode.
+     */
     private void startOnlineBattleServer() {
         displayConnectionBlock(true);
         inputStream = null;
@@ -501,6 +638,9 @@ public class TeamBuilderController {
         connectionThread.start();
     }
 
+    /**
+     * Starts online battle in client mode.
+     */
     private void startOnlineBattleClient() {
         inputStream = null;
         outputStream = null;
@@ -509,6 +649,12 @@ public class TeamBuilderController {
         connectionThread.start();
     }
 
+    /**
+     * Generates an information <code>String</code> containing all necessary Pokémon information.
+     * @param pokemon Pokémon to be turned into a <code>String</code>
+     * @return <code>String</code> representation of the selected Pokémon
+     * @see #parsePokemonInfo(String[])
+     */
     private String createPokemonInfo(Pokemon pokemon) {
         StringBuilder pokemonComposition = new StringBuilder();
         final String separator = "__";
@@ -526,6 +672,11 @@ public class TeamBuilderController {
         return pokemonComposition.toString();
     }
 
+    /**
+     * Creates a <code>String</code> containing all necessary information about the player and their party.
+     * @return <code>StringBuilder</code> object containing party member information in <code>String</code> format
+     * @see #parseTrainerInfo(String)
+     */
     private StringBuilder createTeamInfo() {
         StringBuilder teamComposition = new StringBuilder();
         final String teamSeperator = "--";
@@ -539,6 +690,12 @@ public class TeamBuilderController {
         return teamComposition;
     }
 
+    /**
+     * Converts Pokémon information in <code>String</code> format into <code>Pokemon</code> object
+     * @param splitInfo <code>String</code> array containing Pokémon information
+     * @return <code>Pokemon</code> representation of inserted data
+     * @see #createPokemonInfo(Pokemon)
+     */
     private Pokemon parsePokemonInfo(String[] splitInfo) {
         int pokemonSpecie = Integer.parseInt(splitInfo[0]); // specie enum number
         String pokemonName = splitInfo[1]; // for custom name, currently unused
@@ -565,6 +722,11 @@ public class TeamBuilderController {
         return pokemon;
     }
 
+    /**
+     * Converts Pokémon and Trainer information into objects. The enemy name and party is then loaded into memory.
+     * @param info <code>String</code> representation of the information about the trainer and their party
+     * @see #createTeamInfo()
+     */
     private void parseTrainerInfo(String info) {
         final String separator = "__";
         final String teamSeperator = "--";
@@ -589,6 +751,9 @@ public class TeamBuilderController {
         this.enemyParty = enemyTeam;
     }
 
+    /**
+     * Sends trainer and party info to the server. Used in client mode.
+     */
     public void sendBattleInfoClient() throws IOException {
         StringBuilder teamInfo = createTeamInfo();
         outputStream.writeUTF(teamInfo.toString());
@@ -596,6 +761,9 @@ public class TeamBuilderController {
         readBattleInfoClient();
     }
 
+    /**
+     * Receives trainer and party info from the server. Used in client mode.
+     */
     private void readBattleInfoClient() throws IOException {
         String teamInfo = inputStream.readUTF();
         System.out.println("Server response: " + teamInfo);
@@ -603,6 +771,9 @@ public class TeamBuilderController {
         startOnlineBattle();
     }
 
+    /**
+     * Receives trainer and party info from the client. Used in server mode.
+     */
     public void readBattleInfoServer() throws IOException {
         String teamInfo = inputStream.readUTF();
         System.out.println("Client response: " + teamInfo);
@@ -610,6 +781,9 @@ public class TeamBuilderController {
         sendBattleInfoServer();
     }
 
+    /**
+     * Sends trainer and party info to the client. Used in server mode.
+     */
     private void sendBattleInfoServer() throws IOException {
         StringBuilder teamInfo = createTeamInfo();
         outputStream.writeUTF(teamInfo.toString());
@@ -617,6 +791,9 @@ public class TeamBuilderController {
         startOnlineBattle();
     }
 
+    /**
+     * After information swap is complete, starts online battle.
+     */
     private void startOnlineBattle() {
         Player player = new Player(playerName, playerParty.get(0));
         OnlineTrainer enemy = new OnlineTrainer(enemyName, enemyParty.get(0), inputStream, outputStream, logic);
