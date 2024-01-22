@@ -59,6 +59,9 @@ public class AddPokemonController {
     private InvalidationListener animatedSpriteListener;
     private double maxFitWidth, maxFitHeight;
 
+    /**
+     * Class constructor.
+     */
     public AddPokemonController() {
         moveListLoader = new FXMLLoader(BattleApplication.class.getResource("movelist-view.fxml"));
         movelistPane = null;
@@ -69,6 +72,9 @@ public class AddPokemonController {
         }
     }
 
+    /**
+     * Configures UI elements.
+     */
     public void initialize() {
         setStatisticsListeners();
 
@@ -100,6 +106,16 @@ public class AddPokemonController {
         }
     }
 
+    /**
+     * Sets data related to displaying a Pokémon's data.Also gathers data about the current player and enemy
+     * teams. Add mode allows to add a Pokémon to one of the parties. Edit mode allows to edit one of the already
+     * existing party Pokémon.
+     * @param pokemon Pokémon that is to be displayed
+     * @param playerParty current player party
+     * @param enemyParty current enemy party
+     * @param previousController controller connected to the previous screen
+     * @param pane pane connected to the previous screen
+     */
     public void setAddData(Pokemon pokemon, List<Pokemon> playerParty, List<Pokemon> enemyParty,
                            TeamBuilderController previousController, Pane pane) {
         currentPokemon = new Pokemon(pokemon);
@@ -113,11 +129,20 @@ public class AddPokemonController {
         closeMoveInfoButton.setVisible(false);
     }
 
+    /**
+     * Sets the UI into add mode.
+     * @see #setAddData(Pokemon, List, List, TeamBuilderController, Pane)
+     */
     public void enterAddMode() {
         editModeIndex = -1;
         refreshStats();
     }
 
+    /**
+     * Sets the UI into edit mode.
+     * @param ally <code>true</code> if the currently edited Pokémon belongs to ally party, <code>false</code> otherwise
+     * @param index index in the party of the currently edited Pokémon
+     */
     public void enterEditMode(boolean ally, int index) {
         refreshStats();
         editModeAlly = ally;
@@ -126,6 +151,9 @@ public class AddPokemonController {
         addEnemyButton.setDisable(ally);
     }
 
+    /**
+     * Updates the current Pokémon's move list with the data entered into the UI.
+     */
     private void updatePokemonMoveList() {
         currentPokemon.getMoveList().clear();
 
@@ -142,6 +170,9 @@ public class AddPokemonController {
         }
     }
 
+    /**
+     * Returns to the Team Builder screen.
+     */
     @FXML
     public void returnToBuilder() {
         Stage stage = (Stage) backButton.getScene().getWindow();
@@ -149,6 +180,10 @@ public class AddPokemonController {
         backButton.getScene().setRoot(previousPane);
     }
 
+    /**
+     * Adds the currently displayed Pokémon into the player party. If in edit mode, first deletes the previous version
+     * of the Pokémon and inserts the updated version.
+     */
     @FXML
     public void addPlayerPokemon() {
         updatePokemonMoveList();
@@ -162,6 +197,10 @@ public class AddPokemonController {
         returnToBuilder();
     }
 
+    /**
+     * Adds the currently displayed Pokémon into the enemy party. If in edit mode, first deletes the previous version
+     * of the Pokémon and inserts the updated version.
+     */
     @FXML
     public void addEnemyPokemon() {
         updatePokemonMoveList();
@@ -175,6 +214,9 @@ public class AddPokemonController {
         returnToBuilder();
     }
 
+    /**
+     * Refreshes the displayed statistics to reflect the changes that have occurred.
+     */
     private void refreshStats() {
         pokemonNameLabel.setText(currentPokemon.getName());
         itemLabel.setText("None");
@@ -189,6 +231,9 @@ public class AddPokemonController {
         setPokemonMoves();
     }
 
+    /**
+     * Sets up Pokémon type information.
+     */
     private void setPokemonTypes() {
         String styleString = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: ";
         firstTypeLabel.setText(currentPokemon.getType()[0].getTypeEnum().toString());
@@ -210,6 +255,10 @@ public class AddPokemonController {
         }
     }
 
+    /**
+     * Sets up the <code>ChoiceBox</code> object with the list of available natures, as well as sets a value listener that
+     * changes the Pokémon's nature when a change in value is detected.
+     */
     private void setNatureChoiceBox() {
         for (Enums.Nature nature : Enums.Nature.values()) {
             natureChoiceBox.getItems().add(nature.toString());
@@ -223,6 +272,9 @@ public class AddPokemonController {
         });
     }
 
+    /**
+     * Refreshes the displayed Pokémon's statistics.
+     */
     private void refreshPokemonStatistics() {
 
         pokemonLevel.getValueFactory().setValue(currentPokemon.getLevel());
@@ -250,6 +302,15 @@ public class AddPokemonController {
         natureChoiceBox.setValue(currentPokemon.getNature().toString());
     }
 
+    /**
+     * Checks if the move in the specified index is a duplicate of another.
+     * @param index index of the move
+     * @param startFromIndex if <code>true</code> starts searching for a duplicate from the index value, otherwise
+     *                       searches from the beginning
+     * @param skip array that specifies which indexes should be skipped during search, if <code>null</code> then the
+     *             search is performed normally
+     * @return <code>true</code> if a duplicate move was found, <code>false</code> otherwise
+     */
     private boolean isMoveDuplicate(int index, boolean startFromIndex, @Nullable boolean[] skip) {
 
         boolean repeats = false;
@@ -275,6 +336,10 @@ public class AddPokemonController {
         return repeats;
     }
 
+    /**
+     * Checks if the current move list has duplicates.
+     * @return <code>true</code> if duplicates founds, otherwise returns <code>false</code>
+     */
     private boolean checkIfMoveListHasDuplicate() {
         for (int i=0; i < moveBox.getChildren().size(); i++) {
             if (isMoveDuplicate(i, true, null))
@@ -283,24 +348,43 @@ public class AddPokemonController {
         return false;
     }
 
+    /**
+     * Sets the specified label to display a message about the move being a duplicate.
+     * @param moveOkLabel label to be modified
+     * @param moveInfoButton button that is situated near the label
+     */
     private void setMoveBoxFlagDuplicate(Label moveOkLabel, Button moveInfoButton) {
         moveOkLabel.setText("duplicate");
         moveInfoButton.setDisable(false);
         moveOkLabel.setTextFill(Color.ORANGE);
     }
 
+    /**
+     * Sets the specified label to display a message about the move being accepted as valid.
+     * @param moveOkLabel label to be modified
+     * @param moveInfoButton button that is situated near the label
+     * @param moveFieldText text currently present in the move field
+     */
     private void setMoveBoxFlagOk(Label moveOkLabel, Button moveInfoButton, String moveFieldText) {
         moveOkLabel.setText("ok");
         moveInfoButton.setDisable(Objects.equals(moveFieldText, ""));
         moveOkLabel.setTextFill(Color.GREEN);
     }
 
+    /**
+     * Sets the specified label to display a message about the move not being found.
+     * @param moveOkLabel label to be modified
+     * @param moveInfoButton button that is situated near the label
+     */
     private void setMoveBoxNotFound(Label moveOkLabel, Button moveInfoButton) {
         moveOkLabel.setText("not found");
         moveInfoButton.setDisable(true);
         moveOkLabel.setTextFill(Color.RED);
     }
 
+    /**
+     * Refreshes all the labels situated near the move entry fields.
+     */
     private void refreshMoveTags() {
 
         boolean[] skip = new boolean[]{false, false, false, false};
@@ -330,6 +414,10 @@ public class AddPokemonController {
         }
     }
 
+    /**
+     * Sets up logical listeners related to fields present in the UI. This method specifies the behavior of the UI
+     * depending on the data entered by user.
+     */
     public void setStatisticsListeners() {
         setNatureChoiceBox();
 
@@ -387,6 +475,10 @@ public class AddPokemonController {
         }
     }
 
+    /**
+     * Prepares move info to be displayed to the player.
+     * @param move move template of the selected move
+     */
     private void prepareMoveInfo(MoveTemplate move) {
         String styleString = "-fx-border-radius: 10; -fx-background-radius: 10; -fx-background-color: ";
         HBox generalInfoBox = (HBox) moveInfoBox.getChildren().get(0);
@@ -424,6 +516,10 @@ public class AddPokemonController {
         descriptionLabel.setText(move.getMoveDescription());
     }
 
+    /**
+     * Checks if a Pokémon can be created with the entered moves.
+     * @return <code>true</code> if all entered moves are valid, <code>false</code> otherwise
+     */
     private boolean checkMovesOk() {
         boolean anyMove = false;
         for (int i=0; i < moveBox.getChildren().size(); i++) {
@@ -438,18 +534,29 @@ public class AddPokemonController {
         return anyMove;
     }
 
+    /**
+     * Checks if Pokémon can be added to the player's party.
+     * @return <code>true</code> if it can be added, <code>false</code> otherwise
+     */
     private boolean checkOkPlayer() {
         if (!checkMovesOk())
             return false;
         return playerParty.size() < 6;
     }
 
+    /**
+     * Checks if Pokémon can be added to the player's party.
+     * @return <code>true</code> if it can be added, <code>false</code> otherwise
+     */
     private boolean checkEnemyOk() {
         if (!checkMovesOk())
             return false;
         return enemyParty.size() < 6;
     }
 
+    /**
+     * Reads moves known by Pokémon to be displayed and shows them in the move list field.
+     */
     private void setPokemonMoves() {
         for (int i=0; i < moveBox.getChildren().size(); i++) {
             HBox hBox = (HBox) moveBox.getChildren().get(i);
