@@ -11,55 +11,141 @@ import java.security.SecureRandom;
 import java.util.*;
 
 public class Pokemon {
-    // pokemonExamples - a map of Pokemon with example moves, level and ability, for quickly assembling a team without
-    // the need to input it all manually
+    /**
+     * A map of Pokémon with example moves, level and ability, for quickly assembling a team without the need to input
+     * it all manually. Most of it can be modified once in game.
+     */
     private static final HashMap<PokemonEnum, Pokemon> pokemonExamples = new HashMap<>();
-    // name - name of the Pokemon, identical to the name of the specie unless nicknamed
+
+    /**
+     * Name of the Pokémon, identical to the name of the specie unless nicknamed.
+     */
     private String name;
-    // owner - owner of the Pokemon
+
+    /**
+     * <code>Trainer</code> object representing the owner of the Pokémon.
+     */
     private Trainer owner;
-    // hp - current HP
-    // level - current level
-    private int hp, level;
-    // moveList - a list of moves that can be performed by the Pokemon
+
+    /**
+     * Pokémon's current HP.
+     */
+    private int hp;
+    /**
+     * Pokémon's current level
+     */
+    private int level;
+
+    /**
+     * A list of moves that can be performed by the Pokémon. This should never exceed 4.
+     */
     private List<Move> moveList = new ArrayList<>();
-    // stats - statistics calculated for the Pokemon, the calculations involve: base stats, level, nature, ivs
+
+    /**
+     * Statistics calculated for the Pokémon, the calculations involve: base stats, level, nature and ivs.
+     */
     private LinkedHashMap<Enums.StatType, Integer> stats = new LinkedHashMap<>();
-    // status - current status effect inflicted on the Pokemon
+
+    /**
+     * Current status effect inflicted on the Pokémon.
+     */
     private Enums.Status status = Enums.Status.NONE;
-    // poisonCounter - a counter used when a Pokemon is badly poisoned, increases with each turn
-    // sleepCounter - a counter used when a Pokemon sleeps, the counter decreases with each turn
-    // critIncrease - critical hit chance increases applied to the Pokemon (Focus Energy, items)
-    private int poisonCounter = 1, sleepCounter = 0, critIncrease = 0;
-    // state - information if Pokemon is in a self-induced state, caused by some moves
+
+    /**
+     * A counter used when a Pokémon is badly poisoned, increases with each turn.
+     */
+    private int poisonCounter = 1;
+    /**
+     * A counter used when a Pokémon sleeps, the counter decreases with each turn.
+     */
+    private int sleepCounter = 0;
+    /**
+     * Critical hit chance increases applied to the Pokémon (Focus Energy, items).
+     */
+    private int critIncrease = 0;
+
+    /**
+     * Information if Pokémon is in a self-induced state, caused by some moves.
+     */
     private Enums.States state = Enums.States.NONE;
-    // stateMove - move that is linked with state in some way, for twoturn and multiturn it's a move that the Pokemon
-    // is forced to use for a set amount of time
-    // trapMove - a trap move that is currently affecting the Pokemon
-    private Move stateMove = null, trapMove = null;
-    // stateCounter - counter that is used to keep track of moves left or the amount of moves during state
-    // trappedTimer - counter that tracks how many more turns the Pokemon should be affected by trapping moves
-    private int stateCounter = 0, confusionTimer = 0, trappedTimer = 0, leechSeedTimer = 0;
-    // ivs - Individual Values - random values between 0-31 that increase stats
+
+    /**
+     * Move that is linked with a Pokémon's current state in some way. For example, in twoturn and multiturn it's a move
+     * that the Pokémon is forced to use for a set amount of time.
+     */
+    private Move stateMove = null;
+    /**
+     * A trap (binding) move that is currently affecting the Pokémon.
+     */
+    private Move trapMove = null;
+
+    /**
+     * Counter that is used to keep track of moves left or the amount of moves used during state.
+     */
+    private int stateCounter = 0;
+    /**
+     * Timer that is used to keep track of how many turns are left until confusion ends.
+     */
+    private int confusionTimer = 0;
+    /**
+     * Counter that tracks how many more turns the Pokémon should be affected by trapping moves.
+     */
+    private int trappedTimer = 0;
+
+    private int leechSeedTimer = 0;
+
+    /**
+     * Individual Values - random values between 0-31 that increase stats. Can be modified in this game.
+     */
     private int[] ivs = {0, 0, 0, 0, 0, 0};
-    // nature - the nature of the Pokemon, that sometimes impact some of its stats
+
+    /**
+     * The nature of the Pokémon, that sometimes impact two of its stats. One change is always positive and one negative.
+     */
     private Enums.Nature nature;
-    // statModifiers - modifiers applied on the Pokemon during battle
+
+    /**
+     * Modifiers applied on the Pokémon during battle. They last until switched out (except when using Baton Pass).
+     */
     private HashMap<Enums.StatType, Integer> statModifiers = new HashMap<>();
-    // specie - specie of the Pokemon
+
+    /**
+     * Links to the specie of the Pokémon. Specie holds all general data about the Pokémon.
+     */
     private PokemonSpecie specie;
-    // subStatuses - currently applied subStatuses
+
+    /**
+     * List of currently applied substatuses.
+     */
     private List<Enums.SubStatus> subStatuses = new ArrayList<>();
-    // ability - ability of the Pokemon
+
+    /**
+     * Ability of the Pokémon. Usually each specie member can have one of two possible abilities.
+     */
     private Ability ability = Ability.NONE;
-    // trapped - determines whether the Pokemon is currently under effects of a trapping move
-    // laserFocusActive - check whether Laser Focus condition should be active
-    // swap - pokemon passed all checks necessary to swap in the current turn
-    private boolean trapped = false, laserFocusActive = false, swap = false;
+
+    /**
+     * Determines whether the Pokémon is currently under effects of a trapping move.
+     */
+    private boolean trapped = false;
+    /**
+     * If <code>true</code> Laser Focus condition should is currently active, <code>false</code> otherwise.
+     */
+    private boolean laserFocusActive = false;
+    /**
+     * If <code>true</code>, the Pokémon passed all checks necessary to swap in the current turn. <code>False</code>
+     * otherwise.
+     */
+    private boolean swap = false;
 
     // substituteHp - tracks the amount of hp that the Pokemon's substitute has
     private int substituteHp = 0;
 
+    /**
+     * Method called to get the name of Pokémon for in battle text. This version of the method is used when starting
+     * with the Pokémon's name.
+     * @return <code>String</code> representing the name.
+     */
     public String getBattleName() {
         if (owner.isPlayer())
             return name;
@@ -67,6 +153,11 @@ public class Pokemon {
             return "The foe's " + name;
     }
 
+    /**
+     * Method called to get the name of Pokémon for in battle text. This version of the method is used when the name
+     * will appear somewhere in the middle of the text or at the end.
+     * @return <code>String</code> representing the name.
+     */
     public String getBattleNameMiddle() {
         if (owner.isPlayer())
             return name;
@@ -74,10 +165,18 @@ public class Pokemon {
             return "the foe's " + name;
     }
 
+    /**
+     * Gets the name of Pokémon, or the nickname if set.
+     * @return <code>String</code> representing the name.
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the name of the species, regardless if the Pokémon is nicknamed or not.
+     * @return <code>String</code> representing the name.
+     */
     public PokemonEnum getOriginalName() {
         return specie.getName();
     }
@@ -344,6 +443,11 @@ public class Pokemon {
         generateVariables();
         this.hp = stats.get(Enums.StatType.MAX_HP);
     }
+
+    /**
+     * Copy constructor.
+     * @param original Pokémon data that should be copied.
+     */
     public Pokemon(Pokemon original)
     {
         this.name = original.name;
@@ -358,6 +462,11 @@ public class Pokemon {
         this.hp = stats.get(Enums.StatType.MAX_HP);
     }
 
+    /**
+     * Checks what moves are available to use.
+     * @return array of booleans mimicking the move list; sets value to <code>true</code> on indexes where move can be
+     * used
+     */
     public boolean[] checkAvailableMoves() {
         boolean[] availableMoves = new boolean[4];
 
@@ -369,6 +478,9 @@ public class Pokemon {
         return availableMoves;
     }
 
+    /**
+     * Restores Pokémon to full health. This restores HP, PP and resets all states and timers.
+     */
     public void restoreAll() {
         hp = getMaxHP();
         for (Move move : moveList)
@@ -395,6 +507,10 @@ public class Pokemon {
         laserFocusActive = false;
     }
 
+    /**
+     * Old method used to level up a Pokémon. It only displays information in the terminal. Unused.
+     * @deprecated
+     */
     public void levelUp()       //raises level, updates stats
     {
         int[] oldStats = new int[6];
@@ -425,12 +541,22 @@ public class Pokemon {
         }
     }
 
+    /**
+     * Checks if one of the two Pokémon type is equal to the presented type.
+     * @param type type to which the Pokémon's types are compared to.
+     * @return <code>true</code> if type was found, <code>false</code> otherwise
+     */
     public boolean containsType(Enums.Types type) {
         if (getType()[0].getTypeEnum() == type)
             return true;
         else return getType()[1].getTypeEnum() == type;
     }
 
+    /**
+     * Old method used to add moves. It would prompt the user to delete a move if the move list exceeded 4 moves.
+     * Still used for convenience, although there are separate measures to keep the size of the move list within limits.
+     * @param move move to be added
+     */
     public void addMove(Move move)      //adding a move (in game through leveling or tms)
     {
         if(moveList.size() < 4) {
@@ -455,6 +581,9 @@ public class Pokemon {
         }
     }
 
+    /**
+     * Generates pseudorandom IVs.
+     */
     public void generateIVs()       //generates IV
     {
         SecureRandom g = new SecureRandom();
@@ -464,6 +593,9 @@ public class Pokemon {
         }
     }
 
+    /**
+     * Generates pseudorandom nature.
+     */
     public void generateNature()        //generates nature
     {
         SecureRandom g = new SecureRandom();
@@ -471,6 +603,9 @@ public class Pokemon {
         nature = Enums.Nature.valueOf(nature_num);
     }
 
+    /**
+     * Calculates current statistics based on base stats, IVs, nature and level.
+     */
     public void calculateStats()        //calculates pokemon statistics based on ivs and nature and level
     {
         int stat, basestat;
@@ -506,6 +641,9 @@ public class Pokemon {
         }
     }
 
+    /**
+     * Method called to generate all variables during Pokémon creation.
+     */
     public void generateVariables()
     {
         generateNature();
@@ -513,6 +651,9 @@ public class Pokemon {
         calculateStats();
     }
 
+    /**
+     * Method that generates example Pokémon. The created map contains one of each specie of Pokémon.
+     */
     public static void generatePokemonExamples() {
         PokemonSpecie.setPokemonMap();
         Pokemon example = new Pokemon(PokemonSpecie.getPokemonMap().get(PokemonEnum.BULBASAUR), 50, Ability.OVERGROW,
