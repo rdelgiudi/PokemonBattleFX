@@ -10,6 +10,7 @@ import com.delgiudice.pokemonbattlefx.network.SyncThread;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.trainer.Player;
 import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.InvalidationListener;
@@ -748,6 +749,121 @@ public class SwapPokemonController {
     }
 
     /**
+     * Checks if it is possible to swap to the selected Pokémon. Displays appropriate message if it isn't.
+     * @param pokemon selected Pokémon
+     * @param index index in the party of the selected Pokémon
+     * @return <code>true</code> if swap possible, <code>false</code> otherwise
+     */
+    private boolean checkSwapViable(Pokemon pokemon, int index) {
+
+        int currentAllyPokemon = 0;
+        boolean allyFainted = party.get(currentAllyPokemon).getHp() == 0;
+
+        if (index == currentAllyPokemon) {
+            Timeline alreadyInBattleInfo;
+            if (!allyFainted)
+                alreadyInBattleInfo = getInfoText(String.format(
+                        "%s is already in battle!", pokemon.getBattleName()));
+            else
+                alreadyInBattleInfo = getInfoText(String.format(
+                        "%s has just fainted!", pokemon.getBattleName()));
+
+            Timeline resetText = getInfoText("Choose a POKÉMON.");
+            resetText.setDelay(Duration.seconds(1));
+            alreadyInBattleInfo.setOnFinished(actionEvent -> resetText.play());
+            alreadyInBattleInfo.play();
+            return false;
+        }
+
+        if (pokemon.getHp() == 0) {
+            Timeline faintedInfo = getInfoText(String.format(
+                    "%s is fainted! Can't switch!",
+                    pokemon.getName()));
+            Timeline resetText = getInfoText("Choose a POKÉMON.");
+            resetText.setDelay(Duration.seconds(1));
+            faintedInfo.setOnFinished(actionEvent -> resetText.play());
+            faintedInfo.play();
+            return false;
+        }
+
+        if (party.get(currentAllyPokemon).getTrapMove() != null && !allyFainted
+                && switchContext != Enums.SwitchContext.SWITCH_FIRST_MOVE
+                && switchContext != Enums.SwitchContext.SWITCH_SECOND_MOVE) {
+            Timeline trappedInfo = getInfoText(String.format(
+                    "%s is trapped! Can't switch!",
+                    party.get(currentAllyPokemon).getName()));
+            Timeline resetText = getInfoText("Choose a POKÉMON.");
+            resetText.setDelay(Duration.seconds(1));
+            trappedInfo.setOnFinished(actionEvent -> resetText.play());
+            trappedInfo.play();
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Contains logic related to swapping a Pokémon with another.
+     * @param pokemon selected Pokémon
+     * @param index index in the party of the selected Pokémon
+     */
+    private void processSwapAction(Pokemon pokemon, int index) {
+
+        int currentAllyPokemon = 0;
+        boolean allyFainted = party.get(currentAllyPokemon).getHp() == 0;
+
+        if (!checkSwapViable(pokemon, index))
+            return;
+
+        String currentAllyName = party.get(currentAllyPokemon).getBattleName();
+
+        battleController.switchToPlayerChoice(false);
+
+        List<Timeline> battleTimeLine = new ArrayList<>();
+
+        if (!allyFainted) {
+            if (switchContext != Enums.SwitchContext.SWITCH_SECOND_MOVE
+                    && switchContext != Enums.SwitchContext.SWITCH_FIRST_MOVE) {
+                Timeline allyPokemonReturnText = battleController.getBattleTextAnimation(String.format(
+                        "That's enough %s,%ncome back!", currentAllyName), true);
+                allyPokemonReturnText.setDelay(Duration.seconds(0.1));
+                battleTimeLine.add(allyPokemonReturnText);
+            }
+
+            Timeline allyPokemonReturn = battleController.getPokemonReturnAnimation(true);
+            allyPokemonReturn.setDelay(Duration.seconds(1));
+            battleTimeLine.add(allyPokemonReturn);
+            battleTimeLine.add(battleController.generatePause(1000));
+        }
+
+        Timeline allyPokemonIntro = battleController.getBattleTextAnimation(String.format(BattleLogic.POKEMON_SENT_OUT_STRING,
+                party.get(index).getBattleName()), true);
+        battleTimeLine.add(allyPokemonIntro);
+
+        Timeline updateStatus = battleController.updateStatus(true,
+                party.get(index).getStatus());
+        battleTimeLine.add(updateStatus);
+
+        Timeline allyInfoAnimation = battleController.getIntroAnimation(party.get(index),
+                party.get(index).getHp());
+        battleTimeLine.add(allyInfoAnimation);
+
+        Scene scene = pokemonBox.getScene();
+        scene.setRoot(battlePane);
+
+        TrainerAction playerAction = new TrainerAction(Enums.ActionTypes.SWITCH_POKEMON, String.valueOf(index));
+        if (battleLogic.getGameMode() != Enums.GameMode.OFFLINE && switchContext != Enums.SwitchContext.SWITCH_FIRST
+                && switchContext != Enums.SwitchContext.SWITCH_SECOND) {
+            battleController.getBattleText(BattleLogic.AWAITING_SYNC, true).play();
+            SwitchDataSend syncThread = new SwitchDataSend(battleLogic.getInputStream(), battleLogic.getOutputStream(),
+                    playerAction, this, battleTimeLine, index, switchContext);
+            syncThread.start();
+        }
+        else
+            finalizeSwitchOut(battleTimeLine, index, playerAction, null);
+    }
+
+    /**
      * Initiates listeners of the swap menu which appears if player presses on a Pokémon box when in swap mode.
      * @param pokemonBox selected box
      * @param pokemon selected party member
@@ -756,7 +872,6 @@ public class SwapPokemonController {
     private void initSwapMenuListener(HBox pokemonBox, Pokemon pokemon, int index) {
 
         int currentAllyPokemon = 0;
-        boolean allyFainted = party.get(currentAllyPokemon).getHp() == 0;
 
         selectedPokemonLabel.setText(String.format("%d: %-12s", index+1, pokemon.getName()));
 
@@ -778,95 +893,7 @@ public class SwapPokemonController {
         selectedPokemonLabel.setStyle(setColorIntro + colorHexComplete);
 
         switchOutButton.setOnAction(event -> {
-            if (index == currentAllyPokemon) {
-                Timeline alreadyInBattleInfo;
-                if (!allyFainted)
-                    alreadyInBattleInfo = getInfoText(String.format(
-                            "%s is already in battle!", pokemon.getBattleName()));
-                else
-                    alreadyInBattleInfo = getInfoText(String.format(
-                            "%s has just fainted!", pokemon.getBattleName()));
-
-                Timeline resetText = getInfoText("Choose a POKÉMON.");
-                resetText.setDelay(Duration.seconds(1));
-                alreadyInBattleInfo.setOnFinished(actionEvent -> resetText.play());
-                alreadyInBattleInfo.play();
-                return;
-            }
-
-            if (pokemon.getHp() == 0) {
-                Timeline faintedInfo = getInfoText(String.format(
-                        "%s is fainted! Can't switch!",
-                        pokemon.getName()));
-                Timeline resetText = getInfoText("Choose a POKÉMON.");
-                resetText.setDelay(Duration.seconds(1));
-                faintedInfo.setOnFinished(actionEvent -> resetText.play());
-                faintedInfo.play();
-                return;
-            }
-
-            if (party.get(currentAllyPokemon).getTrapMove() != null && !allyFainted
-                    && switchContext != Enums.SwitchContext.SWITCH_FIRST_MOVE
-                    && switchContext != Enums.SwitchContext.SWITCH_SECOND_MOVE) {
-                Timeline trappedInfo = getInfoText(String.format(
-                        "%s is trapped! Can't switch!",
-                        party.get(currentAllyPokemon).getName()));
-                Timeline resetText = getInfoText("Choose a POKÉMON.");
-                resetText.setDelay(Duration.seconds(1));
-                trappedInfo.setOnFinished(actionEvent -> resetText.play());
-                trappedInfo.play();
-                return;
-            }
-
-            String currentAllyName = party.get(currentAllyPokemon).getBattleName();
-
-            battleController.switchToPlayerChoice(false);
-
-            List<Timeline> battleTimeLine = new ArrayList<>();
-
-            if (!allyFainted) {
-                if (switchContext != Enums.SwitchContext.SWITCH_SECOND_MOVE
-                        && switchContext != Enums.SwitchContext.SWITCH_FIRST_MOVE) {
-                    Timeline allyPokemonReturnText = battleController.getBattleTextAnimation(String.format(
-                            "That's enough %s,%ncome back!", currentAllyName), true);
-                    allyPokemonReturnText.setDelay(Duration.seconds(0.1));
-                    battleTimeLine.add(allyPokemonReturnText);
-                }
-
-                Timeline allyPokemonReturn = battleController.getPokemonReturnAnimation(true);
-                allyPokemonReturn.setDelay(Duration.seconds(1));
-                battleTimeLine.add(allyPokemonReturn);
-                battleTimeLine.add(battleController.generatePause(1000));
-            }
-
-            //int newCurrentAllyPokemon = 0;
-
-            //controller.setAllyInformation(player.getParty(currentAllyPokemon));
-            Timeline allyPokemonIntro = battleController.getBattleTextAnimation(String.format(BattleLogic.POKEMON_SENT_OUT_STRING,
-                    party.get(index).getBattleName()), true);
-            battleTimeLine.add(allyPokemonIntro);
-
-            Timeline updateStatus = battleController.updateStatus(true,
-                    party.get(index).getStatus());
-            battleTimeLine.add(updateStatus);
-
-            Timeline allyInfoAnimation = battleController.getIntroAnimation(party.get(index),
-                    party.get(index).getHp());
-            battleTimeLine.add(allyInfoAnimation);
-
-            Scene scene = pokemonBox.getScene();
-            scene.setRoot(battlePane);
-
-            TrainerAction playerAction = new TrainerAction(Enums.ActionTypes.SWITCH_POKEMON, String.valueOf(index));
-            if (battleLogic.getGameMode() != Enums.GameMode.OFFLINE && switchContext != Enums.SwitchContext.SWITCH_FIRST
-                && switchContext != Enums.SwitchContext.SWITCH_SECOND) {
-                battleController.getBattleText(BattleLogic.AWAITING_SYNC, true).play();
-                SwitchDataSend syncThread = new SwitchDataSend(battleLogic.getInputStream(), battleLogic.getOutputStream(),
-                        playerAction, this, battleTimeLine, index);
-                syncThread.start();
-            }
-            else
-                finalizeSwitchOut(battleTimeLine, index, playerAction);
+            processSwapAction(pokemon, index);
         });
 
         summaryButton.setOnAction(event -> {
@@ -893,30 +920,35 @@ public class SwapPokemonController {
      * @param index index of the selected Pokémon
      * @param playerAction <code>TrainerAction</code> representing player choice
      */
-    public void finalizeSwitchOut(List<Timeline> battleTimeLine, int index, TrainerAction playerAction) {
-        if (switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE) {
-            if (turnPokemon == null || secondMove == null)
-                throw new ValueException("Values of turnPokemon and secondMove expected to be not null in this context");
-            battleLogic.switchPokemon(true, index);
-            battleLogic.applySentOutEffects(battleTimeLine);
-            battleLogic.processSecondMove(battleTimeLine, party.get(0), turnPokemon.get(1), secondMove);
-        }
-        else if (switchContext == Enums.SwitchContext.SWITCH_FIRST) {
-            //battleLogic.initAnimationQueue(battleTimeLine);
-            //battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
-            //});
-            //battleTimeLine.get(0).play();
-            battleLogic.waitEnemyAction(playerAction, battleTimeLine);
-        }
-        else if (switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE || switchContext == Enums.SwitchContext.SWITCH_SECOND) {
-            battleLogic.switchPokemon(true, index);
-            battleLogic.applySentOutEffects(battleTimeLine);
-            battleLogic.battleTurnEnd(battleTimeLine);
-        }
-        else if (switchContext == Enums.SwitchContext.SWITCH_FAINTED) {
-            battleLogic.switchPokemon(true, index);
-            battleLogic.applySentOutEffects(battleTimeLine);
-            battleLogic.finalChecks(battleTimeLine);
+    public void finalizeSwitchOut(List<Timeline> battleTimeLine, int index, TrainerAction playerAction,
+                                  @Nullable TrainerAction enemyAction) {
+
+        switch (switchContext) {
+            case SWITCH_FIRST_MOVE:
+                if (turnPokemon == null || secondMove == null)
+                    throw new ValueException("Values of turnPokemon and secondMove expected to be not null in this context");
+                battleLogic.switchPokemon(true, index);
+                battleLogic.applySentOutEffects(battleTimeLine);
+                battleLogic.processSecondMove(battleTimeLine, party.get(0), turnPokemon.get(1), secondMove);
+                break;
+            case SWITCH_FIRST:
+                battleLogic.waitEnemyAction(playerAction, battleTimeLine);
+                break;
+            case SWITCH_SECOND_MOVE:
+            case SWITCH_SECOND:
+                battleLogic.switchPokemon(true, index);
+                battleLogic.applySentOutEffects(battleTimeLine);
+                battleLogic.battleTurnEnd(battleTimeLine);
+                break;
+            case SWITCH_FAINTED:
+                battleLogic.switchPokemon(true, index);
+                battleLogic.applySentOutEffects(battleTimeLine);
+                battleLogic.finalChecks(battleTimeLine);
+                break;
+            case SWITCH_BOTH_FAINTED_ONLINE:
+                battleLogic.switchPokemon(true, index);
+                battleLogic.processEnemySwitchOut(null, null, null, switchContext,
+                        enemyAction, battleTimeLine);
         }
     }
 }

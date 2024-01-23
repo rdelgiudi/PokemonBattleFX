@@ -287,7 +287,8 @@ public class Enums {
         SWITCH_FIRST_MOVE,
         SWITCH_SECOND,
         SWITCH_SECOND_MOVE,
-        SWITCH_FAINTED;
+        SWITCH_FAINTED,
+        SWITCH_BOTH_FAINTED_ONLINE;
     }
 
     /**

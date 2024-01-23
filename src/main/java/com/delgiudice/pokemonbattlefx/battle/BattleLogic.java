@@ -440,6 +440,42 @@ public class BattleLogic {
     }
 
     /**
+     * Concludes battle with a draw (online battles only)
+     */
+    private void battleDraw() {
+        controller.switchToPlayerChoice(false);
+        Stage stage = (Stage) controller.getFightButton().getScene().getWindow();
+
+        Timeline battleDrawMsg1 = controller.getBattleTextAnimation("Both players are out\nof usable Pokemon!",
+                true);
+        Timeline battleDrawMsg2 = controller.getBattleTextAnimation("Battle ended in a draw!",
+                true);
+        Timeline battleDrawMsg3 = controller.getBattleTextAnimation("Returning to Team Builder...",
+                true);
+        Timeline paused = controller.generatePause(1000);
+
+        controller.battleTextAdvanceByUserInput(battleDrawMsg1, battleDrawMsg2);
+        controller.battleTextAdvanceByUserInput(battleDrawMsg2 ,battleDrawMsg3);
+
+        battleDrawMsg3.setOnFinished(e -> paused.play());
+        paused.setOnFinished(e -> {
+            BattleApplication.endNetworkThread();
+            controller.endBattleThemePlayback();
+            stage.setTitle("Pokemon Battle FX");
+            controller.getFightButton().getScene().setRoot(teamBuilderPane);
+        });
+
+        for (Pokemon pokemon : playerParty) {
+            pokemon.restoreAll();
+        }
+        for (Pokemon pokemon : enemyParty) {
+            pokemon.restoreAll();
+        }
+
+        battleDrawMsg1.play();
+    }
+
+    /**
      * Concludes battle with a win for the player.
      */
     private void battleWon() {
@@ -1202,10 +1238,18 @@ public class BattleLogic {
      * @param switchContext context behind the switch, this should be either a Pokémon fainting or a switch caused by a
      *                      move
      * @param enemyAction action taken by the enemy; it should be a <code>SWITCH_POKEMON</code> action
+     * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn, can
+     *                       be <code>null</code> if this is the beginning of the timeline
      */
     public void processEnemySwitchOut(Pokemon firstPokemon, Pokemon secondPokemon, Move secondMove,
-                                      Enums.SwitchContext switchContext, TrainerAction enemyAction) {
-        List<Timeline> moveTimeLine = new ArrayList<>();
+                                      Enums.SwitchContext switchContext, TrainerAction enemyAction,
+                                      List<Timeline> battleTimeLine) {
+        List<Timeline> moveTimeLine;
+        if (battleTimeLine != null)
+            moveTimeLine = battleTimeLine;
+        else
+            moveTimeLine = new ArrayList<>();
+
         if (enemyAction.actionType != Enums.ActionTypes.SWITCH_POKEMON)
             throw new ValueException("The received action isn't a switch action");
         if (switchContext == Enums.SwitchContext.SWITCH_FIRST ||
@@ -1255,15 +1299,18 @@ public class BattleLogic {
 
         applySentOutEffects(moveTimeLine);
 
-        if (switchContext == Enums.SwitchContext.SWITCH_FIRST_MOVE) {
-            processSecondMove(moveTimeLine, firstPokemon, secondPokemon, secondMove);
-        }
-        else if (switchContext == Enums.SwitchContext.SWITCH_SECOND_MOVE)
-            battleTurnEnd(moveTimeLine);
-
-        if (switchContext == Enums.SwitchContext.SWITCH_FAINTED) {
-            applySentOutEffects(moveTimeLine);
-            finalChecks(moveTimeLine);
+        switch (switchContext) {
+            case SWITCH_FIRST_MOVE:
+                processSecondMove(moveTimeLine, firstPokemon, secondPokemon, secondMove);
+                break;
+            case SWITCH_SECOND_MOVE:
+                battleTurnEnd(moveTimeLine);
+                break;
+            case SWITCH_FAINTED:
+            case SWITCH_BOTH_FAINTED_ONLINE:
+                applySentOutEffects(moveTimeLine);
+                finalChecks(moveTimeLine);
+                break;
         }
     }
 
@@ -1282,7 +1329,7 @@ public class BattleLogic {
 
         if (gameMode == Enums.GameMode.OFFLINE) {
             TrainerAction enemyAction = enemy.getEnemySwitchOut();
-            processEnemySwitchOut(firstPokemon, secondPokemon, secondMove, switchContext, enemyAction);
+            processEnemySwitchOut(firstPokemon, secondPokemon, secondMove, switchContext, enemyAction, null);
         }
         else {
             controller.getBattleText(AWAITING_SYNC, true).play();
@@ -1598,6 +1645,17 @@ public class BattleLogic {
                 Platform.runLater(() -> battleTimeLine.get(0).play());
                 return true;
             }
+            else if (!checkIfEnemyAbleToBattle(false) && !checkIfAllyAbleToBattle(false) &&
+                    gameMode != Enums.GameMode.OFFLINE) {
+                initAnimationQueue(battleTimeLine);
+
+                battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
+                    battleDraw();
+                });
+
+                Platform.runLater(() -> battleTimeLine.get(0).play());
+                return true;
+            }
         }
 
         if (allyFainted) {
@@ -1731,14 +1789,15 @@ public class BattleLogic {
      * Handles giving player an option select new Pokémon when the previous one faints
      * @param battleTimeLine list containing all <code>Timeline</code> objects to be played during current turn
      */
-    private void processNewAllySendOut(List<Timeline> battleTimeLine) {
+    private void processNewAllySendOut(List<Timeline> battleTimeLine, boolean bothFaintedOnline) {
         battleTimeLine.get(battleTimeLine.size() - 1).setOnFinished(e -> {
             Button pokemonButton = controller.getPokemonButton();
-
+            Enums.SwitchContext switchContext = bothFaintedOnline ? Enums.SwitchContext.SWITCH_BOTH_FAINTED_ONLINE :
+                    Enums.SwitchContext.SWITCH_FAINTED;
             Stage stage = (Stage) pokemonButton.getScene().getWindow();
             SwapPokemonController swapPokemonController = swapPokemonLoader.getController();
             swapPokemonController.initVariablesSwitch((Pane) pokemonButton.getScene().getRoot(), this, controller, playerParty,
-                    true, Enums.SwitchContext.SWITCH_FAINTED, null, null);
+                    true, switchContext, null, null);
             pokemonButton.getScene().setRoot(swapPokemonPane);
         });
         initAnimationQueue(battleTimeLine);
@@ -1771,23 +1830,16 @@ public class BattleLogic {
         boolean allyFainted = playerParty.get(0).getHp() == 0;
         boolean enemyFainted = enemyParty.get(0).getHp() == 0;
 
-        // Offline and server checks
-        if (allyFainted && gameMode != Enums.GameMode.CLIENT) {
-            processNewAllySendOut(battleTimeLine);
-            return;
-        }
-        if (enemyFainted && gameMode != Enums.GameMode.CLIENT) {
-            processNewEnemySendOut(battleTimeLine);
-            return;
-        }
-
-        // Client checks
-        if (enemyFainted) {
-            processNewEnemySendOut(battleTimeLine);
+        if (allyFainted && enemyFainted && gameMode != Enums.GameMode.OFFLINE) {
+            processNewAllySendOut(battleTimeLine, true);
             return;
         }
         if (allyFainted) {
-            processNewAllySendOut(battleTimeLine);
+            processNewAllySendOut(battleTimeLine, false);
+            return;
+        }
+        if (enemyFainted) {
+            processNewEnemySendOut(battleTimeLine);
             return;
         }
 
