@@ -3,6 +3,7 @@ package com.delgiudice.pokemonbattlefx.battle;
 import com.delgiudice.pokemonbattlefx.*;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.attributes.Type;
+import com.delgiudice.pokemonbattlefx.graphics.ParticleAnimationCreator;
 import com.delgiudice.pokemonbattlefx.item.Item;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.move.MoveDamageInfo;
@@ -73,6 +74,7 @@ public class BattleLogic {
     private final HashMap<Enums.Spikes, Integer> enemySpikes =
             new HashMap<Enums.Spikes, Integer>();
     private Pair<Enums.WeatherEffect, Integer> weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
+    private ParticleAnimationCreator weatherEffectAnimation;
 
     private boolean[] enemySeen;
 
@@ -140,6 +142,10 @@ public class BattleLogic {
         controller.wipeText(false);
         weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
         controller.updateFieldWeatherEffect(weatherEffect.getKey()).play();
+        if (weatherEffectAnimation != null) {
+            weatherEffectAnimation.clearAnimationAfterEnd();
+            weatherEffectAnimation.stop();
+        }
         enemySeen = new boolean[]{false, false, false, false, false, false};
 
         if (BattleApplication.isUseInternetSprites())
@@ -1715,6 +1721,7 @@ public class BattleLogic {
                     rainMessage = controller.getBattleTextAnimation("The rain stopped.", true);
                     weatherEffect = new Pair<>(Enums.WeatherEffect.NONE, -1);
                     battleTimeLine.add(controller.updateFieldWeatherEffect(weatherEffect.getKey()));
+                    battleTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e-> weatherEffectAnimation.stop())));
                 }
                 battleTimeLine.add(rainMessage);
                 battleTimeLine.add(controller.generatePause(1000));
@@ -2623,10 +2630,10 @@ public class BattleLogic {
             moveTimeLine.add(controller.generatePause(2000));
             return;
         }
-
         switch (moveWeatherEffect) {
             case RAIN:
                 weatherMessage = controller.getBattleTextAnimation("It started to rain!", true);
+                weatherEffectAnimation = controller.generateRainAnimation();
                 break;
             case SANDSTORM:
                 weatherMessage = controller.getBattleTextAnimation("A sandstorm brewed!", true);
@@ -2640,6 +2647,7 @@ public class BattleLogic {
         System.out.println("Weather effect applied: " + moveWeatherEffect);
         moveTimeLine.add(weatherMessage);
         moveTimeLine.add(weatherChange);
+        moveTimeLine.add(new Timeline(new KeyFrame(Duration.millis(1), e-> weatherEffectAnimation.play())));
         moveTimeLine.add(controller.generatePause(2000));
     }
 

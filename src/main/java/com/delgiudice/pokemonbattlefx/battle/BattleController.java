@@ -3,6 +3,8 @@ package com.delgiudice.pokemonbattlefx.battle;
 import com.delgiudice.pokemonbattlefx.BattleApplication;
 import com.delgiudice.pokemonbattlefx.attributes.Enums;
 import com.delgiudice.pokemonbattlefx.attributes.Type;
+import com.delgiudice.pokemonbattlefx.graphics.ParticleAnimationCreator;
+import com.delgiudice.pokemonbattlefx.graphics.ParticleGroup;
 import com.delgiudice.pokemonbattlefx.move.Move;
 import com.delgiudice.pokemonbattlefx.move.MoveEnum;
 import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
@@ -613,6 +615,30 @@ public class BattleController {
                     break;
             }
         });
+    }
+
+    public ParticleAnimationCreator generateRainAnimation() {
+        int lowerBoundX = -300;
+        int lowerBoundY = -1000;
+        int upperBoundX = 1280;
+        int upperBoundY = -20;
+        int[] bounds = new int[]{lowerBoundX, lowerBoundY, upperBoundX, upperBoundY};
+
+        ParticleGroup particleGroup = new ParticleGroup(new Image("sprites/particle_rain_drop.png"), 20, 20);
+        particleGroup.addMultipleParticles(250);
+        particleGroup.setVisible(false);
+        particleGroup.addParticleGroupToPane(mainPane, 4);
+        particleGroup.setParticleGroupPositionsRandom(lowerBoundX, upperBoundX, lowerBoundY, upperBoundY);
+
+        ParticleAnimationCreator particleAnimationCreator = new ParticleAnimationCreator(particleGroup);
+        particleGroup.setVisible(true);
+
+        particleAnimationCreator.initRainAnimation(bounds, mainPane.getWidth(), mainPane.getHeight());
+        particleAnimationCreator.setOnEnded(e -> {
+            particleAnimationCreator.endRainAnimation(lowerBoundY, (int)mainPane.getHeight());
+        });
+
+        return particleAnimationCreator;
     }
 
     /**
