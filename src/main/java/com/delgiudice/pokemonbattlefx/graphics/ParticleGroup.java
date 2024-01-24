@@ -3,8 +3,8 @@ package com.delgiudice.pokemonbattlefx.graphics;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
+import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,13 +12,17 @@ import java.util.Random;
 public class ParticleGroup {
     private double width, height;
     private Image particleImage;
-    private List<ImageView> particleGroup = new ArrayList<>();
+    private List<Particle> particleGroup = new ArrayList<>();
     private Pane currentParentPane;
 
     public ParticleGroup(Image particleImage, double width, double height) {
         this.particleImage = particleImage;
         this.width = width;
         this.height = height;
+    }
+
+    public Pane getCurrentParentPane() {
+        return currentParentPane;
     }
 
     public int getSize() {
@@ -34,7 +38,7 @@ public class ParticleGroup {
     }
 
     public void addParticle() {
-        ImageView particleView = new ImageView(particleImage);
+        Particle particleView = new Particle(particleImage);
         particleView.setFitHeight(height);
         particleView.setFitWidth(width);
         particleGroup.add(particleView);
@@ -47,6 +51,57 @@ public class ParticleGroup {
     public void addMultipleParticles(int num) {
         for (int i=0; i < num; i++)
             addParticle();
+    }
+
+    public void flipParticle(int index) {
+        particleGroup.get(index).flipParticle();
+    }
+
+    public void moveParticlesDown(double amount) {
+        for (int i = 0; i< getSize(); i++) {
+            setParticlePosition(i, getParticleX(i),
+                    getParticleY(i) + amount);
+        }
+    }
+
+    public void moveParticlesRight(double amount) {
+        for (int i = 0; i< getSize(); i++) {
+            setParticlePosition(i, getParticleX(i) + amount,
+                    getParticleY(i));
+        }
+    }
+
+    public void moveParticlesAwayFrom(double x, double y) {
+        for (int i=0; i < getSize(); i++) {
+            Particle particle = particleGroup.get(i);
+            double newX;
+            double newY;
+            double particleX = particle.getLayoutX();
+            double particleY = particle.getLayoutY();
+            // y = ax + b
+            if (particleX - x == 0)
+                x = x - 0.001 * x;
+            double a = (particleY - y) / (particleX - x);
+            double b = y - (a * x);
+
+            if (x > particleX) {
+                newX = particleX - 1;
+            }
+            else {
+                newX = particleX + 1;
+            }
+            newY = newX * a + b;
+            particle.setLayoutX(newX);
+            particle.setLayoutY(newY);
+        }
+    }
+
+    public void increaseSpriteSize(int widthIncrease, int heightIncrease) {
+        for (Particle particle : particleGroup) {
+            particle.increaseSpriteSize(widthIncrease, heightIncrease);
+            width += widthIncrease;
+            height += heightIncrease;
+        }
     }
 
     public void addParticleGroupToPane(Pane pane) {
@@ -109,7 +164,7 @@ public class ParticleGroup {
     }
 
     public void setVisible(boolean set) {
-        for (ImageView particle : particleGroup) {
+        for (Particle particle : particleGroup) {
             particle.setVisible(set);
         }
     }
