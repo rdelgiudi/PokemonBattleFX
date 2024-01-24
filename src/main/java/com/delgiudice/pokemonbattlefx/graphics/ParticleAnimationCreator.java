@@ -115,17 +115,23 @@ public class ParticleAnimationCreator{
         rainSplashGroup.setParticlePosition(1, x+2, y-(1 + generator.nextInt(3)));
         rainSplashGroup.flipParticle(1);
 
+        final int cycleCount = generator.nextInt(150) + 20;
+        double opacityDecrement = 1 / (double)cycleCount;
+
         KeyFrame kf = new KeyFrame(Duration.millis(8), e-> {
             rainSplash.increaseSpriteSize(1, 1);
+
+            rainSplash.setOpacity(rainSplash.getOpacity() - opacityDecrement);
             double newX = middleX - rainSplash.getFitWidth() / 2;
             double newY = middleY - rainSplash.getFitHeight() / 2;
             rainSplash.setLayoutX(newX);
             rainSplash.setLayoutY(newY);
+            rainSplashGroup.decreaseOpacity(opacityDecrement);
             rainSplashGroup.moveParticlesAwayFrom(middleX, middleY);
         });
 
         Timeline timeline = new Timeline(kf);
-        timeline.setCycleCount(generator.nextInt(150) + 20);
+        timeline.setCycleCount(cycleCount);
         timeline.setOnFinished(e -> {
             parentPane.getChildren().remove(rainSplash);
             rainSplashGroup.removeParticleGroupFromPane();
@@ -142,10 +148,13 @@ public class ParticleAnimationCreator{
         ParticleGroup rainGroup = particleGroupList.get(0);
         Random generator = new Random();
 
-        return new KeyFrame(Duration.millis(2), e -> {
+        rainGroup.setParticleGroupPositionsRandom(lowerBoundX, upperBoundX, lowerBoundY, upperBoundY);
+        rainGroup.setVisible(true);
+
+        return new KeyFrame(Duration.millis(1.5), e -> {
             moveParticleGroupDown(1, 0);
             moveParticleGroupRight(0.5, 0);
-            for (int i=0; i< particleGroupList.get(0).getSize(); i++) {
+            for (int i=0; i< rainGroup.getSize(); i++) {
                 if (rainGroup.getParticleX(i) > screenWidth + rainGroup.getParticleWidth()  ||
                         rainGroup.getParticleY(i) > screenHeight + rainGroup.getParticleHeight())
                     rainGroup.setParticlePositionRandom(i, lowerBoundX, upperBoundX, lowerBoundY, upperBoundY);

@@ -617,6 +617,10 @@ public class BattleController {
         });
     }
 
+    /**
+     * Generates rain animation.
+     * @return <code>ParticleAnimationCreator</code> object containing the requested animation
+     */
     public ParticleAnimationCreator generateRainAnimation() {
         int lowerBoundX = -300;
         int lowerBoundY = -1000;
@@ -628,10 +632,8 @@ public class BattleController {
         particleGroup.addMultipleParticles(250);
         particleGroup.setVisible(false);
         particleGroup.addParticleGroupToPane(mainPane, 4);
-        particleGroup.setParticleGroupPositionsRandom(lowerBoundX, upperBoundX, lowerBoundY, upperBoundY);
 
         ParticleAnimationCreator particleAnimationCreator = new ParticleAnimationCreator(particleGroup);
-        particleGroup.setVisible(true);
 
         particleAnimationCreator.initRainAnimation(bounds, mainPane.getWidth(), mainPane.getHeight());
         particleAnimationCreator.setOnEnded(e -> {

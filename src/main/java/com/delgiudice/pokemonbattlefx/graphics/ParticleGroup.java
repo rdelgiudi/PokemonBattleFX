@@ -168,4 +168,15 @@ public class ParticleGroup {
             particle.setVisible(set);
         }
     }
+
+    public void setOpacity(double opacity) {
+        for (Particle particle : particleGroup)
+            particle.setOpacity(opacity);
+    }
+
+    public void decreaseOpacity(double value) {
+        for (Particle particle : particleGroup) {
+            particle.setOpacity(particle.getOpacity() - value);
+        }
+    }
 }
