@@ -122,11 +122,11 @@ public class ParticleAnimationCreator{
         rainSplashGroup.setParticlePositionMiddle(3, middleX+(15 + generator.nextInt(5)),
                 middleY- (10 + generator.nextInt(10)));
 
-        final int cycleCount = generator.nextInt(150) + 20;
+        final int cycleCount = generator.nextInt(38) + 5;
         double opacityDecrement = 1 / (double)cycleCount;
 
-        KeyFrame kf = new KeyFrame(Duration.millis(8), e-> {
-            rainSplash.increaseSpriteSize(1, 1);
+        KeyFrame kf = new KeyFrame(Duration.millis(32), e-> {
+            rainSplash.increaseSpriteSize(4, 4);
 
             rainSplash.setOpacity(rainSplash.getOpacity() - opacityDecrement);
             double newX = middleX - rainSplash.getFitWidth() / 2;
@@ -134,7 +134,7 @@ public class ParticleAnimationCreator{
             rainSplash.setLayoutX(newX);
             rainSplash.setLayoutY(newY);
             rainSplashGroup.decreaseOpacity(opacityDecrement);
-            rainSplashGroup.moveParticlesAwayFrom(middleX, middleY, 0.5);
+            rainSplashGroup.moveParticlesAwayFrom(middleX, middleY, 2);
         });
 
         Timeline timeline = new Timeline(kf);

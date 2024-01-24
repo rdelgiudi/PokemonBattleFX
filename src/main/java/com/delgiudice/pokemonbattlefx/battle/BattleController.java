@@ -11,10 +11,7 @@ import com.delgiudice.pokemonbattlefx.move.MoveTemplate;
 import com.delgiudice.pokemonbattlefx.pokemon.Pokemon;
 import com.delgiudice.pokemonbattlefx.pokemon.PokemonSpecie;
 import com.delgiudice.pokemonbattlefx.teambuilder.AddPokemonController;
-import javafx.animation.Animation;
-import javafx.animation.FadeTransition;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.fxml.FXML;
@@ -942,17 +939,12 @@ public class BattleController {
      */
     private Timeline getTextArrowAnimation() {
 
-        List<KeyFrame> keyFrameList = new ArrayList<>();
-
-        for (int i=30; i < 40; i++) {
-            double finalI = i;
-            KeyFrame kf = new KeyFrame(Duration.millis((i-30) * 25), e ->
-                    textArrowView.setLayoutY(SCREEN_HEIGHT - finalI));
-            keyFrameList.add(kf);
-        }
+        textArrowView.setLayoutY(SCREEN_HEIGHT - 30);
+        KeyValue keyValue = new KeyValue(textArrowView.layoutYProperty(), SCREEN_HEIGHT - 39);
+        KeyFrame keyFrame = new KeyFrame(Duration.millis(225), keyValue);
 
         final Timeline timeline = new Timeline();
-        timeline.getKeyFrames().addAll(keyFrameList);
+        timeline.getKeyFrames().add(keyFrame);
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.setAutoReverse(true);
 
