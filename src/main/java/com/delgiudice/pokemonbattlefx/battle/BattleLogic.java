@@ -2157,7 +2157,7 @@ public class BattleLogic {
      * @param moveTimeLine list containing all <code>Timeline</code> objects to be played during current turn
      */
     private void processUserParalyzed(Pokemon user, List<Timeline> moveTimeLine) {
-        Timeline paralysisInfo = controller.getBattleTextAnimation(String.format("%s is%nfully paralyzed!\nIt can't move!",
+        Timeline paralysisInfo = controller.getBattleTextAnimation(String.format("%s is%nfully paralyzed! It can't move!",
                 user.getBattleName()), true);
         moveTimeLine.add(paralysisInfo);
         moveTimeLine.add(controller.generatePause(2000));

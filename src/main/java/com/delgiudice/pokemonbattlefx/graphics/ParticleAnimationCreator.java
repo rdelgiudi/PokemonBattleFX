@@ -102,7 +102,7 @@ public class ParticleAnimationCreator{
         rainSplash.setFitHeight(2);
 
         ParticleGroup rainSplashGroup = new ParticleGroup(new Image("sprites/particle_rain_drop.png"), 10,10);
-        rainSplashGroup.addMultipleParticles(2);
+        rainSplashGroup.addMultipleParticles(4);
 
         parentPane.getChildren().add(2, rainSplash);
         rainSplash.setLayoutX(x);
@@ -111,9 +111,16 @@ public class ParticleAnimationCreator{
         double middleY = y + rainSplash.getFitHeight() / 2;
 
         rainSplashGroup.addParticleGroupToPane(parentPane, 2);
-        rainSplashGroup.setParticlePosition(0, x-2, y-(1 + generator.nextInt(3)));
-        rainSplashGroup.setParticlePosition(1, x+2, y-(1 + generator.nextInt(3)));
-        rainSplashGroup.flipParticle(1);
+        rainSplashGroup.flipParticle(2);
+        rainSplashGroup.flipParticle(3);
+        rainSplashGroup.setParticlePositionMiddle(0, middleX-(15 + generator.nextInt(5)),
+                middleY- (10 + generator.nextInt(10)));
+        rainSplashGroup.setParticlePositionMiddle(1, middleX-(12 + generator.nextInt(5)),
+                middleY- (10 + generator.nextInt(10)));
+        rainSplashGroup.setParticlePositionMiddle(2, middleX+(12 + generator.nextInt(5)),
+                middleY- (10 + generator.nextInt(10)));
+        rainSplashGroup.setParticlePositionMiddle(3, middleX+(15 + generator.nextInt(5)),
+                middleY- (10 + generator.nextInt(10)));
 
         final int cycleCount = generator.nextInt(150) + 20;
         double opacityDecrement = 1 / (double)cycleCount;
@@ -127,7 +134,7 @@ public class ParticleAnimationCreator{
             rainSplash.setLayoutX(newX);
             rainSplash.setLayoutY(newY);
             rainSplashGroup.decreaseOpacity(opacityDecrement);
-            rainSplashGroup.moveParticlesAwayFrom(middleX, middleY);
+            rainSplashGroup.moveParticlesAwayFrom(middleX, middleY, 0.5);
         });
 
         Timeline timeline = new Timeline(kf);
@@ -151,16 +158,16 @@ public class ParticleAnimationCreator{
         rainGroup.setParticleGroupPositionsRandom(lowerBoundX, upperBoundX, lowerBoundY, upperBoundY);
         rainGroup.setVisible(true);
 
-        return new KeyFrame(Duration.millis(1.5), e -> {
-            moveParticleGroupDown(1, 0);
-            moveParticleGroupRight(0.5, 0);
+        return new KeyFrame(Duration.millis(12), e -> {
+            moveParticleGroupDown(8, 0);
+            moveParticleGroupRight(4, 0);
             for (int i=0; i< rainGroup.getSize(); i++) {
                 if (rainGroup.getParticleX(i) > screenWidth + rainGroup.getParticleWidth()  ||
                         rainGroup.getParticleY(i) > screenHeight + rainGroup.getParticleHeight())
                     rainGroup.setParticlePositionRandom(i, lowerBoundX, upperBoundX, lowerBoundY, upperBoundY);
 
                 else if (rainGroup.getParticleY(i) > screenHeight - 500 && rainGroup.getParticleY(i) < screenHeight - 150
-                        && generator.nextInt(2000) == 123) {
+                        && generator.nextInt(250) == 123) {
                     double splashX = rainGroup.getParticleX(i) + rainGroup.getParticleWidth() / 2;
                     double splashY = rainGroup.getParticleY(i) + rainGroup.getParticleHeight();
                     getRainSplashAnimation(rainGroup.getCurrentParentPane(), splashX,

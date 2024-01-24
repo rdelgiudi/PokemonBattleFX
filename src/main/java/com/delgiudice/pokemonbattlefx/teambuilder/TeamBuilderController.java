@@ -766,7 +766,6 @@ public class TeamBuilderController {
      */
     private void readBattleInfoClient() throws IOException {
         String teamInfo = inputStream.readUTF();
-        System.out.println("Server response: " + teamInfo);
         parseTrainerInfo(teamInfo);
         startOnlineBattle();
     }
@@ -776,7 +775,6 @@ public class TeamBuilderController {
      */
     public void readBattleInfoServer() throws IOException {
         String teamInfo = inputStream.readUTF();
-        System.out.println("Client response: " + teamInfo);
         parseTrainerInfo(teamInfo);
         sendBattleInfoServer();
     }

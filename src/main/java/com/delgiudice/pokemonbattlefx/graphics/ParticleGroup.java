@@ -71,28 +71,43 @@ public class ParticleGroup {
         }
     }
 
-    public void moveParticlesAwayFrom(double x, double y) {
+    private double[] normalizeVector(double[] vector) {
+        double[] result = new double[vector.length];
+        double sum = 0;
+
+        for (double d : vector)
+            sum += Math.pow(d, 2);
+
+        if (sum == 0)
+            throw new ValueException("Cannot normalize a zero vector");
+
+        sum = Math.sqrt(sum);
+
+        for (int i = 0; i < vector.length; i++) {
+            result[i] = vector[i] / sum;
+        }
+
+        return result;
+    }
+
+    public void moveParticlesAwayFrom(double x, double y, double amount) {
         for (int i=0; i < getSize(); i++) {
             Particle particle = particleGroup.get(i);
             double newX;
             double newY;
-            double particleX = particle.getLayoutX();
-            double particleY = particle.getLayoutY();
-            // y = ax + b
-            if (particleX - x == 0)
-                x = x - 0.001 * x;
-            double a = (particleY - y) / (particleX - x);
-            double b = y - (a * x);
+            double particleX = particle.getMiddleX();
+            double particleY = particle.getMiddleY();
+            // vx = xx - x
+            // vy = yy - y
+            double vx = particleX - x; //vector away from x coord of point
+            double vy = particleY - y; //vector away from y coord of point
 
-            if (x > particleX) {
-                newX = particleX - 1;
-            }
-            else {
-                newX = particleX + 1;
-            }
-            newY = newX * a + b;
-            particle.setLayoutX(newX);
-            particle.setLayoutY(newY);
+            double[] vector = new double[]{vx, vy};
+            vector = normalizeVector(vector);
+            newX = particleX + vector[0] * amount;
+            newY = particleY + vector[1] * amount;
+            particle.setMiddleX(newX);
+            particle.setMiddleY(newY);
         }
     }
 
@@ -145,6 +160,12 @@ public class ParticleGroup {
         ImageView particle = particleGroup.get(index);
         particle.setLayoutX(x);
         particle.setLayoutY(y);
+    }
+
+    public void setParticlePositionMiddle(int index, double centerX, double centerY) {
+        Particle particle = particleGroup.get(index);
+        particle.setMiddleX(centerX);
+        particle.setMiddleY(centerY);
     }
 
     public void setParticlePositionRandom(int index ,int lowerBoundX, int upperBoundX, int lowerBoundY, int upperBoundY) {

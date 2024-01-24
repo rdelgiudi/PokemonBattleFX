@@ -26,6 +26,22 @@ public class Particle extends ImageView {
         setRotate(rotate);
     }
 
+    public double getMiddleX() {
+        return getLayoutX() + getFitWidth() / 2.0;
+    }
+
+    public double getMiddleY() {
+        return getLayoutY() + getFitHeight() / 2.0;
+    }
+
+    public void setMiddleX(double x) {
+        setLayoutX(x - getFitWidth() / 2.0);
+    }
+
+    public void setMiddleY(double y) {
+        setLayoutY(y - getFitHeight() / 2.0);
+    }
+
     public void moveRight(int amount) {
         setLayoutX(getLayoutX() + amount);
     }
