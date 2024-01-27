@@ -71,7 +71,7 @@ public class ParticleGroup {
         }
     }
 
-    private double[] normalizeVector(double[] vector) {
+    public static double[] normalizeVector(double[] vector) {
         double[] result = new double[vector.length];
         double sum = 0;
 
