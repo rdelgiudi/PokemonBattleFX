@@ -5,6 +5,7 @@ import com.delgiudice.pokemonbattlefx.battle.TrainerAction;
 import com.delgiudice.pokemonbattlefx.trainer.EnemyTrainer;
 import com.delgiudice.pokemonbattlefx.trainer.Trainer;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -31,6 +32,6 @@ public class MoveSync extends SyncThread{
     @Override
     public void run() {
         final TrainerAction enemyAction = enemy.getEnemyAction(playerAction);
-        battleLogic.battleTurn(playerAction, enemyAction, battleTimeLine);
+        Platform.runLater(() -> battleLogic.battleTurn(playerAction, enemyAction, battleTimeLine));
     }
 }
